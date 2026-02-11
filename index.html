@@ -1,159 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Vector Stock | Ultimate Edition</title>
-    <style>
-        :root { --accent: #f39c12; --bg: #000; --card-bg: #0a0a0a; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; text-align: center; margin: 0; padding: 20px; }
-        h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 4px; margin: 30px 0; font-size: 28px; }
-        
-        .gallery { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 25px; 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 20px;
-        }
+<div style="text-align: center; margin: 30px 0;">
+    <input type="text" id="searchInput" placeholder="Tasarım ara... (Örn: fast food)" 
+           style="padding: 12px; width: 300px; border-radius: 25px; border: 1px solid #f39c12; background: #111; color: white;">
+</div>
 
-        .card { 
-            background: var(--card-bg); 
-            border: 1px solid #1a1a1a; 
-            padding: 20px; 
-            border-radius: 16px; 
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            display: flex; 
-            flex-direction: column;
-        }
-        .card:hover { border-color: var(--accent); transform: translateY(-10px); box-shadow: 0 10px 30px rgba(243, 156, 18, 0.1); }
+<div id="vectorGrid" class="grid-container"></div>
 
-        .img-box { 
-            width: 100%; 
-            height: 200px; 
-            background: #050505; 
-            border-radius: 10px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-            margin-bottom: 15px;
-        }
-        .img-box img { max-width: 90%; max-height: 90%; object-fit: contain; transition: 0.3s; }
+<div id="pagination" style="text-align: center; margin-top: 40px; display: flex; justify-content: center; gap: 10px;"></div>
 
-        .card-title { 
-            color: var(--accent); 
-            font-size: 13px; 
-            font-weight: 700; 
-            margin-bottom: 15px; 
-            text-transform: uppercase; 
-            min-height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+<script>
+let allVectors = [];
+let filteredVectors = [];
+let currentPage = 1;
+const itemsPerPage = 12; // Her sayfada kaç ürün görünsün?
 
-        .btn { 
-            background: var(--accent); 
-            color: #000; 
-            padding: 14px; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: 900; 
-            cursor: pointer; 
-            text-decoration: none; 
-            font-size: 13px; 
-            transition: 0.2s;
-        }
-        .btn:hover { background: #ffb133; transform: scale(1.03); }
-        
-        #loader { font-weight: bold; color: var(--accent); margin-top: 50px; }
-    </style>
-</head>
-<body>
+// Verileri Yükle
+fetch('vectors.json')
+    .then(res => res.json())
+    .then(data => {
+        allVectors = data;
+        filteredVectors = data;
+        renderGallery();
+    });
 
-    <h1>FREE VECTOR STOCK</h1>
+// Galeri ve Sayfalandırma Mantığı
+function renderGallery() {
+    const grid = document.getElementById('vectorGrid');
+    const pagination = document.getElementById('pagination');
+    grid.innerHTML = "";
+    pagination.innerHTML = "";
 
-    <div id="loader">Database Loading...</div>
-    <div id="gallery" class="gallery"></div>
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = filteredVectors.slice(start, end);
 
-    <script>
-        const OWNER = 'free-vector-stock';
-        const REPO = 'free-vector-stock';
+    pageItems.forEach(name => {
+        // Senin klasör yapına uygun otomatik isim eşleştirme
+        const folder = name.trim();
+        grid.innerHTML += `
+            <div class="vector-card">
+                <img src="vectors/${folder}/${folder}.jpg" alt="${folder}" loading="lazy">
+                <h3>${folder.toUpperCase()}</h3>
+                <a href="vectors/${folder}/${folder}.eps" class="download-btn" download>DOWNLOAD EPS</a>
+            </div>
+        `;
+    });
 
-        async function init() {
-            try {
-                const r = await fetch('vectors.json?nocache=' + Date.now());
-                const items = await r.json();
-                document.getElementById('loader').style.display = 'none';
-                render(items.reverse());
-            } catch (e) {
-                document.getElementById('loader').innerText = "Error: Database not found!";
-            }
-        }
+    // Sayfa Numaraları Oluştur
+    const pageCount = Math.ceil(filteredVectors.length / itemsPerPage);
+    for (let i = 1; i <= pageCount; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = (i === currentPage) ? 'page-btn active' : 'page-btn';
+        btn.onclick = () => { currentPage = i; renderGallery(); window.scrollTo(0,0); };
+        pagination.appendChild(btn);
+    }
+}
 
-        function render(data) {
-            const gal = document.getElementById('gallery');
-            gal.innerHTML = '';
+// Arama Filtresi
+document.getElementById('searchInput').oninput = (e) => {
+    const term = e.target.value.toLowerCase();
+    filteredVectors = allVectors.filter(v => v.toLowerCase().includes(term));
+    currentPage = 1;
+    renderGallery();
+};
+</script>
 
-            data.forEach(name => {
-                const enc = encodeURIComponent(name);
-                
-                // image_c5b605.png ve image_c61472.jpg'deki tüm karmaşık yolları tarar:
-                // 1. Yol: vectors/AD/AD.jpg (Standart)
-                // 2. Yol: vectors/1/AD.jpg (Görüntüdeki "1" klasörü)
-                // 3. Yol: vectors/AD.jpg (Doğrudan klasörsüz)
-                const imgPaths = [
-                    `https://cdn.jsdelivr.net/gh/${OWNER}/${REPO}/vectors/${enc}/${enc}.jpg`,
-                    `https://cdn.jsdelivr.net/gh/${OWNER}/${REPO}/vectors/1/${enc}.jpg`,
-                    `https://cdn.jsdelivr.net/gh/${OWNER}/${REPO}/vectors/${enc}.jpg`
-                ];
-
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="img-box">
-                        <img src="${imgPaths[0]}" onerror="tryNext(this, ${JSON.stringify(imgPaths)})">
-                    </div>
-                    <div class="card-title">${name.replace(/-/g, ' ')}</div>
-                    <button class="btn" onclick="downloadEps('${name}')">DOWNLOAD EPS</button>
-                `;
-                gal.appendChild(card);
-            });
-        }
-
-        function tryNext(img, paths) {
-            let currentIdx = paths.indexOf(img.src);
-            if (currentIdx < paths.length - 1) {
-                img.src = paths[currentIdx + 1];
-            } else {
-                img.src = 'https://via.placeholder.com/300x200/111/f39c12?text=Preview+Not+Found';
-                img.onerror = null;
-            }
-        }
-
-        async function downloadEps(name) {
-            const enc = encodeURIComponent(name);
-            const epsPaths = [
-                `https://raw.githubusercontent.com/${OWNER}/${REPO}/main/vectors/${enc}/${enc}.eps`,
-                `https://raw.githubusercontent.com/${OWNER}/${REPO}/main/vectors/1/${enc}.eps`,
-                `https://raw.githubusercontent.com/${OWNER}/${REPO}/main/vectors/${enc}.eps`
-            ];
-
-            for (let path of epsPaths) {
-                try {
-                    const res = await fetch(path, { method: 'HEAD' });
-                    if (res.ok) {
-                        window.open(path, '_blank');
-                        return;
-                    }
-                } catch (e) {}
-            }
-            alert("File is still being processed by GitHub. Please wait 1 minute.");
-        }
-
-        init();
-    </script>
-</body>
-</html>
+<style>
+/* Sayfa Butonları İçin Stil */
+.page-btn { padding: 10px 15px; background: #111; border: 1px solid #f39c12; color: white; cursor: pointer; border-radius: 5px; }
+.page-btn.active { background: #f39c12; color: black; font-weight: bold; }
+.page-btn:hover { background: #333; }
+</style>
