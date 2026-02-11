@@ -5,36 +5,52 @@
     <title>Free Vector Stock</title>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
-        h1 { color: #f39c12; margin-top: 30px; text-transform: uppercase; }
+        h1 { color: #f39c12; margin-top: 30px; text-transform: uppercase; font-size: 2rem; }
         
-        /* ARAMA BARI */
         .search-container { margin: 20px auto; max-width: 500px; }
         #searchInput { 
-            width: 100%; padding: 12px 20px; border-radius: 25px; border: 2px solid #f39c12; 
-            background: #111; color: #fff; outline: none; box-sizing: border-box;
+            width: 100%; padding: 12px 20px; border-radius: 25px; border: 2px solid #333; 
+            background: #111; color: #fff; outline: none; transition: 0.3s;
         }
+        #searchInput:focus { border-color: #f39c12; }
 
-        /* GALERİ */
         .gallery { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 25px; padding: 20px; max-width: 1200px; margin: 0 auto; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+            gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto;
         }
-        .card { 
-            background: #111; border: 1px solid #333; padding: 15px; border-radius: 12px; 
-            transition: 0.3s; position: relative;
-        }
-        .card:hover { border-color: #f39c12; transform: translateY(-5px); }
-        .card img { width: 100%; border-radius: 8px; height: 160px; object-fit: cover; display: block; }
         
-        .card-title { margin: 12px 0; font-size: 14px; font-weight: bold; color: #ccc; }
+        .card { 
+            background: #111; border: 1px solid #222; padding: 15px; border-radius: 12px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            min-height: 300px; /* Kartların boyunu eşitler */
+        }
 
-        /* İNDİRME BUTONU */
+        /* GÖRSEL ALANI: İstediğin ölçüleri burada tanımladık */
+        .img-container {
+            display: flex; align-items: center; justify-content: center;
+            width: 240px; height: 160px; /* Yatay sınır */
+            background: #080808; border-radius: 8px; overflow: hidden;
+        }
+
+        .card img { 
+            max-width: 100%; max-height: 100%; 
+            object-fit: contain; /* Kırpmayı önler, orijinal oranı korur */
+        }
+
+        /* Dikey görseller için özel kısıtlama (CSS ile değil JS ile dinamik destekli) */
+        .card img.portrait {
+            width: 107px; height: 160px;
+        }
+
+        .card-title { margin: 15px 0; font-size: 13px; font-weight: bold; color: #888; text-transform: uppercase; }
+
         .download-btn { 
             background: #f39c12; color: #000; padding: 10px; text-decoration: none; 
-            display: block; font-weight: bold; border-radius: 6px; font-size: 13px;
-            transition: 0.2s; border: none; width: 100%; cursor: pointer;
+            font-weight: bold; border-radius: 6px; font-size: 13px;
+            border: none; width: 100%; cursor: pointer; transition: 0.2s;
         }
-        .download-btn:hover { background: #e67e22; }
+        .download-btn:hover { background: #fff; }
     </style>
 </head>
 <body>
@@ -42,7 +58,7 @@
     <h1>FREE VECTOR STOCK</h1>
     
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Vektörlerde ara..." onkeyup="search()">
+        <input type="text" id="searchInput" placeholder="Vektör ara..." onkeyup="search()">
     </div>
 
     <div class="gallery" id="gallery">Yükleniyor...</div>
@@ -62,16 +78,16 @@
                     if(d.type === 'dir') {
                         const fRes = await fetch(d.url);
                         const files = await fRes.json();
-                        
-                        // Klasör içindeki JPG ve EPS dosyalarını bul
                         const jpg = files.find(f => f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.jpeg'));
                         const eps = files.find(f => f.name.toLowerCase().endsWith('.eps'));
 
                         if(jpg && eps) {
                             gallery.innerHTML += `
                                 <div class="card" data-name="${d.name.toLowerCase()}">
-                                    <img src="${jpg.download_url}" alt="${d.name}">
-                                    <div class="card-title">${d.name.replace(/-/g, ' ').toUpperCase()}</div>
+                                    <div class="img-container">
+                                        <img src="${jpg.download_url}" alt="${d.name}" onload="checkFormat(this)">
+                                    </div>
+                                    <div class="card-title">${d.name.replace(/-/g, ' ')}</div>
                                     <button class="download-btn" onclick="downloadFile('${eps.download_url}', '${d.name}.eps')">
                                         EPS İNDİR
                                     </button>
@@ -79,31 +95,13 @@
                         }
                     }
                 }
-            } catch(e) { gallery.innerHTML = 'Hata: Vektörler yüklenemedi.'; }
+            } catch(e) { gallery.innerHTML = 'Vektörler yüklenirken bir hata oluştu.'; }
         }
 
-        // Güvenli İndirme Fonksiyonu
-        function downloadFile(url, filename) {
-            fetch(url).then(res => res.blob()).then(blob => {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            }).catch(() => alert('İndirme başarısız oldu.'));
-        }
-
-        // Arama Fonksiyonu
-        function search() {
-            let input = document.getElementById('searchInput').value.toLowerCase();
-            let cards = document.getElementsByClassName('card');
-            for (let card of cards) {
-                card.style.display = card.getAttribute('data-name').includes(input) ? "block" : "none";
-            }
-        }
-
-        load();
-    </script>
-</body>
-</html>
+        // Görselin yatay mı dikey mi olduğunu anlayıp ona göre boyutlandıran fonksiyon
+        function checkFormat(img) {
+            if (img.naturalHeight > img.naturalWidth) {
+                // Eğer dikeyse senin istediğin 107x160 sınırına çekiyoruz
+                img.style.width = "107px";
+                img.style.height = "160px";
+            } else
