@@ -2,119 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free Vector Stock</title>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
-        h1 { color: #f39c12; margin-top: 30px; text-transform: uppercase; }
-        
-        .search-container { margin: 20px auto; max-width: 500px; }
-        #searchInput { 
-            width: 100%; padding: 12px 20px; border-radius: 25px; border: 2px solid #333; 
-            background: #111; color: #fff; outline: none; box-sizing: border-box;
-        }
-
-        .gallery { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
-            gap: 25px; padding: 20px; max-width: 1400px; margin: 0 auto;
-        }
-        
-        .card { 
-            background: #111; border: 1px solid #222; padding: 15px; border-radius: 12px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            min-height: 340px;
-        }
-
-        .img-container {
-            display: flex; align-items: center; justify-content: center;
-            width: 240px; height: 160px; 
-            background: #080808; border-radius: 8px; overflow: hidden;
-        }
-
+        h1 { color: #f39c12; margin-top: 30px; text-transform: uppercase; letter-spacing: 2px; }
+        .search-container { margin: 25px auto; max-width: 500px; }
+        #searchInput { width: 100%; padding: 12px 20px; border-radius: 25px; border: 2px solid #333; background: #111; color: #fff; outline: none; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .card { background: #111; border: 1px solid #222; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 340px; }
+        .img-container { display: flex; align-items: center; justify-content: center; width: 240px; height: 160px; background: #080808; border-radius: 8px; overflow: hidden; }
         .card img { object-fit: contain; display: block; }
         .card-title { margin: 15px 0; font-size: 13px; font-weight: bold; color: #f39c12; text-transform: uppercase; }
-
-        /* BUTON BURADA İNGİLİZCE OLDU */
-        .download-btn { 
-            background: #f39c12; color: #000; padding: 12px; text-decoration: none; 
-            font-weight: bold; border-radius: 6px; font-size: 13px;
-            border: none; width: 100%; cursor: pointer; transition: 0.2s;
-        }
-        .download-btn:hover { background: #fff; }
+        .download-btn { background: #f39c12; color: #000; padding: 12px; text-decoration: none; font-weight: bold; border-radius: 6px; font-size: 13px; border: none; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <h1>FREE VECTOR STOCK</h1>
-    
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search vectors..." onkeyup="search()">
-    </div>
-
+    <div class="search-container"><input type="text" id="searchInput" placeholder="Search vectors..." onkeyup="search()"></div>
     <div id="gallery" class="gallery">Loading...</div>
-
     <script>
         const OWNER = 'free-vector-stock';
         const REPO = 'free-vector-stock';
-
         async function load() {
             const gallery = document.getElementById('gallery');
             try {
                 const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/vectors`);
                 const dirs = await res.json();
                 gallery.innerHTML = '';
-                
                 for(let d of dirs) {
                     if(d.type === 'dir') {
                         const fRes = await fetch(d.url);
                         const files = await fRes.json();
                         const jpg = files.find(f => f.name.toLowerCase().endsWith('.jpg') || f.name.toLowerCase().endsWith('.jpeg'));
                         const eps = files.find(f => f.name.toLowerCase().endsWith('.eps'));
-
                         if(jpg && eps) {
-                            gallery.innerHTML += `
-                                <div class="card" data-name="${d.name.toLowerCase()}">
-                                    <div class="img-container">
-                                        <img src="${jpg.download_url}" alt="${d.name}" onload="applyDynamicSize(this)">
-                                    </div>
-                                    <div class="card-title">${d.name.replace(/-/g, ' ')}</div>
-                                    <button class="download-btn" onclick="downloadFile('${eps.download_url}', '${d.name}.eps')">
-                                        DOWNLOAD EPS
-                                    </button>
-                                </div>`;
+                            gallery.innerHTML += `<div class="card" data-name="${d.name.toLowerCase()}">
+                                <div class="img-container"><img src="${jpg.download_url}" alt="${d.name}" onload="applySize(this)"></div>
+                                <div class="card-title">${d.name.replace(/-/g, ' ')}</div>
+                                <button class="download-btn" onclick="dl('${eps.download_url}', '${d.name}.eps')">DOWNLOAD EPS</button>
+                            </div>`;
                         }
                     }
                 }
             } catch(e) { gallery.innerHTML = 'Error loading assets.'; }
         }
-
-        function applyDynamicSize(img) {
-            if (img.naturalHeight > img.naturalWidth) {
-                img.style.width = "107px";
-                img.style.height = "160px";
-            } else {
-                img.style.width = "240px";
-                img.style.height = "160px";
-            }
+        function applySize(img) {
+            if (img.naturalHeight > img.naturalWidth) { img.style.width = "107px"; img.style.height = "160px"; } 
+            else { img.style.width = "240px"; img.style.height = "160px"; }
         }
-
-        function downloadFile(url, filename) {
-            fetch(url).then(res => res.blob()).then(blob => {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            });
-        }
-
+        function dl(url, name) { fetch(url).then(r => r.blob()).then(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); }); }
         function search() {
-            let input = document.getElementById('searchInput').value.toLowerCase();
+            let val = document.getElementById('searchInput').value.toLowerCase();
             let cards = document.getElementsByClassName('card');
-            for (let card of cards) {
-                card.style.display = card.getAttribute('data-name').includes(input) ? "flex" : "none";
-            }
+            for (let c of cards) { c.style.display = c.getAttribute('data-name').includes(val) ? "flex" : "none"; }
         }
         load();
     </script>
