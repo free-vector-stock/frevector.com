@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistem Paneli | Vektör Yükle</title>
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; }
+        .upload-box { border: 2px dashed #f39c12; padding: 40px; border-radius: 15px; text-align: center; width: 400px; }
+        .file-input { display: none; }
+        .btn { background: #f39c12; color: #000; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #status { margin-top: 20px; color: #f1c40f; }
+    </style>
+</head>
+<body>
+    <div class="upload-box">
+        <h2>Vektör Yükleme Paneli</h2>
+        <p>EPS ve JPEG dosyalarýný ayný anda sürükle</p>
+        <label class="btn" for="files">Dosyalarý Seç</label>
+        <input type="file" id="files" class="file-input" multiple accept=".eps,.jpg,.jpeg">
+        <div id="status">Hazýr.</div>
+    </div>
+<script>
+    const fileInput = document.getElementById('files');
+    const status = document.getElementById('status');
+
+    fileInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        let pairs = {};
+
+        // EPS ve JPEG eþleþtirme mantýðý
+        files.forEach(file => {
+            const nameWithoutExt = file.name.split('.').slice(0, -1).join('.');
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (!pairs[nameWithoutExt]) pairs[nameWithoutExt] = { eps: false, jpg: false };
+            if (ext === 'eps') pairs[nameWithoutExt].eps = true;
+            if (ext === 'jpg' || ext === 'jpeg') pairs[nameWithoutExt].jpg = true;
+        });
+
+        // Hata kontrolü (Eþleþmeyen dosya var mý?)
+        let missing = Object.keys(pairs).filter(name => !pairs[name].eps || !pairs[name].jpg);
+
+        if (missing.length > 0) {
+            status.innerHTML = "? Hata: Þu dosyalarýn eþi eksik: " + missing.join(', ');
+            status.style.color = "#e74c3c";
+        } else {
+            status.innerHTML = "? Harika! " + Object.keys(pairs).length + " vektör seti hazýr.";
+            status.style.color = "#2ecc71";
+        }
+    });
+</script></body>
+</html>
