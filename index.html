@@ -3,45 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FREE VECTOR STOCK | 2026 Premium Gallery</title>
+    <title>FREE VECTOR STOCK | 2026 Premium Resources</title>
     <style>
-        body { background: #ffffff; color: #333; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        header { background: #000; color: #fff; padding: 20px 0; text-align: center; }
-        header h1 { margin: 0; font-size: 24px; letter-spacing: 4px; text-transform: uppercase; }
+        body { background: #ffffff; color: #333; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+        header { background: #000; color: #fff; padding: 25px 0 10px 0; text-align: center; }
+        header h1 { margin: 0; font-size: 28px; letter-spacing: 5px; font-weight: bold; text-transform: uppercase; }
 
-        /* News Ticker */
-        .news-slider { background: #000; color: #f39c12; padding: 10px 0; font-size: 13px; border-bottom: 3px solid #f39c12; }
-        .slide-text { text-align: center; display: none; font-weight: 500; }
+        /* News Slider */
+        .news-slider { background: #000; color: #f39c12; padding: 12px 0; font-size: 13px; border-bottom: 4px solid #f39c12; overflow: hidden; }
+        .slide-text { text-align: center; display: none; }
         .slide-text.active { display: block; animation: fadeIn 0.8s; }
 
-        .wrapper { display: flex; max-width: 1600px; margin: auto; padding: 20px; gap: 20px; align-items: flex-start; }
+        .wrapper { display: flex; max-width: 1500px; margin: auto; padding: 20px; gap: 30px; }
 
         /* No-Scroll Sidebar */
-        .category-sidebar { flex: 0 0 200px; background: #fdfdfd; padding: 15px; border-radius: 10px; border: 1px solid #eee; position: sticky; top: 20px; }
-        .category-sidebar h2 { font-size: 13px; border-bottom: 2px solid #f39c12; padding-bottom: 8px; margin-top: 0; color: #000; }
-        .category-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
-        .category-list li { padding: 5px 0; border-bottom: 1px solid #f1f1f1; cursor: pointer; font-size: 12px; transition: 0.2s; color: #666; }
-        .category-list li:hover { color: #f39c12; padding-left: 5px; background: #fafafa; }
+        .category-sidebar { flex: 0 0 220px; background: #f9f9f9; padding: 20px; border-radius: 10px; position: sticky; top: 20px; height: fit-content; border: 1px solid #eee; }
+        .category-sidebar h2 { font-size: 15px; border-bottom: 2px solid #f39c12; padding-bottom: 10px; margin-top: 0; }
+        .category-list { list-style: none; padding: 0; margin: 0; }
+        .category-list li { padding: 6px 0; border-bottom: 1px solid #eee; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .category-list li:hover { color: #f39c12; padding-left: 8px; background: #fff; }
 
         .content-area { flex: 1; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .card:hover { border-color: #f39c12; transform: translateY(-3px); }
-        .card img { width: 100%; height: 150px; object-fit: contain; background: #f9f9f9; border-radius: 4px; }
-        .card h3 { font-size: 10px; margin: 10px 0; color: #444; text-transform: uppercase; letter-spacing: 0.5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .card:hover { border-color: #f39c12; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .card img { width: 100%; height: 160px; object-fit: contain; background: #f4f4f4; border-radius: 5px; }
+        .card h3 { font-size: 11px; margin: 12px 0; color: #555; text-transform: uppercase; }
 
-        /* Detail View */
+        /* Detail & Footer */
         #detailView { display: none; }
-        .detail-container { display: flex; flex-wrap: wrap; gap: 30px; background: #fff; padding: 25px; border: 1px solid #eee; border-radius: 12px; }
-        .detail-img-box { flex: 1.2; min-width: 300px; }
-        .detail-img-box img { width: 100%; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .detail-actions { flex: 0.8; min-width: 250px; }
-        .download-btn { background: #f39c12; color: #000; padding: 18px; text-decoration: none; border-radius: 50px; font-weight: bold; display: block; text-align: center; margin: 20px 0; font-size: 18px; }
-
-        /* Footer */
-        footer { padding: 50px 20px; text-align: center; background: #fafafa; border-top: 1px solid #eee; margin-top: 40px; }
-        .footer-info { font-size: 14px; color: #333; margin-bottom: 8px; font-weight: bold; }
-        .footer-copy { font-size: 12px; color: #aaa; letter-spacing: 1px; }
+        .download-btn { background: #f39c12; color: #000; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; display: block; text-align: center; margin-top: 20px; }
+        
+        footer { padding: 60px 20px; text-align: center; border-top: 1px solid #eee; margin-top: 60px; background: #fafafa; }
+        .footer-mail { font-weight: bold; color: #333; margin-bottom: 5px; }
+        .footer-copy { color: #999; font-size: 12px; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -51,9 +46,9 @@
 <header><h1>FREE VECTOR STOCK</h1></header>
 
 <div class="news-slider">
-    <div class="slide-text active">Welcome to the 2026 Premium Vector Repository.</div>
-    <div class="slide-text">Strictly prohibited to redistribute our files in any form.</div>
-    <div class="slide-text">Contact us: freevectorstock@gmail.com</div>
+    <div class="slide-text active">Premium quality vectors for your professional projects.</div>
+    <div class="slide-text">Need help? Contact us at hakankacar2014@gmail.com</div>
+    <div class="slide-text">© 2026 - The best generation center for graphic resources.</div>
 </div>
 
 <div class="wrapper">
@@ -64,19 +59,17 @@
 
     <main class="content-area">
         <div id="galleryView">
-            <input type="text" id="searchInput" placeholder="Search for vectors..." style="width:100%; padding:12px; margin-bottom:20px; border-radius:6px; border:1px solid #ddd; outline: none; font-size: 14px;">
+            <input type="text" id="searchInput" placeholder="Search vectors..." style="width:100%; padding:15px; margin-bottom:20px; border-radius:8px; border:1px solid #ddd;">
             <div id="vectorGrid" class="grid"></div>
         </div>
 
         <div id="detailView">
-            <button onclick="showGallery()" style="margin-bottom:20px; cursor:pointer; padding: 8px 15px; border-radius: 5px; border: 1px solid #ccc; background: #fff;">← Back to Results</button>
-            <div class="detail-container">
-                <div class="detail-img-box"><img id="detImg" src=""></div>
-                <div class="detail-actions">
-                    <h2 id="detTitle" style="margin-top:0; font-size:22px; text-transform: uppercase;"></h2>
-                    <div style="background:#f4f4f4; height:120px; line-height:120px; text-align:center; color:#bbb; border-radius:8px; margin:15px 0; font-size: 12px;">ADVERTISEMENT</div>
-                    <a id="detDl" href="" class="download-btn" download>DOWNLOAD VECTOR (EPS)</a>
-                    <div style="background:#f4f4f4; height:120px; line-height:120px; text-align:center; color:#bbb; border-radius:8px; margin:15px 0; font-size: 12px;">ADVERTISEMENT</div>
+            <button onclick="showGallery()">← Back</button>
+            <div style="display:flex; gap:30px; margin-top:20px; background:#fff; padding:20px; border:1px solid #eee; border-radius:10px;">
+                <img id="detImg" style="width:50%; border-radius:8px;">
+                <div style="flex:1;">
+                    <h2 id="detTitle" style="text-transform:uppercase;"></h2>
+                    <a id="detDl" href="" class="download-btn" download>DOWNLOAD EPS</a>
                 </div>
             </div>
         </div>
@@ -84,12 +77,11 @@
 </div>
 
 <footer>
-    <div class="footer-info">Contact: freevectorstock@gmail.com</div>
+    <div class="footer-mail">Contact: hakankacar2014@gmail.com</div>
     <div class="footer-copy">© 2026 FREE VECTOR STOCK. All Rights Reserved.</div>
 </footer>
 
 <script>
-    // News Ticker Logic
     let sIdx = 0; const slides = document.querySelectorAll('.slide-text');
     setInterval(() => { slides[sIdx].classList.remove('active'); sIdx = (sIdx + 1) % slides.length; slides[sIdx].classList.add('active'); }, 4000);
 
@@ -107,8 +99,8 @@
     function render() {
         const grid = document.getElementById('vectorGrid'); grid.innerHTML = "";
         filtered.forEach(name => {
-            let cleanTitle = name.split('-').slice(0,-1).join(' ');
-            grid.innerHTML += `<div class="card" onclick="openDetail('${name}')"><img src="vectors/${name}/${name}.jpg"><h3>${cleanTitle}</h3></div>`;
+            let clean = name.split('-').slice(0,-1).join(' ');
+            grid.innerHTML += `<div class="card" onclick="openDetail('${name}')"><img src="vectors/${name}/${name}.jpg"><h3>${clean}</h3></div>`;
         });
     }
 
@@ -117,7 +109,6 @@
         document.getElementById('detTitle').innerText = f.split('-').slice(0,-1).join(' ');
         document.getElementById('detImg').src = `vectors/${f}/${f}.jpg`;
         document.getElementById('detDl').href = `vectors/${f}/${f}.eps`;
-        window.scrollTo(0,0);
     }
 
     function showGallery() { document.getElementById('detailView').style.display="none"; document.getElementById('galleryView').style.display="block"; }
