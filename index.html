@@ -1,119 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FREE VECTOR STOCK | 2026 Premium Resources</title>
+    <title>FREE VECTOR STOCK | Professional Graphic Archive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <style>
-        body { background: #ffffff; color: #333; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
-        header { background: #000; color: #fff; padding: 25px 0 10px 0; text-align: center; }
-        header h1 { margin: 0; font-size: 28px; letter-spacing: 5px; font-weight: bold; text-transform: uppercase; }
-
-        /* News Slider */
-        .news-slider { background: #000; color: #f39c12; padding: 12px 0; font-size: 13px; border-bottom: 4px solid #f39c12; overflow: hidden; }
-        .slide-text { text-align: center; display: none; }
-        .slide-text.active { display: block; animation: fadeIn 0.8s; }
-
-        .wrapper { display: flex; max-width: 1500px; margin: auto; padding: 20px; gap: 30px; }
-
-        /* No-Scroll Sidebar */
-        .category-sidebar { flex: 0 0 220px; background: #f9f9f9; padding: 20px; border-radius: 10px; position: sticky; top: 20px; height: fit-content; border: 1px solid #eee; }
-        .category-sidebar h2 { font-size: 15px; border-bottom: 2px solid #f39c12; padding-bottom: 10px; margin-top: 0; }
-        .category-list { list-style: none; padding: 0; margin: 0; }
-        .category-list li { padding: 6px 0; border-bottom: 1px solid #eee; cursor: pointer; font-size: 13px; transition: 0.2s; }
-        .category-list li:hover { color: #f39c12; padding-left: 8px; background: #fff; }
-
-        .content-area { flex: 1; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .card:hover { border-color: #f39c12; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-        .card img { width: 100%; height: 160px; object-fit: contain; background: #f4f4f4; border-radius: 5px; }
-        .card h3 { font-size: 11px; margin: 12px 0; color: #555; text-transform: uppercase; }
-
-        /* Detail & Footer */
-        #detailView { display: none; }
-        .download-btn { background: #f39c12; color: #000; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; display: block; text-align: center; margin-top: 20px; }
-        
-        footer { padding: 60px 20px; text-align: center; border-top: 1px solid #eee; margin-top: 60px; background: #fafafa; }
-        .footer-mail { font-weight: bold; color: #333; margin-bottom: 5px; }
-        .footer-copy { color: #999; font-size: 12px; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Logo için ekstra tıklama stili */
+        header h1 a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        header h1 a:hover {
+            color: #f39c12; /* Üzerine gelince turuncu olur */
+        }
+        /* Arama kutusu iyileştirmesi */
+        .search-container input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 30px;
+            border: 2px solid #333;
+            background: #111;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-container input:focus {
+            border-color: #f39c12;
+        }
     </style>
 </head>
 <body>
-
-<header><h1>FREE VECTOR STOCK</h1></header>
-
-<div class="news-slider">
-    <div class="slide-text active">Premium quality vectors for your professional projects.</div>
-    <div class="slide-text">Need help? Contact us at hakankacar2014@gmail.com</div>
-    <div class="slide-text">© 2026 - The best generation center for graphic resources.</div>
-</div>
-
-<div class="wrapper">
-    <aside class="category-sidebar">
-        <h2>CATEGORIES</h2>
-        <ul class="category-list" id="categoryMenu"></ul>
-    </aside>
-
-    <main class="content-area">
-        <div id="galleryView">
-            <input type="text" id="searchInput" placeholder="Search vectors..." style="width:100%; padding:15px; margin-bottom:20px; border-radius:8px; border:1px solid #ddd;">
-            <div id="vectorGrid" class="grid"></div>
+    <header>
+        <div class="header-content">
+            <h1><a href="index.html">FREE VECTOR STOCK</a></h1>
+            <p class="tagline">Explore our massive archive of premium vectors, illustrations, and design elements. Free for your creative projects.</p>
         </div>
+    </header>
 
-        <div id="detailView">
-            <button onclick="showGallery()">← Back</button>
-            <div style="display:flex; gap:30px; margin-top:20px; background:#fff; padding:20px; border:1px solid #eee; border-radius:10px;">
-                <img id="detImg" style="width:50%; border-radius:8px;">
-                <div style="flex:1;">
-                    <h2 id="detTitle" style="text-transform:uppercase;"></h2>
-                    <a id="detDl" href="" class="download-btn" download>DOWNLOAD EPS</a>
-                </div>
+    <div class="container">
+        <aside class="sidebar">
+            <h3>CATEGORIES</h3>
+            <ul id="category-list">
+                <li style="color: #666; font-size: 12px; padding: 10px;">Loading categories...</li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Search in 1000+ vectors (e.g. nature, sport, business)...">
             </div>
+
+            <div id="vector-grid" class="grid">
+                </div>
+            
+            <div id="no-results" style="display:none; text-align:center; padding:50px; color:#777;">
+                No vectors found matching your search.
+            </div>
+        </main>
+    </div>
+
+    <div id="detail-modal" class="modal">
         </div>
-    </main>
-</div>
 
-<footer>
-    <div class="footer-mail">Contact: hakankacar2014@gmail.com</div>
-    <div class="footer-copy">© 2026 FREE VECTOR STOCK. All Rights Reserved.</div>
-</footer>
-
-<script>
-    let sIdx = 0; const slides = document.querySelectorAll('.slide-text');
-    setInterval(() => { slides[sIdx].classList.remove('active'); sIdx = (sIdx + 1) % slides.length; slides[sIdx].classList.add('active'); }, 4000);
-
-    const cats = ["Abstract", "Animals", "Arts", "Backgrounds", "Beauty", "Buildings", "Business", "Celebrities", "Education", "Food", "Healthcare", "Holidays", "Industrial", "Interiors", "Miscellaneous", "Nature", "Objects", "Parks", "People", "Religion", "Science", "Signs", "Sports", "Technology", "Transportation", "Vintage"];
-    const menu = document.getElementById('categoryMenu');
-    cats.sort().forEach(c => {
-        const li = document.createElement('li'); li.innerText = c;
-        li.onclick = () => { showGallery(); filterData(c); window.scrollTo(0,0); };
-        menu.appendChild(li);
-    });
-
-    let rawData = []; let filtered = [];
-    fetch('vectors.json').then(r => r.json()).then(data => { rawData = data; filtered = data; render(); });
-
-    function render() {
-        const grid = document.getElementById('vectorGrid'); grid.innerHTML = "";
-        filtered.forEach(name => {
-            let clean = name.split('-').slice(0,-1).join(' ');
-            grid.innerHTML += `<div class="card" onclick="openDetail('${name}')"><img src="vectors/${name}/${name}.jpg"><h3>${clean}</h3></div>`;
-        });
-    }
-
-    function openDetail(f) {
-        document.getElementById('galleryView').style.display="none"; document.getElementById('detailView').style.display="block";
-        document.getElementById('detTitle').innerText = f.split('-').slice(0,-1).join(' ');
-        document.getElementById('detImg').src = `vectors/${f}/${f}.jpg`;
-        document.getElementById('detDl').href = `vectors/${f}/${f}.eps`;
-    }
-
-    function showGallery() { document.getElementById('detailView').style.display="none"; document.getElementById('galleryView').style.display="block"; }
-    function filterData(v) { filtered = rawData.filter(x => x.toLowerCase().includes(v.toLowerCase())); render(); }
-    document.getElementById('searchInput').oninput = (e) => filterData(e.target.value);
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
