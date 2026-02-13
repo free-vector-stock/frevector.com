@@ -25,7 +25,7 @@
     </div>
 
 <script>
-    // KATEGORİYE ÖZEL 45 KELİMELİK PAKETLER
+    // KATEGORİYE ÖZEL 45 KELİMELİK PAKETLER (Senin Orijinal Anahtar Kelimelerin)
     const catKeywords = {
         "abstract": "abstract, background, pattern, texture, modern, artistic, creative, colorful, shape, geometric, wave, line, futuristic, minimal, art, style, trendy, decoration, composition, element, digital, light, gradient, flow, concept, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, canvas, brush, expression",
         "animals": "animal, pet, wild, nature, mammal, bird, cat, dog, lion, tiger, zoo, wildlife, fauna, creature, mascot, character, cute, adorable, biological, species, domestic, paw, fur, safari, jungle, forest, vector, illustration, graphic, design, isolated, eps",
@@ -49,13 +49,13 @@
 
     const genericPool = "vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, simple, modern, creative, artistic, collection, resource";
 
-    // AKILLI AI AÇIKLAMA ÜRETİCİ
+    // AI AÇIKLAMA ÜRETİCİ
     function generateAIDescription(fileName, category) {
         const cleanName = fileName.replace(/-/g, ' ');
         const templates = [
-            `Professional ${cleanName} vector illustration. This high-quality ${category} graphic is designed for modern projects, featuring clean lines and premium details.`,
-            `A creative ${cleanName} element perfect for your ${category} themed designs. This scalable vector graphic ensures perfect quality for both web and print use.`,
-            `Premium ${category} resource featuring ${cleanName}. Ideal for marketing materials, professional presentations, and creative digital artworks.`
+            `Professional ${cleanName} vector illustration. This high-quality ${category} graphic is designed for modern projects.`,
+            `A creative ${cleanName} element perfect for your ${category} themed designs. High quality scalable vector.`,
+            `Premium ${category} resource featuring ${cleanName}. Ideal for professional presentations and digital artworks.`
         ];
         return templates[Math.floor(Math.random() * templates.length)];
     }
@@ -63,7 +63,7 @@
     async function startProcess() {
         const token = document.getElementById('tk').value;
         const files = Array.from(document.getElementById('fi').files);
-        let globalDesc = document.getElementById('desc').value;
+        const globalDesc = document.getElementById('desc').value;
         const log = document.getElementById('log');
 
         if(!token || files.length === 0) return alert("HATA: Bilgiler eksik!");
@@ -77,7 +77,6 @@
             let clean = base.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
             let folder = `${clean}-${Math.floor(10000 + Math.random() * 90000)}`;
 
-            // Kategori ve Kelime Seçimi
             let categoryFound = "general";
             let selectedKeys = genericPool;
             for (let cat in catKeywords) {
@@ -88,27 +87,18 @@
                 }
             }
 
-            // EĞER AÇIKLAMA BOŞSA AI ÜRETSİN
-            let finalDesc = globalDesc;
-            if (!finalDesc || finalDesc.trim() === "") {
-                finalDesc = generateAIDescription(clean, categoryFound);
-            }
-
+            let finalDesc = globalDesc || generateAIDescription(clean, categoryFound);
             const eps = files.find(f => f.name.split('.')[0] === base && f.name.toLowerCase().endsWith('.eps'));
 
             if (eps) {
                 log.innerHTML += `<div>⚙️ İşleniyor: ${folder}</div>`;
                 try {
-                    await push(folder, jpg, `${folder}.jpg`, token);
-                    await push(folder, eps, `${folder}.eps`, token);
+                    await pushToGithub(folder, jpg, `${folder}.jpg`, token);
+                    await pushToGithub(folder, eps, `${folder}.eps`, token);
 
-                    const data = {
-                        name: folder,
-                        desc: finalDesc,
-                        keys: selectedKeys
-                    };
+                    const data = { name: folder, desc: finalDesc, keys: selectedKeys };
+                    await updateJson(data, token);
 
-                    await update(data, token);
                     log.innerHTML += `<div style="color:#27ae60">✓ BAŞARILI: ${folder}</div>`;
                 } catch (e) {
                     log.innerHTML += `<div style="color:red">X HATA: ${e.message}</div>`;
@@ -119,26 +109,32 @@
         document.getElementById('btn').disabled = false;
     }
 
-    async function push(fld, file, name, tk) {
+    async function pushToGithub(fld, file, name, tk) {
         const b64 = await toB64(file);
         const url = `https://api.github.com/repos/free-vector-stock/free-vector-stock/contents/vectors/${fld}/${name}`;
-        await fetch(url, {
+        const res = await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${tk}` },
             body: JSON.stringify({ message: `Add ${name}`, content: b64.split(',')[1] })
         });
+        if(!res.ok) throw new Error(`${name} yüklenemedi.`);
     }
 
-    async function update(newData, tk) {
+    async function updateJson(newData, tk) {
         const url = `https://api.github.com/repos/free-vector-stock/free-vector-stock/contents/vectors.json`;
         const res = await fetch(url);
         const f = await res.json();
-        let list = JSON.parse(atob(f.content));
+        let list = JSON.parse(decodeURIComponent(escape(atob(f.content))));
         list.unshift(newData);
+        
         await fetch(url, {
             method: 'PUT',
             headers: { 'Authorization': `token ${tk}` },
-            body: JSON.stringify({ message: `Update`, content: btoa(JSON.stringify(list, null, 2)), sha: f.sha })
+            body: JSON.stringify({ 
+                message: `Update vectors.json`, 
+                content: btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2)))), 
+                sha: f.sha 
+            })
         });
     }
 
