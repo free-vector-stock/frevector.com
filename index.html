@@ -9,7 +9,7 @@
         header { background: #000; color: #fff; padding: 25px 0 10px 0; text-align: center; }
         header h1 { margin: 0; font-size: 28px; letter-spacing: 5px; font-weight: bold; text-transform: uppercase; }
 
-        /* News Slider - Updated Content */
+        /* News Slider - Content Fixed */
         .news-slider { background: #000; color: #f39c12; padding: 15px 20px; font-size: 14px; border-bottom: 4px solid #f39c12; overflow: hidden; min-height: 20px; }
         .slide-text { text-align: center; display: none; line-height: 1.4; }
         .slide-text.active { display: block; animation: fadeIn 0.8s; }
@@ -35,14 +35,13 @@
         .detail-img-side { width: 55%; }
         .detail-img-side img { width: 100%; border-radius: 8px; border: 1px solid #eee; }
         
-        /* Action Buttons */
         .action-side { flex: 1; }
         .download-btn { color: #000; padding: 15px; text-decoration: none; border-radius: 5px; font-weight: bold; display: block; text-align: center; margin-bottom: 10px; font-size: 16px; transition: 0.3s; border: 2px solid transparent; }
         .eps-btn { background: #f39c12; }
         .jpg-btn { background: #fff; border: 2px solid #f39c12; color: #f39c12; }
         .download-btn:hover { background: #000; color: #fff; border-color: #000; }
         
-        /* Footer */
+        /* Footer & Contact */
         footer { padding: 60px 20px; text-align: center; border-top: 1px solid #eee; margin-top: 60px; background: #fafafa; }
         .footer-mail { font-weight: bold; color: #333; margin-bottom: 10px; font-size: 16px; }
         .footer-mail a { color: #f39c12; text-decoration: none; }
@@ -82,10 +81,8 @@
                 <div class="action-side">
                     <h2 id="detTitle" style="text-transform:uppercase; margin-top: 0;"></h2>
                     <div style="height:80px; background:#f9f9f9; border:1px dashed #ccc; margin:10px 0; line-height:80px; text-align:center; color:#999; font-size: 11px;">ADVERTISEMENT</div>
-                    
                     <a id="epsDl" href="" class="download-btn eps-btn" download>DOWNLOAD EPS (VECTOR)</a>
                     <a id="jpgDl" href="" class="download-btn jpg-btn" download>DOWNLOAD JPEG (IMAGE)</a>
-                    
                     <div style="height:80px; background:#f9f9f9; border:1px dashed #ccc; margin:10px 0; line-height:80px; text-align:center; color:#999; font-size: 11px;">ADVERTISEMENT</div>
                 </div>
             </div>
@@ -101,6 +98,11 @@
 </footer>
 
 <script>
+    // Koruma Kalkanı Fonksiyonu: Hatalı isimleri tarayıcıya uygun hale getirir
+    function safePath(path) {
+        return encodeURIComponent(path).replace(/%2F/g, '/');
+    }
+
     let sIdx = 0; const slides = document.querySelectorAll('.slide-text');
     setInterval(() => { slides[sIdx].classList.remove('active'); sIdx = (sIdx + 1) % slides.length; slides[sIdx].classList.add('active'); }, 5000);
 
@@ -119,7 +121,8 @@
         const grid = document.getElementById('vectorGrid'); grid.innerHTML = "";
         filtered.forEach(name => {
             let clean = name.split('-').slice(0,-1).join(' ');
-            grid.innerHTML += `<div class="card" onclick="openDetail('${name}')"><img src="vectors/${name}/${name}.jpg"><h3>${clean}</h3></div>`;
+            // Kart görseli için koruma kullanıldı
+            grid.innerHTML += `<div class="card" onclick="openDetail('${name}')"><img src="${safePath('vectors/'+name+'/'+name+'.jpg')}"><h3>${clean}</h3></div>`;
         });
     }
 
@@ -127,11 +130,11 @@
         document.getElementById('galleryView').style.display="none"; 
         document.getElementById('detailView').style.display="block";
         document.getElementById('detTitle').innerText = f.split('-').slice(0,-1).join(' ');
-        document.getElementById('detImg').src = `vectors/${f}/${f}.jpg`;
         
-        // Setup both download links
-        document.getElementById('epsDl').href = `vectors/${f}/${f}.eps`;
-        document.getElementById('jpgDl').href = `vectors/${f}/${f}.jpg`;
+        // Detay görseli ve indirme linkleri için koruma kalkanı devrede
+        document.getElementById('detImg').src = safePath(`vectors/${f}/${f}.jpg`);
+        document.getElementById('epsDl').href = safePath(`vectors/${f}/${f}.eps`);
+        document.getElementById('jpgDl').href = safePath(`vectors/${f}/${f}.jpg`);
         
         window.scrollTo(0,0);
     }
