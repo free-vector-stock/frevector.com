@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>AI SMART UPLOAD SYSTEM | TOTAL CATEGORY VERSION</title>
+    <title>AI SMART UPLOAD SYSTEM v3.0 | FULL VERSION</title>
     <style>
         body { background:#0a0a0a; color:#eee; font-family: 'Segoe UI', Arial, sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; }
         .box { background:#111; padding:35px; border-radius:15px; border:2px solid #f39c12; width:560px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -16,104 +16,105 @@
 </head>
 <body>
     <div class="box">
-        <h2>SISTEM OTOMATIK YUKLEME v2.0</h2>
+        <h2>AUTOMATIC AI UPLOAD SYSTEM</h2>
         <input type="password" id="tk" placeholder="GitHub Personal Access Token">
         <input type="file" id="fi" multiple accept=".jpg,.eps">
-        <textarea id="desc" rows="3" placeholder="Aciklama bos kalirsa kategoriye ozel 45 kelime otomatik eklenir"></textarea>
-        <button id="btn" onclick="startProcess()">DOSYALARI ISLE VE YUKLE</button>
-        <div id="log">Sistem hazir. Tum kategoriler (30+) aktif.</div>
+        <textarea id="desc" rows="3" placeholder="Boş bırakırsanız AI 10 farklı kalıptan profesyonel açıklama üretir."></textarea>
+        <button id="btn" onclick="startProcess()">DOSYALARI İŞLE VE YUKLE</button>
+        <div id="log">Sistem Hazır. Tüm Kategoriler ve 10 AI Kalıbı Aktif.</div>
     </div>
 
 <script>
     const catKeywords = {
-        "abstract": "abstract, background, pattern, texture, modern, artistic, creative, colorful, shape, geometric, wave, line, futuristic, minimal, art, style, trendy, decoration, composition, element, digital, light, gradient, flow, concept, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, canvas, brush, expression, vivid, visual",
-        "animals": "animal, pet, wild, nature, mammal, bird, cat, dog, lion, tiger, zoo, wildlife, fauna, creature, mascot, character, cute, adorable, biological, species, domestic, paw, fur, safari, jungle, forest, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, biological, veterinarian, habitat, species",
-        "arts": "arts, artistic, paint, brush, creative, museum, gallery, canvas, drawing, sketch, culture, history, craft, masterpiece, sculpture, classic, modern-art, oil-paint, watercolor, fine-art, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, collection, exhibition, talent, frame, visual, expression",
-        "backgrounds": "background, texture, wallpaper, surface, backdrop, abstract, pattern, material, empty, space, layout, scene, environment, decorative, graphic-element, clean, simple, light, dark, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, design-resource, digital-paper, seamless, web-design, presentation",
-        "beauty": "beauty, fashion, cosmetic, makeup, skincare, spa, hair, model, style, glamour, elegant, female, girl, woman, wellness, salon, treatment, face, organic, luxury, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, perfume, lip-stick, health, lifestyle, gorgeous, boutique, salon",
-        "buildings": "buildings, architecture, city, house, urban, skyscraper, apartment, construction, home, exterior, real-estate, street, downtown, structure, facade, landmark, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, blueprint, residential, city-view, window, door, roof, property, industrial",
-        "business": "business, corporate, office, work, professional, success, team, finance, marketing, strategy, management, career, worker, company, meeting, growth, technology, icon, economy, leadership, communication, partnership, vision, creative, job, networking, planning, achievement, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, strategy, analytics",
-        "celebrities": "celebrity, famous, star, red-carpet, actor, singer, talent, idol, media, personality, popular, person, stage, performance, fan, award, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, icon, entertainment, spotlight, movie, music, glory, paparazzi, public-figure",
-        "education": "education, school, learning, book, student, teacher, university, study, knowledge, classroom, library, college, lesson, science, pencil, back-to-school, academic, brain, intelligence, skill, graduation, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, diploma, notebook, research, online-learning, kid, child, pen",
-        "food": "food, meal, dish, fresh, healthy, organic, delicious, tasty, nutrition, cooking, kitchen, restaurant, gourmet, menu, appetizer, ingredient, lunch, dinner, breakfast, snack, diet, vegetarian, homemade, spicy, sweet, culinary, recipe, dining, plate, yummy, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, dining, organic",
-        "healthcare": "medical, health, doctor, hospital, medicine, care, treatment, clinic, pharmacy, nurse, virus, science, lab, surgery, heartbeat, emergency, patient, wellness, healthy, diagnostic, vaccine, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, stethoscope, ambulance, pill, biology, healthcare, lab, scientist",
-        "holidays": "holidays, celebration, party, christmas, birthday, vacation, travel, event, gift, happy, winter, summer, festive, decoration, season, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, carnival, festival, greeting, card, invitation, fireworks, balloon, relax, tourism",
-        "industrial": "industrial, factory, engineering, technology, manufacturing, machine, power, energy, fuel, metal, construction, hard-hat, worker, equipment, tools, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, production, warehouse, oil, gas, chemistry, robot, automatic, workshop",
-        "interiors": "interiors, room, furniture, house, home, design, living-room, decoration, indoor, architecture, modern, style, couch, table, kitchen, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, apartment, residential, floor, wall, decor, cozy, luxury, space",
-        "nature": "nature, landscape, outdoor, green, environment, sky, mountain, forest, tree, water, river, lake, summer, spring, autumn, winter, scenic, view, plant, leaf, garden, flower, wild, park, wood, ecology, eco-friendly, earth, peace, fresh-air, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, earth",
-        "objects": "objects, thing, items, elements, icon, set, collection, tools, isolated-objects, equipment, gadget, household, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, simple, product, commercial, asset, kit, miscellaneous, various, daily, materials, shape, piece",
-        "parks": "parks, nature, garden, outdoor, recreation, green, leisure, city-park, bench, grass, trees, family, walk, playground, relaxation, environment, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, public, summer, picnic, path, natural, ecology, wood, spring",
-        "people": "people, person, human, character, crowd, man, woman, family, community, social, lifestyle, group, happy, activity, portrait, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, user, avatar, diversity, together, children, adult, friends, silhouette",
-        "religion": "religion, spiritual, holy, god, church, mosque, temple, faith, pray, culture, tradition, peace, sacred, believe, symbol, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, zen, islam, christianity, buddhism, meditation, worship, history, architecture",
-        "science": "science, laboratory, research, chemistry, biology, experiment, physics, technology, formula, medicine, education, scientist, equipment, molecule, atom, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, future, genetic, lab-glass, study, invention, microscope, test",
-        "signs": "signs, symbol, icon, warning, information, traffic, notice, label, tag, board, direction, arrow, road, mark, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, street-sign, safety, guide, signal, branding, logotype, badge, emblem",
-        "sports": "sport, fitness, training, athlete, gym, workout, active, competition, healthy, lifestyle, exercise, ball, team, winner, stadium, fast, power, speed, muscle, physical, activity, running, football, basketball, tennis, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, energy, game, action",
-        "technology": "technology, digital, innovation, future, computer, web, software, tech, science, internet, network, modern, connection, electronic, robot, ai, intelligence, virtual, coding, server, hardware, cyber, information, communication, advanced, smart, industry, online, cloud, data, gadget, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template",
-        "transportation": "transportation, vehicle, car, plane, travel, logistics, truck, ship, boat, airplane, flight, delivery, engine, speed, move, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, drive, road, sky, sea, auto, traffic, fuel, journey, tourism",
-        "vintage": "vintage, retro, old, classic, history, antique, traditional, style, nostalgic, decorative, textured, ornate, paper, aged, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, victorian, frame, badge, grunge, sepia, ornament, heritage, museum"
+        "abstract": "abstract, background, pattern, texture, modern, artistic, creative, colorful, shape, geometric, wave, line, futuristic, minimal, art, style, trendy, decoration, composition, element, digital, light, gradient, flow, concept, vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, canvas, brush",
+        "animals": "animal, pet, wild, nature, mammal, bird, cat, dog, lion, tiger, zoo, wildlife, fauna, creature, mascot, character, cute, adorable, biological, species, domestic, paw, fur, safari, jungle, vector, illustration, graphic, design, isolated, eps",
+        "arts": "arts, artistic, paint, brush, creative, museum, gallery, canvas, drawing, sketch, culture, history, craft, masterpiece, sculpture, classic, modern-art, oil-paint, watercolor, fine-art, vector, illustration, graphic, design, isolated, eps",
+        "backgrounds": "background, texture, wallpaper, surface, backdrop, abstract, pattern, material, empty, space, layout, scene, environment, decorative, graphic-element, clean, simple, light, dark, vector, illustration, graphic, design, isolated, eps",
+        "beauty": "beauty, fashion, cosmetic, makeup, skincare, spa, hair, model, style, glamour, elegant, female, girl, woman, wellness, salon, treatment, face, organic, luxury, vector, illustration, graphic, design, isolated, eps",
+        "buildings": "buildings, architecture, city, house, urban, skyscraper, apartment, construction, home, exterior, real-estate, street, downtown, structure, facade, landmark, vector, illustration, graphic, design, isolated, eps",
+        "business": "business, corporate, office, work, professional, success, team, finance, marketing, strategy, management, career, worker, company, meeting, growth, technology, icon, economy, leadership, communication, partnership, vector, illustration, eps",
+        "education": "education, school, learning, book, student, teacher, university, study, knowledge, classroom, library, college, lesson, science, pencil, academic, brain, intelligence, skill, vector, illustration, graphic, design, eps",
+        "food": "food, meal, dish, fresh, healthy, organic, delicious, tasty, nutrition, cooking, kitchen, restaurant, gourmet, menu, appetizer, ingredient, lunch, dinner, breakfast, snack, diet, vegetarian, homemade, spicy, sweet, vector, illustration, eps",
+        "healthcare": "medical, health, doctor, hospital, medicine, care, treatment, clinic, pharmacy, nurse, virus, science, lab, surgery, heartbeat, emergency, patient, wellness, healthy, vector, illustration, graphic, design, eps",
+        "holidays": "holidays, celebration, party, christmas, birthday, vacation, travel, event, gift, happy, festive, decoration, season, carnival, festival, greeting, card, invitation, vector, illustration, graphic, design, eps",
+        "industrial": "industrial, factory, engineering, technology, manufacturing, machine, power, energy, fuel, metal, construction, hard-hat, worker, equipment, tools, vector, illustration, graphic, design, eps",
+        "nature": "nature, landscape, outdoor, green, environment, sky, mountain, forest, tree, water, river, lake, summer, spring, autumn, winter, scenic, view, plant, leaf, garden, flower, wild, park, wood, vector, illustration, graphic, design, eps",
+        "people": "people, person, human, character, crowd, man, woman, family, community, social, lifestyle, group, happy, activity, portrait, vector, illustration, graphic, design, isolated, eps",
+        "sports": "sport, fitness, training, athlete, gym, workout, active, competition, healthy, lifestyle, exercise, ball, team, winner, stadium, fast, power, speed, muscle, physical, activity, running, football, vector, illustration, graphic, design, eps",
+        "technology": "technology, digital, innovation, future, computer, web, software, tech, science, internet, network, modern, connection, electronic, robot, ai, intelligence, virtual, coding, vector, illustration, eps",
+        "transportation": "transportation, vehicle, car, plane, travel, logistics, truck, ship, boat, airplane, flight, delivery, engine, speed, move, vector, illustration, graphic, design, isolated, eps",
+        "vintage": "vintage, retro, old, classic, history, antique, traditional, style, nostalgic, decorative, textured, ornate, paper, aged, victorian, frame, badge, grunge, sepia, vector, illustration, eps"
     };
 
-    const genericPool = "vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, simple, modern, creative, artistic, background, element, symbol, icon, web, print, collection, resource, visual, workspace, unique";
+    const genericPool = "vector, illustration, graphic, design, isolated, eps, flat-design, clip-art, digital-art, stock, premium, commercial, high-quality, professional, template, creative, artistic, collection, resource";
+
+    function generateAIDescription(fileName, category) {
+        const cleanName = fileName.replace(/-/g, ' ');
+        const templates = [
+            `Professional ${cleanName} vector illustration. This high-quality ${category} graphic is designed for modern projects, featuring clean lines and premium details.`,
+            `A creative ${cleanName} element perfect for your ${category} themed designs. This scalable vector graphic ensures perfect quality for both web and print use.`,
+            `Premium ${category} resource featuring ${cleanName}. Ideal for marketing materials, professional presentations, and creative digital artworks.`,
+            `Enhance your creative projects with this ${cleanName} illustration. A versatile addition to our ${category} collection, optimized for high-end design standards.`,
+            `Detailed ${cleanName} vector graphic for commercial or personal use. Part of our exclusive ${category} library, meticulously crafted for professional designers.`,
+            `Modern and stylish ${cleanName} design element. This ${category} themed vector is perfect for social media, website headers, and promotional graphics.`,
+            `High-resolution ${cleanName} vector illustration. This asset from our ${category} section provides a clean and professional look for any design layout.`,
+            `Top-tier ${cleanName} graphic, ready for immediate download. Perfectly categorized under ${category}, this vector meets all modern aesthetic requirements.`,
+            `A unique ${cleanName} illustration that stands out. Designed specifically for the ${category} niche, it offers flexibility and high-quality resolution.`,
+            `Professional-grade ${cleanName} vector, curated for our premium ${category} archive. Excellent for branding, advertising, and sophisticated visual storytelling.`
+        ];
+        return templates[Math.floor(Math.random() * templates.length)];
+    }
 
     async function startProcess() {
         const token = document.getElementById('tk').value;
         const files = Array.from(document.getElementById('fi').files);
-        const globalDesc = document.getElementById('desc').value;
+        let globalDesc = document.getElementById('desc').value;
         const log = document.getElementById('log');
         
-        if(!token || files.length === 0) return alert("HATA: Token ve Dosyalar eksik!");
+        if(!token || files.length === 0) return alert("Eksik bilgi!");
         document.getElementById('btn').disabled = true;
-        log.innerHTML = "<b>Islem basladi...</b>";
+        log.innerHTML = "<b>İşlem başladı...</b>";
 
         const jpegs = files.filter(f => f.name.toLowerCase().endsWith('.jpg'));
-        
         for (let jpg of jpegs) {
             let base = jpg.name.split('.')[0];
-            let clean = base.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
+            let clean = base.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
             let folder = `${clean}-${Math.floor(10000 + Math.random() * 90000)}`;
 
-            // KATEGORIYE OZEL KELIME SECIMI
+            let categoryFound = "general";
             let selectedKeys = genericPool;
             for (let cat in catKeywords) {
                 if (clean.includes(cat)) {
                     selectedKeys = catKeywords[cat];
+                    categoryFound = cat;
                     break;
                 }
             }
 
-            const eps = files.find(f => f.name.split('.')[0] === base && f.name.toLowerCase().endsWith('.eps'));
+            let finalDesc = globalDesc || generateAIDescription(clean, categoryFound);
 
+            const eps = files.find(f => f.name.split('.')[0] === base && f.name.toLowerCase().endsWith('.eps'));
             if (eps) {
-                log.innerHTML += `<div>⚙️ Yukleniyor: ${folder}</div>`;
+                log.innerHTML += `<div>⚙️ Yükleniyor: ${folder}</div>`;
                 try {
                     await push(folder, jpg, `${folder}.jpg`, token);
                     await push(folder, eps, `${folder}.eps`, token);
-                    
-                    const data = {
-                        name: folder,
-                        desc: globalDesc || `Premium ${clean.replace(/-/g, ' ')} vector illustration for professional design projects.`,
-                        keys: selectedKeys
-                    };
-
+                    const data = { name: folder, desc: finalDesc, keys: selectedKeys };
                     await update(data, token);
-                    log.innerHTML += `<div style="color:#27ae60">✓ BASARILI: ${folder}</div>`;
+                    log.innerHTML += `<div style="color:#27ae60">✓ BAŞARILI: ${folder}</div>`;
                 } catch (e) {
                     log.innerHTML += `<div style="color:red">X HATA: ${e.message}</div>`;
                 }
             }
         }
-        log.innerHTML += "<div><b>BITTI! Tum dosyalar yuklendi.</b></div>";
+        log.innerHTML += "<div><b>TAMAMLANDI!</b></div>";
         document.getElementById('btn').disabled = false;
     }
 
     async function push(fld, file, name, tk) {
         const b64 = await toB64(file);
         const url = `https://api.github.com/repos/free-vector-stock/free-vector-stock/contents/vectors/${fld}/${name}`;
-        await fetch(url, {
-            method: 'PUT',
-            headers: { 'Authorization': `token ${tk}` },
-            body: JSON.stringify({ message: `Add ${name}`, content: b64.split(',')[1] })
-        });
+        await fetch(url, { method: 'PUT', headers: { 'Authorization': `token ${tk}` }, body: JSON.stringify({ message: `Add ${name}`, content: b64.split(',')[1] }) });
     }
 
     async function update(newData, tk) {
@@ -122,11 +123,7 @@
         const f = await res.json();
         let list = JSON.parse(atob(f.content));
         list.unshift(newData);
-        await fetch(url, {
-            method: 'PUT',
-            headers: { 'Authorization': `token ${tk}` },
-            body: JSON.stringify({ message: `Update`, content: btoa(JSON.stringify(list, null, 2)), sha: f.sha })
-        });
+        await fetch(url, { method: 'PUT', headers: { 'Authorization': `token ${tk}` }, body: JSON.stringify({ message: `Update`, content: btoa(JSON.stringify(list, null, 2)), sha: f.sha }) });
     }
 
     const toB64 = f => new Promise((res, rej) => {
