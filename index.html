@@ -5,93 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FREE VECTOR STOCK</title>
     <style>
-        body { background: #ffffff; color: #333; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        
-        /* Header & Logo */
+        body { background: #ffffff; color: #333; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
         header { background: #000; color: #fff; padding: 25px; text-align: center; border-bottom: 4px solid #f39c12; }
-        header a { text-decoration: none; color: inherit; }
-        header h1 { margin: 0; font-size: 30px; letter-spacing: 4px; font-weight: bold; cursor: pointer; }
+        header a { text-decoration: none; color: inherit; cursor: pointer; }
+        header h1 { margin: 0; font-size: 30px; letter-spacing: 5px; text-transform: uppercase; }
 
         .main-container { display: flex; max-width: 1400px; margin: auto; padding: 20px; gap: 30px; }
 
-        /* Sol Kategori Menüsü */
+        /* Sol Menü */
         .category-sidebar { flex: 1; background: #f9f9f9; padding: 20px; border-radius: 10px; height: fit-content; position: sticky; top: 20px; border: 1px solid #eee; }
         .category-sidebar h2 { font-size: 16px; border-bottom: 2px solid #f39c12; padding-bottom: 10px; margin-top: 0; text-transform: uppercase; }
-        .category-list { list-style: none; padding: 0; margin: 0; }
+        .category-list { list-style: none; padding: 0; }
         .category-list li { padding: 8px 0; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .category-list li:hover { color: #f39c12; padding-left: 5px; }
 
-        /* Sağ İçerik Alanı */
+        /* Sağ Galeri */
         .content-area { flex: 4; }
         .search-box { margin-bottom: 20px; }
         #searchInput { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 8px; outline: none; box-sizing: border-box; }
-
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
         .card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.3s; }
         .card:hover { border-color: #f39c12; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .card img { width: 100%; height: 160px; object-fit: contain; background: #f4f4f4; border-radius: 5px; }
-        .card h3 { font-size: 13px; margin: 10px 0; color: #666; text-transform: uppercase; }
+        .card img { width: 100%; height: 160px; object-fit: contain; background: #f4f4f4; border-radius: 5px; pointer-events: none; }
+        .card h3 { font-size: 12px; margin: 10px 0; color: #666; text-transform: uppercase; }
 
-        /* Detay Sayfası (Modal) */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
-        .modal-content { background: #fff; margin: 5% auto; padding: 20px; width: 80%; max-width: 900px; border-radius: 15px; position: relative; text-align: center; }
-        .close-modal { position: absolute; right: 20px; top: 10px; font-size: 30px; cursor: pointer; }
-        .modal-img { max-width: 100%; height: auto; max-height: 400px; margin-bottom: 20px; border: 1px solid #eee; }
+        /* Ayrı Detay Sayfası Görünümü */
+        #detailPage { display: none; padding: 40px 20px; max-width: 1200px; margin: auto; text-align: center; }
+        .detail-layout { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; align-items: flex-start; margin-top: 30px; }
+        .detail-img-box { flex: 1; min-width: 300px; }
+        .detail-img-box img { width: 100%; border-radius: 10px; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .detail-info-box { flex: 1; min-width: 300px; text-align: left; background: #fdfdfd; padding: 30px; border-radius: 15px; border: 1px solid #eee; }
         
-        .ad-box { background: #f0f0f0; border: 1px dashed #ccc; padding: 20px; margin: 20px 0; color: #999; }
-        .download-btn { background: #f39c12; color: #000; padding: 15px 40px; text-decoration: none; border-radius: 30px; font-weight: bold; display: inline-block; font-size: 18px; }
+        .ad-space { background: #f0f0f0; border: 1px dashed #ccc; padding: 20px; margin: 20px 0; color: #999; text-align: center; border-radius: 8px; font-size: 13px; }
+        .download-btn { background: #f39c12; color: #000; padding: 18px 40px; text-decoration: none; border-radius: 50px; font-weight: bold; display: block; text-align: center; font-size: 18px; margin-top: 10px; }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #f39c12; cursor: pointer; font-weight: bold; text-decoration: underline; }
 
-        .pagination { margin: 40px 0; display: flex; justify-content: center; gap: 10px; }
-        .p-btn { padding: 10px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 5px; }
-        .p-btn.active { background: #f39c12; border-color: #f39c12; }
+        /* Alt Kısım Diğer Görseller */
+        .related-section { margin-top: 60px; border-top: 1px solid #eee; padding-top: 40px; }
 
-        footer { padding: 40px; text-align: center; border-top: 1px solid #eee; font-size: 14px; color: #666; }
-        footer a { color: #f39c12; text-decoration: none; }
+        footer { padding: 40px; text-align: center; border-top: 1px solid #eee; margin-top: 50px; font-size: 14px; color: #888; }
+        footer a { color: #f39c12; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<header><a href="index.html"><h1>FREE VECTOR STOCK</h1></a></header>
+<header><a href="#" onclick="showHome()"><h1>FREE VECTOR STOCK</h1></a></header>
 
-<div class="main-container">
-    <aside class="category-sidebar">
-        <h2>Categories</h2>
-        <ul class="category-list" id="categoryMenu"></ul>
-    </aside>
-
-    <main class="content-area">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search vectors...">
-        </div>
-        <div id="vectorGrid" class="grid"></div>
-        <div id="pagination" class="pagination"></div>
-    </main>
+<div id="homePage">
+    <div class="main-container">
+        <aside class="category-sidebar">
+            <h2>Categories</h2>
+            <ul class="category-list" id="categoryMenu"></ul>
+        </aside>
+        <main class="content-area">
+            <div class="search-box"><input type="text" id="searchInput" placeholder="Search vectors..."></div>
+            <div id="vectorGrid" class="grid"></div>
+            <div id="pagination" style="display:flex; justify-content:center; gap:10px; margin-top:30px;"></div>
+        </main>
+    </div>
 </div>
 
-<div id="downloadModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle"></h2>
-        <img id="modalImg" class="modal-img" src="">
-        <div class="ad-box">--- ADVERTISEMENT AREA (Google AdSense) ---</div>
-        <a id="modalDl" href="" class="download-btn" download>DOWNLOAD EPS</a>
+<div id="detailPage">
+    <div class="back-btn" onclick="showHome()">← Back to Gallery</div>
+    <h2 id="detTitle" style="text-transform: uppercase; letter-spacing: 2px;"></h2>
+    
+    <div class="detail-layout">
+        <div class="detail-img-box">
+            <img id="detImg" src="">
+        </div>
+        <div class="detail-info-box">
+            <div class="ad-space">--- REKLAM ALANI (ADSENSE TOP) ---</div>
+            <p><strong>Format:</strong> Encapsulated PostScript (.eps) + JPG Preview</p>
+            <p><strong>License:</strong> Free for personal and commercial use with attribution.</p>
+            <a id="detDl" href="" class="download-btn" download>DOWNLOAD EPS</a>
+            <div class="ad-space">--- REKLAM ALANI (ADSENSE BOTTOM) ---</div>
+        </div>
+    </div>
+
+    <div class="related-section">
+        <h3 style="text-align: left; margin-bottom: 20px;">Other Popular Vectors</h3>
+        <div id="relatedGrid" class="grid"></div>
     </div>
 </div>
 
 <footer>
-    2026 © FREE VECTOR STOCK. All rights reserved. 
-    <a href="mailto:hakankacar2014@gmail.com">Contact</a>
+    2026 © FREE VECTOR STOCK. All rights reserved. <br>
+    <a href="mailto:hakankacar2014@gmail.com">Contact: hakankacar2014@gmail.com</a>
 </footer>
 
 <script>
     const categories = ["Abstract", "Animals/Wildlife", "The Arts", "Backgrounds/Textures", "Beauty/Fashion", "Buildings/Landmarks", "Business/Finance", "Celebrities", "Education", "Food and Drink", "Healthcare/Medical", "Holidays", "Industrial", "Interiors", "Miscellaneous", "Nature", "Objects", "Parks/Outdoor", "People", "Religion", "Science", "Signs/Symbols", "Sports/Recreation", "Technology", "Transportation", "Vintage"];
     let rawData = []; let filtered = []; let page = 1; const limit = 12;
 
-    // Build Sidebar
     const menu = document.getElementById('categoryMenu');
     categories.sort().forEach(cat => {
-        const li = document.createElement('li');
-        li.innerText = cat;
+        const li = document.createElement('li'); li.innerText = cat;
         li.onclick = () => { document.getElementById('searchInput').value = cat; filterData(cat); };
         menu.appendChild(li);
     });
@@ -102,40 +110,42 @@
         const grid = document.getElementById('vectorGrid');
         const pag = document.getElementById('pagination');
         grid.innerHTML = ""; pag.innerHTML = "";
-
         const slice = filtered.slice((page-1)*limit, page*limit);
         slice.forEach(name => {
             const folder = name.trim();
-            grid.innerHTML += `
-                <div class="card" onclick="openModal('${folder}')">
-                    <img src="vectors/${folder}/${folder}.jpg" onerror="this.src='https://via.placeholder.com/220x160?text=Vector'">
-                    <h3>${folder.replace(/-/g, ' ')}</h3>
-                </div>`;
+            grid.innerHTML += `<div class="card" onclick="openDetail('${folder}')"><img src="vectors/${folder}/${folder}.jpg" onerror="this.src='https://via.placeholder.com/220x160?text=Vector'"><h3>${folder.replace(/-/g, ' ')}</h3></div>`;
         });
-
         const total = Math.ceil(filtered.length / limit);
         for(let i=1; i<=total; i++) {
-            const b = document.createElement('button');
-            b.innerText = i; b.className = (i===page) ? 'p-btn active' : 'p-btn';
-            b.onclick = () => { page = i; render(); window.scrollTo({top:0, behavior:'smooth'}); };
+            const b = document.createElement('button'); b.innerText = i; b.style.padding="10px"; b.onclick = () => { page = i; render(); window.scrollTo(0,0); };
+            if(i===page) b.style.background="#f39c12";
             pag.appendChild(b);
         }
     }
 
-    function openModal(folder) {
-        document.getElementById('modalTitle').innerText = folder.replace(/-/g, ' ');
-        document.getElementById('modalImg').src = `vectors/${folder}/${folder}.jpg`;
-        document.getElementById('modalDl').href = `vectors/${folder}/${folder}.eps`;
-        document.getElementById('downloadModal').style.display = "block";
+    function openDetail(folder) {
+        document.getElementById('homePage').style.display = "none";
+        document.getElementById('detailPage').style.display = "block";
+        document.getElementById('detTitle').innerText = folder.replace(/-/g, ' ');
+        document.getElementById('detImg').src = `vectors/${folder}/${folder}.jpg`;
+        document.getElementById('detDl').href = `vectors/${folder}/${folder}.eps`;
+        
+        // Altta rastgele 4 görsel göster
+        const related = document.getElementById('relatedGrid'); related.innerHTML = "";
+        const shuffle = [...rawData].sort(() => 0.5 - Math.random()).slice(0, 4);
+        shuffle.forEach(name => {
+            const f = name.trim();
+            related.innerHTML += `<div class="card" onclick="openDetail('${f}')"><img src="vectors/${f}/${f}.jpg"><h3>${f}</h3></div>`;
+        });
+        window.scrollTo(0,0);
     }
 
-    function closeModal() { document.getElementById('downloadModal').style.display = "none"; }
-    window.onclick = (e) => { if(e.target == document.getElementById('downloadModal')) closeModal(); }
-
-    function filterData(val) {
-        filtered = rawData.filter(v => v.toLowerCase().includes(val.toLowerCase()));
-        page = 1; render();
+    function showHome() {
+        document.getElementById('detailPage').style.display = "none";
+        document.getElementById('homePage').style.display = "block";
     }
+
+    function filterData(val) { filtered = rawData.filter(v => v.toLowerCase().includes(val.toLowerCase())); page = 1; render(); }
     document.getElementById('searchInput').oninput = (e) => filterData(e.target.value);
 </script>
 </body>
