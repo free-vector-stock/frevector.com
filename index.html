@@ -3,112 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FREE VECTOR STOCK - High Quality Resources</title>
+    <meta name="description" content="Download free vector illustrations, EPS10, SVG and stock photos for personal and commercial projects. High quality graphic resources.">
+    <meta name="keywords" content="free vector download, eps10, svg illustrations, high quality graphics, royalty free vectors, free stock images">
+    <title>FREE VECTOR STOCK - High Quality Graphic Resources</title>
+    
     <style>
-        body { margin: 0; font-family: 'Helvetica Neue', Arial; background: #fff; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
-        .top-nav { background: #000; color: #fff; padding: 40px 20px; text-align: center; }
-        .logo { font-size: 32px; font-weight: bold; margin-bottom: 20px; }
-        .main-content { display: flex; flex: 1; }
-        .sidebar { width: 220px; border-right: 1px solid #eee; padding: 30px; }
-        .sidebar div { padding: 8px 0; cursor: pointer; font-size: 14px; }
-        .sidebar div:hover { font-weight: bold; }
-        .gallery-area { flex: 1; padding: 40px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 30px; }
-        .card { border: 1px solid #eee; transition: 0.3s; }
-        .card img { width: 100%; height: 180px; object-fit: cover; cursor: pointer; }
-        .card-body { padding: 15px; text-align: center; }
-        .btn-dl { background: #000; color: #fff; padding: 10px; display: block; text-decoration: none; font-weight: bold; cursor: pointer; }
-        .ad-box { background: #f9f9f9; border: 1px dashed #ccc; color: #999; text-align: center; padding: 20px; margin: 20px 0; font-size: 12px; }
+        :root { --black: #000; --white: #fff; --gray: #f8f8f8; --border: #eee; }
+        body { margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--white); display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* Modal - İndirme Bekleme Sayfası */
-        #dlModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 1000; padding: 50px; overflow-y: auto; }
-        .timer { font-size: 24px; color: red; font-weight: bold; margin: 30px 0; text-align: center; }
-        .btn-group { display: none; gap: 15px; justify-content: center; }
+        /* Layout */
+        .top-banner { background: var(--black); color: var(--white); padding: 40px 20px; position: sticky; top: 0; z-index: 100; text-align: center; }
+        .logo { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 20px; }
+        .banner-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .nav-dot { width: 30px; height: 4px; background: #444; cursor: pointer; transition: 0.3s; }
+        .nav-dot.active { background: var(--white); }
+        #bannerText { font-size: 14px; max-width: 800px; margin: 0 auto; height: 40px; }
+
+        .search-container { padding: 40px 20px; text-align: center; background: var(--gray); }
+        .search-box { position: relative; max-width: 600px; margin: 0 auto; }
+        .search-box input { width: 100%; padding: 15px 50px 15px 20px; border-radius: 30px; border: 1px solid #ddd; font-size: 16px; outline: none; }
+        .search-box i { position: absolute; right: 20px; top: 15px; cursor: pointer; }
+
+        .main-wrapper { display: flex; flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; }
+        .sidebar { width: 250px; padding: 30px; border-right: 1px solid var(--border); }
+        .sidebar h3 { font-size: 14px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid var(--black); padding-bottom: 10px; }
+        .cat-link { display: block; padding: 8px 0; color: #555; text-decoration: none; font-size: 14px; cursor: pointer; }
+        .cat-link:hover { color: var(--black); font-weight: bold; }
+
+        .content-area { flex: 1; padding: 30px; }
+        .ad-space { background: #fafafa; border: 1px dashed #ccc; text-align: center; color: #999; margin: 20px 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .banner-ad { height: 90px; width: 100%; }
+        .sidebar-ad { height: 600px; width: 100%; margin-top: 30px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .asset-card { border: 1px solid var(--border); transition: 0.3s; cursor: pointer; position: relative; }
+        .asset-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .asset-card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-body { padding: 15px; }
+        .card-title { font-weight: bold; font-size: 14px; margin-bottom: 10px; }
+        .btn-download { background: var(--black); color: var(--white); text-align: center; padding: 12px; font-size: 13px; font-weight: bold; display: block; }
+
+        /* Detail Modal */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--white); z-index: 1000; overflow-y: auto; }
+        .modal-content { max-width: 1200px; margin: 50px auto; padding: 20px; display: grid; grid-template-columns: 1fr 350px; gap: 40px; }
+        .preview-img { width: 100%; border: 1px solid var(--border); }
+        .wait-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); z-index:2000; display:none; align-items:center; justify-content:center; flex-direction:column; }
+
+        /* Footer */
+        .footer { background: var(--black); color: var(--white); padding: 40px; text-align: center; font-size: 14px; }
+        .footer a { color: var(--white); text-decoration: none; margin-left: 20px; }
+
+        @media (max-width: 768px) { .main-wrapper { flex-direction: column; } .sidebar { width: 100%; border: none; } .modal-content { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div class="top-nav">
+<header class="top-banner">
     <div class="logo">FREE VECTOR STOCK</div>
-    <div style="max-width:800px; margin: 0 auto; font-size: 14px;">We offer high-quality vector designs for free. Supported by ads.</div>
-</div>
+    <div class="banner-nav" id="bannerNav"></div>
+    <div id="bannerText">We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.</div>
+</header>
 
-<div class="main-content">
-    <div class="sidebar" id="cats"><h4>Categories</h4></div>
-    <div class="gallery-area">
-        <div class="ad-box">ADVERTISEMENT - LEADERBOARD</div>
-        <div class="grid" id="mainGrid"></div>
+<div class="search-container">
+    <div class="search-box">
+        <input type="text" placeholder="Search for free vectors, icons and more..." id="searchInput">
+        <i>🔍</i>
     </div>
 </div>
 
-<div id="dlModal">
-    <div style="max-width:800px; margin:0 auto; text-align:center;">
-        <span onclick="this.parentElement.parentElement.style.display='none'" style="float:right; cursor:pointer; font-size:30px;">×</span>
-        <div class="ad-box">PREMIUM AD PLACEMENT</div>
-        <h1 id="mt">Title</h1>
-        <img id="mi" src="" style="width:100%; max-width:500px;">
-        <div id="countdown" class="timer">Preparing your download... 10s</div>
-        <div class="ad-box" style="height:150px;">HIGH REVENUE AD AREA</div>
-        <div id="btns" class="btn-group">
-            <div class="btn-dl" onclick="alert('Downloading JPEG...')">JPEG</div>
-            <div class="btn-dl" onclick="alert('Downloading EPS...')">EPS10</div>
-            <div class="btn-dl" onclick="alert('Downloading SVG...')">SVG</div>
+<div class="ad-space banner-ad">ADVERTISEMENT - TOP LEADERBOARD (970x90)</div>
+
+<div class="main-wrapper">
+    <aside class="sidebar">
+        <h3>Categories</h3>
+        <div id="categoryList"></div>
+        <div class="ad-space sidebar-ad">ADVERTISEMENT - VERTICAL TOWER (300x600)</div>
+    </aside>
+
+    <main class="content-area">
+        <div class="grid" id="assetGrid"></div>
+        <div class="ad-space banner-ad" style="margin-top: 50px;">ADVERTISEMENT - MIDDLE SECTION (728x90)</div>
+        <h3 style="margin-top: 40px;">Related Vectors</h3>
+        <div class="grid" id="relatedGrid"></div>
+    </main>
+</div>
+
+<footer class="footer">
+    <span>2026 © FREE VECTOR STOCK™ - Registered Trademark. All Rights Reserved.</span>
+    <a href="mailto:hakankacar2014@gmail.com">Info</a>
+</footer>
+
+<div id="modal">
+    <div style="padding: 20px; border-bottom: 1px solid #eee;"><button onclick="closeModal()" style="cursor:pointer; font-weight:bold;">← BACK TO GALLERY</button></div>
+    <div class="modal-content">
+        <div>
+            <img id="mImg" class="preview-img">
+            <h2 id="mTitle"></h2>
+            <p id="mDesc" style="color:#666;"></p>
+            <div id="mTags" style="margin-top:20px; color:#999; font-size:12px;"></div>
+        </div>
+        <div>
+            <div class="ad-space" style="height:250px;">ADVERTISEMENT - HIGH CTR AREA</div>
+            <div id="mDownloadButtons" style="margin-top:20px;">
+                <button class="btn-download" onclick="triggerDownload('JPG')" style="width:100%; margin-bottom:10px;">DOWNLOAD JPEG</button>
+                <div class="ad-space" style="height:100px;">ADS - BELOW BUTTON</div>
+                <button class="btn-download" onclick="triggerDownload('EPS')" style="width:100%; margin-bottom:10px;">DOWNLOAD EPS10 (VECTOR)</button>
+                <button class="btn-download" onclick="triggerDownload('SVG')" style="width:100%;">DOWNLOAD SVG</button>
+            </div>
+            <div class="ad-space" style="height:400px; margin-top:20px;">ADVERTISEMENT - SIDEBAR STICKY</div>
         </div>
     </div>
 </div>
 
+<div id="waitScreen" class="wait-screen">
+    <div class="ad-space" style="width:336px; height:280px;">MOST VALUABLE AD - PREMIUM PLACEMENT</div>
+    <h1 style="margin-top:30px;">Your file is being prepared...</h1>
+    <div id="timer" style="font-size:48px; font-weight:bold; color:red;">10</div>
+    <p>Please wait while we generate your high-quality download link.</p>
+</div>
+
 <script>
-    const categories = ["Abstract", "Nature", "Business", "Technology", "Vintage", "Icon"];
-    const catBox = document.getElementById('cats');
-    categories.forEach(c => {
-        let d = document.createElement('div');
-        d.innerText = c;
-        d.onclick = () => filter(c);
-        catBox.appendChild(d);
-    });
+    const USER = "free-vector-stock";
+    const REPO = "free-vector-stock";
+    
+    const bannerTexts = [
+        "We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",
+        "Our goal is to provide a comprehensive and ideal platform for those seeking graphic resources.",
+        "We aim to offer a wide archive of graphics, including vector illustrations, stock photos, icons, logos, and various design elements.",
+        "Our only and absolute rule is that our files may not be redistributed in any way.",
+        "The advertisements on our website generate revenue to enable us to continue our work. Therefore, we ask for your understanding.",
+        "Our website's sustainability depends on advertising revenue. Some features may be restricted while an ad blocker is active. Please disable the blocker and refresh the page."
+    ];
 
-    let db = JSON.parse(localStorage.getItem('vectorDB') || "[]");
+    const categories = ["Abstract", "Animals/Wildlife", "The Arts", "Backgrounds/Textures", "Beauty/Fashion", "Buildings/Landmarks", "Business/Finance", "Celebrities", "Education", "Food", "Drink", "Healthcare/Medical", "Holidays", "Industrial", "Interiors", "Miscellaneous", "Nature", "Objects", "Parks/Outdoor", "People", "Religion", "Science", "Signs/Symbols", "Sports/Recreation", "Technology", "Transportation", "Vintage", "Logo", "Font", "icon"].sort();
 
-    function render(data) {
-        const grid = document.getElementById('mainGrid');
-        grid.innerHTML = "";
-        data.forEach(item => {
-            grid.innerHTML += `
-                <div class="card">
-                    <img src="${item.img}" onclick="openDl(${item.id})">
-                    <div class="card-body">
-                        <div style="font-weight:bold; margin-bottom:10px;">${item.title}</div>
-                        <div class="btn-dl" onclick="openDl(${item.id})">FREE DOWNLOAD</div>
-                    </div>
-                </div>
-            `;
+    let activeBanner = 0;
+    function initBanner() {
+        const nav = document.getElementById('bannerNav');
+        bannerTexts.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = `nav-dot ${i===0?'active':''}`;
+            dot.onclick = () => setBanner(i);
+            nav.appendChild(dot);
         });
     }
 
-    function openDl(id) {
-        const item = db.find(v => v.id == id);
-        document.getElementById('mt').innerText = item.title;
-        document.getElementById('mi').src = item.img;
-        document.getElementById('dlModal').style.display = "block";
+    function setBanner(index) {
+        activeBanner = index;
+        document.getElementById('bannerText').innerText = bannerTexts[index];
+        const dots = document.querySelectorAll('.nav-dot');
+        dots.forEach((d, i) => d.className = `nav-dot ${i===index?'active':''}`);
+    }
+
+    function initCategories() {
+        const list = document.getElementById('categoryList');
+        categories.forEach(cat => {
+            const a = document.createElement('a');
+            a.className = 'cat-link';
+            a.innerText = cat;
+            a.onclick = () => filterByCategory(cat);
+            list.appendChild(a);
+        });
+    }
+
+    async function loadAssets() {
+        try {
+            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/assets`);
+            const files = await res.json();
+            
+            // Group files by name
+            const groups = {};
+            files.forEach(f => {
+                const name = f.name.split('.')[0];
+                if(!groups[name]) groups[name] = { name, jpg:null, eps:false, svg:false, json:null };
+                const ext = f.name.split('.').pop().toLowerCase();
+                if(ext === 'jpg' || ext === 'jpeg') groups[name].jpg = f.download_url;
+                if(ext === 'eps') groups[name].eps = true;
+                if(ext === 'svg') groups[name].svg = true;
+                if(ext === 'json') groups[name].json = f.download_url;
+            });
+
+            renderGrid(Object.values(groups), 'assetGrid');
+            renderGrid(Object.values(groups).reverse().slice(0,4), 'relatedGrid');
+        } catch(e) { console.error("Cloud connection failed."); }
+    }
+
+    function renderGrid(data, targetId) {
+        const grid = document.getElementById(targetId);
+        grid.innerHTML = "";
+        data.forEach(item => {
+            if(!item.jpg) return;
+            const div = document.createElement('div');
+            div.className = 'asset-card';
+            div.onclick = () => openAsset(item);
+            div.innerHTML = `
+                <img src="${item.jpg}" alt="${item.name}">
+                <div class="card-body">
+                    <div class="card-title">${item.name.replace(/-/g, ' ')}</div>
+                    <div class="btn-download">FREE DOWNLOAD</div>
+                </div>
+            `;
+            grid.appendChild(div);
+        });
+    }
+
+    async function openAsset(item) {
+        document.getElementById('mImg').src = item.jpg;
+        document.getElementById('mTitle').innerText = item.name.toUpperCase();
         
-        let sec = 10;
-        document.getElementById('btns').style.display = "none";
-        document.getElementById('countdown').style.display = "block";
-        
-        const t = setInterval(() => {
-            sec--;
-            document.getElementById('countdown').innerText = `Preparing your download... ${sec}s`;
-            if(sec <= 0) {
-                clearInterval(t);
-                document.getElementById('countdown').style.display = "none";
-                document.getElementById('btns').style.display = "flex";
+        if(item.json) {
+            const meta = await fetch(item.json).then(r => r.json());
+            document.getElementById('mDesc').innerText = meta.description || "High quality professional vector resource.";
+            document.getElementById('mTags').innerText = "Keywords: " + (meta.keywords || "free, vector, design");
+        }
+
+        document.getElementById('modal').style.display = "block";
+        window.scrollTo(0,0);
+    }
+
+    function triggerDownload(type) {
+        const wait = document.getElementById('waitScreen');
+        const timerTxt = document.getElementById('timer');
+        wait.style.display = "flex";
+        let count = 10;
+        const interval = setInterval(() => {
+            count--;
+            timerTxt.innerText = count;
+            if(count <= 0) {
+                clearInterval(interval);
+                wait.style.display = "none";
+                alert(`Preparing ${type} file... Your download will start shortly.`);
             }
         }, 1000);
     }
 
-    function filter(c) { render(db.filter(v => v.category === c)); }
+    function closeModal() { document.getElementById('modal').style.display = "none"; }
 
-    render(db);
+    initBanner();
+    initCategories();
+    loadAssets();
 </script>
 </body>
 </html>
