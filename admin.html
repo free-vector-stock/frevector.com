@@ -5,76 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADMIN PANEL - FREE VECTOR STOCK</title>
     <style>
-        :root { --primary: #000; --bg: #ffffff; --text: #333; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); }
-        .header { background: var(--primary); color: #fff; padding: 25px; text-align: center; font-weight: bold; font-size: 24px; letter-spacing: 1px; }
-        .container { max-width: 800px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #eee; }
-        h2 { border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 30px; text-transform: uppercase; font-size: 18px; }
-        .input-group { margin-bottom: 25px; }
-        label { display: block; margin-bottom: 10px; font-weight: bold; font-size: 14px; }
-        input[type="password"] { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .upload-area { border: 2px dashed #ccc; padding: 60px 20px; text-align: center; cursor: pointer; background: #fafafa; border-radius: 4px; transition: 0.3s; }
-        .upload-area:hover { border-color: var(--primary); background: #fff; }
-        #fileList { margin-top: 20px; font-size: 13px; max-height: 200px; overflow-y: auto; background: #f9f9f9; padding: 15px; border: 1px solid #eee; display: none; }
-        .btn { background: var(--primary); color: #fff; width: 100%; padding: 20px; border: none; border-radius: 4px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        :root { --primary: #000; --bg: #ffffff; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #fff; color: #333; }
+        .header { background: var(--primary); color: #fff; padding: 25px; text-align: center; font-weight: bold; font-size: 24px; }
+        .container { max-width: 800px; margin: 50px auto; padding: 40px; border: 1px solid #eee; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        label { display: block; margin-bottom: 10px; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        input[type="password"] { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 25px; }
+        .upload-area { border: 2px dashed #ccc; padding: 60px 20px; text-align: center; cursor: pointer; background: #fafafa; transition: 0.3s; }
+        .upload-area:hover { border-color: #000; background: #fff; }
+        #fileList { margin-top: 20px; font-size: 13px; max-height: 200px; overflow-y: auto; background: #f9f9f9; padding: 15px; display: none; border: 1px solid #eee; }
+        .btn { background: var(--primary); color: #fff; width: 100%; padding: 20px; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 16px; }
         .btn:disabled { background: #ccc; cursor: not-allowed; }
-        .status { margin-top: 20px; padding: 15px; border-radius: 4px; text-align: center; font-weight: bold; display: none; }
-        .loading { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status { margin-top: 20px; padding: 15px; text-align: center; font-weight: bold; display: none; border-radius: 4px; }
+        .loading { background: #fff3cd; color: #856404; }
+        .success { background: #d4edda; color: #155724; }
     </style>
 </head>
 <body>
-
 <div class="header">FREE VECTOR STOCK - CLOUD MANAGEMENT</div>
-
 <div class="container">
-    <h2>Bulk Asset Sync</h2>
-    
-    <div class="input-group">
-        <label>GitHub Personal Access Token:</label>
-        <input type="password" id="ghToken" placeholder="Enter ghp_ token here">
-    </div>
-
+    <label>GitHub Personal Access Token:</label>
+    <input type="password" id="ghToken" placeholder="Enter ghp_ token here">
     <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-        <strong>Click or Drag & Drop Files</strong>
-        <p>Select multiple JPG, EPS10, SVG, and JSON files simultaneously.<br>The system will automatically match names and categories.</p>
+        <strong>Click to Bulk Upload Assets</strong>
+        <p>Select multiple JPG, EPS10, SVG, and JSON files simultaneously.</p>
     </div>
     <input type="file" id="fileInput" multiple style="display:none" onchange="handleFiles(this.files)">
-
     <div id="fileList"></div>
-    <div id="statusBox" class="status"></div>
-    
-    <button id="uploadBtn" class="btn" onclick="startCloudSync()" disabled>SYNC ASSETS TO WEBSITE</button>
+    <div id="status" class="status"></div>
+    <button id="uploadBtn" class="btn" onclick="startUpload()" disabled>SYNC ASSETS TO CLOUD</button>
 </div>
-
 <script>
-    const OWNER = "free-vector-stock";
-    const REPO = "free-vector-stock";
+    const OWNER = "free-vector-stock", REPO = "free-vector-stock";
     let selectedFiles = [];
-
     function handleFiles(files) {
         selectedFiles = Array.from(files);
         const list = document.getElementById('fileList');
         if(selectedFiles.length > 0) {
             list.style.display = "block";
-            list.innerHTML = "<strong>Detected Items:</strong><br>" + 
-                             selectedFiles.map(f => `• ${f.name}`).join('<br>');
+            list.innerHTML = "<strong>Ready to Sync:</strong><br>" + selectedFiles.map(f => `• ${f.name}`).join('<br>');
             document.getElementById('uploadBtn').disabled = false;
         }
     }
-
-    async function startCloudSync() {
+    async function startUpload() {
         const token = document.getElementById('ghToken').value.trim();
-        const status = document.getElementById('statusBox');
-        const btn = document.getElementById('uploadBtn');
-
-        if(!token) return alert("Please enter your GitHub Token.");
-
-        status.className = "status loading";
-        status.style.display = "block";
-        status.innerText = "Connecting to GitHub... Uploading assets.";
-        btn.disabled = true;
-
+        const status = document.getElementById('status');
+        if(!token) return alert("Enter Token!");
+        status.className = "status loading"; status.style.display = "block"; status.innerText = "Syncing with GitHub...";
         try {
             for (let file of selectedFiles) {
                 const base64 = await new Promise(r => {
@@ -82,31 +59,17 @@
                     reader.onload = () => r(reader.result.split(',')[1]);
                     reader.readAsDataURL(file);
                 });
-
                 const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/assets/${file.name}`;
-                const checkRes = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
-                let sha = null;
-                if (checkRes.ok) {
-                    const data = await checkRes.json();
-                    sha = data.sha;
-                }
-
+                const check = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+                let sha = null; if (check.ok) { const d = await check.json(); sha = d.sha; }
                 await fetch(url, {
                     method: 'PUT',
                     headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: `Bulk Sync: ${file.name}`,
-                        content: base64,
-                        sha: sha
-                    })
+                    body: JSON.stringify({ message: `Sync: ${file.name}`, content: base64, sha: sha })
                 });
             }
-            status.className = "status success";
-            status.innerText = "SUCCESS! All files uploaded and paired correctly.";
-        } catch (e) {
-            alert("Error: " + e.message);
-            btn.disabled = false;
-        }
+            status.className = "status success"; status.innerText = "SUCCESS! Files are live.";
+        } catch (e) { alert("Error: " + e.message); }
     }
 </script>
 </body>
