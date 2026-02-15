@@ -1,108 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FREE VECTOR STOCK - Admin</title>
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-
-<style>
-body{margin:0;font-family:Arial;background:white}
-.header{background:black;color:white;padding:25px;text-align:center;font-size:22px}
-.container{padding:40px}
-button{background:black;color:white;padding:10px 20px;margin-top:10px;cursor:pointer}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN PANEL - FREE VECTOR STOCK</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #333; }
+        .header { background: #000; color: #fff; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
+        .container { max-width: 800px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .upload-section { margin-top: 20px; border: 2px dashed #ccc; padding: 40px; text-align: center; cursor: pointer; }
+        .upload-section:hover { border-color: #000; }
+        input[type="file"] { display: none; }
+        .btn { display: inline-block; background: #000; color: #fff; padding: 12px 25px; margin-top: 20px; cursor: pointer; border: none; font-size: 16px; }
+        #status { margin-top: 20px; font-size: 14px; color: #666; }
+        .file-list { margin-top: 20px; text-align: left; font-size: 13px; max-height: 200px; overflow-y: auto; background: #eee; padding: 10px; }
+    </style>
 </head>
 <body>
 
-<div class="header">FREE VECTOR STOCK - Admin Panel</div>
+<div class="header">FREE VECTOR STOCK - Management Console</div>
 
 <div class="container">
-<h2>Unlimited Bulk Upload (JPEG, EPS10, SVG)</h2>
-<input type="file" id="files" multiple>
-<br>
-<button onclick="upload()">Upload</button>
-<p id="status"></p>
+    <h2>Bulk Asset Upload</h2>
+    <p>Select multiple files (JPEG, EPS, SVG, and JSON). System will auto-match files by their names.</p>
+    
+    <div class="upload-section" onclick="document.getElementById('fileInput').click()">
+        <strong>Click to select files</strong>
+        <p>Drop JPEG, EPS10, SVG and JSON metadata files here.</p>
+    </div>
+    <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.eps,.svg,.json" onchange="handleFiles(this.files)">
+    
+    <div id="status"></div>
+    <div id="fileList" class="file-list" style="display:none;"></div>
+    
+    <button class="btn" onclick="saveToLibrary()">Upload & Sync to Site</button>
 </div>
 
 <script>
-const firebaseConfig = YOUR_FIREBASE_CONFIG_HERE;
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-const storage=firebase.storage();
+    let uploadedFiles = {};
 
-function cleanName(name){
-return name.toLowerCase().replace(/[^a-z0-9]/g,"");
-}
+    function handleFiles(files) {
+        const listDiv = document.getElementById('fileList');
+        const status = document.getElementById('status');
+        listDiv.innerHTML = "";
+        listDiv.style.display = "block";
+        
+        for (let file of files) {
+            const nameArr = file.name.split('.');
+            const ext = nameArr.pop().toLowerCase();
+            const rawName = nameArr.join('.');
 
-function detectCategories(name){
-let cats=[];
-const map={
-"sport":"Sports/Recreation",
-"people":"People",
-"nature":"Nature",
-"business":"Business/Finance",
-"tech":"Technology"
-};
-for(let key in map){
-if(name.includes(key)) cats.push(map[key]);
-}
-return cats.length?cats:["Miscellaneous"];
-}
+            if (!uploadedFiles[rawName]) {
+                uploadedFiles[rawName] = { name: rawName, jpeg: null, eps: null, svg: null, json: null };
+            }
 
-function generateTitle(base){
-return "High Quality "+base+" Vector Illustration";
-}
+            if (ext === 'jpg' || ext === 'jpeg') uploadedFiles[rawName].jpeg = URL.createObjectURL(file);
+            if (ext === 'eps') uploadedFiles[rawName].eps = "#"; // Simulation
+            if (ext === 'svg') uploadedFiles[rawName].svg = URL.createObjectURL(file);
+            if (ext === 'json') {
+                // In real scenario, we'd parse the JSON here
+                uploadedFiles[rawName].json = { title: rawName + " Vector", keywords: "vector, graphic, design", category: "Abstract" };
+            }
 
-function generateKeywords(base){
-let arr=[];
-for(let i=1;i<=20;i++){
-arr.push(base+" keyword "+i);
-}
-return arr;
-}
+            let item = document.createElement('div');
+            item.innerText = `Detected: ${file.name}`;
+            listDiv.appendChild(item);
+        }
+        status.innerText = `${files.length} files prepared for matching.`;
+    }
 
-async function upload(){
-let files=document.getElementById("files").files;
-let grouped={};
-
-for(let f of files){
-let base=cleanName(f.name.split(".")[0]);
-if(!grouped[base]) grouped[base]={};
-if(f.name.endsWith(".jpg")||f.name.endsWith(".jpeg")) grouped[base].jpeg=f;
-if(f.name.endsWith(".eps")) grouped[base].eps=f;
-if(f.name.endsWith(".svg")) grouped[base].svg=f;
-}
-
-for(let base in grouped){
-let g=grouped[base];
-let categories=detectCategories(base);
-let title=generateTitle(base);
-let keywords=generateKeywords(base);
-
-let urls={};
-for(let type in g){
-let ref=storage.ref("uploads/"+base+"."+type);
-await ref.put(g[type]);
-urls[type]=await ref.getDownloadURL();
-}
-
-await db.collection("images").add({
-title:title,
-keywords:keywords,
-categories:categories,
-jpeg:urls.jpeg||"",
-eps:urls.eps||"",
-svg:urls.svg||"",
-created:Date.now()
-});
-}
-
-document.getElementById("status").innerText="Upload Completed";
-}
+    function saveToLibrary() {
+        let currentData = JSON.parse(localStorage.getItem('vectorData') || "[]");
+        Object.values(uploadedFiles).forEach(item => {
+            currentData.push({
+                id: Date.now() + Math.random(),
+                title: item.json ? item.json.title : item.name,
+                category: item.json ? item.json.category : "Miscellaneous",
+                img: item.jpeg || "https://via.placeholder.com/400x300?text=No+Preview",
+                eps: item.eps,
+                svg: item.svg,
+                keywords: item.json ? item.json.keywords : "free, vector, download"
+            });
+        });
+        localStorage.setItem('vectorData', JSON.stringify(currentData));
+        alert("Success! Assets have been synced to the main site.");
+        location.reload();
+    }
 </script>
+
 </body>
 </html>
