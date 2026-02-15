@@ -2,115 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FREE VECTOR STOCK - PROFESSIONAL ADMIN</title>
+    <title>FREE VECTOR STOCK - SECURE ADMIN CLOUD</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #fff; margin: 0; }
-        .head { background: #000; color: #fff; padding: 30px; text-align: center; font-weight: 900; letter-spacing: 2px; }
-        .container { max-width: 800px; margin: 50px auto; padding: 0 20px; }
-        .input-box { margin-bottom: 25px; }
+        body { font-family: 'Inter', sans-serif; background: #fff; margin: 0; }
+        .head { background: #000; color: #fff; padding: 40px; text-align: center; font-weight: 900; letter-spacing: 2px; }
+        .box { max-width: 800px; margin: 50px auto; padding: 0 20px; }
+        .field { margin-bottom: 25px; }
         label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #444; }
-        input[type="password"] { width: 100%; padding: 15px; border: 1px solid #ddd; outline: none; }
-        .drop-area { border: 3px dashed #ccc; padding: 60px; text-align: center; background: #fafafa; cursor: pointer; color: #888; transition: 0.3s; }
-        .drop-area:hover { border-color: #000; background: #fff; color: #000; }
-        #status { background: #111; color: #0f0; padding: 20px; height: 250px; overflow-y: auto; font-family: monospace; font-size: 12px; margin-top: 20px; border-radius: 5px; }
-        .sync-btn { width: 100%; padding: 20px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 16px; }
-        .sync-btn:disabled { background: #ccc; cursor: not-allowed; }
+        input[type="password"] { width: 100%; padding: 15px; border: 1px solid #ddd; outline: none; border-radius: 4px; }
+        .drop-zone { border: 3px dashed #ccc; padding: 70px; text-align: center; background: #fafafa; cursor: pointer; color: #999; }
+        .drop-zone:hover { border-color: #000; background: #fff; color: #000; }
+        #console { background: #111; color: #0f0; padding: 25px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; margin-top: 20px; border-radius: 6px; line-height: 1.6; }
+        .btn-sync { width: 100%; padding: 20px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; border-radius: 4px; }
+        .btn-sync:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<div class="head">CLOUD ASSET MANAGEMENT SYSTEM</div>
+<div class="head">ADMIN CLOUD - SINGLE COMMIT DEPLOYMENT</div>
 
-<div class="container">
-    <div class="input-box">
-        <label>GITHUB TOKEN (ghp_...):</label>
-        <input type="password" id="token" placeholder="Paste your token here">
+<div class="box">
+    <div class="field">
+        <label>GITHUB PERSONAL ACCESS TOKEN (Required):</label>
+        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxx">
     </div>
 
-    <div class="drop-area" onclick="document.getElementById('files').click()">
-        <strong>BULK ASSET SELECTION</strong>
-        <p>Select all JPG, EPS10, SVG and JSON files together. <br>The system will auto-match by name.</p>
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+        <strong>DRAG & DROP OR CLICK TO SELECT ASSETS</strong>
+        <p>You can select all JPG, EPS10, SVG and JSON files at once.</p>
     </div>
-    <input type="file" id="files" multiple style="display:none" onchange="logQueue()">
+    <input type="file" id="fileInput" multiple style="display:none" onchange="showSelection()">
 
-    <div id="status">System Standby... Ready for single-tree deployment.</div>
-    <button class="sync-btn" id="syncBtn" onclick="deployAll()">SYNC ALL ASSETS TO CLOUD</button>
+    <div id="console">Cloud system ready for batch processing...</div>
+    <button class="btn-sync" id="syncBtn" onclick="executeBatchUpload()">START BATCH CLOUD SYNC</button>
 </div>
 
 <script>
     const OWNER = "free-vector-stock", REPO = "free-vector-stock";
 
-    function logQueue() {
-        const count = document.getElementById('files').files.length;
-        document.getElementById('status').innerHTML = `Queue updated: ${count} files selected.\nSystem will perform a single-commit bulk update.`;
+    function showSelection() {
+        const files = document.getElementById('fileInput').files;
+        document.getElementById('console').innerHTML = `Queue loaded: ${files.length} files.\nSystem will bypass GitHub Actions conflicts by using Single-Commit Tree API.`;
     }
 
-    async function deployAll() {
-        const token = document.getElementById('token').value;
-        const files = Array.from(document.getElementById('files').files);
-        const log = document.getElementById('status');
+    async function executeBatchUpload() {
+        const token = document.getElementById('ghToken').value;
+        const files = Array.from(document.getElementById('fileInput').files);
+        const log = document.getElementById('console');
         const btn = document.getElementById('syncBtn');
 
-        if(!token || files.length === 0) return alert("Token or files missing.");
+        if(!token || files.length === 0) return alert("Missing token or files!");
 
         btn.disabled = true;
-        log.innerHTML = "Initializing single-commit sequence...\n";
+        log.innerHTML = "Initializing Batch Deployment...\n";
 
         try {
-            // 1. Get latest commit SHA
-            log.innerHTML += "> Fetching main branch status...\n";
-            const mainRef = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/main`, {
+            // 1. Get Main Reference
+            log.innerHTML += "> Fetching latest repository state...\n";
+            const refRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/main`, {
                 headers: { 'Authorization': `token ${token}` }
             }).then(r => r.json());
-            const latestCommitSha = mainRef.object.sha;
+            const baseSha = refRes.object.sha;
 
-            // 2. Prepare blobs
-            log.innerHTML += `> Processing ${files.length} files into blobs...\n`;
-            const treeData = [];
+            // 2. Upload Blobs
+            log.innerHTML += `> Creating ${files.length} blobs in cloud storage...\n`;
+            const treeEntries = [];
             for(let f of files) {
-                const b64 = await toB64(f);
-                const blob = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`, {
+                const base64 = await toB64(f);
+                const blobRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`, {
                     method: 'POST',
                     headers: { 'Authorization': `token ${token}` },
-                    body: JSON.stringify({ content: b64, encoding: 'base64' })
+                    body: JSON.stringify({ content: base64, encoding: 'base64' })
                 }).then(r => r.json());
                 
-                treeData.push({
+                treeEntries.push({
                     path: `assets/${f.name}`,
                     mode: "100644",
                     type: "blob",
-                    sha: blob.sha
+                    sha: blobRes.sha
                 });
-                log.innerHTML += `Matched: ${f.name}\n`;
+                log.innerHTML += `+ Blob Created: ${f.name}\n`;
                 log.scrollTop = log.scrollHeight;
             }
 
-            // 3. Create new tree
-            log.innerHTML += "> Constructing new Git Tree...\n";
-            const newTree = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/trees`, {
+            // 3. Create Tree
+            log.innerHTML += "> Building Git Tree structure...\n";
+            const treeRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/trees`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ base_tree: latestCommitSha, tree: treeData })
+                body: JSON.stringify({ base_tree: baseSha, tree: treeEntries })
             }).then(r => r.json());
 
-            // 4. Create new commit
-            log.innerHTML += "> Finalizing Bulk Commit...\n";
-            const newCommit = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/commits`, {
+            // 4. Create Commit
+            log.innerHTML += "> Finalizing commit signature...\n";
+            const commitRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/commits`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ message: `Bulk Cloud Sync: ${files.length} files`, tree: newTree.sha, parents: [latestCommitSha] })
+                body: JSON.stringify({ 
+                    message: `Cloud Batch Sync: ${files.length} assets`, 
+                    tree: treeRes.sha, 
+                    parents: [baseSha] 
+                })
             }).then(r => r.json());
 
-            // 5. Update reference
+            // 5. Update Head
+            log.innerHTML += "> Updating main branch reference...\n";
             await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/main`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ sha: newCommit.sha })
+                body: JSON.stringify({ sha: commitRes.sha })
             });
 
-            log.innerHTML += "\n[SUCCESS] All files uploaded in one single step. Cloud updated!";
+            log.innerHTML += "\n[SUCCESS] Cloud sync complete! GitHub Actions will now build your site once.";
         } catch(e) {
-            log.innerHTML += `\n[FATAL ERROR] ${e.message}`;
+            log.innerHTML += `\n[ERROR] Deployment failed: ${e.message}`;
         }
         btn.disabled = false;
         log.scrollTop = log.scrollHeight;
@@ -120,7 +125,7 @@
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = error => reject(error);
+        reader.onerror = e => reject(e);
     });
 </script>
 </body>
