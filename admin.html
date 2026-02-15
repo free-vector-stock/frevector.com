@@ -2,85 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FREE VECTOR STOCK - CLOUD MANAGEMENT</title>
+    <title>ADMIN PANEL</title>
     <style>
-        body { font-family: sans-serif; background: #fff; margin: 0; padding: 0; }
-        .head { background: #000; color: #fff; padding: 25px; text-align: center; font-weight: bold; letter-spacing: 1px; }
-        .card { max-width: 600px; margin: 50px auto; padding: 40px; border: 1px solid #eee; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 13px; }
-        input[type="password"] { width: 100%; padding: 12px; margin-bottom: 25px; border: 1px solid #ddd; }
-        .drop-zone { border: 2px dashed #ccc; padding: 50px; text-align: center; color: #777; cursor: pointer; background: #fafafa; }
-        .drop-zone:hover { border-color: #000; background: #fff; }
-        .btn { width: 100%; padding: 15px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer; margin-top: 25px; text-transform: uppercase; }
-        #log { margin-top: 25px; font-size: 13px; max-height: 250px; overflow-y: auto; background: #f9f9f9; padding: 10px; }
-        .sc { color: green; font-weight: bold; } .er { color: red; }
+        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f4f4f4; }
+        .box { background: #fff; padding: 40px; border-radius: 10px; width: 500px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .drop-zone { border: 2px dashed #ccc; padding: 30px; margin: 20px 0; cursor: pointer; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; }
+        button { width: 100%; padding: 15px; background: #000; color: #fff; border: none; cursor: pointer; font-weight: bold; }
+        #status { margin-top: 15px; font-size: 12px; color: green; }
     </style>
 </head>
 <body>
-
-<div class="head">FREE VECTOR STOCK - CLOUD MANAGEMENT</div>
-
-<div class="card">
-    <label>GITHUB PERSONAL ACCESS TOKEN:</label>
-    <input type="password" id="token" placeholder="Enter ghp_ token here">
-
-    <div class="drop-zone" onclick="document.getElementById('files').click()">
-        <strong>Bulk Upload Assets</strong>
-        <p>Select multiple JPG, EPS10, SVG, and JSON files simultaneously.</p>
+    <div class="box">
+        <h2>GITHUB CLOUD UPLOADER</h2>
+        <input type="password" id="token" placeholder="Enter GitHub Token">
+        <div class="drop-zone" onclick="document.getElementById('f').click()">
+            Click to Select Multiple Files (JPG, EPS, SVG)
+        </div>
+        <input type="file" id="f" multiple style="display:none" onchange="showCount()">
+        <div id="status"></div>
+        <button onclick="upload()">SYNC TO CLOUD</button>
     </div>
-    <input type="file" id="files" multiple style="display:none" onchange="preview()">
 
-    <div id="log"></div>
-    <button class="btn" onclick="uploadAll()">SYNC ASSETS TO CLOUD</button>
-</div>
+    <script>
+        function showCount() {
+            document.getElementById('status').innerText = document.getElementById('f').files.length + " files selected.";
+        }
 
-<script>
-    let fileStack = [];
-    const OWNER = "free-vector-stock", REPO = "free-vector-stock";
+        async function upload() {
+            const token = document.getElementById('token').value;
+            const files = document.getElementById('f').files;
+            const status = document.getElementById('status');
+            const USER = "free-vector-stock", REPO = "free-vector-stock";
 
-    function preview() {
-        fileStack = Array.from(document.getElementById('files').files);
-        document.getElementById('log').innerHTML = `<strong>Selected:</strong> ${fileStack.length} files.`;
-    }
+            if(!token || files.length === 0) return alert("Token and files required!");
 
-    async function uploadAll() {
-        const token = document.getElementById('token').value;
-        const logBox = document.getElementById('log');
-        if(!token) return alert("Token is required!");
-
-        logBox.innerHTML = "<em>Starting sync process...</em><br>";
-
-        for(let file of fileStack) {
-            try {
+            for(let file of files) {
+                status.innerText = "Uploading: " + file.name;
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                await new Promise((resolve) => {
+                await new Promise(resolve => {
                     reader.onload = async () => {
-                        const content = reader.result.split(',')[1];
+                        const base64 = reader.result.split(',')[1];
                         const path = `assets/${file.name}`;
                         
-                        // Check for existing file SHA
+                        // Önce dosya var mı kontrol et (SHA al)
                         let sha = null;
-                        const check = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+                        const check = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
                             headers: { 'Authorization': `token ${token}` }
                         });
-                        if(check.ok) { const d = await check.json(); sha = d.sha; }
+                        if(check.ok) { const data = await check.json(); sha = data.sha; }
 
-                        const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+                        // Yükle veya Güncelle
+                        await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`, {
                             method: 'PUT',
                             headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ message: `Bulk Sync: ${file.name}`, content, sha })
+                            body: JSON.stringify({
+                                message: "Cloud Update",
+                                content: base64,
+                                sha: sha
+                            })
                         });
-
-                        if(res.ok) logBox.innerHTML += `<div class="sc">✓ ${file.name} synced.</div>`;
-                        else logBox.innerHTML += `<div class="er">✗ ${file.name} failed.</div>`;
                         resolve();
                     };
                 });
-            } catch(e) { logBox.innerHTML += `<div class="er">✗ Critical error on ${file.name}</div>`; }
+            }
+            status.innerText = "SUCCESS! All files synced. Please wait 1 minute for GitHub to refresh.";
         }
-        logBox.innerHTML += "<strong>BULK SYNC COMPLETED.</strong>";
-    }
-</script>
+    </script>
 </body>
 </html>
