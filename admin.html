@@ -2,112 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN PANEL - FREE VECTOR STOCK</title>
+    <title>DIRECT ADMIN PANEL - FREE VECTOR STOCK</title>
     <style>
         body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #000; }
         .header { background: #000; color: #fff; padding: 25px; text-align: center; font-size: 22px; font-weight: bold; }
-        .login-box, .container { max-width: 600px; margin: 80px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .container { max-width: 700px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         h2 { border-bottom: 2px solid #000; padding-bottom: 10px; margin-top: 0; }
-        input[type="text"], input[type="password"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; box-sizing: border-box; }
-        .btn { background: #000; color: #fff; padding: 15px; border: none; width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        .upload-area { border: 3px dashed #bbb; padding: 50px; text-align: center; margin: 20px 0; cursor: pointer; transition: 0.3s; background: #fafafa; }
+        .upload-area:hover { border-color: #000; background: #fff; }
+        #fileList { font-size: 14px; color: #444; max-height: 200px; overflow-y: auto; background: #f9f9f9; padding: 15px; border: 1px solid #eee; margin-top: 15px; }
+        .btn { background: #000; color: #fff; padding: 15px; border: none; width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; margin-top: 10px; }
         .btn:hover { background: #333; }
-        .upload-area { border: 2px dashed #bbb; padding: 40px; text-align: center; margin: 20px 0; cursor: pointer; }
-        #fileList { font-size: 13px; color: #666; max-height: 150px; overflow-y: auto; background: #f9f9f9; padding: 10px; margin-top: 10px; }
-        .hidden { display: none; }
+        .btn-danger { background: #cc0000; }
+        .btn-danger:hover { background: #990000; }
     </style>
 </head>
 <body>
 
-<div class="header">FREE VECTOR STOCK - Admin Panel</div>
+<div class="header">FREE VECTOR STOCK - Management Console</div>
 
-<div id="loginArea" class="login-box">
-    <h2>Access Required</h2>
-    <p>Please enter your Admin Access Token to manage uploads.</p>
-    <input type="password" id="tokenInp" placeholder="Enter Token...">
-    <button class="btn" onclick="checkToken()">Login</button>
-</div>
-
-<div id="adminPanel" class="container hidden">
+<div class="container">
     <h2>Bulk Asset Upload</h2>
-    <p>Upload JPEG, EPS10, SVG and JSON. Files with identical names will be merged automatically.</p>
-    
+    <p>Select your JPEG, EPS10, SVG and JSON files together. The system links them by name automatically.</p>
+
     <div class="upload-area" onclick="document.getElementById('fileInp').click()">
         <strong>Click to Select Multiple Files</strong>
-        <p>No upload limit per session</p>
+        <p>Drop your vector assets here</p>
     </div>
-    <input type="file" id="fileInp" multiple accept=".jpg,.jpeg,.eps,.svg,.json" onchange="listSelectedFiles(this.files)">
+    <input type="file" id="fileInp" multiple accept=".jpg,.jpeg,.eps,.svg,.json" style="display:none" onchange="processSelectedFiles(this.files)">
+
+    <div id="fileList" style="display:none"></div>
     
-    <div id="fileList"></div>
-    <button class="btn" style="margin-top:20px;" onclick="uploadAndSync()">Sync Assets to Website</button>
-    <button class="btn" style="margin-top:10px; background:#cc0000;" onclick="clearAllData()">Clear All Site Data</button>
+    <button class="btn" onclick="syncWithSite()">SYNC ASSETS TO WEBSITE</button>
+    <button class="btn btn-danger" onclick="clearData()">WIPE ALL WEBSITE DATA</button>
 </div>
 
 <script>
-    // VARSAYILAN ŞİFRE: admin123 (Bunu buradan değiştirebilirsin)
-    const SECRET_TOKEN = "admin123";
-    let selectedFilesData = {};
+    let localAssets = {};
 
-    function checkToken() {
-        const input = document.getElementById('tokenInp').value;
-        if (input === SECRET_TOKEN) {
-            document.getElementById('loginArea').classList.add('hidden');
-            document.getElementById('adminPanel').classList.remove('hidden');
-        } else {
-            alert("Invalid Token!");
-        }
-    }
-
-    function listSelectedFiles(files) {
+    function processSelectedFiles(files) {
         const list = document.getElementById('fileList');
-        list.innerHTML = "<strong>Detected Files:</strong><br>";
-        selectedFilesData = {};
+        list.style.display = "block";
+        list.innerHTML = "<strong>Detected Items:</strong><br>";
+        localAssets = {};
 
         for (let file of files) {
-            const nameArr = file.name.split('.');
-            const ext = nameArr.pop().toLowerCase();
-            const rawName = nameArr.join('.');
+            const parts = file.name.split('.');
+            const ext = parts.pop().toLowerCase();
+            const fileName = parts.join('.');
 
-            if (!selectedFilesData[rawName]) {
-                selectedFilesData[rawName] = { name: rawName, jpeg: null, eps: false, svg: false, meta: null };
+            if (!localAssets[fileName]) {
+                localAssets[fileName] = { name: fileName, jpeg: null, eps: false, svg: false, meta: null };
             }
 
-            if (ext === 'jpg' || ext === 'jpeg') selectedFilesData[rawName].jpeg = "https://via.placeholder.com/600x400?text=" + rawName;
-            if (ext === 'eps') selectedFilesData[rawName].eps = true;
-            if (ext === 'svg') selectedFilesData[rawName].svg = true;
+            // Placeholder image used for simulation
+            if (ext === 'jpg' || ext === 'jpeg') localAssets[fileName].jpeg = "https://via.placeholder.com/600x400?text=" + fileName;
+            if (ext === 'eps') localAssets[fileName].eps = true;
+            if (ext === 'svg') localAssets[fileName].svg = true;
             if (ext === 'json') {
-                // Simülasyon: JSON verisi var kabul ediyoruz
-                selectedFilesData[rawName].meta = { title: rawName, keywords: "vector, design, stock, illustration", category: "Abstract" };
+                localAssets[fileName].meta = { title: fileName, keywords: "free, vector, design", category: "Abstract" };
             }
 
-            let item = document.createElement('div');
-            item.textContent = "• " + file.name;
-            list.appendChild(item);
+            list.innerHTML += `<div>• ${file.name}</div>`;
         }
     }
 
-    function uploadAndSync() {
+    function syncWithSite() {
         let db = JSON.parse(localStorage.getItem('vectorDB') || "[]");
-        
-        Object.values(selectedFilesData).forEach(item => {
+        Object.values(localAssets).forEach(item => {
             db.push({
                 id: Date.now() + Math.random(),
                 title: item.meta ? item.meta.title : item.name,
                 category: item.meta ? item.meta.category : "Miscellaneous",
                 img: item.jpeg || "https://via.placeholder.com/400x300?text=No+Preview",
-                keywords: item.meta ? item.meta.keywords : "free vector, download",
+                keywords: item.meta ? item.meta.keywords : "free vector",
                 formats: { eps: item.eps, svg: item.svg, jpg: !!item.jpeg }
             });
         });
-
         localStorage.setItem('vectorDB', JSON.stringify(db));
-        alert("Upload Success! Files matched and synced.");
+        alert("Success! Your files are now live.");
         location.reload();
     }
 
-    function clearAllData() {
-        if(confirm("Are you sure? This will delete all items from the gallery!")) {
+    function clearData() {
+        if(confirm("Are you sure? This deletes the entire gallery!")) {
             localStorage.removeItem('vectorDB');
-            alert("Database cleared.");
             location.reload();
         }
     }
