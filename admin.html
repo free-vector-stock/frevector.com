@@ -2,125 +2,136 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FREE VECTOR STOCK - CLOUD ADMIN</title>
+    <title>FREE VECTOR STOCK - Batch Cloud Admin</title>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #fff; margin: 0; }
-        .head { background: #000; color: #fff; padding: 40px; text-align: center; font-weight: 900; letter-spacing: 2px; }
-        .container { max-width: 800px; margin: 40px auto; padding: 20px; }
-        .field { margin-bottom: 25px; }
-        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #555; }
-        input[type="password"] { width: 100%; padding: 15px; border: 1px solid #ddd; outline: none; border-radius: 4px; }
-        .upload-zone { border: 3px dashed #ccc; padding: 80px; text-align: center; background: #fafafa; cursor: pointer; color: #999; }
-        .upload-zone:hover { border-color: #000; background: #fff; color: #000; }
-        #console { background: #111; color: #0f0; padding: 20px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; margin-top: 20px; border-radius: 6px; line-height: 1.5; }
-        .btn { width: 100%; padding: 20px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer; font-size: 16px; border-radius: 4px; }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a1a1a; margin-bottom: 30px; }
+        input[type="password"] { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .drop-area { border: 3px dashed #000; padding: 60px; text-align: center; background: #fafafa; border-radius: 12px; cursor: pointer; transition: 0.3s; margin-bottom: 20px; }
+        .drop-area:hover { background: #f0f0f0; border-color: #555; }
+        #log { background: #1e1e1e; color: #00ff00; padding: 20px; border-radius: 8px; height: 250px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 13px; margin-top: 20px; }
+        .btn-upload { background: #000; color: #fff; width: 100%; padding: 20px; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-upload:disabled { background: #888; cursor: not-allowed; }
+        .file-info { text-align: center; margin-bottom: 15px; font-weight: bold; color: #444; }
     </style>
 </head>
 <body>
 
-<div class="head">BATCH DEPLOYMENT SYSTEM</div>
-
 <div class="container">
-    <div class="field">
-        <label>GITHUB TOKEN (ghp_...):</label>
-        <input type="password" id="ghToken" placeholder="Paste your token here">
+    <h1>BATCH CLOUD UPLOADER</h1>
+    <input type="password" id="token" placeholder="Enter GitHub Personal Access Token">
+    
+    <div class="drop-area" id="dropArea" onclick="document.getElementById('fileInput').click()">
+        <strong>Click or Drag Files Here</strong>
+        <p>Supports JPG, EPS, SVG, JSON</p>
     </div>
-
-    <div class="upload-zone" onclick="document.getElementById('files').click()">
-        <strong>SELECT MULTIPLE FILES (JPG, EPS, SVG, JSON)</strong>
-        <p>The system will auto-match files by filename and upload them as a single commit.</p>
-    </div>
-    <input type="file" id="files" multiple style="display:none" onchange="countFiles()">
-
-    <div id="console">Ready... No individual commits, using high-speed Tree API.</div>
-    <button class="btn" id="syncBtn" onclick="startSingleCommit()">DEPLOY TO CLOUD</button>
+    <input type="file" id="fileInput" multiple style="display:none" onchange="handleFiles()">
+    
+    <div class="file-info" id="fileCount">No files selected</div>
+    
+    <button class="btn-upload" id="upBtn" onclick="startDeployment()">DEPLOY TO CLOUD</button>
+    
+    <div id="log">Ready to process...</div>
 </div>
 
 <script>
-    const OWNER = "free-vector-stock", REPO = "free-vector-stock";
+    const REPO_OWNER = "free-vector-stock";
+    const REPO_NAME = "free-vector-stock";
+    let selectedFiles = [];
 
-    function countFiles() {
-        const c = document.getElementById('files').files.length;
-        document.getElementById('console').innerHTML = `Detected: ${c} files. Ready for batch sync.`;
+    function handleFiles() {
+        selectedFiles = Array.from(document.getElementById('fileInput').files);
+        document.getElementById('fileCount').innerText = `${selectedFiles.length} files ready for upload.`;
     }
 
-    async function startSingleCommit() {
-        const token = document.getElementById('ghToken').value;
-        const files = Array.from(document.getElementById('files').files);
-        const log = document.getElementById('console');
-        const btn = document.getElementById('syncBtn');
+    function addLog(msg) {
+        const l = document.getElementById('log');
+        l.innerHTML += `> ${msg}<br>`;
+        l.scrollTop = l.scrollHeight;
+    }
 
-        if(!token || files.length === 0) return alert("Missing token or files!");
+    async function startDeployment() {
+        const token = document.getElementById('token').value;
+        if(!token || selectedFiles.length === 0) return alert("Please provide token and select files!");
 
+        const btn = document.getElementById('upBtn');
         btn.disabled = true;
-        log.innerHTML = "Starting single-commit batch process...\n";
+        addLog("Starting batch deployment...");
 
         try {
-            // 1. Get Base Commit
-            log.innerHTML += "> Fetching main branch head...\n";
-            const main = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/main`, {
+            // 1. Get current commit SHA
+            const refRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/refs/heads/main`, {
                 headers: { 'Authorization': `token ${token}` }
-            }).then(r => r.json());
-            const baseSha = main.object.sha;
+            });
+            const refData = await refRes.json();
+            const baseSha = refData.object.sha;
 
             // 2. Create Blobs for each file
-            log.innerHTML += `> Creating blobs for ${files.length} files...\n`;
+            addLog(`Creating blobs for ${selectedFiles.length} files...`);
             const treeEntries = [];
-            for (let f of files) {
-                const b64 = await toB64(f);
-                const blob = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/blobs`, {
+            
+            for (let file of selectedFiles) {
+                const base64 = await toBase64(file);
+                const blobRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/blobs`, {
                     method: 'POST',
                     headers: { 'Authorization': `token ${token}` },
-                    body: JSON.stringify({ content: b64, encoding: 'base64' })
-                }).then(r => r.json());
+                    body: JSON.stringify({ content: base64, encoding: 'base64' })
+                });
+                const blobData = await blobRes.json();
                 
                 treeEntries.push({
-                    path: `assets/${f.name}`,
+                    path: `assets/${file.name}`,
                     mode: "100644",
                     type: "blob",
-                    sha: blob.sha
+                    sha: blobData.sha
                 });
-                log.innerHTML += `Blobbed: ${f.name}\n`;
-                log.scrollTop = log.scrollHeight;
+                addLog(`Blob created: ${file.name}`);
             }
 
-            // 3. Create Tree
-            log.innerHTML += "> Creating Git Tree...\n";
-            const tree = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/trees`, {
+            // 3. Create a New Tree
+            addLog("Building virtual git tree...");
+            const treeRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ base_tree: baseSha, tree: treeEntries })
-            }).then(r => r.json());
+            });
+            const treeData = await treeRes.json();
 
-            // 4. Create Commit
-            log.innerHTML += "> Finalizing Commit...\n";
-            const commit = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/commits`, {
+            // 4. Create the Commit
+            addLog("Committing changes...");
+            const commitRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/commits`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ message: `Bulk Cloud Sync: ${files.length} assets`, tree: tree.sha, parents: [baseSha] })
-            }).then(r => r.json());
+                body: JSON.stringify({
+                    message: `Admin: Batch upload ${selectedFiles.length} assets`,
+                    tree: treeData.sha,
+                    parents: [baseSha]
+                })
+            });
+            const commitData = await commitRes.json();
 
-            // 5. Update Ref
-            await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/refs/heads/main`, {
+            // 5. Update the main branch
+            addLog("Pushing to main branch...");
+            await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/refs/heads/main`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ sha: commit.sha })
+                body: JSON.stringify({ sha: commitData.sha })
             });
 
-            log.innerHTML += "\n[SUCCESS] Cloud sync complete. All files updated at once!";
-        } catch(e) {
-            log.innerHTML += `\n[ERROR] ${e.message}`;
+            addLog("SUCCESS! All files uploaded in a single commit.");
+            addLog("GitHub Pages will update in 1-2 minutes.");
+        } catch (err) {
+            addLog("CRITICAL ERROR: " + err.message);
         }
         btn.disabled = false;
-        log.scrollTop = log.scrollHeight;
     }
 
-    const toB64 = f => new Promise((resolve, reject) => {
+    const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.readAsDataURL(f);
+        reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = e => reject(e);
+        reader.onerror = error => reject(error);
     });
 </script>
 </body>
