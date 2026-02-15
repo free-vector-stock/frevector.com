@@ -6,70 +6,77 @@
     <style>
         body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #000; }
         .header { background: #000; color: #fff; padding: 25px; text-align: center; font-size: 22px; font-weight: bold; }
-        .container { max-width: 700px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         h2 { border-bottom: 2px solid #000; padding-bottom: 10px; margin-top: 0; }
-        .upload-area { border: 3px dashed #bbb; padding: 50px; text-align: center; margin: 20px 0; cursor: pointer; transition: 0.3s; background: #fafafa; }
+        .upload-area { border: 2px dashed #bbb; padding: 40px; text-align: center; margin: 20px 0; cursor: pointer; background: #fafafa; transition: 0.3s; }
         .upload-area:hover { border-color: #000; background: #fff; }
-        #fileList { font-size: 14px; color: #444; max-height: 200px; overflow-y: auto; background: #f9f9f9; padding: 15px; border: 1px solid #eee; margin-top: 15px; }
+        #fileList { font-size: 13px; color: #666; max-height: 150px; overflow-y: auto; background: #f9f9f9; padding: 10px; margin-top: 10px; border: 1px solid #eee; }
         .btn { background: #000; color: #fff; padding: 15px; border: none; width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; margin-top: 10px; }
         .btn:hover { background: #333; }
-        .btn-danger { background: #cc0000; }
-        .btn-danger:hover { background: #990000; }
+        .btn-danger { background: #cc0000; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="header">FREE VECTOR STOCK - Management Console</div>
+<div class="header">FREE VECTOR STOCK - Management Panel</div>
 
 <div class="container">
     <h2>Bulk Asset Upload</h2>
-    <p>Select your JPEG, EPS10, SVG and JSON files together. The system links them by name automatically.</p>
+    <p>Select your JPEG, EPS10, SVG and JSON files. Files with the same name will be linked automatically.</p>
 
     <div class="upload-area" onclick="document.getElementById('fileInp').click()">
         <strong>Click to Select Multiple Files</strong>
         <p>Drop your vector assets here</p>
     </div>
-    <input type="file" id="fileInp" multiple accept=".jpg,.jpeg,.eps,.svg,.json" style="display:none" onchange="processSelectedFiles(this.files)">
+    <input type="file" id="fileInp" multiple accept=".jpg,.jpeg,.eps,.svg,.json" style="display:none" onchange="listSelectedFiles(this.files)">
 
     <div id="fileList" style="display:none"></div>
     
-    <button class="btn" onclick="syncWithSite()">SYNC ASSETS TO WEBSITE</button>
-    <button class="btn btn-danger" onclick="clearData()">WIPE ALL WEBSITE DATA</button>
+    <button class="btn" onclick="uploadAndSync()">SYNC ASSETS TO WEBSITE</button>
+    <button class="btn btn-danger" onclick="clearAllData()">WIPE ALL WEBSITE DATA</button>
 </div>
 
 <script>
-    let localAssets = {};
+    let selectedFilesData = {};
 
-    function processSelectedFiles(files) {
+    function listSelectedFiles(files) {
         const list = document.getElementById('fileList');
         list.style.display = "block";
         list.innerHTML = "<strong>Detected Items:</strong><br>";
-        localAssets = {};
+        selectedFilesData = {};
 
         for (let file of files) {
-            const parts = file.name.split('.');
-            const ext = parts.pop().toLowerCase();
-            const fileName = parts.join('.');
+            const nameArr = file.name.split('.');
+            const ext = nameArr.pop().toLowerCase();
+            const rawName = nameArr.join('.');
 
-            if (!localAssets[fileName]) {
-                localAssets[fileName] = { name: fileName, jpeg: null, eps: false, svg: false, meta: null };
+            if (!selectedFilesData[rawName]) {
+                selectedFilesData[rawName] = { name: rawName, jpeg: null, eps: false, svg: false, meta: null };
             }
 
-            // Placeholder image used for simulation
-            if (ext === 'jpg' || ext === 'jpeg') localAssets[fileName].jpeg = "https://via.placeholder.com/600x400?text=" + fileName;
-            if (ext === 'eps') localAssets[fileName].eps = true;
-            if (ext === 'svg') localAssets[fileName].svg = true;
+            if (ext === 'jpg' || ext === 'jpeg') {
+                // Önizleme için dosya yolu (Yerel çalışma için base64 simülasyonu)
+                selectedFilesData[rawName].jpeg = "https://via.placeholder.com/600x400?text=" + rawName;
+            }
+            if (ext === 'eps') selectedFilesData[rawName].eps = true;
+            if (ext === 'svg') selectedFilesData[rawName].svg = true;
             if (ext === 'json') {
-                localAssets[fileName].meta = { title: fileName, keywords: "free, vector, design", category: "Abstract" };
+                selectedFilesData[rawName].meta = { title: rawName, keywords: "vector, free, design", category: "Abstract" };
             }
 
             list.innerHTML += `<div>• ${file.name}</div>`;
         }
     }
 
-    function syncWithSite() {
-        let db = JSON.parse(localStorage.getItem('vectorDB') || "[]");
-        Object.values(localAssets).forEach(item => {
+    function uploadAndSync() {
+        if (Object.keys(selectedFilesData).length === 0) {
+            alert("Please select files first!");
+            return;
+        }
+
+        let db = JSON.parse(localStorage.getItem('vectorStockDB') || "[]");
+
+        Object.values(selectedFilesData).forEach(item => {
             db.push({
                 id: Date.now() + Math.random(),
                 title: item.meta ? item.meta.title : item.name,
@@ -79,14 +86,16 @@
                 formats: { eps: item.eps, svg: item.svg, jpg: !!item.jpeg }
             });
         });
-        localStorage.setItem('vectorDB', JSON.stringify(db));
-        alert("Success! Your files are now live.");
+
+        localStorage.setItem('vectorStockDB', JSON.stringify(db));
+        alert("Success! Your files are now live on the main site.");
         location.reload();
     }
 
-    function clearData() {
-        if(confirm("Are you sure? This deletes the entire gallery!")) {
-            localStorage.removeItem('vectorDB');
+    function clearAllData() {
+        if(confirm("Are you sure? This will delete EVERYTHING!")) {
+            localStorage.removeItem('vectorStockDB');
+            alert("Database cleared.");
             location.reload();
         }
     }
