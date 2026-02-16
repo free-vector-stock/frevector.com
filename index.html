@@ -2,321 +2,181 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FREE VECTOR STOCK | 7000+ Professional Free Vector Graphics & EPS10</title>
-    <meta name="description" content="Download premium quality free vectors, stock illustrations, icons and EPS10 files. Professional resources for designers.">
-    <meta name="keywords" content="free vector download, free eps10, stock illustrations, svg icons, free graphic design assets">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FREE VECTOR STOCK | Download Free Vectors, EPS, SVG & High-Res JPG</title>
+    <meta name="description" content="Download over 7,000+ free vectors, icons, and illustrations. High-quality EPS, SVG, and JPG files for personal and commercial use.">
+    <meta name="keywords" content="free vectors, stock vectors, svg icons, eps download, free illustrations, graphic resources">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --black: #000000; --white: #ffffff; --grey: #f8f8f8; --border: #ececec; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        html, body { height: 100%; width: 100%; background: var(--white); overflow: hidden; }
-        body { display: flex; flex-direction: column; -webkit-user-select: none; user-select: none; }
-
-        /* HEADER & FOOTER - GUARANTEED VISIBILITY */
-        header { background: var(--black); color: var(--white); padding: 15px 0; text-align: center; flex-shrink: 0; z-index: 100; border-bottom: 2px solid #333; }
-        footer { background: var(--black); color: var(--white); height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 100; border-top: 2px solid #333; }
-
-        .logo { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: var(--white); text-decoration: none; display: block; margin-bottom: 8px; }
-        .nav-lines { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-        .line { width: 35px; height: 3px; background: #444; cursor: pointer; transition: 0.3s; }
-        .line.active { background: var(--white); }
-        #top-info { font-size: 11px; max-width: 900px; margin: 0 auto; color: #bbb; line-height: 1.4; min-height: 32px; padding: 0 10px; }
-
-        /* MAIN CONTENT AREA */
-        .wrapper { display: flex; flex: 1; overflow: hidden; width: 100%; }
-        
-        /* SIDEBAR - FULL LEFT ALIGN */
-        .sidebar { width: 260px; border-right: 1px solid var(--border); overflow-y: auto; background: var(--white); flex-shrink: 0; padding: 20px 0; }
-        .cat-head { padding: 0 20px 10px; font-size: 12px; font-weight: 800; color: #aaa; text-transform: uppercase; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-        .cat-list { list-style: none; }
-        .cat-item { padding: 12px 25px; font-size: 14px; color: #333; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; }
-        .cat-item:hover, .cat-item.active { background: #f0f0f0; border-left-color: var(--black); font-weight: bold; }
-
-        /* GRID AREA */
-        .main-content { flex: 1; overflow-y: auto; padding: 25px; scroll-behavior: smooth; }
-        .search-section { max-width: 800px; margin: 0 auto 30px; position: relative; }
-        .search-box { width: 100%; padding: 16px 55px 16px 25px; border: 2px solid var(--black); border-radius: 50px; font-size: 16px; outline: none; }
-        .search-btn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); border: none; background: none; font-size: 20px; cursor: pointer; }
-
-        .ad-slot { background: #fafafa; border: 1px dashed #ddd; text-align: center; color: #999; font-size: 11px; display: flex; align-items: center; justify-content: center; margin: 20px 0; overflow: hidden; }
-
-        .vector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: var(--white); border: 1px solid var(--border); overflow: hidden; transition: 0.3s; cursor: pointer; position: relative; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
-        .card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; background: #eee; }
-        .card .hover-btn { position: absolute; bottom: 0; width: 100%; padding: 12px; background: var(--black); color: white; text-align: center; font-weight: bold; font-size: 12px; transform: translateY(100%); transition: 0.3s; }
-        .card:hover .hover-btn { transform: translateY(0); }
-
-        .pagination { display: flex; justify-content: center; gap: 10px; margin: 40px 0; }
-        .pagination button { padding: 10px 18px; border: 2px solid var(--black); background: white; font-weight: 900; cursor: pointer; transition: 0.3s; }
-        .pagination button.active { background: var(--black); color: white; }
-
-        /* DOWNLOAD PAGE OVERLAY */
-        #view-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 500; overflow-y: auto; padding-top: 20px; }
-        .view-content { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 380px; gap: 40px; padding: 40px 20px; }
-        .preview-box img { width: 100%; border: 1px solid var(--border); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .dl-sidebar { background: #f9f9f9; padding: 30px; border: 1px solid var(--border); border-radius: 4px; }
-        .dl-btn { display: block; width: 100%; padding: 20px; background: var(--black); color: white; border: none; font-weight: bold; margin-bottom: 15px; cursor: pointer; text-decoration: none; text-align: center; font-size: 14px; }
-
-        /* LOADING TIMER */
-        #timer-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #timer-count { font-size: 120px; font-weight: 900; color: var(--black); margin: 20px 0; }
-
-        @media (max-width: 900px) {
-            .wrapper { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; display: flex; overflow-x: auto; padding: 10px; border-right: none; border-bottom: 1px solid var(--border); }
-            .cat-item { white-space: nowrap; padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; margin-right: 10px; border-left: none; }
-            .view-content { grid-template-columns: 1fr; }
-            footer { flex-direction: column; height: auto; padding: 15px; text-align: center; gap: 10px; }
-        }
+        body { background-color: #ffffff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .sidebar { width: 260px; background: #f8f9fa; border-right: 1px solid #eee; overflow-y: auto; height: 100%; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
+        .vector-card { border: 1px solid #eee; transition: all 0.3s; position: relative; }
+        .vector-card:hover { border-color: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .ad-space { background: #fafafa; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
+        .sticky-banner { background: #000; color: #fff; padding: 10px 20px; z-index: 1000; }
+        .category-link { padding: 10px 20px; display: block; color: #333; transition: 0.2s; border-left: 4px solid transparent; }
+        .category-link:hover, .category-link.active { background: #eee; border-left-color: #000; font-weight: bold; }
+        #downloadModal { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
+        .line-tab { width: 30px; height: 3px; background: #555; cursor: pointer; transition: 0.3s; }
+        .line-tab.active { background: #fff; width: 50px; }
+        img { -webkit-user-drag: none; user-select: none; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <header>
-        <a href="index.html" class="logo">FREE VECTOR STOCK</a>
-        <div class="nav-lines" id="lines-box"></div>
-        <div id="top-info"></div>
+    <header class="sticky-banner">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-bold tracking-tighter">FREE VECTOR STOCK</h1>
+            <div class="flex-1 max-w-2xl px-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search 7,000+ free vectors..." class="w-full py-2 px-10 rounded-full text-black focus:outline-none">
+                    <i class="fa fa-search absolute left-4 top-3 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="text-xs text-right hidden lg:block" id="headerText">
+                We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.
+            </div>
+        </div>
+        <div class="flex gap-2 mt-2 justify-center" id="textTabs">
+            <div class="line-tab active" onclick="changeText(0)"></div>
+            <div class="line-tab" onclick="changeText(1)"></div>
+            <div class="line-tab" onclick="changeText(2)"></div>
+            <div class="line-tab" onclick="changeText(3)"></div>
+            <div class="line-tab" onclick="changeText(4)"></div>
+        </div>
     </header>
 
-    <div class="wrapper">
-        <aside class="sidebar">
-            <div class="cat-head">Asset Categories</div>
-            <ul class="cat-list" id="cat-menu"></ul>
-            <div class="ad-slot" style="height: 300px; margin: 20px;">SIDEBAR AD</div>
-        </aside>
+    <div class="ad-space h-[90px] w-full">ADVERTISEMENT - TOP BANNER</div>
 
-        <main class="main-content">
-            <div class="search-section">
-                <input type="text" class="search-box" id="search-input" placeholder="Search across 7,000+ vectors..." onkeyup="doSearch()">
-                <button class="search-btn"><i class="fa fa-search"></i></button>
+    <div class="main-container">
+        <aside class="sidebar py-4" id="categorySidebar">
+            <h3 class="px-5 mb-4 font-bold text-sm uppercase text-gray-500">Categories</h3>
+            </aside>
+
+        <main class="content-area">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6" id="vectorGrid">
+                </div>
+
+            <div class="mt-12">
+                <h3 class="text-xl font-bold mb-6">Related Stock Vectors</h3>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="relatedGrid"></div>
             </div>
 
-            <div class="ad-slot" style="height: 90px;">TOP LEADERBOARD AD</div>
-
-            <div class="vector-grid" id="main-grid"></div>
-            <div class="pagination" id="pager-box"></div>
-
-            <h3 style="margin: 50px 0 20px; text-transform: uppercase; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 5px;">Related Stock Vectors</h3>
-            <div class="vector-grid" id="related-grid"></div>
-
-            <div class="ad-slot" style="height: 150px;">BOTTOM REVENUE AD</div>
+            <div class="ad-space h-[250px] w-full mt-10">ADVERTISEMENT - CONTENT BOTTOM</div>
         </main>
     </div>
 
-    <footer>
-        <span style="font-weight: bold;">2026 © FREE VECTOR STOCK™ - Registered Brand. All Rights Reserved.</span>
-        <a href="mailto:hakankacar2014@gmail.com" style="color:white; text-decoration:none; border:1px solid #444; padding:5px 15px; border-radius:4px; font-size:12px;">Contact: hakankacar2014@gmail.com</a>
+    <div id="downloadModal">
+        <div class="ad-space w-[336px] h-[280px] mb-6">MOST VALUABLE AD - 336x280</div>
+        <h2 class="text-2xl font-bold mb-2">Your file is being prepared...</h2>
+        <p class="text-gray-500 mb-6">Please wait <span id="timer" class="font-bold text-black text-xl">10</span> seconds.</p>
+        <div id="downloadButtons" class="hidden flex gap-4">
+            <a id="linkJPG" class="bg-black text-white px-6 py-2 rounded" download>Download JPG</a>
+            <a id="linkEPS" class="bg-blue-600 text-white px-6 py-2 rounded" download>Download EPS</a>
+            <a id="linkSVG" class="bg-green-600 text-white px-6 py-2 rounded" download>Download SVG</a>
+        </div>
+        <button onclick="closeModal()" class="mt-10 text-gray-400 underline">Cancel</button>
+    </div>
+
+    <footer class="sticky-banner flex justify-between items-center text-xs py-3 px-6">
+        <div>2026 © FREE VECTOR STOCK - Registered Trademark</div>
+        <div class="flex gap-4">
+            <a href="mailto:hakankacar2014@gmail.com" class="hover:underline italic">Info: Contact Developer</a>
+        </div>
     </footer>
 
-    <div id="view-panel">
-        <div style="padding: 10px 30px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-            <button onclick="closePanel()" style="background:none; border:2px solid #000; padding:8px 20px; font-weight:900; cursor:pointer;">BACK TO GALLERY</button>
-            <span style="font-weight:900;">FREE VECTOR STOCK</span>
-        </div>
-        <div class="view-content">
-            <div class="view-left">
-                <div class="ad-slot" style="height: 90px; margin-bottom: 20px;">TOP CONTENT AD</div>
-                <div class="preview-box"><img id="preview-img" src=""></div>
-                <div id="meta-box" style="margin-top:25px;"></div>
-                <h3 style="margin:40px 0 20px;">SIMILAR VECTOR ASSETS</h3>
-                <div class="vector-grid" id="similar-grid"></div>
-            </div>
-            <div class="view-right">
-                <div class="dl-sidebar">
-                    <div class="ad-slot" style="height: 250px;">SIDEBAR AD AREA</div>
-                    <p style="font-weight:bold; margin-bottom:15px; font-size:12px; color:#666;">SELECT FORMAT:</p>
-                    <button class="dl-btn" onclick="triggerDownload('jpg')">DOWNLOAD JPEG (High Res)</button>
-                    <button class="dl-btn" onclick="triggerDownload('eps')">DOWNLOAD EPS10 (Vector)</button>
-                    <button class="dl-btn" onclick="triggerDownload('svg')">DOWNLOAD SVG (Web)</button>
-                    <div class="ad-slot" style="height: 100px; margin-top:20px;">BUTTON NEAR AD</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="timer-screen">
-        <div class="ad-slot" style="width: 728px; height: 90px;">PREMIUM ADVERTISEMENT</div>
-        <h1 style="margin-top:40px;">Your file is being prepared...</h1>
-        <div id="timer-count">10</div>
-        <p style="max-width: 500px; color:#666;">Our service is free thanks to ads. Please wait while we generate your secure download link.</p>
-        <div class="ad-slot" style="width: 300px; height: 250px; margin-top:40px;">SPONSOR AD</div>
-    </div>
-
     <script>
-        const USER = "free-vector-stock", REPO = "free-vector-stock";
-        const messages = [
+        const GITHUB_USER = "free-vector-stock";
+        const GITHUB_REPO = "free-vector-stock";
+        const CATEGORIES = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"].sort();
+        
+        const bannerTexts = [
             "We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",
             "Our goal is to provide a comprehensive and ideal platform for those seeking graphic resources.",
-            "We aim to offer a wide archive of graphics, including vector illustrations, stock photos, icons, logos, and various design elements.",
             "Our only and absolute rule is that our files may not be redistributed in any way.",
-            "The advertisements on our website generate revenue to enable us to continue our work. Therefore, we ask for your understanding.",
-            "Our website's sustainability depends on advertising revenue. Some features may be restricted while an ad blocker is active. Please disable the blocker and refresh the page."
+            "The advertisements on our website generate revenue to enable us to continue our work.",
+            "Our website's sustainability depends on advertising revenue. Please disable ad-blockers."
         ];
 
-        const categories = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"].sort();
+        function changeText(i) {
+            document.getElementById('headerText').innerText = bannerTexts[i];
+            document.querySelectorAll('.line-tab').forEach((t, idx) => t.classList.toggle('active', i === idx));
+        }
 
-        let db = [], filtered = [], page = 1;
-
-        async function init() {
-            // Header Lines
-            const lb = document.getElementById('lines-box');
-            messages.forEach((m, i) => {
-                const l = document.createElement('div');
-                l.className = `line ${i===0?'active':''}`;
-                l.onclick = () => {
-                    document.getElementById('top-info').innerText = m;
-                    document.querySelectorAll('.line').forEach(el => el.classList.remove('active'));
-                    l.classList.add('active');
-                };
-                lb.appendChild(l);
+        function init() {
+            const sidebar = document.getElementById('categorySidebar');
+            CATEGORIES.forEach(cat => {
+                const a = document.createElement('a');
+                a.className = "category-link text-sm";
+                a.href = "#";
+                a.innerText = cat;
+                a.onclick = () => loadCategory(cat);
+                sidebar.appendChild(a);
             });
-            document.getElementById('top-info').innerText = messages[0];
-
-            // Sidebar
-            const menu = document.getElementById('cat-menu');
-            categories.forEach(c => {
-                const li = document.createElement('li');
-                li.className = 'cat-item';
-                li.innerText = c;
-                li.onclick = () => filterCat(c, li);
-                menu.appendChild(li);
-            });
-
-            await loadAll();
+            loadCategory('Food'); // Default
         }
 
-        async function loadAll() {
-            let items = [];
-            // Optimize: Load metadata from GitHub API
-            for (let c of categories) {
-                try {
-                    const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/assets/${c}`);
-                    if (!r.ok) continue;
-                    const files = await r.json();
-                    const grouped = {};
-                    files.forEach(f => {
-                        const id = f.name.split('.')[0];
-                        const ext = f.name.split('.').pop().toLowerCase();
-                        if(!grouped[id]) grouped[id] = { id, cat: c };
-                        // Direct RAW links to fix the "not loading" issue
-                        grouped[id][ext] = `https://raw.githubusercontent.com/${USER}/${REPO}/main/assets/${c}/${f.name}`;
-                    });
-                    items = [...items, ...Object.values(grouped).filter(x => x.jpg)];
-                } catch(e) {}
-            }
-            db = items;
-            filtered = [...db];
-            render();
-            renderRelated();
-        }
-
-        function render() {
-            const grid = document.getElementById('main-grid');
-            grid.innerHTML = "";
-            const start = (page - 1) * 30;
-            const slice = filtered.slice(start, start + 30);
-
-            slice.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.onclick = () => openItem(item);
-                div.innerHTML = `
-                    <img src="${item.jpg}" loading="lazy">
-                    <div class="hover-btn">FREE DOWNLOAD</div>
-                `;
-                grid.appendChild(div);
-            });
-            renderPager();
-        }
-
-        function renderPager() {
-            const box = document.getElementById('pager-box');
-            box.innerHTML = "";
-            const total = Math.ceil(filtered.length / 30);
-            for(let i=1; i<=total; i++) {
-                const b = document.createElement('button');
-                b.innerText = i;
-                if(i === page) b.className = 'active';
-                b.onclick = () => { page = i; render(); document.querySelector('.main-content').scrollTop = 0; };
-                box.appendChild(b);
-            }
-        }
-
-        let active = null;
-        async function openItem(item) {
-            active = item;
-            document.getElementById('preview-img').src = item.jpg;
-            document.getElementById('view-panel').style.display = 'block';
+        async function loadCategory(cat) {
+            const grid = document.getElementById('vectorGrid');
+            grid.innerHTML = "<p class='col-span-full text-center py-20'>Scanning repository for "+cat+"...</p>";
             
-            const meta = document.getElementById('meta-box');
-            meta.innerHTML = "<h4>Processing metadata...</h4>";
-            
-            if(item.json) {
-                try {
-                    const r = await fetch(item.json);
-                    const d = await r.json();
-                    meta.innerHTML = `<h2 style="font-size:28px;">${d.title}</h2><p style="margin-top:10px; color:#555;">${d.description}</p><p style="margin-top:10px; font-size:12px; color:#999;">Keywords: ${d.keywords}</p>`;
-                } catch(e) {}
-            } else {
-                meta.innerHTML = `<h2>${item.id}</h2><p>Professional free vector stock illustration.</p>`;
-            }
+            try {
+                // Fetch from raw directory (bypass cache)
+                const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/assets/${cat.replace(/\//g,'_')}`;
+                const res = await fetch(url);
+                const files = await res.json();
+                
+                const items = {};
+                files.forEach(f => {
+                    const name = f.name.split('.')[0];
+                    if(!items[name]) items[name] = { name: name, category: cat };
+                    items[name][f.name.split('.').pop().toLowerCase()] = f.download_url;
+                });
 
-            const sim = document.getElementById('similar-grid');
-            sim.innerHTML = "";
-            db.sort(() => 0.5 - Math.random()).slice(0, 8).forEach(s => {
-                const d = document.createElement('div');
-                d.className = 'card';
-                d.onclick = () => openItem(s);
-                d.innerHTML = `<img src="${s.jpg}">`;
-                sim.appendChild(d);
-            });
+                grid.innerHTML = "";
+                Object.values(items).forEach(item => {
+                    if(!item.jpg) return;
+                    const card = document.createElement('div');
+                    card.className = "vector-card p-2 bg-white";
+                    card.innerHTML = `
+                        <img src="${item.jpg}" class="w-full aspect-square object-cover mb-2" loading="lazy">
+                        <p class="text-[10px] uppercase font-bold text-gray-400 mb-2">${item.name}</p>
+                        <button onclick="openDownload('${item.jpg}', '${item.eps}', '${item.svg}')" class="w-full bg-black text-white text-xs py-2 hover:bg-gray-800">DOWNLOAD</button>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (e) {
+                grid.innerHTML = "<p class='col-span-full text-center py-20'>No files found in this category yet.</p>";
+            }
         }
 
-        function triggerDownload(ext) {
-            const url = active[ext];
-            if(!url) { alert("Format not found."); return; }
-            const ts = document.getElementById('timer-screen');
-            const tc = document.getElementById('timer-count');
-            ts.style.display = 'flex';
+        function openDownload(jpg, eps, svg) {
+            const modal = document.getElementById('downloadModal');
+            const timerEl = document.getElementById('timer');
+            const btnGroup = document.getElementById('downloadButtons');
+            modal.style.display = 'flex';
+            btnGroup.classList.add('hidden');
+            
             let count = 10;
-            tc.innerText = count;
-            const intv = setInterval(() => {
+            timerEl.innerText = count;
+            
+            const interval = setInterval(() => {
                 count--;
-                tc.innerText = count;
+                timerEl.innerText = count;
                 if(count <= 0) {
-                    clearInterval(intv);
-                    ts.style.display = 'none';
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${active.id}.${ext}`;
-                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    clearInterval(interval);
+                    btnGroup.classList.remove('hidden');
+                    document.getElementById('linkJPG').href = jpg;
+                    document.getElementById('linkEPS').href = eps || '#';
+                    document.getElementById('linkSVG').href = svg || '#';
                 }
             }, 1000);
         }
 
-        function closePanel() { document.getElementById('view-panel').style.display = 'none'; }
-        function filterCat(c, el) { 
-            document.querySelectorAll('.cat-item').forEach(x => x.classList.remove('active'));
-            el.classList.add('active');
-            filtered = db.filter(x => x.cat === c); page = 1; render(); 
-        }
-        function doSearch() { 
-            const q = document.getElementById('search-input').value.toLowerCase(); 
-            filtered = db.filter(x => x.id.toLowerCase().includes(q)); page = 1; render(); 
-        }
-        function renderRelated() {
-            const rg = document.getElementById('related-grid');
-            rg.innerHTML = "";
-            db.sort(() => 0.5 - Math.random()).slice(0, 20).forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.onclick = () => openItem(item);
-                div.innerHTML = `<img src="${item.jpg}" loading="lazy">`;
-                rg.appendChild(div);
-            });
-        }
+        function closeModal() { document.getElementById('downloadModal').style.display = 'none'; }
 
         init();
     </script>
