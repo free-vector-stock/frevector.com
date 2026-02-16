@@ -2,52 +2,67 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FREE VECTOR STOCK - Admin Upload</title>
 <style>
-body{font-family:Arial;background:#fff;margin:0;padding:20px}
-h1{margin-bottom:15px}
+body{font-family:Arial;background:#fff;margin:0;padding:40px}
+h1{margin-bottom:20px}
 input,button{padding:10px;margin:5px 0;width:100%}
-button{background:#000;color:#fff;border:none;cursor:pointer}
-.log{margin-top:20px;background:#f2f2f2;padding:10px;height:200px;overflow:auto}
+button{background:#000;color:#fff;border:0;cursor:pointer}
 </style>
 </head>
 <body>
 
 <h1>FREE VECTOR STOCK - Admin Panel</h1>
 
-<input type="text" id="repo" placeholder="GitHub Repo (username/repository)">
-<input type="text" id="token" placeholder="GitHub Personal Access Token">
+<input type="password" id="token" placeholder="GitHub Personal Access Token">
 <input type="file" id="files" multiple>
 <button onclick="upload()">Upload Files</button>
 
-<div class="log" id="log"></div>
-
 <script>
-function log(t){document.getElementById('log').innerHTML+=t+"<br>"}
+const repo = "free-vector-stock/free-vector-stock";
+const branch = "main";
+
+function getCategory(fileName){
+const categories=[
+"Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion",
+"Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink",
+"Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature",
+"Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols",
+"Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"];
+for(let c of categories){
+if(fileName.toLowerCase().includes(c.toLowerCase().split("/")[0])) return c;
+}
+return "Miscellaneous";
+}
 
 async function upload(){
-const repo=document.getElementById("repo").value.trim()
-const token=document.getElementById("token").value.trim()
-const files=document.getElementById("files").files
-if(!repo||!token||files.length===0){alert("Fill all fields");return;}
+const token=document.getElementById("token").value;
+const files=document.getElementById("files").files;
 
 for(let file of files){
-let name=file.name
-let category=name.split("-")[0]
-category=category.charAt(0).toUpperCase()+category.slice(1)
-let path="assets/"+category+"/"+name
-let content=await file.arrayBuffer()
-let base64=btoa(new Uint8Array(content).reduce((d,b)=>d+String.fromCharCode(b),''))
+const reader=new FileReader();
+reader.onload=async function(){
+const content=btoa(reader.result);
+const category=getCategory(file.name);
+const path=`assets/${category}/${file.name}`;
 await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
 method:"PUT",
-headers:{Authorization:"token "+token,"Content-Type":"application/json"},
-body:JSON.stringify({message:"Upload "+name,content:base64})
+headers:{
+"Authorization":"token "+token,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:"upload "+file.name,
+content:content,
+branch:branch
 })
-log("Uploaded: "+name)
+});
+};
+reader.readAsBinaryString(file);
 }
-alert("Upload Complete")
+alert("Upload Complete");
 }
 </script>
+
 </body>
 </html>
