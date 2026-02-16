@@ -3,42 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <title>FREE VECTOR STOCK - Free Vector Download</title>
-<meta name="description" content="Download free vectors, EPS10, SVG and JPEG files for personal and commercial use.">
+<meta name="description" content="Download free vector EPS10, SVG and JPEG files for personal and commercial use.">
 <meta name="keywords" content="free vector download, eps10, svg, jpeg, stock vector, graphics">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{margin:0;font-family:Arial;background:#fff;overflow-x:hidden}
-.top{background:#000;color:#fff;text-align:center;padding:20px}
-.logo{font-size:26px;font-weight:bold}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#fff}
+header,footer{background:#000;color:#fff;text-align:center;padding:20px}
+.logo{font-size:24px;font-weight:bold}
 .lines span{display:inline-block;width:25px;height:3px;background:#fff;margin:4px;cursor:pointer}
-.subtext{margin-top:10px;font-size:14px;max-width:900px;margin-left:auto;margin-right:auto}
-.layout{display:flex;min-height:calc(100vh - 160px)}
-.sidebar{width:220px;padding:15px;border-right:1px solid #eee}
-.sidebar div{padding:4px 0;font-size:13px;cursor:pointer}
+.subtext{font-size:13px;max-width:1000px;margin:auto}
+.container{display:flex;min-height:calc(100vh - 200px)}
+.sidebar{width:220px;padding:10px;border-right:1px solid #eee}
+.sidebar div{font-size:12px;padding:4px 0;cursor:pointer}
 .sidebar div:hover{font-weight:bold}
 .main{flex:1;padding:20px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
 .card{border:1px solid #eee;padding:10px;text-align:center}
-.card img{width:100%;height:150px;object-fit:cover}
-.card h4{font-size:13px;margin:8px 0}
+.card img{width:100%;height:160px;object-fit:cover}
+.card h4{font-size:13px;margin:5px 0}
 .card p{font-size:11px;color:#555}
-button{background:black;color:white;border:none;padding:8px 12px;margin-top:8px;cursor:pointer}
-.ad{background:#f2f2f2;text-align:center;padding:25px;margin:20px 0;font-size:14px}
-.pagination{text-align:center;margin:20px}
-.pagination span{margin:0 5px;cursor:pointer}
-.footer{background:#000;color:#fff;text-align:center;padding:20px}
-.searchbox{margin-bottom:20px}
+button{background:#000;color:#fff;border:none;padding:8px;margin-top:5px;cursor:pointer;width:100%}
+.ad{background:#f2f2f2;text-align:center;padding:20px;margin:15px 0;font-size:14px}
 .searchbox input{width:100%;padding:10px;font-size:14px}
+.pagination{text-align:center;margin:20px}
+.pagination span{margin:0 6px;cursor:pointer}
 @media(max-width:900px){
-.layout{flex-direction:column}
-.sidebar{width:100%;border-right:none;border-bottom:1px solid #eee;display:flex;flex-wrap:wrap}
-.sidebar div{width:50%}
+.container{flex-direction:column}
+.sidebar{width:100%;display:grid;grid-template-columns:repeat(2,1fr);border-right:none;border-bottom:1px solid #eee}
 }
 </style>
 </head>
 <body oncontextmenu="return false">
 
-<div class="top">
+<header>
 <div class="logo">FREE VECTOR STOCK</div>
 <div class="lines">
 <span onclick="changeText(0)"></span>
@@ -50,19 +48,20 @@ button{background:black;color:white;border:none;padding:8px 12px;margin-top:8px;
 <div class="subtext" id="subtext">
 We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.
 </div>
-</div>
+</header>
 
 <div class="ad">Advertisement Area</div>
 
-<div class="layout">
+<div class="container">
 <div class="sidebar" id="categories"></div>
 
 <div class="main">
 <div class="searchbox">
-<input type="text" id="search" placeholder="🔍 Search vectors..." onkeyup="searchFiles()">
+<input type="text" placeholder="🔍 Search vectors..." onkeyup="searchData(this.value)">
 </div>
 
 <div class="grid" id="grid"></div>
+
 <div class="pagination" id="pagination"></div>
 
 <div class="ad">Advertisement Area</div>
@@ -73,15 +72,28 @@ We operate our own in-house studio to produce graphic designs and offer them fre
 </div>
 </div>
 
-<div class="footer">
+<footer>
 © 2026 ® FREE VECTOR STOCK | 
 <a href="mailto:hakankacar2014@gmail.com" style="color:white">Info</a>
-</div>
+</footer>
 
 <script>
 const USER="free-vector-stock";
 const REPO="free-vector-stock";
 const BRANCH="main";
+
+const categories=[
+"Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion",
+"Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink",
+"Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature",
+"Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols",
+"Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"
+].sort();
+
+let allData=[];
+let filtered=[];
+let currentPage=1;
+const perPage=30;
 
 const messages=[
 "We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",
@@ -92,44 +104,33 @@ const messages=[
 ];
 function changeText(i){document.getElementById("subtext").innerText=messages[i];}
 
-const categoriesList=[
-"Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion",
-"Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink",
-"Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature",
-"Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols",
-"Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"
-];
-
-let allFiles=[];
-let currentPage=1;
-const perPage=30;
-
 function loadCategories(){
 let box=document.getElementById("categories");
-categoriesList.sort().forEach(cat=>{
-let div=document.createElement("div");
-div.innerText=cat;
-div.onclick=()=>filterCategory(cat);
-box.appendChild(div);
+categories.forEach(cat=>{
+let d=document.createElement("div");
+d.innerText=cat;
+d.onclick=()=>filterCategory(cat);
+box.appendChild(d);
 });
 }
 
-async function loadAllFiles(){
-const response=await fetch(`https://api.github.com/repos/${USER}/${REPO}/git/trees/${BRANCH}?recursive=1`);
-const data=await response.json();
-const files=data.tree.filter(f=>f.path.startsWith("assets/") && f.path.endsWith(".jpg"));
+async function loadData(){
+const res=await fetch(`https://api.github.com/repos/${USER}/${REPO}/git/trees/${BRANCH}?recursive=1`);
+const data=await res.json();
+const jpgs=data.tree.filter(f=>f.path.endsWith(".jpg"));
 
-allFiles=files.map(f=>{
-let name=f.path.split("/").pop();
-let base=name.replace(".jpg","");
+allData=jpgs.map(f=>{
+let base=f.path.replace(".jpg","");
 return{
-name:base,
-jpg:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${f.path}`,
-eps:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/assets/${base}.eps`,
-svg:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/assets/${base}.svg`,
-json:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/assets/${base}.json`
+thumb:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${f.path}`,
+eps:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${base}.eps`,
+svg:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${base}.svg`,
+json:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${base}.json`,
+name:base.split("/").pop(),
+category:f.path.split("/")[1]
 };
 });
+filtered=[...allData];
 render();
 }
 
@@ -137,18 +138,16 @@ async function render(){
 let grid=document.getElementById("grid");
 grid.innerHTML="";
 let start=(currentPage-1)*perPage;
-let pageFiles=allFiles.slice(start,start+perPage);
+let items=filtered.slice(start,start+perPage);
 
-for(let file of pageFiles){
-let title=file.name;
-let description="";
+for(let item of items){
+let title=item.name;
 let keywords="";
 try{
-let res=await fetch(file.json);
-if(res.ok){
-let j=await res.json();
-title=j.title||file.name;
-description=j.description||"";
+let r=await fetch(item.json);
+if(r.ok){
+let j=await r.json();
+title=j.title||title;
 keywords=j.keywords||"";
 }
 }catch{}
@@ -156,11 +155,13 @@ keywords=j.keywords||"";
 let card=document.createElement("div");
 card.className="card";
 card.innerHTML=`
-<img loading="lazy" src="${file.jpg}">
+<img loading="lazy" src="${item.thumb}">
 <h4>${title}</h4>
 <p>${keywords}</p>
 <div class="ad">Advertisement Area</div>
-<button onclick="openDownload('${file.jpg}','${file.eps}','${file.svg}')">Download</button>
+<button onclick="downloadPage('${item.eps}')">Download EPS</button>
+<button onclick="downloadPage('${item.svg}')">Download SVG</button>
+<button onclick="downloadPage('${item.thumb}')">Download JPG</button>
 `;
 grid.appendChild(card);
 }
@@ -170,55 +171,62 @@ renderRelated();
 }
 
 function renderPagination(){
-let total=Math.ceil(allFiles.length/perPage);
+let total=Math.ceil(filtered.length/perPage);
 let pag=document.getElementById("pagination");
 pag.innerHTML="";
 for(let i=1;i<=total;i++){
-let span=document.createElement("span");
-span.innerText=i;
-span.onclick=()=>{currentPage=i;render()};
-pag.appendChild(span);
+let s=document.createElement("span");
+s.innerText=i;
+s.onclick=()=>{currentPage=i;render()};
+pag.appendChild(s);
 }
 }
 
 function renderRelated(){
-let related=document.getElementById("related");
-related.innerHTML="";
-allFiles.slice(0,20).forEach(file=>{
-let div=document.createElement("div");
-div.className="card";
-div.innerHTML=`<img loading="lazy" src="${file.jpg}">`;
-related.appendChild(div);
+let rel=document.getElementById("related");
+rel.innerHTML="";
+filtered.slice(0,20).forEach(i=>{
+let d=document.createElement("div");
+d.className="card";
+d.innerHTML=`<img loading="lazy" src="${i.thumb}">`;
+rel.appendChild(d);
 });
 }
 
-function searchFiles(){
-let val=document.getElementById("search").value.toLowerCase();
-allFiles=allFiles.filter(f=>f.name.toLowerCase().includes(val));
+function searchData(val){
+filtered=allData.filter(d=>d.name.toLowerCase().includes(val.toLowerCase()));
 currentPage=1;
 render();
 }
 
 function filterCategory(cat){
-let lower=cat.toLowerCase().replace(/[^a-z]/g,"");
-allFiles=allFiles.filter(f=>f.name.toLowerCase().includes(lower));
+filtered=allData.filter(d=>d.category===cat);
 currentPage=1;
 render();
 }
 
-function openDownload(jpg,eps,svg){
+function downloadPage(url){
 let w=window.open("");
 w.document.write(`
-<h2>Your file is preparing... Please wait 10 seconds</h2>
-<div style="background:#eee;padding:40px;margin:20px 0;text-align:center">Advertisement Area</div>
-<button onclick="window.location='${jpg}'">Download JPG</button>
-<button onclick="window.location='${eps}'">Download EPS</button>
-<button onclick="window.location='${svg}'">Download SVG</button>
+<h2>Your file is being prepared... 10 seconds remaining</h2>
+<div style="background:#eee;padding:50px;margin:20px 0;text-align:center">Advertisement Area</div>
+<p id="count">10</p>
+<script>
+let t=10;
+let interval=setInterval(()=>{
+t--;
+document.getElementById("count").innerText=t;
+if(t==0){
+clearInterval(interval);
+window.location='${url}';
+}
+},1000);
+<\/script>
 `);
 }
 
 loadCategories();
-loadAllFiles();
+loadData();
 </script>
 
 </body>
