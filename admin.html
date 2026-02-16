@@ -2,107 +2,122 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN | CLOUD ASSET MANAGER</title>
+    <title>ADMIN | ASSET MANAGER</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 40px; }
-        .box { max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h2 { text-align: center; margin-bottom: 25px; }
-        input, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ddd; }
-        .drop-zone { border: 2px dashed #000; padding: 40px; text-align: center; color: #777; cursor: pointer; background: #fafafa; margin-bottom: 20px; font-weight: bold; }
-        #log { background: #000; color: #0f0; padding: 15px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 11px; }
-        .btn-upload { background: #000; color: #fff; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 50px; }
+        .uploader-card { max-width: 600px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 20px; text-align: center; }
+        input, button { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        .drop-zone { border: 2px dashed #000; padding: 40px; text-align: center; color: #666; cursor: pointer; background: #fdfdfd; font-weight: bold; margin-bottom: 20px; }
+        #status { font-family: monospace; background: #000; color: #0f0; padding: 15px; height: 150px; overflow-y: auto; font-size: 12px; }
+        .btn-push { background: #000; color: #fff; font-weight: bold; cursor: pointer; border: none; }
+        .btn-push:disabled { background: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="box">
+<div class="uploader-card">
     <h2>BATCH DEPLOYER</h2>
-    <input type="password" id="token" placeholder="GitHub Token (Classic)">
+    <input type="password" id="token" placeholder="GitHub Personal Access Token (Classic)">
     
-    <div class="drop-zone" onclick="document.getElementById('files').click()">
-        CLICK OR DRAG ALL FILES (JPG, EPS, SVG, JSON)
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+        CLICK HERE TO SELECT JPG, EPS, SVG, JSON FILES<br>
+        <small>(Same names will be matched automatically)</small>
     </div>
-    <input type="file" id="files" multiple style="display:none" onchange="document.getElementById('count').innerText = this.files.length + ' files selected.'">
-    <div id="count" style="text-align:center; margin-bottom:15px; font-weight:bold;"></div>
+    <input type="file" id="fileInput" multiple style="display:none" onchange="updateCount()">
+    <div id="count" style="text-align: center; font-weight: bold; margin-bottom: 15px;">0 files selected</div>
 
-    <button class="btn-upload" onclick="batchPush()">PUSH TO CLOUD STORAGE</button>
-    <div id="log">Status: Idle</div>
+    <button class="btn-push" id="btnPush" onclick="startBatch()">START SECURE UPLOAD</button>
+    <div id="status">Ready...</div>
 </div>
 
 <script>
     const G_OWNER = "free-vector-stock", G_REPO = "free-vector-stock";
     const categories = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","icon"];
 
-    function log(m) {
-        const l = document.getElementById('log');
-        l.innerHTML += `> ${m}<br>`;
-        l.scrollTop = l.scrollHeight;
+    function log(msg) {
+        const s = document.getElementById('status');
+        s.innerHTML += `> ${msg}<br>`;
+        s.scrollTop = s.scrollHeight;
     }
 
-    async function batchPush() {
-        const token = document.getElementById('token').value;
-        const files = Array.from(document.getElementById('files').files);
-        if(!token || files.length === 0) return alert("Missing data!");
+    function updateCount() {
+        document.getElementById('count').innerText = document.getElementById('fileInput').files.length + " files selected";
+    }
 
-        log("Starting batch process...");
+    async function startBatch() {
+        const token = document.getElementById('token').value;
+        const files = Array.from(document.getElementById('fileInput').files);
         
+        if(!token || files.length === 0) { alert("Token and files required!"); return; }
+        
+        document.getElementById('btnPush').disabled = true;
+        log("Process started. Creating cloud folders...");
+
         try {
-            // Get current SHA
+            // Get current master SHA
             const head = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/refs/heads/main`, {
                 headers: { 'Authorization': `token ${token}` }
             }).then(r => r.json());
             const baseSha = head.object.sha;
 
-            const treeData = [];
+            const treeEntries = [];
+            
             for(let file of files) {
-                // Determine Category by filename
+                // Determine category from filename
                 let targetCat = "Miscellaneous";
-                const lowerName = file.name.toLowerCase();
-                for(let cat of categories) {
-                    if(lowerName.includes(cat.toLowerCase().split('/')[0])) {
-                        targetCat = cat;
+                const lowName = file.name.toLowerCase();
+                for(let c of categories) {
+                    if(lowName.includes(c.toLowerCase().split('/')[0])) {
+                        targetCat = c;
                         break;
                     }
                 }
 
                 const b64 = await toBase64(file);
+                
+                // Create Blobs
                 const blob = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/blobs`, {
                     method: 'POST',
                     headers: { 'Authorization': `token ${token}` },
                     body: JSON.stringify({ content: b64, encoding: 'base64' })
                 }).then(r => r.json());
 
-                treeData.push({
+                treeEntries.push({
                     path: `assets/${targetCat}/${file.name}`,
                     mode: "100644",
                     type: "blob",
                     sha: blob.sha
                 });
-                log(`Hashed: ${file.name} -> assets/${targetCat}/`);
+                log(`Prepared: ${file.name} -> ${targetCat}`);
             }
 
-            log("Building Tree...");
-            const tree = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/trees`, {
+            log("Building New Tree...");
+            const newTree = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/trees`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ base_tree: baseSha, tree: treeData })
+                body: JSON.stringify({ base_tree: baseSha, tree: treeEntries })
             }).then(r => r.json());
 
-            log("Committing...");
+            log("Committing changes...");
             const commit = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/commits`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ message: `Batch sync: ${files.length} items`, tree: tree.sha, parents: [baseSha] })
+                body: JSON.stringify({ message: `Secure Upload: ${files.length} items`, tree: newTree.sha, parents: [baseSha] })
             }).then(r => r.json());
 
+            log("Updating Main Branch...");
             await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/refs/heads/main`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ sha: commit.sha })
             });
 
-            log("DONE! Files are successfully stored in cloud folders.");
-        } catch(e) { log("Error: " + e.message); }
+            log("SUCCESS! All files are deployed. Refresh index.html in 1 minute.");
+        } catch(e) {
+            log("ERROR: " + e.message);
+        }
+        document.getElementById('btnPush').disabled = false;
     }
 
     const toBase64 = f => new Promise((res, rej) => {
