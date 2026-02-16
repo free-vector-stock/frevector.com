@@ -54,7 +54,11 @@ async function startUpload() {
             
             const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
                 method: "PUT",
-                headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                headers: { 
+                    "Authorization": `token ${token}`, 
+                    "Content-Type": "application/json",
+                    "Accept": "application/vnd.github.v3+json"
+                },
                 body: JSON.stringify({
                     message: `Upload ${file.name} to ${cat}`,
                     content: content,
@@ -62,10 +66,14 @@ async function startUpload() {
                 })
             });
 
-            if(res.ok) status.innerHTML += `<div class="success">Uploaded: ${file.name} to ${cat}</div>`;
-            else throw new Error();
+            if(res.ok) {
+                status.innerHTML += `<div class="success">Uploaded: ${file.name} to ${cat}</div>`;
+            } else {
+                const errData = await res.json();
+                throw new Error(errData.message || "Upload failed");
+            }
         } catch (e) {
-            status.innerHTML += `<div class="error">Failed: ${file.name}</div>`;
+            status.innerHTML += `<div class="error">Failed: ${file.name} (${e.message})</div>`;
         }
         status.scrollTop = status.scrollHeight;
     }
@@ -79,10 +87,15 @@ const toBase64 = file => new Promise((resolve, reject) => {
 });
 
 async function getSha(path, token) {
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-        headers: { "Authorization": `token ${token}` }
-    });
-    if (res.ok) { const data = await res.json(); return data.sha; }
+    try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            headers: { "Authorization": `token ${token}` }
+        });
+        if (res.ok) { 
+            const data = await res.json(); 
+            return data.sha; 
+        }
+    } catch (e) {}
     return null;
 }
 </script>
