@@ -7,7 +7,7 @@
     <meta name="description" content="Download free premium vectors, stock photos, icons and logos. High resolution EPS and SVG files for professional design projects.">
     <meta name="keywords" content="free vector, download eps, free illustrations, stock vectors, svg icons, graphic resources">
     <style>
-        :root { --black: #000; --white: #fff; --gray: #f8f8f8; --border: #e0e0e0; }
+        :root { --black: #000; --white: #fff; --gray: #f8f8f8; --border: #e0e0e0; --accent: #333; }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; }
         body { font-family: 'Inter', Helvetica, Arial, sans-serif; background: var(--white); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
@@ -36,18 +36,39 @@
 
         .ad-slot { background: #fafafa; border: 1px dashed #ccc; text-align:center; color:#aaa; font-size:12px; padding:20px; margin:15px 0; }
 
-        /* GRID */
-        .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
-        .card { border: 1px solid var(--border); display:flex; flex-direction:column; position:relative; transition: 0.3s; }
-        .card:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        .card img { width:100%; height:180px; object-fit:cover; cursor:pointer; }
-        .card-body { padding:15px; flex:1; }
-        .card-body h3 { font-size:14px; margin-bottom:8px; color:#000; height:18px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .card-body p { font-size:11px; color:#666; height:34px; overflow:hidden; margin-bottom:10px; line-height:1.4; }
-        .card-body .keywords { font-size:10px; color:#999; font-style:italic; }
+        /* GRID & MODERN CARD DESIGN */
+        .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
+        .card { border: 1px solid var(--border); display:flex; flex-direction:column; position:relative; transition: 0.3s; background: #fff; overflow: hidden; }
+        .card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.12); transform: translateY(-3px); }
+        
+        .img-container { position: relative; width: 100%; height: 200px; overflow: hidden; cursor: pointer; }
+        .card img { width:100%; height:100%; object-fit:cover; transition: 0.5s; }
+        
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: 0.4s;
+            backdrop-filter: blur(3px);
+        }
+        .card:hover .overlay { opacity: 1; }
+        .card:hover img { transform: scale(1.1); }
+
+        .overlay p { font-size: 12px; line-height: 1.5; margin-bottom: 15px; color: #ddd; }
+        .overlay .tags { font-size: 10px; color: #aaa; font-style: italic; border-top: 1px solid #444; padding-top: 10px; }
+
+        .card-body { padding:15px; background: #fff; z-index: 2; }
+        .card-body h3 { font-size:14px; color:#000; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .dl-section { background:#f9f9f9; padding:10px; border-top:1px solid var(--border); }
-        .dl-button { background:var(--black); color:var(--white); border:none; width:100%; padding:12px; font-weight:bold; cursor:pointer; font-size:13px; }
+        .dl-button { background:var(--black); color:var(--white); border:none; width:100%; padding:12px; font-weight:bold; cursor:pointer; font-size:13px; transition: 0.3s; }
+        .dl-button:hover { background: #333; }
 
         /* FOOTER BANNER */
         footer { background:var(--black); color:var(--white); padding:18px; text-align:center; position:fixed; bottom:0; width:100%; z-index:1000; font-size:13px; display:flex; justify-content:center; gap:30px; }
@@ -81,9 +102,10 @@
         
         <div class="search-wrapper">
             <span class="search-btn">🔍</span>
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search premium vectors...">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search vectors by name or keywords...">
         </div>
 
+        <div id="searchStatus" style="font-size: 12px; color: #666; margin-bottom: 10px; display: none;"></div>
         <div class="grid" id="vectorGrid"></div>
         <div class="pagination" id="paginator"></div>
 
@@ -106,7 +128,7 @@
 <script>
 const repo = "free-vector-stock/free-vector-stock";
 const rawBase = `https://raw.githubusercontent.com/${repo}/main/assets/`;
-const apiBase = `https://api.github.com/repos/${repo}/contents/assets/`;
+const dbUrl = `https://raw.githubusercontent.com/${repo}/main/database.json`;
 
 const categories = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"];
 const lines = [
@@ -118,107 +140,187 @@ const lines = [
     "Sustainability depends on ads. Please disable ad blockers for better experience."
 ];
 
-let items = [];
+let allData = [];
 let filtered = [];
 let currentPage = 1;
 const perPage = 30;
+let currentCatName = "Food";
 
 // Ticker
 let lIdx = 0;
 setInterval(() => {
-    document.getElementById('ticker').innerText = lines[lIdx];
-    lIdx = (lIdx + 1) % lines.length;
+    const tickerEl = document.getElementById('ticker');
+    if(tickerEl) {
+        tickerEl.innerText = lines[lIdx];
+        lIdx = (lIdx + 1) % lines.length;
+    }
 }, 5000);
 
 // Load Nav
-const nav = document.getElementById('sideNav');
-categories.sort().forEach(c => {
-    let a = document.createElement('a');
-    a.href = "#"; a.innerText = c;
-    a.onclick = (e) => { e.preventDefault(); selectCat(c, a); };
-    nav.appendChild(a);
-});
+function initNav() {
+    const nav = document.getElementById('sideNav');
+    if(!nav) return;
+    nav.innerHTML = "<h4>Categories</h4>";
+    categories.sort().forEach(c => {
+        let a = document.createElement('a');
+        a.href = "#"; a.innerText = c;
+        a.onclick = (e) => { e.preventDefault(); selectCat(c, a); };
+        nav.appendChild(a);
+    });
+}
 
-async function selectCat(cat, el) {
+async function loadDatabase() {
+    const grid = document.getElementById('vectorGrid');
+    grid.innerHTML = "<div style='grid-column: 1/-1; text-align: center; padding: 50px;'>Loading database...</div>";
+    
+    try {
+        const res = await fetch(dbUrl + "?t=" + new Date().getTime());
+        if(!res.ok) {
+            if(res.status === 404) {
+                grid.innerHTML = `<div style='grid-column: 1/-1; text-align: center; padding: 50px; color: #f39c12;'>
+                    <b>Database not found!</b><br>
+                    Please use the Admin Panel to upload your first files. This will create the database.json file automatically.
+                </div>`;
+                return;
+            }
+            throw new Error("Database could not be loaded");
+        }
+        allData = await res.json();
+        selectCat(currentCatName);
+    } catch (e) {
+        console.error("DB Load Error:", e);
+        grid.innerHTML = `<div style='grid-column: 1/-1; text-align: center; padding: 50px; color: #e74c3c;'>
+            <b>Error:</b> ${e.message}<br>
+            <small>Please check your internet connection or GitHub repository.</small>
+        </div>`;
+    }
+}
+
+function selectCat(cat, el) {
+    const searchInput = document.getElementById('searchInput');
+    if(searchInput) searchInput.value = "";
+    
+    const searchStatus = document.getElementById('searchStatus');
+    if(searchStatus) searchStatus.style.display = "none";
+    
     document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
     if(el) el.classList.add('active');
+    else {
+        const links = document.querySelectorAll('.sidebar a');
+        links.forEach(l => { if(l.innerText === cat) l.classList.add('active'); });
+    }
+    
+    currentCatName = cat;
     currentPage = 1;
-    const res = await fetch(apiBase + encodeURIComponent(cat));
-    if(!res.ok) return;
-    const data = await res.json();
-    items = data.filter(f => f.name.endsWith('.jpg')).map(f => ({
-        name: f.name.replace('.jpg', ''),
-        cat: cat
-    }));
-    filtered = [...items];
+    
+    filtered = allData.filter(item => item.category === cat);
     render();
 }
 
-async function render() {
+function render() {
     const grid = document.getElementById('vectorGrid');
+    if(!grid) return;
     grid.innerHTML = "";
+    
     let start = (currentPage - 1) * perPage;
     let slice = filtered.slice(start, start + perPage);
 
-    for (let item of slice) {
-        let meta = { title: item.name, description: "Professional stock vector for commercial use.", keywords: "vector, free, stock" };
-        try {
-            let mRes = await fetch(`${rawBase}${item.cat}/${item.name}.json`);
-            if(mRes.ok) meta = await mRes.json();
-        } catch(e){}
+    if (slice.length === 0) {
+        grid.innerHTML = "<div style='grid-column: 1/-1; text-align: center; padding: 50px; color: #999;'>No vectors found in this category.</div>";
+        updatePaginator();
+        return;
+    }
 
-        grid.innerHTML += `
-            <div class="card">
-                <img src="${rawBase}${item.cat}/${item.name}.jpg" onclick="startDL('${item.cat}','${item.name}')" loading="lazy">
-                <div class="card-body">
-                    <h3>${meta.title}</h3>
-                    <p>${meta.description}</p>
-                    <div class="keywords">${meta.keywords}</div>
-                </div>
-                <div class="dl-section">
-                    <div style="font-size:10px; color:#999; text-align:center; margin-bottom:5px">ADS</div>
-                    <button class="dl-button" onclick="startDL('${item.cat}','${item.name}')">DOWNLOAD (ZIP)</button>
+    slice.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const imgUrl = `${rawBase}${encodeURIComponent(item.category)}/${encodeURIComponent(item.name)}.jpg`;
+        
+        card.innerHTML = `
+            <div class="img-container" onclick="startDL('${item.category}','${item.name}')">
+                <img src="${imgUrl}" alt="${item.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'">
+                <div class="overlay">
+                    <p>${item.description || 'Professional stock vector for commercial use.'}</p>
+                    <div class="tags">${item.keywords || 'vector, free, stock'}</div>
                 </div>
             </div>
+            <div class="card-body">
+                <h3 title="${item.name}">${item.name}</h3>
+            </div>
+            <div class="dl-section">
+                <div style="font-size:10px; color:#999; text-align:center; margin-bottom:5px">ADS</div>
+                <button class="dl-button" onclick="startDL('${item.category}','${item.name}')">DOWNLOAD (ZIP)</button>
+            </div>
         `;
-    }
+        grid.appendChild(card);
+    });
     updatePaginator();
 }
 
 function updatePaginator() {
     const p = document.getElementById('paginator');
+    if(!p) return;
     p.innerHTML = "";
     let total = Math.ceil(filtered.length / perPage);
+    if (total <= 1) return;
     for(let i=1; i<=total; i++) {
         let btn = document.createElement('button');
         btn.innerText = i;
         if(i === currentPage) btn.className = "active";
-        btn.onclick = () => { currentPage = i; render(); };
+        btn.onclick = () => { 
+            currentPage = i; 
+            render(); 
+            document.querySelector('.content').scrollTop = 0;
+        };
         p.appendChild(btn);
     }
 }
 
-// Search
-document.getElementById('searchInput').onkeyup = (e) => {
-    let val = e.target.value.toLowerCase();
-    filtered = items.filter(i => i.name.toLowerCase().includes(val));
-    currentPage = 1;
-    render();
-};
+// Arama Fonksiyonu
+const searchInput = document.getElementById('searchInput');
+if(searchInput) {
+    searchInput.oninput = (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const searchStatus = document.getElementById('searchStatus');
+        
+        if (query.length === 0) {
+            if(searchStatus) searchStatus.style.display = "none";
+            selectCat(currentCatName);
+            return;
+        }
+
+        if(searchStatus) {
+            searchStatus.style.display = "block";
+            searchStatus.innerText = "Searching...";
+        }
+        
+        filtered = allData.filter(item => 
+            item.name.toLowerCase().includes(query) || 
+            (item.keywords && item.keywords.toLowerCase().includes(query)) ||
+            (item.description && item.description.toLowerCase().includes(query))
+        );
+        
+        if(searchStatus) searchStatus.innerText = `Found ${filtered.length} results for "${query}"`;
+        currentPage = 1;
+        render();
+    };
+}
 
 function startDL(cat, name) {
     const modal = document.getElementById('dl-modal');
     const timerEl = document.getElementById('timer');
+    if(!modal || !timerEl) return;
+    
     modal.style.display = "flex";
     let count = 10;
+    timerEl.innerText = count;
+    
     let itv = setInterval(() => {
         count--;
         timerEl.innerText = count;
         if(count <= 0) {
             clearInterval(itv);
             modal.style.display = "none";
-            
-            // ZIP İndirme Çözümü: Gizli bir link oluşturup tetikleme
             const downloadUrl = `${rawBase}${encodeURIComponent(cat)}/${encodeURIComponent(name)}.zip`;
             const link = document.createElement('a');
             link.href = downloadUrl;
@@ -230,8 +332,11 @@ function startDL(cat, name) {
     }, 1000);
 }
 
-// Init
-selectCat("Food");
+// Başlangıç
+window.addEventListener('DOMContentLoaded', () => {
+    initNav();
+    loadDatabase();
+});
 </script>
 </body>
 </html>
