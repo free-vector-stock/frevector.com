@@ -2,65 +2,80 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FREE VECTOR STOCK - Admin Upload</title>
+<title>FREE VECTOR STOCK - Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{font-family:Arial;background:#fff;margin:0;padding:40px}
+body{font-family:Arial;background:#ffffff;margin:0;padding:30px}
 h1{margin-bottom:20px}
-input,button{padding:10px;margin:5px 0;width:100%}
-button{background:#000;color:#fff;border:0;cursor:pointer}
+input,button{width:100%;padding:12px;margin-bottom:15px;font-size:14px}
+button{background:#000;color:#fff;border:none;cursor:pointer}
+button:hover{opacity:0.8}
+.notice{background:#f2f2f2;padding:10px;font-size:13px}
 </style>
 </head>
 <body>
 
-<h1>FREE VECTOR STOCK - Admin Panel</h1>
+<h1>FREE VECTOR STOCK - Secure Upload</h1>
 
+<div class="notice">
+Only the administrator can upload files.  
+Select unlimited JPG, ZIP and JSON files together.
+Files must share identical names (example: food-0001.jpg, food-0001.zip, food-0001.json).
+Category is detected automatically from filename prefix.
+</div>
+
+<input type="text" id="repo" placeholder="Repository (example: free-vector-stock/free-vector-stock)">
 <input type="password" id="token" placeholder="GitHub Personal Access Token">
 <input type="file" id="files" multiple>
-<button onclick="upload()">Upload Files</button>
+<button onclick="uploadFiles()">Upload Files</button>
 
 <script>
-const repo = "free-vector-stock/free-vector-stock";
-const branch = "main";
-
-function getCategory(fileName){
-const categories=[
+const categories = [
 "Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion",
 "Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink",
 "Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature",
 "Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols",
-"Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"];
-for(let c of categories){
-if(fileName.toLowerCase().includes(c.toLowerCase().split("/")[0])) return c;
+"Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"
+];
+
+function detectCategory(filename){
+let prefix = filename.split("-")[0].toLowerCase();
+for(let cat of categories){
+if(cat.toLowerCase().includes(prefix)) return cat;
 }
-return "Miscellaneous";
+return null;
 }
 
-async function upload(){
-const token=document.getElementById("token").value;
+async function uploadFiles(){
+const repo=document.getElementById("repo").value.trim();
+const token=document.getElementById("token").value.trim();
 const files=document.getElementById("files").files;
+if(!repo||!token||files.length===0){alert("Fill all fields");return;}
 
 for(let file of files){
-const reader=new FileReader();
+let category=detectCategory(file.name);
+if(!category){alert("Category not detected for "+file.name);continue;}
+
+let reader=new FileReader();
 reader.onload=async function(){
-const content=btoa(reader.result);
-const category=getCategory(file.name);
-const path=`assets/${category}/${file.name}`;
-await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
+let content=btoa(reader.result);
+let path="assets/"+category+"/"+file.name;
+
+await fetch("https://api.github.com/repos/"+repo+"/contents/"+path,{
 method:"PUT",
 headers:{
 "Authorization":"token "+token,
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-message:"upload "+file.name,
-content:content,
-branch:branch
+message:"Upload "+file.name,
+content:content
 })
 });
 };
 reader.readAsBinaryString(file);
 }
-alert("Upload Complete");
+alert("Upload completed successfully.");
 }
 </script>
 
