@@ -2,63 +2,144 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FREE VECTOR STOCK - Free Vector Download</title>
-<meta name="description" content="Download free vector EPS10, SVG and JPEG files for personal and commercial use.">
-<meta name="keywords" content="free vector download, eps10, svg, jpeg, stock vector, graphics">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FREE VECTOR STOCK - Free Vector Download</title>
+
+<meta name="description" content="Download free vector illustrations, SVG, EPS10 and high resolution JPEG files for personal and commercial use.">
+<meta name="keywords" content="free vector download, free svg, free eps10, stock vectors, free illustrations">
+<meta name="robots" content="index, follow">
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial;background:#fff}
-header,footer{background:#000;color:#fff;text-align:center;padding:20px}
-.logo{font-size:24px;font-weight:bold}
-.lines span{display:inline-block;width:25px;height:3px;background:#fff;margin:4px;cursor:pointer}
-.subtext{font-size:13px;max-width:1000px;margin:auto}
-.container{display:flex;min-height:calc(100vh - 200px)}
-.sidebar{width:220px;padding:10px;border-right:1px solid #eee}
-.sidebar div{font-size:12px;padding:4px 0;cursor:pointer}
-.sidebar div:hover{font-weight:bold}
-.main{flex:1;padding:20px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-.card{border:1px solid #eee;padding:10px;text-align:center}
-.card img{width:100%;height:160px;object-fit:cover}
-.card h4{font-size:13px;margin:5px 0}
-.card p{font-size:11px;color:#555}
-button{background:#000;color:#fff;border:none;padding:8px;margin-top:5px;cursor:pointer;width:100%}
-.ad{background:#f2f2f2;text-align:center;padding:20px;margin:15px 0;font-size:14px}
-.searchbox input{width:100%;padding:10px;font-size:14px}
-.pagination{text-align:center;margin:20px}
-.pagination span{margin:0 6px;cursor:pointer}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial;background:#fff;color:#000;display:flex;flex-direction:column;min-height:100vh}
+
+header{background:#000;color:#fff;padding:15px;text-align:center}
+header h1{margin-bottom:10px}
+
+.banner-lines{display:flex;justify-content:center;gap:5px;margin-bottom:10px}
+.banner-lines div{width:30px;height:3px;background:#fff;cursor:pointer}
+
+#bannerText{font-size:13px;max-width:900px;margin:0 auto}
+
+.layout{display:flex;flex:1}
+
+.sidebar{
+width:220px;
+padding:15px;
+border-right:1px solid #eee;
+}
+
+.sidebar a{
+display:block;
+padding:4px 0;
+font-size:13px;
+color:#000;
+}
+
+.main{
+flex:1;
+padding:20px;
+}
+
+.search-box{
+display:flex;
+align-items:center;
+margin-bottom:20px;
+border:1px solid #ddd;
+padding:8px;
+}
+
+.search-box input{
+border:none;
+flex:1;
+outline:none;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:20px;
+}
+
+.card{
+border:1px solid #eee;
+padding:10px;
+text-align:center;
+}
+
+.card img{
+width:100%;
+height:150px;
+object-fit:cover;
+}
+
+.download-btn{
+display:inline-block;
+margin-top:8px;
+padding:6px 12px;
+background:#000;
+color:#fff;
+font-size:12px;
+}
+
+.pagination{
+margin:30px 0;
+text-align:center;
+}
+
+.pagination span{
+margin:0 5px;
+cursor:pointer;
+}
+
+footer{
+background:#000;
+color:#fff;
+text-align:center;
+padding:15px;
+}
+
+.ad{
+margin:20px 0;
+padding:20px;
+border:1px dashed #aaa;
+text-align:center;
+}
+
 @media(max-width:900px){
-.container{flex-direction:column}
-.sidebar{width:100%;display:grid;grid-template-columns:repeat(2,1fr);border-right:none;border-bottom:1px solid #eee}
+.layout{flex-direction:column}
+.sidebar{width:100%;border-right:none;border-bottom:1px solid #eee}
 }
 </style>
 </head>
+
 <body oncontextmenu="return false">
 
 <header>
-<div class="logo">FREE VECTOR STOCK</div>
-<div class="lines">
-<span onclick="changeText(0)"></span>
-<span onclick="changeText(1)"></span>
-<span onclick="changeText(2)"></span>
-<span onclick="changeText(3)"></span>
-<span onclick="changeText(4)"></span>
+<h1>FREE VECTOR STOCK</h1>
+<div class="banner-lines">
+<div onclick="changeText(0)"></div>
+<div onclick="changeText(1)"></div>
+<div onclick="changeText(2)"></div>
+<div onclick="changeText(3)"></div>
+<div onclick="changeText(4)"></div>
 </div>
-<div class="subtext" id="subtext">
+<div id="bannerText">
 We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.
 </div>
 </header>
 
-<div class="ad">Advertisement Area</div>
+<div class="layout">
 
-<div class="container">
 <div class="sidebar" id="categories"></div>
 
 <div class="main">
-<div class="searchbox">
-<input type="text" placeholder="🔍 Search vectors..." onkeyup="searchData(this.value)">
+
+<div class="search-box">
+🔍 <input type="text" id="search" placeholder="Search vectors..." onkeyup="render()">
 </div>
+
+<div class="ad">Advertisement Area</div>
 
 <div class="grid" id="grid"></div>
 
@@ -66,167 +147,110 @@ We operate our own in-house studio to produce graphic designs and offer them fre
 
 <div class="ad">Advertisement Area</div>
 
-<h3>Related Stock Vectors</h3>
-<div class="grid" id="related"></div>
-
 </div>
 </div>
 
 <footer>
-© 2026 ® FREE VECTOR STOCK | 
-<a href="mailto:hakankacar2014@gmail.com" style="color:white">Info</a>
+© 2026 ® FREE VECTOR STOCK |
+<a href="mailto:hakankacar2014@gmail.com" style="color:#fff">Info</a>
 </footer>
 
 <script>
-const USER="free-vector-stock";
-const REPO="free-vector-stock";
-const BRANCH="main";
-
 const categories=[
 "Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion",
 "Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink",
 "Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature",
 "Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols",
 "Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"
-].sort();
+].sort()
 
-let allData=[];
-let filtered=[];
-let currentPage=1;
-const perPage=30;
-
-const messages=[
+const bannerTexts=[
 "We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",
 "Our goal is to provide a comprehensive and ideal platform for those seeking graphic resources.",
 "We aim to offer a wide archive of graphics, including vector illustrations, stock photos, icons, logos, and various design elements.",
 "Our only and absolute rule is that our files may not be redistributed in any way.",
-"Our website's sustainability depends on advertising revenue. Please disable any ad blocker and refresh the page."
-];
-function changeText(i){document.getElementById("subtext").innerText=messages[i];}
+"Our website's sustainability depends on advertising revenue. Some features may be restricted while an ad blocker is active."
+]
 
-function loadCategories(){
-let box=document.getElementById("categories");
-categories.forEach(cat=>{
-let d=document.createElement("div");
-d.innerText=cat;
-d.onclick=()=>filterCategory(cat);
-box.appendChild(d);
-});
+function changeText(i){document.getElementById("bannerText").innerText=bannerTexts[i]}
+
+categories.forEach(c=>{
+let a=document.createElement("a")
+a.innerText=c
+a.onclick=()=>filterCategory=c
+document.getElementById("categories").appendChild(a)
+})
+
+let filterCategory=""
+let page=1
+const perPage=30
+
+async function fetchFiles(){
+let res=await fetch("https://api.github.com/repos/free-vector-stock/free-vector-stock/contents/assets")
+return res.json()
 }
 
-async function loadData(){
-const res=await fetch(`https://api.github.com/repos/${USER}/${REPO}/git/trees/${BRANCH}?recursive=1`);
-const data=await res.json();
-const jpgs=data.tree.filter(f=>f.path.endsWith(".jpg"));
+let allFiles=[]
 
-allData=jpgs.map(f=>{
-let base=f.path.replace(".jpg","");
-return{
-thumb:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${f.path}`,
-eps:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${base}.eps`,
-svg:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${base}.svg`,
-json:`https://raw.githubusercontent.com/${USER}/${REPO}/${BRANCH}/${base}.json`,
-name:base.split("/").pop(),
-category:f.path.split("/")[1]
-};
-});
-filtered=[...allData];
-render();
-}
-
-async function render(){
-let grid=document.getElementById("grid");
-grid.innerHTML="";
-let start=(currentPage-1)*perPage;
-let items=filtered.slice(start,start+perPage);
-
-for(let item of items){
-let title=item.name;
-let keywords="";
+async function init(){
 try{
-let r=await fetch(item.json);
-if(r.ok){
-let j=await r.json();
-title=j.title||title;
-keywords=j.keywords||"";
+let data=await fetchFiles()
+allFiles=data
+render()
+}catch(e){console.log(e)}
 }
-}catch{}
 
-let card=document.createElement("div");
-card.className="card";
+function render(){
+let grid=document.getElementById("grid")
+grid.innerHTML=""
+let search=document.getElementById("search").value.toLowerCase()
+
+let filtered=allFiles.filter(f=>{
+let matchCategory=filterCategory?f.name.toLowerCase().includes(filterCategory.toLowerCase()):true
+let matchSearch=f.name.toLowerCase().includes(search)
+return matchCategory&&matchSearch
+})
+
+let start=(page-1)*perPage
+let items=filtered.slice(start,start+perPage)
+
+items.forEach(f=>{
+let card=document.createElement("div")
+card.className="card"
 card.innerHTML=`
-<img loading="lazy" src="${item.thumb}">
-<h4>${title}</h4>
-<p>${keywords}</p>
-<div class="ad">Advertisement Area</div>
-<button onclick="downloadPage('${item.eps}')">Download EPS</button>
-<button onclick="downloadPage('${item.svg}')">Download SVG</button>
-<button onclick="downloadPage('${item.thumb}')">Download JPG</button>
-`;
-grid.appendChild(card);
+<img src="${f.download_url}" loading="lazy">
+<div>${f.name}</div>
+<a class="download-btn" onclick="prepareDownload('${f.download_url}')">Download</a>
+`
+grid.appendChild(card)
+})
+
+renderPagination(filtered.length)
 }
 
-renderPagination();
-renderRelated();
-}
-
-function renderPagination(){
-let total=Math.ceil(filtered.length/perPage);
-let pag=document.getElementById("pagination");
-pag.innerHTML="";
-for(let i=1;i<=total;i++){
-let s=document.createElement("span");
-s.innerText=i;
-s.onclick=()=>{currentPage=i;render()};
-pag.appendChild(s);
+function renderPagination(total){
+let totalPages=Math.ceil(total/perPage)
+let p=document.getElementById("pagination")
+p.innerHTML=""
+for(let i=1;i<=totalPages;i++){
+let s=document.createElement("span")
+s.innerText=i
+s.onclick=()=>{page=i;render()}
+p.appendChild(s)
 }
 }
 
-function renderRelated(){
-let rel=document.getElementById("related");
-rel.innerHTML="";
-filtered.slice(0,20).forEach(i=>{
-let d=document.createElement("div");
-d.className="card";
-d.innerHTML=`<img loading="lazy" src="${i.thumb}">`;
-rel.appendChild(d);
-});
-}
-
-function searchData(val){
-filtered=allData.filter(d=>d.name.toLowerCase().includes(val.toLowerCase()));
-currentPage=1;
-render();
-}
-
-function filterCategory(cat){
-filtered=allData.filter(d=>d.category===cat);
-currentPage=1;
-render();
-}
-
-function downloadPage(url){
-let w=window.open("");
+function prepareDownload(url){
+let w=window.open()
 w.document.write(`
-<h2>Your file is being prepared... 10 seconds remaining</h2>
-<div style="background:#eee;padding:50px;margin:20px 0;text-align:center">Advertisement Area</div>
-<p id="count">10</p>
-<script>
-let t=10;
-let interval=setInterval(()=>{
-t--;
-document.getElementById("count").innerText=t;
-if(t==0){
-clearInterval(interval);
-window.location='${url}';
-}
-},1000);
-<\/script>
-`);
+<h2 style="font-family:Arial">Your file is being prepared...</h2>
+<p>Download will start in 10 seconds.</p>
+<div style="border:1px dashed #aaa;padding:20px;text-align:center;margin-top:20px">Advertisement Area</div>
+`)
+setTimeout(()=>{w.location=url},10000)
 }
 
-loadCategories();
-loadData();
+init()
 </script>
 
 </body>
