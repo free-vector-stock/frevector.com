@@ -1,184 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FREE VECTOR STOCK | Download Free Vectors, EPS, SVG & High-Res JPG</title>
-    <meta name="description" content="Download over 7,000+ free vectors, icons, and illustrations. High-quality EPS, SVG, and JPG files for personal and commercial use.">
-    <meta name="keywords" content="free vectors, stock vectors, svg icons, eps download, free illustrations, graphic resources">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: #ffffff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        .main-container { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 260px; background: #f8f9fa; border-right: 1px solid #eee; overflow-y: auto; height: 100%; }
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
-        .vector-card { border: 1px solid #eee; transition: all 0.3s; position: relative; }
-        .vector-card:hover { border-color: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .ad-space { background: #fafafa; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
-        .sticky-banner { background: #000; color: #fff; padding: 10px 20px; z-index: 1000; }
-        .category-link { padding: 10px 20px; display: block; color: #333; transition: 0.2s; border-left: 4px solid transparent; }
-        .category-link:hover, .category-link.active { background: #eee; border-left-color: #000; font-weight: bold; }
-        #downloadModal { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
-        .line-tab { width: 30px; height: 3px; background: #555; cursor: pointer; transition: 0.3s; }
-        .line-tab.active { background: #fff; width: 50px; }
-        img { -webkit-user-drag: none; user-select: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FREE VECTOR STOCK - Free Vector Download Library</title>
+
+<meta name="description" content="Download free vectors, EPS10, SVG and high resolution JPEG files for personal and commercial use. FREE VECTOR STOCK professional vector library.">
+<meta name="keywords" content="free vector download, free eps10, free svg, free stock vectors, vector library, graphic resources">
+<meta name="robots" content="index, follow">
+
+<link rel="canonical" href="https://free-vector-stock.github.io/free-vector-stock/">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#ffffff;color:#111}
+a{text-decoration:none;color:inherit}
+
+header,footer{background:#000;color:#fff;width:100%}
+header{padding:15px;text-align:center}
+.logo{font-size:28px;font-weight:bold}
+.menu-toggle{margin-top:10px;cursor:pointer}
+.top-text{margin-top:10px;font-size:14px;min-height:60px}
+
+.container{display:flex;width:100%}
+.sidebar{
+width:220px;
+padding:15px;
+border-right:1px solid #ddd;
+}
+.sidebar ul{list-style:none}
+.sidebar li{padding:4px 0;font-size:13px}
+.sidebar a:hover{font-weight:bold}
+
+.main{flex:1;padding:15px}
+
+.search-box{
+margin-bottom:20px;
+display:flex;
+align-items:center;
+border:1px solid #ccc;
+padding:8px;
+}
+.search-box input{
+border:none;
+flex:1;
+outline:none;
+font-size:14px;
+}
+
+.ad{background:#f1f1f1;text-align:center;padding:20px;margin:20px 0;font-weight:bold}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+gap:15px;
+}
+
+.card{
+border:1px solid #ddd;
+padding:10px;
+text-align:center;
+}
+
+.card img{
+width:100%;
+height:150px;
+object-fit:cover;
+}
+
+.download-btn{
+background:#000;
+color:#fff;
+padding:6px 10px;
+display:inline-block;
+margin-top:6px;
+font-size:12px;
+}
+
+.pagination{
+margin-top:20px;
+text-align:center;
+}
+
+.related{
+margin-top:40px;
+}
+
+footer{
+padding:20px;
+text-align:center;
+}
+
+@media(max-width:768px){
+.container{flex-direction:column}
+.sidebar{
+width:100%;
+overflow-x:auto;
+white-space:nowrap;
+}
+.sidebar li{display:inline-block;margin-right:10px}
+}
+</style>
 </head>
-<body oncontextmenu="return false;">
 
-    <header class="sticky-banner">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <h1 class="text-2xl font-bold tracking-tighter">FREE VECTOR STOCK</h1>
-            <div class="flex-1 max-w-2xl px-4">
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Search 7,000+ free vectors..." class="w-full py-2 px-10 rounded-full text-black focus:outline-none">
-                    <i class="fa fa-search absolute left-4 top-3 text-gray-400"></i>
-                </div>
-            </div>
-            <div class="text-xs text-right hidden lg:block" id="headerText">
-                We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.
-            </div>
-        </div>
-        <div class="flex gap-2 mt-2 justify-center" id="textTabs">
-            <div class="line-tab active" onclick="changeText(0)"></div>
-            <div class="line-tab" onclick="changeText(1)"></div>
-            <div class="line-tab" onclick="changeText(2)"></div>
-            <div class="line-tab" onclick="changeText(3)"></div>
-            <div class="line-tab" onclick="changeText(4)"></div>
-        </div>
-    </header>
+<body oncontextmenu="return false">
 
-    <div class="ad-space h-[90px] w-full">ADVERTISEMENT - TOP BANNER</div>
+<header>
+<div class="logo">FREE VECTOR STOCK</div>
 
-    <div class="main-container">
-        <aside class="sidebar py-4" id="categorySidebar">
-            <h3 class="px-5 mb-4 font-bold text-sm uppercase text-gray-500">Categories</h3>
-            </aside>
+<div class="menu-toggle" onclick="changeText()">|||||</div>
+<div class="top-text" id="topText">
+We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.
+</div>
+</header>
 
-        <main class="content-area">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6" id="vectorGrid">
-                </div>
+<div class="ad">Advertisement Area</div>
 
-            <div class="mt-12">
-                <h3 class="text-xl font-bold mb-6">Related Stock Vectors</h3>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="relatedGrid"></div>
-            </div>
+<div class="container">
 
-            <div class="ad-space h-[250px] w-full mt-10">ADVERTISEMENT - CONTENT BOTTOM</div>
-        </main>
-    </div>
+<div class="sidebar">
+<ul>
+<li><a href="?cat=Abstract">Abstract</a></li>
+<li><a href="?cat=Animals/Wildlife">Animals/Wildlife</a></li>
+<li><a href="?cat=The Arts">The Arts</a></li>
+<li><a href="?cat=Backgrounds/Textures">Backgrounds/Textures</a></li>
+<li><a href="?cat=Beauty/Fashion">Beauty/Fashion</a></li>
+<li><a href="?cat=Buildings/Landmarks">Buildings/Landmarks</a></li>
+<li><a href="?cat=Business/Finance">Business/Finance</a></li>
+<li><a href="?cat=Celebrities">Celebrities</a></li>
+<li><a href="?cat=Education">Education</a></li>
+<li><a href="?cat=Food">Food</a></li>
+<li><a href="?cat=Drink">Drink</a></li>
+<li><a href="?cat=Healthcare/Medical">Healthcare/Medical</a></li>
+<li><a href="?cat=Holidays">Holidays</a></li>
+<li><a href="?cat=Industrial">Industrial</a></li>
+<li><a href="?cat=Interiors">Interiors</a></li>
+<li><a href="?cat=Miscellaneous">Miscellaneous</a></li>
+<li><a href="?cat=Nature">Nature</a></li>
+<li><a href="?cat=Objects">Objects</a></li>
+<li><a href="?cat=Parks/Outdoor">Parks/Outdoor</a></li>
+<li><a href="?cat=People">People</a></li>
+<li><a href="?cat=Religion">Religion</a></li>
+<li><a href="?cat=Science">Science</a></li>
+<li><a href="?cat=Signs/Symbols">Signs/Symbols</a></li>
+<li><a href="?cat=Sports/Recreation">Sports/Recreation</a></li>
+<li><a href="?cat=Technology">Technology</a></li>
+<li><a href="?cat=Transportation">Transportation</a></li>
+<li><a href="?cat=Vintage">Vintage</a></li>
+<li><a href="?cat=Logo">Logo</a></li>
+<li><a href="?cat=Font">Font</a></li>
+<li><a href="?cat=Icon">Icon</a></li>
+</ul>
+</div>
 
-    <div id="downloadModal">
-        <div class="ad-space w-[336px] h-[280px] mb-6">MOST VALUABLE AD - 336x280</div>
-        <h2 class="text-2xl font-bold mb-2">Your file is being prepared...</h2>
-        <p class="text-gray-500 mb-6">Please wait <span id="timer" class="font-bold text-black text-xl">10</span> seconds.</p>
-        <div id="downloadButtons" class="hidden flex gap-4">
-            <a id="linkJPG" class="bg-black text-white px-6 py-2 rounded" download>Download JPG</a>
-            <a id="linkEPS" class="bg-blue-600 text-white px-6 py-2 rounded" download>Download EPS</a>
-            <a id="linkSVG" class="bg-green-600 text-white px-6 py-2 rounded" download>Download SVG</a>
-        </div>
-        <button onclick="closeModal()" class="mt-10 text-gray-400 underline">Cancel</button>
-    </div>
+<div class="main">
 
-    <footer class="sticky-banner flex justify-between items-center text-xs py-3 px-6">
-        <div>2026 © FREE VECTOR STOCK - Registered Trademark</div>
-        <div class="flex gap-4">
-            <a href="mailto:hakankacar2014@gmail.com" class="hover:underline italic">Info: Contact Developer</a>
-        </div>
-    </footer>
+<div class="search-box">
+🔍 <input type="text" placeholder="Search vectors...">
+</div>
 
-    <script>
-        const GITHUB_USER = "free-vector-stock";
-        const GITHUB_REPO = "free-vector-stock";
-        const CATEGORIES = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"].sort();
-        
-        const bannerTexts = [
-            "We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",
-            "Our goal is to provide a comprehensive and ideal platform for those seeking graphic resources.",
-            "Our only and absolute rule is that our files may not be redistributed in any way.",
-            "The advertisements on our website generate revenue to enable us to continue our work.",
-            "Our website's sustainability depends on advertising revenue. Please disable ad-blockers."
-        ];
+<div class="grid" id="grid"></div>
 
-        function changeText(i) {
-            document.getElementById('headerText').innerText = bannerTexts[i];
-            document.querySelectorAll('.line-tab').forEach((t, idx) => t.classList.toggle('active', i === idx));
-        }
+<div class="pagination">
+1 2 3 4 5 6 7 8 9
+</div>
 
-        function init() {
-            const sidebar = document.getElementById('categorySidebar');
-            CATEGORIES.forEach(cat => {
-                const a = document.createElement('a');
-                a.className = "category-link text-sm";
-                a.href = "#";
-                a.innerText = cat;
-                a.onclick = () => loadCategory(cat);
-                sidebar.appendChild(a);
-            });
-            loadCategory('Food'); // Default
-        }
+<div class="related">
+<h3>Related Stock Vectors</h3>
+<div class="grid" id="related"></div>
+</div>
 
-        async function loadCategory(cat) {
-            const grid = document.getElementById('vectorGrid');
-            grid.innerHTML = "<p class='col-span-full text-center py-20'>Scanning repository for "+cat+"...</p>";
-            
-            try {
-                // Fetch from raw directory (bypass cache)
-                const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/assets/${cat.replace(/\//g,'_')}`;
-                const res = await fetch(url);
-                const files = await res.json();
-                
-                const items = {};
-                files.forEach(f => {
-                    const name = f.name.split('.')[0];
-                    if(!items[name]) items[name] = { name: name, category: cat };
-                    items[name][f.name.split('.').pop().toLowerCase()] = f.download_url;
-                });
+<div class="ad">Advertisement Area</div>
 
-                grid.innerHTML = "";
-                Object.values(items).forEach(item => {
-                    if(!item.jpg) return;
-                    const card = document.createElement('div');
-                    card.className = "vector-card p-2 bg-white";
-                    card.innerHTML = `
-                        <img src="${item.jpg}" class="w-full aspect-square object-cover mb-2" loading="lazy">
-                        <p class="text-[10px] uppercase font-bold text-gray-400 mb-2">${item.name}</p>
-                        <button onclick="openDownload('${item.jpg}', '${item.eps}', '${item.svg}')" class="w-full bg-black text-white text-xs py-2 hover:bg-gray-800">DOWNLOAD</button>
-                    `;
-                    grid.appendChild(card);
-                });
-            } catch (e) {
-                grid.innerHTML = "<p class='col-span-full text-center py-20'>No files found in this category yet.</p>";
-            }
-        }
+</div>
+</div>
 
-        function openDownload(jpg, eps, svg) {
-            const modal = document.getElementById('downloadModal');
-            const timerEl = document.getElementById('timer');
-            const btnGroup = document.getElementById('downloadButtons');
-            modal.style.display = 'flex';
-            btnGroup.classList.add('hidden');
-            
-            let count = 10;
-            timerEl.innerText = count;
-            
-            const interval = setInterval(() => {
-                count--;
-                timerEl.innerText = count;
-                if(count <= 0) {
-                    clearInterval(interval);
-                    btnGroup.classList.remove('hidden');
-                    document.getElementById('linkJPG').href = jpg;
-                    document.getElementById('linkEPS').href = eps || '#';
-                    document.getElementById('linkSVG').href = svg || '#';
-                }
-            }, 1000);
-        }
+<footer>
+© 2026 ® Registered Trademark | 
+<a href="mailto:hakankacar2014@gmail.com">Info</a>
+</footer>
 
-        function closeModal() { document.getElementById('downloadModal').style.display = 'none'; }
+<script>
+const texts=[
+"We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",
+"Our goal is to provide a comprehensive and ideal platform for those seeking graphic resources.",
+"We aim to offer a wide archive of graphics, including vector illustrations, stock photos, icons, logos, and various design elements.",
+"Our only and absolute rule is that our files may not be redistributed in any way.",
+"The advertisements on our website generate revenue to enable us to continue our work. Therefore, we ask for your understanding.",
+"Our website's sustainability depends on advertising revenue. Some features may be restricted while an ad blocker is active. Please disable the blocker and refresh the page."
+];
+let i=0;
+function changeText(){
+i=(i+1)%texts.length;
+document.getElementById("topText").innerText=texts[i];
+}
 
-        init();
-    </script>
+function createCard(name){
+return `
+<div class="card">
+<img src="https://raw.githubusercontent.com/free-vector-stock/free-vector-stock/main/thumbs/${name}.jpg" loading="lazy">
+<div>
+<a class="download-btn" href="download.html?file=${name}">Download</a>
+</div>
+</div>
+`;
+}
+
+for(let n=1;n<=30;n++){
+document.getElementById("grid").innerHTML+=createCard("sample-"+n);
+}
+for(let n=31;n<=50;n++){
+document.getElementById("related").innerHTML+=createCard("sample-"+n);
+}
+</script>
+
 </body>
 </html>
