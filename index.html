@@ -2,36 +2,36 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FREE VECTOR STOCK - Free Vector Download Library</title>
-<meta name="description" content="Download free vector illustrations, EPS files, icons, logos and design resources for personal and commercial use.">
-<meta name="keywords" content="free vector download, eps download, free stock vector, vector illustrations, graphic resources">
+<title>FREE VECTOR STOCK - Free Vector Download</title>
+<meta name="description" content="Download free vector illustrations, EPS, SVG and stock graphics for personal and commercial use.">
+<meta name="keywords" content="free vector download, eps download, free stock vectors, svg vectors">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial;background:#fff;color:#000;display:flex;flex-direction:column;height:100vh}
-header{background:#000;color:#fff;padding:15px;display:flex;justify-content:space-between;align-items:center}
-header h1{font-size:20px}
-.menu{cursor:pointer;font-size:22px}
-.info{padding:10px;font-size:13px;background:#111;color:#fff;display:none}
+body{font-family:Arial;background:#fff;color:#000;height:100vh;display:flex;flex-direction:column}
+header{background:#000;color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:22px}
+.lines{cursor:pointer;font-size:22px}
+.toptext{background:#111;color:#fff;padding:10px;font-size:13px}
 .layout{flex:1;display:flex;overflow:hidden}
-.sidebar{width:220px;padding:10px;background:#fff;border-right:1px solid #ddd}
-.sidebar a{display:block;font-size:12px;padding:4px 0;color:#000;text-decoration:none}
+.sidebar{width:230px;padding:10px;border-right:1px solid #ddd}
+.sidebar a{display:block;font-size:12px;padding:3px 0;color:#000;text-decoration:none}
 .sidebar a:hover{font-weight:bold}
 .main{flex:1;padding:15px;overflow-y:auto}
-.searchbox{width:100%;padding:10px;margin-bottom:15px;border:1px solid #ccc}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px}
-.card{border:1px solid #eee;padding:8px;text-align:center}
+.search{width:100%;padding:10px;border:1px solid #ccc;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:15px}
+.card{border:1px solid #eee;padding:10px}
 .card img{width:100%;height:150px;object-fit:cover}
-button{background:#000;color:#fff;border:none;padding:8px;margin-top:6px;cursor:pointer;width:100%}
-.ad{background:#eee;text-align:center;padding:15px;margin:15px 0}
+.meta{font-size:11px;margin-top:5px}
+button{background:#000;color:#fff;border:none;padding:8px;width:100%;cursor:pointer;margin-top:8px}
+.ad{background:#eee;text-align:center;padding:20px;margin:15px 0}
 .pagination{text-align:center;margin:20px 0}
 .pagination span{margin:0 5px;cursor:pointer}
 footer{background:#000;color:#fff;text-align:center;padding:15px;font-size:14px}
-#downloadPage{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;justify-content:center;align-items:center}
+#downloadPage{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;justify-content:center;align-items:center;z-index:999}
 #downloadPage .ad{width:60%}
-@media(max-width:768px){
-.sidebar{width:140px;font-size:11px}
-.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+@media(max-width:900px){
+.sidebar{display:none}
 }
 </style>
 </head>
@@ -39,29 +39,26 @@ footer{background:#000;color:#fff;text-align:center;padding:15px;font-size:14px}
 
 <header>
 <h1>FREE VECTOR STOCK</h1>
-<div class="menu" onclick="toggleInfo()">☰</div>
+<div class="lines" onclick="changeText()">≡≡≡≡≡</div>
 </header>
 
-<div class="info" id="infoText">
+<div class="toptext" id="topText">
 We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.
 </div>
 
 <div class="layout">
-
-<div class="sidebar" id="categories"></div>
+<div class="sidebar" id="cats"></div>
 
 <div class="main">
-
 <div class="ad">Advertisement Area</div>
 
-<input type="text" id="search" class="searchbox" placeholder="🔍 Search vectors...">
+<input type="text" id="search" class="search" placeholder="🔍 Search vectors...">
 
 <div class="grid" id="grid"></div>
 
 <div class="pagination" id="pagination"></div>
 
 <div class="ad">Advertisement Area</div>
-
 </div>
 </div>
 
@@ -71,7 +68,7 @@ We operate our own in-house studio to produce graphic designs and offer them fre
 
 <div id="downloadPage">
 <h2>Your file is being prepared</h2>
-<p>Download will start in <span id="count">10</span> seconds</p>
+<p>Download starts in <span id="counter">10</span> seconds</p>
 <div class="ad">Advertisement Area</div>
 </div>
 
@@ -88,17 +85,26 @@ const categories=[
 "Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"
 ];
 
-let items=[];
+const texts=[
+"We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",
+"Our goal is to provide a comprehensive and ideal platform for those seeking graphic resources.",
+"We aim to offer a wide archive of graphics including vector illustrations, stock photos, icons and design elements.",
+"Our only and absolute rule is that our files may not be redistributed in any way.",
+"The advertisements on our website generate revenue to enable us to continue our work."
+];
+
+let textIndex=0;
+function changeText(){
+textIndex=(textIndex+1)%texts.length;
+document.getElementById("topText").innerText=texts[textIndex];
+}
+
+let allItems=[];
 let page=1;
 const perPage=30;
 
-function toggleInfo(){
-document.getElementById("infoText").style.display=
-document.getElementById("infoText").style.display==="block"?"none":"block";
-}
-
 function loadCategories(){
-let box=document.getElementById("categories");
+let box=document.getElementById("cats");
 categories.sort().forEach(cat=>{
 let a=document.createElement("a");
 a.innerText=cat;
@@ -109,37 +115,49 @@ box.appendChild(a);
 loadCategories();
 
 async function loadCategory(cat){
-items=[];
+allItems=[];
 page=1;
 let res=await fetch(apiBase+encodeURIComponent(cat));
 if(!res.ok) return;
 let data=await res.json();
-for(let file of data){
-if(file.name.endsWith(".jpg")){
-let base=file.name.replace(".jpg","");
-items.push({cat,base});
+for(let f of data){
+if(f.name.endsWith(".jpg")){
+let base=f.name.replace(".jpg","");
+allItems.push({cat,base});
 }
 }
 render();
 }
 
-function render(){
+async function getMeta(cat,base){
+try{
+let res=await fetch(baseRaw+cat+"/"+base+".json");
+if(!res.ok) return {};
+return await res.json();
+}catch{return {};}
+}
+
+async function render(){
 let grid=document.getElementById("grid");
 grid.innerHTML="";
 let start=(page-1)*perPage;
-let slice=items.slice(start,start+perPage);
-slice.forEach(item=>{
+let slice=allItems.slice(start,start+perPage);
+
+for(let item of slice){
+let meta=await getMeta(item.cat,item.base);
 grid.innerHTML+=`
 <div class="card">
 <img loading="lazy" src="${baseRaw}${item.cat}/${item.base}.jpg">
-<button onclick="prepareDownload('${item.cat}','${item.base}')">Download</button>
+<div class="meta"><b>${meta.title||""}</b><br>${meta.description||""}<br>${meta.keywords||""}</div>
+<div class="ad">Advertisement Area</div>
+<button onclick="download('${item.cat}','${item.base}')">Download</button>
 </div>`;
-});
+}
 renderPagination();
 }
 
 function renderPagination(){
-let total=Math.ceil(items.length/perPage);
+let total=Math.ceil(allItems.length/perPage);
 let p="";
 for(let i=1;i<=total;i++){
 p+=`<span onclick="goPage(${i})">${i}</span>`;
@@ -149,10 +167,10 @@ document.getElementById("pagination").innerHTML=p;
 
 function goPage(i){page=i;render();}
 
-function prepareDownload(cat,base){
+function download(cat,base){
 document.getElementById("downloadPage").style.display="flex";
 let c=10;
-let counter=document.getElementById("count");
+let counter=document.getElementById("counter");
 counter.innerText=c;
 let t=setInterval(()=>{
 c--;
@@ -166,7 +184,7 @@ window.location.href=baseRaw+cat+"/"+base+".zip";
 
 document.getElementById("search").addEventListener("input",function(){
 let q=this.value.toLowerCase();
-items=items.filter(x=>x.base.toLowerCase().includes(q));
+allItems=allItems.filter(x=>x.base.toLowerCase().includes(q));
 render();
 });
 </script>
