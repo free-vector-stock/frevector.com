@@ -2,142 +2,143 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SECURE ADMIN | BATCH UPLOAD SYSTEM</title>
+    <title>CLOUD PANEL | Batch Upload System</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 40px; }
-        .admin-card { max-width: 700px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        h1 { font-size: 24px; text-align: center; color: #000; margin-bottom: 30px; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 13px; color: #555; }
-        input[type="password"], input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .drop-area { border: 2px dashed #000; padding: 50px; text-align: center; cursor: pointer; border-radius: 12px; background: #fafafa; transition: 0.3s; margin-bottom: 20px; }
-        .drop-area:hover { background: #f0f0f0; }
-        #statusLog { background: #000; color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 180px; overflow-y: auto; margin-top: 20px; }
-        .upload-btn { background: #000; color: #fff; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .upload-btn:disabled { background: #888; cursor: not-allowed; }
-        .summary { text-align: center; margin-bottom: 15px; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 40px; }
+        .panel { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { font-size: 22px; text-align: center; color: #333; margin-bottom: 30px; letter-spacing: 1px; }
+        .input-group { margin-bottom: 25px; }
+        label { display: block; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+        input[type="password"], input[type="text"] { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 6px; }
+        .drop-zone { border: 2px dashed #000; padding: 60px; text-align: center; border-radius: 8px; background: #fafafa; cursor: pointer; transition: 0.3s; margin-bottom: 20px; }
+        .drop-zone:hover { background: #f0f0f0; border-color: #555; }
+        #log { background: #1a1a1a; color: #00ff00; padding: 20px; border-radius: 6px; font-family: monospace; font-size: 12px; height: 200px; overflow-y: auto; margin-top: 25px; line-height: 1.5; }
+        .btn-upload { background: #000; color: #fff; width: 100%; padding: 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; text-transform: uppercase; }
+        .btn-upload:disabled { background: #ccc; cursor: not-allowed; }
+        .file-info { text-align: center; font-size: 14px; color: #666; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-<div class="admin-card">
-    <h1>FREE VECTOR STOCK ADMIN</h1>
+<div class="panel">
+    <h1>SECURE BATCH UPLOAD PANEL</h1>
     
     <div class="input-group">
-        <label>GITHUB ACCESS TOKEN (Required)</label>
-        <input type="password" id="ghToken" placeholder="Paste your GitHub token here...">
+        <label>GITHUB PERSONAL ACCESS TOKEN</label>
+        <input type="password" id="token" placeholder="Enter your GitHub Token...">
     </div>
 
-    <div class="drop-area" onclick="document.getElementById('fileInput').click()">
-        <strong>Click or Drop Files Here</strong><br>
-        <small>Select all JPG, EPS, SVG, and JSON files together.</small>
+    <div class="drop-zone" onclick="document.getElementById('files').click()">
+        <strong>DRAG & DROP FILES OR CLICK TO SELECT</strong>
+        <p style="font-size: 12px; margin-top: 10px; color: #888;">Select JPG, EPS, SVG and JSON files at once</p>
     </div>
-    <input type="file" id="fileInput" multiple style="display:none" onchange="showSummary()">
+    <input type="file" id="files" multiple style="display:none" onchange="updateInfo()">
 
-    <div id="fileSummary" class="summary">No files selected</div>
+    <div id="fileInfo" class="file-info">No files selected</div>
 
-    <button class="upload-btn" id="startBtn" onclick="processUploads()">START CLOUD DEPLOYMENT</button>
+    <button class="btn-upload" id="upBtn" onclick="startCloudProcess()">START GLOBAL DEPLOYMENT</button>
 
-    <div id="statusLog">System ready. Awaiting files...</div>
+    <div id="log">System ready... awaiting instructions.</div>
 </div>
 
 <script>
-    const G_OWNER = "free-vector-stock", G_REPO = "free-vector-stock";
-    const categories = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","icon"];
+    const G_USER = "free-vector-stock", G_REPO = "free-vector-stock";
+    const categories = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"];
 
-    function log(m) {
-        const s = document.getElementById('statusLog');
-        s.innerHTML += `> ${m}<br>`;
-        s.scrollTop = s.scrollHeight;
+    function writeLog(msg) {
+        const l = document.getElementById('log');
+        l.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+        l.scrollTop = l.scrollHeight;
     }
 
-    function showSummary() {
-        const files = document.getElementById('fileInput').files;
-        document.getElementById('fileSummary').innerText = `${files.length} files selected for matching.`;
+    function updateInfo() {
+        const count = document.getElementById('files').files.length;
+        document.getElementById('fileInfo').innerText = `${count} files prepared for processing.`;
     }
 
-    async function processUploads() {
-        const token = document.getElementById('ghToken').value;
-        const files = Array.from(document.getElementById('fileInput').files);
+    async function startCloudProcess() {
+        const token = document.getElementById('token').value;
+        const files = Array.from(document.getElementById('files').files);
         
-        if(!token) { alert("Please enter GitHub Token!"); return; }
-        if(files.length === 0) { alert("Please select files!"); return; }
+        if(!token) { alert("GitHub Token is required!"); return; }
+        if(files.length === 0) { alert("Select files first!"); return; }
 
-        document.getElementById('startBtn').disabled = true;
-        log("Initiating Batch Upload Process...");
+        const btn = document.getElementById('upBtn');
+        btn.disabled = true;
+        writeLog("Process started. Analyzing local files...");
 
         try {
-            // Get Master Commit SHA
-            const master = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/refs/heads/main`, {
+            // Get Current Main SHA
+            const head = await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/git/refs/heads/main`, {
                 headers: { 'Authorization': `token ${token}` }
             }).then(r => r.json());
-            const baseSha = master.object.sha;
+            const baseSha = head.object.sha;
 
-            const treeEntries = [];
+            const treeData = [];
 
-            for(let file of files) {
-                // Category Detection Logic
-                let detectedCat = "Miscellaneous";
-                const lowerName = file.name.toLowerCase();
+            for(let f of files) {
+                // Determine Category
+                let targetCat = "Miscellaneous";
+                const lowName = f.name.toLowerCase();
                 for(let cat of categories) {
-                    if(lowerName.includes(cat.toLowerCase().split('/')[0])) {
-                        detectedCat = cat;
+                    if(lowName.includes(cat.toLowerCase().split('/')[0])) {
+                        targetCat = cat;
                         break;
                     }
                 }
 
-                const b64 = await toBase64(file);
+                const base64Content = await toB64(f);
                 
-                // Upload as Blob
-                const blobRes = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/blobs`, {
+                // Create Blob
+                const blob = await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/git/blobs`, {
                     method: 'POST',
                     headers: { 'Authorization': `token ${token}` },
-                    body: JSON.stringify({ content: b64, encoding: 'base64' })
+                    body: JSON.stringify({ content: base64Content, encoding: 'base64' })
                 }).then(r => r.json());
 
-                treeEntries.push({
-                    path: `assets/${detectedCat}/${file.name}`,
+                treeData.push({
+                    path: `assets/${targetCat}/${f.name}`,
                     mode: "100644",
                     type: "blob",
-                    sha: blobRes.sha
+                    sha: blob.sha
                 });
-                log(`Hashed: ${file.name} -> Folder: ${detectedCat}`);
+                writeLog(`Mapped: ${f.name} -> ${targetCat}`);
             }
 
-            log("Building cloud folder structure...");
-            const newTree = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/trees`, {
+            writeLog("Generating cloud tree structure...");
+            const newTree = await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/git/trees`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ base_tree: baseSha, tree: treeEntries })
+                body: JSON.stringify({ base_tree: baseSha, tree: treeData })
             }).then(r => r.json());
 
-            log("Creating sync commit...");
-            const commit = await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/commits`, {
+            writeLog("Finalizing commit...");
+            const commit = await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/git/commits`, {
                 method: 'POST',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ message: `Cloud Update: Added ${files.length} assets`, tree: newTree.sha, parents: [baseSha] })
+                body: JSON.stringify({ message: `System: Batch Upload ${files.length} items`, tree: newTree.sha, parents: [baseSha] })
             }).then(r => r.json());
 
-            log("Pushing to GitHub Main branch...");
-            await fetch(`https://api.github.com/repos/${G_OWNER}/${G_REPO}/git/refs/heads/main`, {
+            writeLog("Updating repository reference...");
+            await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/git/refs/heads/main`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ sha: commit.sha })
             });
 
-            log("DONE! Your files are now live on the server.");
-            alert("Upload Success! Please refresh your main site in a few moments.");
+            writeLog("SUCCESS! Deployment completed successfully.");
+            alert("Upload Finished! The site will update in a minute.");
         } catch(e) {
-            log("CRITICAL ERROR: " + e.message);
+            writeLog("FATAL ERROR: " + e.message);
         }
-        document.getElementById('startBtn').disabled = false;
+        btn.disabled = false;
     }
 
-    const toBase64 = file => new Promise((resolve, reject) => {
+    const toB64 = file => new Promise((res, rej) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = error => reject(error);
+        reader.onload = () => res(reader.result.split(',')[1]);
+        reader.onerror = e => rej(e);
     });
 </script>
 </body>
