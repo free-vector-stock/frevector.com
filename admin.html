@@ -8,12 +8,15 @@
         body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh}
         .container{background:#fff;padding:40px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:100%;max-width:600px}
         h2{text-align:center;margin-bottom:25px;color:#1a1a1a;border-bottom:2px solid #000;padding-bottom:10px}
-        input,button{width:100%;padding:14px;margin-bottom:15px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box}
+        input,button,select{width:100%;padding:14px;margin-bottom:15px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box}
         button{background:#000;color:#fff;font-weight:bold;cursor:pointer;border:none;transition:0.3s}
         button:hover{background:#333}
+        button:disabled{background:#ccc;cursor:not-allowed}
         #status{max-height:250px;overflow-y:auto;background:#fafafa;padding:15px;border-radius:6px;font-size:12px;border:1px solid #eee}
-        .success{color:#27ae60;font-weight:bold} .error{color:#e74c3c;font-weight:bold}
+        .success{color:#27ae60;font-weight:bold;margin-bottom:5px} 
+        .error{color:#e74c3c;font-weight:bold;margin-bottom:5px}
         .info{font-size:11px;color:#666;text-align:center;margin-bottom:10px}
+        .progress-item { border-bottom: 1px solid #eee; padding: 5px 0; }
     </style>
 </head>
 <body>
@@ -22,7 +25,7 @@
         <p class="info">Select JPG, ZIP, and JSON files with identical names together.</p>
         <input type="password" id="token" placeholder="GitHub Personal Access Token">
         <input type="file" id="fileInput" multiple>
-        <button onclick="startUpload()">START MULTI-UPLOAD</button>
+        <button id="uploadBtn" onclick="startUpload()">START MULTI-UPLOAD & UPDATE DB</button>
         <div id="status">Ready...</div>
     </div>
 
@@ -38,15 +41,28 @@ function getCat(filename){
 
 async function startUpload() {
     const token = document.getElementById('token').value;
-    const files = document.getElementById('fileInput').files;
+    const files = Array.from(document.getElementById('fileInput').files);
     const status = document.getElementById('status');
+    const btn = document.getElementById('uploadBtn');
     
     if(!token || files.length === 0) { alert("Token and files required!"); return; }
+    
+    btn.disabled = true;
+    btn.innerText = "UPLOADING...";
     status.innerHTML = "Starting upload process...<br>";
 
+    let newEntries = [];
+
+    // Önce dosyaları yükle
     for (let file of files) {
         const cat = getCat(file.name);
         const path = `assets/${cat}/${file.name}`;
+        
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'progress-item';
+        itemDiv.innerText = `Processing: ${file.name}...`;
+        status.appendChild(itemDiv);
+        status.scrollTop = status.scrollHeight;
         
         try {
             const content = await toBase64(file);
@@ -67,16 +83,99 @@ async function startUpload() {
             });
 
             if(res.ok) {
-                status.innerHTML += `<div class="success">Uploaded: ${file.name} to ${cat}</div>`;
+                itemDiv.innerHTML = `<span class="success">✓ Uploaded: ${file.name} to ${cat}</span>`;
+                
+                // Eğer JPG ise database için hazırla
+                if(file.name.toLowerCase().endsWith('.jpg')) {
+                    const baseName = file.name.replace(/\.[^/.]+$/, "");
+                    // Aynı isimli JSON dosyasını bulmaya çalış
+                    const jsonFile = files.find(f => f.name === baseName + ".json");
+                    let meta = { description: "", keywords: "" };
+                    
+                    if(jsonFile) {
+                        try {
+                            const jsonText = await jsonFile.text();
+                            const parsed = JSON.parse(jsonText);
+                            meta.description = parsed.description || "";
+                            meta.keywords = parsed.keywords || "";
+                        } catch(e) { console.error("JSON parse error", e); }
+                    }
+
+                    newEntries.push({
+                        name: baseName,
+                        category: cat,
+                        description: meta.description || "Professional stock vector for commercial use.",
+                        keywords: meta.keywords || "vector, free, stock",
+                        date: new Date().toISOString().split('T')[0]
+                    });
+                }
             } else {
                 const errData = await res.json();
                 throw new Error(errData.message || "Upload failed");
             }
         } catch (e) {
-            status.innerHTML += `<div class="error">Failed: ${file.name} (${e.message})</div>`;
+            itemDiv.innerHTML = `<span class="error">✗ Failed: ${file.name} (${e.message})</span>`;
         }
         status.scrollTop = status.scrollHeight;
     }
+
+    // Database.json güncelleme
+    if(newEntries.length > 0) {
+        const dbDiv = document.createElement('div');
+        dbDiv.className = 'progress-item';
+        dbDiv.innerText = "Updating database.json...";
+        status.appendChild(dbDiv);
+
+        try {
+            const dbPath = "database.json";
+            const dbSha = await getSha(dbPath, token);
+            let currentDb = [];
+
+            if(dbSha) {
+                const dbRes = await fetch(`https://api.github.com/repos/${repo}/contents/${dbPath}`, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+                const dbData = await dbRes.json();
+                currentDb = JSON.parse(decodeURIComponent(escape(atob(dbData.content))));
+            }
+
+            // Yeni verileri ekle (varsa eskileri güncelle, yoksa ekle)
+            newEntries.forEach(entry => {
+                const idx = currentDb.findIndex(item => item.name === entry.name && item.category === entry.category);
+                if(idx > -1) currentDb[idx] = entry;
+                else currentDb.push(entry);
+            });
+
+            // Tarihe göre sırala (en yeni en üstte)
+            currentDb.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const updateRes = await fetch(`https://api.github.com/repos/${repo}/contents/${dbPath}`, {
+                method: "PUT",
+                headers: { 
+                    "Authorization": `token ${token}`, 
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Update database.json with new entries and metadata",
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(currentDb, null, 2)))),
+                    sha: dbSha || undefined
+                })
+            });
+
+            if(updateRes.ok) {
+                dbDiv.innerHTML = `<span class="success">✓ Database updated successfully!</span>`;
+            } else {
+                throw new Error("Database update failed");
+            }
+        } catch(e) {
+            dbDiv.innerHTML = `<span class="error">✗ Database Error: ${e.message}</span>`;
+        }
+    }
+    
+    btn.disabled = false;
+    btn.innerText = "START MULTI-UPLOAD & UPDATE DB";
+    status.innerHTML += "<br><b>Process completed.</b>";
+    status.scrollTop = status.scrollHeight;
 }
 
 const toBase64 = file => new Promise((resolve, reject) => {
