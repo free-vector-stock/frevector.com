@@ -217,7 +217,15 @@ function startDL(cat, name) {
         if(count <= 0) {
             clearInterval(itv);
             modal.style.display = "none";
-            window.location.href = `${rawBase}${cat}/${name}.zip`;
+            
+            // ZIP İndirme Çözümü: Gizli bir link oluşturup tetikleme
+            const downloadUrl = `${rawBase}${encodeURIComponent(cat)}/${encodeURIComponent(name)}.zip`;
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `${name}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     }, 1000);
 }
