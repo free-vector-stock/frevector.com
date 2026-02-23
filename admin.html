@@ -2,265 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ADMIN - FREE VECTOR STOCK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;margin:0;padding:20px;display:flex;flex-direction:column;align-items:center;min-height:100vh}
-        .container{background:#fff;padding:30px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.1);width:100%;max-width:800px;margin-bottom:20px}
-        h2{text-align:center;margin-bottom:20px;color:#1a1a1a;border-bottom:2px solid #000;padding-bottom:10px}
-        input,button,select{width:100%;padding:12px;margin-bottom:15px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box}
-        button{background:#000;color:#fff;font-weight:bold;cursor:pointer;border:none;transition:0.3s}
-        button:hover{background:#333}
-        button:disabled{background:#ccc;cursor:not-allowed}
-        #status{max-height:200px;overflow-y:auto;background:#fafafa;padding:15px;border-radius:6px;font-size:12px;border:1px solid #eee;margin-bottom:20px}
-        .success{color:#27ae60;font-weight:bold;margin-bottom:5px} 
-        .error{color:#e74c3c;font-weight:bold;margin-bottom:5px}
-        .info{font-size:11px;color:#666;text-align:center;margin-bottom:10px}
-        
-        /* CATEGORY STATS TABLE */
-        .stats-container { background:#fff; padding:20px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.05); width:100%; max-width:800px; overflow-x:auto; }
-        table { width:100%; border-collapse:collapse; font-size:14px; }
-        th, td { padding:12px; text-align:left; border-bottom:1px solid #eee; }
-        th { background:#f8f8f8; font-weight:bold; color:#333; }
-        tr:hover { background:#fafafa; }
-        .badge { background:#000; color:#fff; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; }
-        .count-cell { font-weight:900; color:#000; font-size:16px; }
-    </style>
+    <title>Free Vector, SVG, EPS & JPEG Downloads - Frevector</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h2>STOCK MULTI-UPLOAD PANEL</h2>
-        <p class="info">Select JPG, ZIP, and JSON files with identical names together.</p>
-        <input type="password" id="token" placeholder="GitHub Personal Access Token">
-        <input type="file" id="fileInput" multiple>
-        <button id="uploadBtn" onclick="startUpload()">START MULTI-UPLOAD & UPDATE DB</button>
-        <div id="status">Ready...</div>
-        <button onclick="loadStats()" style="background:#444; margin-top:10px;">REFRESH CATEGORY STATS</button>
+    <div class="top-black-bar">
+        <div class="dash-indicators"><span></span><span></span><span></span><span></span><span></span></div>
+        <div id="announcement-text" class="fade-in-out"></div>
     </div>
 
-    <div class="stats-container">
-        <h3 style="margin-top:0; font-size:18px; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:15px;">Category Download Statistics</h3>
-        <table id="statsTable">
-            <thead>
-                <tr>
-                    <th>Category Name</th>
-                    <th style="text-align:center;">Total Downloads</th>
-                    <th style="text-align:center;">Total Vectors</th>
-                </tr>
-            </thead>
-            <tbody id="statsBody">
-                <tr><td colspan="3" style="text-align:center; color:#999; padding:30px;">Click "Refresh" to load statistics...</td></tr>
-            </tbody>
-        </table>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="logo.png" class="nav-logo" alt="frevector" onclick="location.reload()">
+        </div>
+        <div class="search-section">
+            <div class="search-input-wrapper">
+                <span class="black-magnifier">🔍</span> <input type="text" placeholder="Search vectors by keywords...">
+            </div>
+            <select class="time-filter">
+                <option>Anytime</option>
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="site-layout">
+        <aside class="side-nav">
+            <h3>CATEGORIES</h3>
+            <ul id="catList">
+                <li class="active">Abstract</li>
+                <li>Animals/Wildlife</li>
+                <li>Backgrounds/Textures</li>
+                <li>Beauty/Fashion</li>
+                <li>Buildings/Landmarks</li>
+                <li>Business/Finance</li>
+                <li>Celebrities</li>
+                <li>Education</li>
+                <li>Food</li>
+                <li>Icon</li>
+                <li>Logo</li>
+                <li>Nature</li>
+                <li>Technology</li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <h1 id="seo-title">Free Abstract Vectors – SVG, EPS and JPEG Formats</h1>
+
+            <div class="vector-grid" id="vectorGrid">
+                </div>
+
+            <section id="featured" class="special-picks">
+                <div class="picks-header">
+                    <button class="nav-arrow">←</button>
+                    <h2>Picked for you</h2>
+                    <button class="nav-arrow">→</button>
+                </div>
+                <div class="picks-slider"></div>
+            </section>
+
+            <div class="hybrid-nav-container">
+                <button class="next-page-btn">Next</button>
+                <div class="pagination-controls">
+                    <button class="arrow">←</button>
+                    <div class="page-indicator">
+                        <input type="number" value="1" id="pageNumberInput"> / <span id="totalPages">12.529</span>
+                    </div>
+                    <button class="arrow">→</button>
+                </div>
+            </div>
+        </main>
     </div>
 
-<script>
-const repo = "free-vector-stock/free-vector-stock";
-const cats = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"];
+    <footer class="main-footer">
+        <div class="footer-left">2026 © frevector.com Registered Trademark</div>
+        <div class="footer-right">
+            <a href="about.html">About Us</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </footer>
 
-function getCat(filename){
-    let prefix = filename.split('-')[0].toLowerCase();
-    let found = cats.find(c => c.toLowerCase().replace(/[^a-z]/g,"").includes(prefix));
-    return found || "Miscellaneous";
-}
-
-async function startUpload() {
-    const token = document.getElementById('token').value;
-    const files = Array.from(document.getElementById('fileInput').files);
-    const status = document.getElementById('status');
-    const btn = document.getElementById('uploadBtn');
-    
-    if(!token || files.length === 0) { alert("Token and files required!"); return; }
-    
-    btn.disabled = true;
-    btn.innerText = "UPLOADING...";
-    status.innerHTML = "Starting upload process...<br>";
-
-    let newEntries = [];
-
-    for (let file of files) {
-        const cat = getCat(file.name);
-        const path = `assets/${cat}/${file.name}`;
-        
-        const itemDiv = document.createElement('div');
-        itemDiv.innerText = `Processing: ${file.name}...`;
-        status.appendChild(itemDiv);
-        status.scrollTop = status.scrollHeight;
-        
-        try {
-            const content = await toBase64(file);
-            const sha = await getSha(path, token);
-            
-            const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-                method: "PUT",
-                headers: { 
-                    "Authorization": `token ${token}`, 
-                    "Content-Type": "application/json",
-                    "Accept": "application/vnd.github.v3+json"
-                },
-                body: JSON.stringify({
-                    message: `Upload ${file.name} to ${cat}`,
-                    content: content,
-                    sha: sha || undefined
-                })
-            });
-
-            if(res.ok) {
-                itemDiv.innerHTML = `<span class="success">✓ Uploaded: ${file.name}</span>`;
-                
-                if(file.name.toLowerCase().endsWith('.jpg')) {
-                    const baseName = file.name.replace(/\.[^/.]+$/, "");
-                    const jsonFile = files.find(f => f.name === baseName + ".json");
-                    let meta = { description: "", keywords: "" };
-                    
-                    if(jsonFile) {
-                        try {
-                            const jsonText = await jsonFile.text();
-                            const parsed = JSON.parse(jsonText);
-                            meta.description = parsed.description || "";
-                            meta.keywords = parsed.keywords || "";
-                        } catch(e) { console.error("JSON parse error", e); }
-                    }
-
-                    newEntries.push({
-                        name: baseName,
-                        category: cat,
-                        description: meta.description || "Professional stock vector for commercial use.",
-                        keywords: meta.keywords || "vector, free, stock",
-                        date: new Date().toISOString().split('T')[0],
-                        downloads: 0
-                    });
-                }
-            } else {
-                const errData = await res.json();
-                throw new Error(errData.message || "Upload failed");
-            }
-        } catch (e) {
-            itemDiv.innerHTML = `<span class="error">✗ Failed: ${file.name} (${e.message})</span>`;
-        }
-        status.scrollTop = status.scrollHeight;
-    }
-
-    if(newEntries.length > 0) {
-        await updateDatabase(newEntries, token);
-    }
-    
-    btn.disabled = false;
-    btn.innerText = "START MULTI-UPLOAD & UPDATE DB";
-    status.innerHTML += "<br><b>Process completed.</b>";
-    loadStats();
-}
-
-async function updateDatabase(newEntries, token) {
-    const status = document.getElementById('status');
-    const dbDiv = document.createElement('div');
-    dbDiv.innerText = "Updating database.json...";
-    status.appendChild(dbDiv);
-
-    try {
-        const dbPath = "database.json";
-        const dbSha = await getSha(dbPath, token);
-        let currentDb = [];
-
-        if(dbSha) {
-            const dbRes = await fetch(`https://api.github.com/repos/${repo}/contents/${dbPath}`, {
-                headers: { "Authorization": `token ${token}` }
-            });
-            const dbData = await dbRes.json();
-            currentDb = JSON.parse(decodeURIComponent(escape(atob(dbData.content))));
-        }
-
-        newEntries.forEach(entry => {
-            const idx = currentDb.findIndex(item => item.name === entry.name && item.category === entry.category);
-            if(idx > -1) {
-                const oldDownloads = currentDb[idx].downloads || 0;
-                currentDb[idx] = {...entry, downloads: oldDownloads};
-            } else {
-                currentDb.push(entry);
-            }
-        });
-
-        currentDb.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        const updateRes = await fetch(`https://api.github.com/repos/${repo}/contents/${dbPath}`, {
-            method: "PUT",
-            headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message: "Update database.json",
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(currentDb, null, 2)))),
-                sha: dbSha || undefined
-            })
-        });
-
-        if(updateRes.ok) dbDiv.innerHTML = `<span class="success">✓ Database updated!</span>`;
-        else throw new Error("DB update failed");
-    } catch(e) {
-        dbDiv.innerHTML = `<span class="error">✗ DB Error: ${e.message}</span>`;
-    }
-}
-
-async function loadStats() {
-    const body = document.getElementById('statsBody');
-    body.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Loading statistics...</td></tr>";
-    
-    try {
-        const res = await fetch(`https://raw.githubusercontent.com/${repo}/main/database.json?t=${new Date().getTime()}`);
-        if(!res.ok) throw new Error("Database not found");
-        const data = await res.json();
-        
-        // Kategori bazlı özetleme
-        const summary = {};
-        cats.forEach(c => summary[c] = { downloads: 0, count: 0 });
-        
-        data.forEach(item => {
-            if(summary[item.category]) {
-                summary[item.category].downloads += (item.downloads || 0);
-                summary[item.category].count += 1;
-            } else {
-                // Eğer listede olmayan bir kategori varsa (Miscellaneous gibi)
-                if(!summary["Miscellaneous"]) summary["Miscellaneous"] = { downloads: 0, count: 0 };
-                summary["Miscellaneous"].downloads += (item.downloads || 0);
-                summary["Miscellaneous"].count += 1;
-            }
-        });
-
-        body.innerHTML = "";
-        
-        // Sadece verisi olan kategorileri veya tüm listeyi gösterelim
-        cats.sort().forEach(cat => {
-            const tr = document.createElement('tr');
-            const stats = summary[cat];
-            tr.innerHTML = `
-                <td><span class="badge">${cat}</span></td>
-                <td style="text-align:center;" class="count-cell">${stats.downloads}</td>
-                <td style="text-align:center; color:#666;">${stats.count} Vectors</td>
-            `;
-            body.appendChild(tr);
-        });
-        
-    } catch(e) {
-        body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">Error: ${e.message}</td></tr>`;
-    }
-}
-
-const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = error => reject(error);
-});
-
-async function getSha(path, token) {
-    try {
-        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-            headers: { "Authorization": `token ${token}` }
-        });
-        if (res.ok) { const data = await res.json(); return data.sha; }
-    } catch (e) {}
-    return null;
-}
-
-window.onload = loadStats;
-</script>
+    <script src="main.js"></script>
 </body>
 </html>
