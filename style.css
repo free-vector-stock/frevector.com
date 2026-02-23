@@ -231,4 +231,63 @@ body {
     margin-bottom: 25px;
 }
 
-.
+.manual-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.nav-arrow {
+    font-size: 24px;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.page-box {
+    border: 1px solid var(--gray-border);
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.page-box input {
+    width: 40px;
+    text-align: center;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* --- FOOTER --- */
+.site-footer {
+    background-color: var(--black);
+    color: var(--white);
+    padding: 25px 4%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-top: 80px;
+}
+
+.footer-links a {
+    color: var(--white);
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .layout-container { flex-direction: column; }
+    .sidebar { width: 100%; margin-bottom: 30px; }
+    .main-content { padding-left: 0; }
+    .header-main { flex-direction: column; gap: 15px; }
+    .search-section { margin-left: 0; width: 100%; }
+}
