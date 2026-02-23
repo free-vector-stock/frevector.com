@@ -2,394 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FREE VECTOR STOCK - High Quality Free Vector Download, EPS and SVG</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Download free premium vectors, stock photos, icons and logos. High resolution EPS and SVG files for professional design projects.">
-    <meta name="keywords" content="free vector, download eps, free illustrations, stock vectors, svg icons, graphic resources">
-    <style>
-        :root { --black: #000; --white: #fff; --gray: #f8f8f8; --border: #e0e0e0; --accent: #333; }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: 'Inter', Helvetica, Arial, sans-serif; background: var(--white); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-
-        /* HEADER */
-        header { background: var(--black); color: var(--white); padding: 15px 0; text-align:center; position:fixed; top:0; width:100%; z-index:1000; }
-        header h1 { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
-        #ticker-container { height: 20px; margin-top: 5px; overflow: hidden; }
-        #ticker { font-size: 11px; color: #ccc; transition: 0.5s; }
-
-        /* LAYOUT */
-        .page-container { display:flex; flex:1; margin-top: 75px; margin-bottom: 55px; overflow: hidden; }
-        
-        /* SIDEBAR (LEFT) */
-        .sidebar { width: 220px; border-right: 1px solid var(--border); overflow-y:auto; padding: 20px 10px; background: var(--white); flex-shrink: 0; }
-        .sidebar h4 { font-size: 12px; margin-bottom: 10px; color: #888; text-transform: uppercase; padding-left: 5px; }
-        .sidebar a { display:block; padding: 7px 10px; color: #333; text-decoration:none; font-size: 13px; border-radius: 4px; }
-        .sidebar a:hover { background: var(--gray); font-weight: bold; }
-        .sidebar a.active { background: var(--black); color: var(--white); }
-
-        /* MAIN CONTENT AREA */
-        .main-content-wrapper { flex: 1; display: flex; overflow: hidden; }
-        .content { flex:1; overflow-y:auto; padding: 20px; position:relative; scroll-behavior: smooth; }
-        
-        /* RIGHT SIDEBAR AD */
-        .sidebar-ad { width: 240px; flex-shrink: 0; border-left: 1px solid var(--border); padding: 20px; overflow-y: auto; }
-        .ad-slot-vertical { background: #fafafa; border: 1px dashed #ccc; text-align:center; color:#aaa; font-size:12px; padding:20px; margin-bottom: 20px; min-height: 250px; display:flex; align-items:center; justify-content:center; }
-
-        /* --- YENİ REKLAM ALANI STİLLERİ --- */
-        .ad-slot-top { background: #fafafa; border: 1px dashed #ccc; text-align:center; color:#aaa; font-size:12px; padding:20px; margin-bottom: 20px; width: 100%; }
-        .ad-card { grid-column: span 1; background: #f1f1f1; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; min-height: 320px; font-size: 14px; color: #999; font-weight: bold; }
-
-        .search-wrapper { position:sticky; top:0; background:var(--white); padding-bottom:15px; z-index:10; }
-        .search-bar { width:100%; padding:15px 45px; border:1px solid var(--border); border-radius:30px; font-size:16px; outline:none; }
-        .search-btn { position:absolute; left:18px; top:16px; font-size:18px; color:#999; }
-
-        /* GRID & CARD */
-        .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
-        .card { border: 1px solid var(--border); display:flex; flex-direction:column; position:relative; transition: 0.3s; background: #fff; overflow: hidden; }
-        .card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.12); transform: translateY(-3px); }
-        
-        .img-container { position: relative; width: 100%; height: 200px; overflow: hidden; cursor: pointer; background: #f0f0f0; }
-        .card img { width:100%; height:100%; object-fit:cover; transition: 0.5s; }
-        
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); color: #fff; display: flex; flex-direction: column; justify-content: center; padding: 20px; opacity: 0; transition: 0.4s; backdrop-filter: blur(3px); }
-        .card:hover .overlay { opacity: 1; }
-        .card:hover img { transform: scale(1.1); }
-        .overlay p { font-size: 12px; line-height: 1.5; margin-bottom: 15px; color: #ddd; }
-        .overlay .tags { font-size: 10px; color: #aaa; font-style: italic; border-top: 1px solid #444; padding-top: 10px; }
-
-        .card-body { padding:15px; background: #fff; z-index: 2; }
-        .card-body h3 { font-size:14px; color:#000; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        
-        .dl-section { background:#f9f9f9; padding:10px; border-top:1px solid var(--border); }
-        .dl-button { background:var(--black); color:var(--white); border:none; width:100%; padding:12px; font-weight:bold; cursor:pointer; font-size:13px; transition: 0.3s; }
-        .dl-button:hover { background: #333; }
-
-        /* FOOTER */
-        footer { background:var(--black); color:var(--white); padding:18px; text-align:center; position:fixed; bottom:0; width:100%; z-index:1000; font-size:13px; display:flex; justify-content:center; gap:30px; }
-        footer a { color:var(--white); text-decoration:none; font-weight:bold; }
-
-        /* DOWNLOAD MODAL */
-        #dl-modal { position:fixed; inset:0; background:var(--white); z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; }
-        #timer { font-size: 80px; font-weight: 900; margin: 20px; }
-
-        /* PAGINATION */
-        .pagination { position: fixed; bottom: 55px; left: 0; width: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); border-top: 1px solid var(--border); padding: 15px 0; text-align:center; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; z-index: 999; }
-        .pagination button { min-width: 45px; height: 45px; border: none; background:var(--black); color:var(--white); cursor:pointer; border-radius: 8px; transition: 0.2s; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .pagination button:hover { background: #444; transform: translateY(-2px); }
-        .pagination .active { background: #e74c3c; color: #fff; box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4); }
-        .pagination button:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* RESPONSIVE DESIGN */
-        @media (max-width: 1024px) { .sidebar-ad { display:none; } }
-        @media (max-width: 768px) { .sidebar { display:none; } .page-container { margin-top: 75px; } }
-    </style>
+    <title>Free Vector, SVG, EPS & JPEG Downloads - Frevector</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
-    <h1>FREE VECTOR STOCK</h1>
-    <div id="ticker-container"><div id="ticker"></div></div>
-</header>
-
-<div class="page-container">
-    <aside class="sidebar" id="sideNav">
-        <h4>Categories</h4>
-    </aside>
-
-    <div class="main-content-wrapper">
-        <main class="content" id="mainContent">
-            <div class="search-wrapper">
-                <span class="search-btn">🔍</span>
-                <input type="text" id="searchInput" class="search-bar" placeholder="Search vectors by name or keywords...">
-            </div>
-            
-            <!-- YENİ EKLENEN ÜST REKLAM ALANI -->
-            <div class="ad-slot-top">TOP ADVERTISEMENT AREA</div>
-
-            <div id="statusPanel" style="font-size: 14px; color: #000; font-weight: bold; margin-bottom: 15px; display: none; background: #f0f0f0; padding: 10px; border-radius: 8px;"></div>
-            <div class="grid" id="vectorGrid"></div>
-        </main>
-
-        <aside class="sidebar-ad">
-            <h4>Advertisement</h4>
-            <div class="ad-slot-vertical">SIDEBAR AD AREA 1</div>
-            <div class="ad-slot-vertical">SIDEBAR AD AREA 2</div>
-            <div class="ad-slot-vertical">SIDEBAR AD AREA 3</div>
-        </aside>
+    <div class="top-black-bar">
+        <div class="dash-indicators"><span></span><span></span><span></span><span></span><span></span></div>
+        <div id="announcement-text" class="fade-in-out"></div>
     </div>
-</div>
 
-<footer>
-    <span>© 2026 ® FREE VECTOR STOCK™ | All Rights Reserved</span>
-    <a href="mailto:hakankacar2014@gmail.com">Info: Request Support</a>
-</footer>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="logo.png" class="nav-logo" alt="frevector" onclick="location.reload()">
+        </div>
+        <div class="search-section">
+            <div class="search-input-wrapper">
+                <span class="black-magnifier">🔍</span> <input type="text" placeholder="Search vectors by keywords...">
+            </div>
+            <select class="time-filter">
+                <option>Anytime</option>
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+            </select>
+        </div>
+    </header>
 
-<div class="pagination" id="paginator"></div>
+    <div class="site-layout">
+        <aside class="side-nav">
+            <h3>CATEGORIES</h3>
+            <ul id="catList">
+                <li class="active">Abstract</li>
+                <li>Animals/Wildlife</li>
+                <li>Backgrounds/Textures</li>
+                <li>Beauty/Fashion</li>
+                <li>Buildings/Landmarks</li>
+                <li>Business/Finance</li>
+                <li>Celebrities</li>
+                <li>Education</li>
+                <li>Food</li>
+                <li>Icon</li>
+                <li>Logo</li>
+                <li>Nature</li>
+                <li>Technology</li>
+            </ul>
+        </aside>
 
-<div id="dl-modal">
-    <h2 style="font-size:24px">Preparing Your Vector File...</h2>
-    <div id="timer">10</div>
-    <div class="ad-slot" style="width:80%; height:300px; border: 1px dashed #ccc;">HIGH VALUE INTERSTITIAL AD AREA</div>
-    <p>Your download will start automatically. Do not close this page.</p>
-</div>
+        <main class="main-content">
+            <h1 id="seo-title">Free Abstract Vectors – SVG, EPS and JPEG Formats</h1>
 
-<script>
-// --- CONFIGURATION ---
-const repoName = "free-vector-stock";
-const githubUser = "free-vector-stock";
-const perPage = 28; // Reklamlarla daha iyi bölünmesi için 4'ün katı bir sayı seçildi.
-const defaultCategory = "Food";
-const adFrequency = 10; // Her 10 içerikten sonra bir reklam göster.
+            <div class="vector-grid" id="vectorGrid">
+                </div>
 
-// --- DYNAMIC PATHS ---
-const repoPath = `${githubUser}/${repoName}`;
-const rawBase = `https://raw.githubusercontent.com/${repoPath}/main/assets`;
-const dbUrl = `https://raw.githubusercontent.com/${repoPath}/main/database.json`;
+            <section id="featured" class="special-picks">
+                <div class="picks-header">
+                    <button class="nav-arrow">←</button>
+                    <h2>Picked for you</h2>
+                    <button class="nav-arrow">→</button>
+                </div>
+                <div class="picks-slider"></div>
+            </section>
 
-const categories = ["Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures","Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities","Education","Food","Drink","Healthcare/Medical","Holidays","Industrial","Interiors","Miscellaneous","Nature","Objects","Parks/Outdoor","People","Religion","Science","Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage","Logo","Font","Icon"];
-const tickerLines = [
-    "We operate our own in-house studio to produce graphic designs and offer them free of charge.",
-    "Our goal is to provide a comprehensive and ideal platform for graphic resources.",
-    "Wide archive of vector illustrations, stock photos, icons and various design elements.",
-    "Absolute rule: Our files may not be redistributed in any way.",
-    "Ads generate revenue to enable us to continue our work. We ask for your understanding.",
-    "Sustainability depends on ads. Please disable ad blockers for better experience."
-];
-
-let allData = [];
-let filteredData = [];
-let currentPage = 1;
-let currentCategory = defaultCategory;
-
-// --- INITIALIZATION ---
-window.addEventListener('DOMContentLoaded', ( ) => {
-    initTicker();
-    initNav();
-    initSearch();
-    loadDatabase();
-});
-
-function initTicker() {
-    const tickerEl = document.getElementById('ticker');
-    if (!tickerEl) return;
-    let lineIndex = 0;
-    setInterval(() => {
-        tickerEl.innerText = tickerLines[lineIndex];
-        lineIndex = (lineIndex + 1) % tickerLines.length;
-    }, 5000);
-}
-
-function initNav() {
-    const nav = document.getElementById('sideNav');
-    if (!nav) return;
-    nav.innerHTML = "<h4>Categories</h4>";
-    categories.sort().forEach(c => {
-        let a = document.createElement('a');
-        a.href = "#";
-        a.innerText = c;
-        a.onclick = (e) => { e.preventDefault(); selectCategory(c, a); };
-        nav.appendChild(a);
-    });
-}
-
-async function loadDatabase() {
-    const grid = document.getElementById('vectorGrid');
-    const statusPanel = document.getElementById('statusPanel');
-    
-    showStatus("Loading database...", "info");
-
-    try {
-        const response = await fetch(`${dbUrl}?t=${new Date().getTime()}`);
-        if (!response.ok) {
-            throw new Error(`Network response was not ok. Status: ${response.status} - ${response.statusText}`);
-        }
-        allData = await response.json();
-        if (!Array.isArray(allData)) {
-             throw new Error("Database format is incorrect. Expected an array.");
-        }
-        hideStatus();
-        selectCategory(currentCategory);
-    } catch (error) {
-        console.error("Database Load Error:", error);
-        showStatus(`<b>Error:</b> Could not load database.   
-<small>${error.message}</small>`, "error");
-    }
-}
-
-function selectCategory(category, element) {
-    document.getElementById('searchInput').value = "";
-    hideStatus();
-
-    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    if (element) {
-        element.classList.add('active');
-    } else {
-        const link = Array.from(document.querySelectorAll('.sidebar a')).find(l => l.innerText === category);
-        if (link) link.classList.add('active');
-    }
-    
-    currentCategory = category;
-    currentPage = 1;
-    
-    filteredData = allData.filter(item => item.category === category);
-    renderPage();
-    document.getElementById('mainContent').scrollTop = 0;
-}
-
-// --- GÜNCELLENMİŞ RENDER FONKSİYONU (REKLAM EKLEMELİ) ---
-function renderPage() {
-    const grid = document.getElementById('vectorGrid');
-    grid.innerHTML = "";
-    
-    const start = (currentPage - 1) * perPage;
-    const pageItems = filteredData.slice(start, start + perPage);
-
-    if (pageItems.length === 0) {
-        grid.innerHTML = "<div style='grid-column: 1/-1; text-align: center; padding: 50px; color: #999;'>No vectors found in this section.</div>";
-    } else {
-        pageItems.forEach((item, index) => {
-            // Her 'adFrequency' sayıda içerikten sonra bir reklam kartı ekle
-            if (index > 0 && index % adFrequency === 0) {
-                const adCard = document.createElement('div');
-                adCard.className = 'ad-card';
-                adCard.innerHTML = 'IN-GRID ADVERTISEMENT';
-                grid.appendChild(adCard);
-            }
-
-            const card = document.createElement('div');
-            card.className = 'card';
-            const imgUrl = `${rawBase}/${encodeURIComponent(item.category)}/${encodeURIComponent(item.name)}.jpg`;
-            
-            card.innerHTML = `
-                <div class="img-container" onclick="startDownload('${item.category}','${item.name}')">
-                    <img src="${imgUrl}" alt="${item.name}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:12px;\\'>Image Not Found</div>';">
-                    <div class="overlay">
-                        <p>${item.description || 'Professional stock vector for commercial use.'}</p>
-                        <div class="tags">${item.keywords || 'vector, free, stock'}</div>
+            <div class="hybrid-nav-container">
+                <button class="next-page-btn">Next</button>
+                <div class="pagination-controls">
+                    <button class="arrow">←</button>
+                    <div class="page-indicator">
+                        <input type="number" value="1" id="pageNumberInput"> / <span id="totalPages">12.529</span>
                     </div>
+                    <button class="arrow">→</button>
                 </div>
-                <div class="card-body">
-                    <h3 title="${item.name}">${item.name}</h3>
-                </div>
-                <div class="dl-section">
-                    <button class="dl-button" onclick="startDownload('${item.category}','${item.name}')">DOWNLOAD (ZIP)</button>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }
-    renderPaginator();
-}
+            </div>
+        </main>
+    </div>
 
-function renderPaginator() {
-    const paginator = document.getElementById('paginator');
-    paginator.innerHTML = "";
-    
-    const totalPages = Math.ceil(filteredData.length / perPage);
-    if (totalPages <= 1) return;
+    <footer class="main-footer">
+        <div class="footer-left">2026 © frevector.com Registered Trademark</div>
+        <div class="footer-right">
+            <a href="about.html">About Us</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="contact.html">Contact</a>
+        </div>
+    </footer>
 
-    const prevBtn = document.createElement('button');
-    prevBtn.innerText = '«';
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.onclick = () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderPage();
-            document.getElementById('mainContent').scrollTop = 0;
-        }
-    };
-    paginator.appendChild(prevBtn);
-
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.innerText = i;
-        if (i === currentPage) btn.className = "active";
-        btn.onclick = () => { 
-            currentPage = i; 
-            renderPage(); 
-            document.getElementById('mainContent').scrollTop = 0;
-        };
-        paginator.appendChild(btn);
-    }
-
-    const nextBtn = document.createElement('button');
-    nextBtn.innerText = '»';
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.onclick = () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderPage();
-            document.getElementById('mainContent').scrollTop = 0;
-        }
-    };
-    paginator.appendChild(nextBtn);
-}
-
-function initSearch() {
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        
-        if (query.length === 0) {
-            hideStatus();
-            selectCategory(currentCategory);
-            return;
-        }
-
-        showStatus(`Searching for "${query}"...`, "info");
-        document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-
-        filteredData = allData.filter(item => {
-            const nameMatch = item.name.toLowerCase().includes(query);
-            const keywordMatch = item.keywords && item.keywords.toLowerCase().includes(query);
-            const descMatch = item.description && item.description.toLowerCase().includes(query);
-            return nameMatch || keywordMatch || descMatch;
-        });
-        
-        showStatus(`Found ${filteredData.length} results for "${query}"`, "success");
-        currentPage = 1;
-        renderPage();
-    });
-}
-
-function startDownload(category, name) {
-    const modal = document.getElementById('dl-modal');
-    const timerEl = document.getElementById('timer');
-    if (!modal || !timerEl) return;
-    
-    modal.style.display = "flex";
-    let count = 10;
-    timerEl.innerText = count;
-    
-    const interval = setInterval(() => {
-        count--;
-        timerEl.innerText = count;
-        if (count <= 0) {
-            clearInterval(interval);
-            modal.style.display = "none";
-            const downloadUrl = `${rawBase}/${encodeURIComponent(category)}/${encodeURIComponent(name)}.zip`;
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `${name}.zip`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    }, 1000);
-}
-
-// --- UTILITY FUNCTIONS ---
-function showStatus(message, type = "info") {
-    const statusPanel = document.getElementById('statusPanel');
-    statusPanel.style.display = "block";
-    statusPanel.innerHTML = message;
-    statusPanel.style.background = type === "error" ? "#fbeaea" : (type === "success" ? "#eaf6eb" : "#f0f0f0");
-    statusPanel.style.color = type === "error" ? "#c0392b" : (type === "success" ? "#27ae60" : "#333");
-}
-
-function hideStatus() {
-    document.getElementById('statusPanel').style.display = "none";
-}
-</script>
+    <script src="main.js"></script>
 </body>
 </html>
