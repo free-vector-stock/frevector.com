@@ -3,7 +3,7 @@ export async function onRequest(context) {
     // Cloudflare KV'den verileri çekiyoruz
     const data = await context.env.VECTOR_KV.get("vectors_data");
 
-    // Eğer veritabanı boşsa siteye hata vermemesi için boş bir liste gönderiyoruz
+    // Eğer veritabanı boşsa siteye boş bir liste gönderiyoruz
     if (!data) {
       return new Response(JSON.stringify({ "vectors": [] }), {
         headers: {
@@ -13,7 +13,7 @@ export async function onRequest(context) {
       });
     }
 
-    // Veri varsa doğrudan gönderiyoruz (ekstra tırnak kullanmadan)
+    // Veri varsa doğrudan (saf JSON olarak) gönderiyoruz
     return new Response(data, {
       headers: {
         "content-type": "application/json",
