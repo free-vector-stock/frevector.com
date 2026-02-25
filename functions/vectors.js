@@ -5,11 +5,11 @@ export async function onRequest(context) {
   };
 
   try {
-    // Cloudflare panelindeki hem KV hem DB isimlerini kontrol eder
+    // Paneldeki her iki olası ismi de (VECTOR_KV ve VECTOR_DB) deniyoruz
     const kv = context.env.VECTOR_KV || context.env.VECTOR_DB;
     
     if (!kv) {
-      return new Response(JSON.stringify({ error: "KV Baglantisi Bulunamadi" }), { status: 500, headers });
+      return new Response(JSON.stringify({ error: "KV baglantisi bulunamadi" }), { status: 500, headers });
     }
 
     const data = await kv.get("vectors_data");
