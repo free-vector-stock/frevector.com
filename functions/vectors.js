@@ -1,20 +1,16 @@
 export async function onRequest(context) {
   try {
-    // Paneldeki ismin ne olursa olsun (VECTOR_KV veya VECTOR_DB) hepsini deniyoruz
-    const kv = context.env.VECTOR_KV || context.env.VECTOR_DB || context.env.VECTOR_KV_;
-    
-    if (!kv) {
-      throw new Error("KV baglantisi kurulamadi. Lutfen Cloudflare panelinden Binding ayarlarini kontrol edin.");
-    }
-
-    const data = await kv.get("vectors_data");
+    // Hem VECTOR_KV hem de VECTOR_DB isimlerini deniyoruz ki hata payı kalmasın
+    const data = await context.env.VECTOR_DB.get("vectors_data") || await context.env.VECTOR_KV.get("vectors_data");
 
     if (!data) {
+      // Eğer veri yoksa boş liste döndür
       return new Response(JSON.stringify({ "vectors": [] }), {
         headers: { "content-type": "application/json", "Access-Control-Allow-Origin": "*" }
       });
     }
 
+    // Veri varsa saf haliyle gönder
     return new Response(data, {
       headers: { "content-type": "application/json", "Access-Control-Allow-Origin": "*" }
     });
