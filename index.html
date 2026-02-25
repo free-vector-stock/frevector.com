@@ -24,29 +24,38 @@
             <div class="animated-text">We aim to offer a wide archive of graphics, including vector illustrations, stock photos, icons, logos, and various design elements.</div>
             <div class="animated-text">Our only and absolute rule is that our files may not be redistributed in any way.</div>
             <div class="animated-text">The advertisements on our website generate revenue to enable us to continue our work. Therefore, we ask for your understanding.</div>
+            <div class="animated-text">Our website's sustainability depends on advertising revenue. Some features may be restricted while an ad blocker is active. Please disable the blocker and refresh the page.</div>
         </div>
     </div>
 
     <!-- HEADER -->
     <header class="header">
         <div class="logo-container">
-            <a href="/" class="logo">
+            <a href="/" class="logo" id="logoLink">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <rect width="40" height="40" rx="4" fill="black"/>
                     <text x="50%" y="50%" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="central">f</text>
                 </svg>
                 <span>frevector</span>
             </a>
         </div>
-        <div class="tagline">Premium quality professional graphic designs offered 100% free.</div>
         <div class="header-right">
-            <span class="upload-date">Upload Date:</span>
-            <select id="dateFilter" class="date-filter">
-                <option value="all">Any time</option>
-                <option value="7">Last 7 days</option>
-                <option value="30">Last 30 days</option>
-                <option value="180">Last 6 months</option>
-                <option value="365">Last 12 months</option>
-            </select>
+            <div class="search-container">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="8" cy="8" r="6" stroke="black" stroke-width="2"/>
+                    <path d="M12 12L18 18" stroke="black" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search vectors...">
+            </div>
+            <div class="filter-container">
+                <select id="dateFilter" class="date-filter">
+                    <option value="all">Any time</option>
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="180">Last 6 months</option>
+                    <option value="365">Last 12 months</option>
+                </select>
+            </div>
         </div>
     </header>
 
@@ -55,53 +64,13 @@
         <!-- LEFT SIDEBAR - CATEGORIES -->
         <aside class="sidebar">
             <div class="sidebar-title">CATEGORIES</div>
-            <nav class="categories-list">
-                <a href="#" class="category-link" data-category="Abstract">Abstract</a>
-                <a href="#" class="category-link" data-category="Animals/Wildlife">Animals/Wildlife</a>
-                <a href="#" class="category-link" data-category="The Arts">The Arts</a>
-                <a href="#" class="category-link" data-category="Backgrounds/Textures">Backgrounds/Textures</a>
-                <a href="#" class="category-link" data-category="Beauty/Fashion">Beauty/Fashion</a>
-                <a href="#" class="category-link" data-category="Buildings/Landmarks">Buildings/Landmarks</a>
-                <a href="#" class="category-link" data-category="Business/Finance">Business/Finance</a>
-                <a href="#" class="category-link" data-category="Celebrities">Celebrities</a>
-                <a href="#" class="category-link" data-category="Education">Education</a>
-                <a href="#" class="category-link" data-category="Food">Food</a>
-                <a href="#" class="category-link" data-category="Drink">Drink</a>
-                <a href="#" class="category-link" data-category="Healthcare/Medical">Healthcare/Medical</a>
-                <a href="#" class="category-link" data-category="Holidays">Holidays</a>
-                <a href="#" class="category-link" data-category="Industrial">Industrial</a>
-                <a href="#" class="category-link" data-category="Interiors">Interiors</a>
-                <a href="#" class="category-link" data-category="Miscellaneous">Miscellaneous</a>
-                <a href="#" class="category-link" data-category="Nature">Nature</a>
-                <a href="#" class="category-link" data-category="Objects">Objects</a>
-                <a href="#" class="category-link" data-category="Parks/Outdoor">Parks/Outdoor</a>
-                <a href="#" class="category-link" data-category="People">People</a>
-                <a href="#" class="category-link" data-category="Religion">Religion</a>
-                <a href="#" class="category-link" data-category="Science">Science</a>
-                <a href="#" class="category-link" data-category="Signs/Symbols">Signs/Symbols</a>
-                <a href="#" class="category-link" data-category="Sports/Recreation">Sports/Recreation</a>
-                <a href="#" class="category-link" data-category="Technology">Technology</a>
-                <a href="#" class="category-link" data-category="Transportation">Transportation</a>
-                <a href="#" class="category-link" data-category="Vintage">Vintage</a>
-                <a href="#" class="category-link" data-category="Logo">Logo</a>
-                <a href="#" class="category-link" data-category="Font">Font</a>
-                <a href="#" class="category-link" data-category="Icon">Icon</a>
+            <nav class="categories-list" id="categoriesList">
+                <!-- Categories will be loaded here -->
             </nav>
         </aside>
 
         <!-- CENTER CONTENT -->
         <main class="content">
-            <!-- CATEGORY HEADER -->
-            <div class="category-header">
-                <div class="search-container">
-                    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 12L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search vectors...">
-                </div>
-            </div>
-
             <!-- CATEGORY TITLE -->
             <h1 id="categoryTitle" class="category-title">Free Food Vector, SVG, EPS & JPEG Downloads</h1>
 
@@ -110,83 +79,93 @@
                 <!-- Vectors will be loaded here -->
             </div>
 
-            <!-- INFINITE SCROLL LOADER -->
-            <div id="loaderSpinner" class="loader-spinner" style="display: none;">
-                <div class="spinner"></div>
+            <!-- SELECTED FOR YOU (Only on page 1) -->
+            <div id="selectedForYouSection" class="selected-for-you">
+                <h2 class="section-title">Selected for you</h2>
+                <div class="selected-grid-container">
+                    <button class="scroll-btn prev">❮</button>
+                    <div id="selectedGrid" class="selected-grid">
+                        <!-- Selected items here -->
+                    </div>
+                    <button class="scroll-btn next">❯</button>
+                </div>
+            </div>
+
+            <!-- KEYWORD TAGS (Bottom of grid) -->
+            <div id="categoryKeywords" class="category-keywords">
+                <!-- Dynamic keyword tags here -->
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination-wrapper">
+                <div class="pagination-info">
+                    <span id="totalPageCount">/ 1</span>
+                </div>
+                <div class="pagination-controls">
+                    <button id="prevBtn" class="pagination-btn">❮</button>
+                    <input type="number" id="pageInput" class="page-input" value="1" min="1">
+                    <button id="nextBtn" class="pagination-btn">❯</button>
+                </div>
+                <button id="nextPageLargeBtn" class="next-page-large">Next</button>
             </div>
         </main>
     </div>
 
-    <!-- BOTTOM BANNER WITH PAGINATION -->
-    <div class="bottom-banner">
-        <div class="pagination-container">
-            <button id="prevBtn" class="pagination-btn">❮</button>
-            <span id="pageNumber" class="page-number">1</span>
-            <button id="nextBtn" class="pagination-btn">❯</button>
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-left">
+            <span class="copyright">© 2026 © frevector.com Registered Trademark</span>
         </div>
-        <div class="footer-links">
-            <span class="copyright">© 2026 © frevector.com</span>
-            <div class="footer-nav">
-                <a href="#about">About Us</a>
-                <a href="#privacy">Privacy Policy</a>
-                <a href="#terms">Terms of Service</a>
-                <a href="#contact">Contact</a>
+        <div class="footer-right">
+            <nav class="footer-nav">
+                <a href="#" data-modal="about">About Us</a>
+                <a href="#" data-modal="privacy">Privacy Policy</a>
+                <a href="#" data-modal="terms">Terms of Service</a>
+                <a href="#" data-modal="contact">Contact</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- DOWNLOAD MODAL (Replaces separate page for better UX) -->
+    <div id="downloadModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="download-layout">
+                <div class="download-preview">
+                    <img id="modalImage" src="" alt="Vector Preview">
+                </div>
+                <div class="download-details">
+                    <h2 id="modalTitle">Title</h2>
+                    <p id="modalDescription">Description</p>
+                    <div id="modalKeywords" class="modal-keywords-list"></div>
+                    
+                    <table class="details-table">
+                        <tr><td>FILE FORMAT</td><td>EPS, SVG, JPEG</td></tr>
+                        <tr><td>CATEGORY</td><td id="modalCategory">-</td></tr>
+                        <tr><td>RESOLUTION</td><td>High Quality / Fully Scalable</td></tr>
+                        <tr><td>LICENSE</td><td>Free for Personal & Commercial Use</td></tr>
+                        <tr><td>FILE SIZE</td><td id="modalFileSize">1.8 MB</td></tr>
+                    </table>
+
+                    <div class="download-action">
+                        <button id="downloadBtn" class="download-btn">download</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- DOWNLOAD MODAL -->
-    <div id="downloadModal" class="modal" style="display: none;">
-        <div class="modal-content">
+    <!-- INFO MODAL (For About, Privacy, etc.) -->
+    <div id="infoModal" class="modal" style="display: none;">
+        <div class="modal-content info-modal-content">
             <button class="modal-close">&times;</button>
-            
-            <div class="download-container">
-                <div class="download-image-section">
-                    <img id="modalImage" src="" alt="Vector Preview" class="modal-image">
-                </div>
-                
-                <div class="download-info-section">
-                    <h2 id="modalTitle" class="modal-title">Vector Title</h2>
-                    <p id="modalDescription" class="modal-description">Description here</p>
-                    <div id="modalKeywords" class="modal-keywords">
-                        <!-- Keywords will be loaded here -->
-                    </div>
-                    
-                    <div class="vector-details">
-                        <table class="details-table">
-                            <tr>
-                                <td class="detail-label">File Format</td>
-                                <td class="detail-value">EPS, SVG, JPEG</td>
-                            </tr>
-                            <tr>
-                                <td class="detail-label">Category</td>
-                                <td id="modalCategory" class="detail-value">-</td>
-                            </tr>
-                            <tr>
-                                <td class="detail-label">Resolution</td>
-                                <td class="detail-value">High Quality / Fully Scalable</td>
-                            </tr>
-                            <tr>
-                                <td class="detail-label">License</td>
-                                <td class="detail-value">Free for Personal & Commercial Use</td>
-                            </tr>
-                            <tr>
-                                <td class="detail-label">File Size</td>
-                                <td id="modalFileSize" class="detail-value">1.8 MB</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    <div class="download-countdown">
-                        <p>Your download will start in</p>
-                        <div id="countdownDisplay" class="countdown-display">
-                            <span id="countdownNumber">3</span>
-                        </div>
-                        <button id="downloadButton" class="download-button">Download</button>
-                    </div>
-                </div>
-            </div>
+            <div id="infoContent" class="info-content"></div>
         </div>
+    </div>
+
+    <!-- LOADER -->
+    <div id="loader" class="loader-overlay" style="display: none;">
+        <div class="spinner"></div>
     </div>
 
     <script src="main.js"></script>
