@@ -1,111 +1,115 @@
 // ===========================
-// FREVECTOR - SMART DATA LOADER
+// FREVECTOR - ABSOLUTE STABLE JAVASCRIPT
 // ===========================
 
 const CONFIG = {
     itemsPerPage: 20,
-    animationInterval: 5000, 
+    // Önbellek sorunlarını aşmak için versiyon ekliyoruz
+    cacheVersion: Date.now() 
 };
 
 const state = {
-    currentPage: 1,
-    selectedCategory: null,
     allVectors: [],
     filteredVectors: [],
+    currentPage: 1,
+    selectedCategory: 'Food'
 };
 
 const elements = {
-    categoryLinks: document.querySelectorAll('.category-link'),
     vectorsGrid: document.getElementById('vectorsGrid'),
     categoryTitle: document.getElementById('categoryTitle'),
-    loaderSpinner: document.getElementById('loaderSpinner'),
+    loader: document.getElementById('loaderSpinner'),
+    categoryLinks: document.querySelectorAll('.category-link')
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadVectors();
-    initializeBasicEvents();
+    init();
 });
 
-async function loadVectors() {
-    // Denenecek yollar: Önce kök dizin, sonra göreceli dizin
-    const paths = ['./data.json', '/data.json', 'data.json'];
-    let success = false;
+async function init() {
+    // 1. ADIM: Veriyi birkaç farklı yoldan çekmeyi deniyoruz
+    const dataLoaded = await tryLoadData();
+    
+    if (dataLoaded) {
+        setupEventListeners();
+        render();
+    } else {
+        showError("Data file (data.json) not found. Please check your GitHub repository root.");
+    }
+}
 
-    if(elements.loaderSpinner) elements.loaderSpinner.style.display = 'flex';
+async function tryLoadData() {
+    // Denenecek yollar
+    const paths = [
+        './data.json',
+        'data.json',
+        window.location.origin + '/data.json'
+    ];
 
     for (let path of paths) {
         try {
-            console.log(`Trying to load: ${path}`);
-            const response = await fetch(`${path}?v=${Date.now()}`);
+            console.log("Checking path:", path);
+            const response = await fetch(`${path}?v=${CONFIG.cacheVersion}`);
             if (response.ok) {
                 const data = await response.json();
                 state.allVectors = data.vectors || [];
                 state.filteredVectors = [...state.allVectors];
-                success = true;
-                console.log("Data loaded successfully from:", path);
-                break;
+                return true;
             }
         } catch (e) {
-            console.error(`Path ${path} failed:`, e);
+            console.warn("Failed to load from:", path);
         }
     }
-
-    if (success && state.allVectors.length > 0) {
-        selectCategory('Food');
-    } else {
-        displayError("Data file (data.json) could not be found or is empty.");
-    }
-
-    if(elements.loaderSpinner) elements.loaderSpinner.style.display = 'none';
+    return false;
 }
 
-function selectCategory(category) {
-    state.selectedCategory = category;
-    state.currentPage = 1;
-    
-    elements.categoryLinks.forEach(link => {
-        link.classList.toggle('active', link.dataset.category === category);
-    });
-
-    if(elements.categoryTitle) {
-        elements.categoryTitle.textContent = `Free ${category} Vector, SVG, EPS & JPEG Downloads`;
-    }
-    
-    filterAndRender();
-}
-
-function filterAndRender() {
-    let filtered = state.allVectors;
-    if (state.selectedCategory) {
-        filtered = filtered.filter(v => v.category === state.selectedCategory);
-    }
-    state.filteredVectors = filtered;
-    
-    if(!elements.vectorsGrid) return;
+function render() {
+    if (!elements.vectorsGrid) return;
     elements.vectorsGrid.innerHTML = '';
     
-    state.filteredVectors.forEach(vector => {
+    // Kategoriye göre filtrele
+    const filtered = state.allVectors.filter(v => v.category === state.selectedCategory);
+    
+    if (filtered.length === 0) {
+        elements.vectorsGrid.innerHTML = `<div style="grid-column:1/-1; text-align:center;">No items in ${state.selectedCategory}</div>`;
+        return;
+    }
+
+    filtered.forEach(vector => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         card.innerHTML = `
-            <img src="${vector.thumbnail}" alt="${vector.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Error'">
-            <div class="vector-info"><div class="vector-title">${vector.title}</div></div>
+            <img src="${vector.thumbnail}" alt="${vector.title}" loading="lazy" 
+                 onerror="this.src='https://via.placeholder.com/300x200?text=Image+Load+Error'">
+            <div class="vector-info">
+                <div class="vector-title">${vector.title}</div>
+            </div>
         `;
+        // Tıklama olayı modalı açar
+        card.onclick = () => window.openDownloadModal ? window.openDownloadModal(vector) : null;
         elements.vectorsGrid.appendChild(card);
     });
-}
 
-function displayError(msg) {
-    if(elements.vectorsGrid) {
-        elements.vectorsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:red; padding:50px;">${msg}</div>`;
+    if (elements.categoryTitle) {
+        elements.categoryTitle.textContent = `Free ${state.selectedCategory} Vector, SVG, EPS & JPEG Downloads`;
     }
 }
 
-function initializeBasicEvents() {
+function setupEventListeners() {
     elements.categoryLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            selectCategory(link.dataset.category);
+            state.selectedCategory = link.dataset.category;
+            // Aktif sınıfını güncelle
+            elements.categoryLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            render();
         });
     });
+}
+
+function showError(msg) {
+    if (elements.vectorsGrid) {
+        elements.vectorsGrid.innerHTML = `<div style="grid-column:1/-1; color:red; text-align:center; padding:50px;">${msg}</div>`;
+    }
 }
