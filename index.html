@@ -47,15 +47,6 @@
                 </svg>
                 <input type="text" id="searchInput" class="search-input" placeholder="Search vectors...">
             </div>
-            <div class="filter-container">
-                <select id="dateFilter" class="date-filter">
-                    <option value="all">Any time</option>
-                    <option value="7">Last 7 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="180">Last 6 months</option>
-                    <option value="365">Last 12 months</option>
-                </select>
-            </div>
         </div>
     </header>
 
@@ -71,29 +62,12 @@
 
         <!-- CENTER CONTENT -->
         <main class="content">
-            <!-- CATEGORY TITLE -->
+            <!-- CATEGORY TITLE (H1) -->
             <h1 id="categoryTitle" class="category-title">Free Food Vector, SVG, EPS & JPEG Downloads</h1>
 
             <!-- VECTORS GRID -->
             <div id="vectorsGrid" class="vectors-grid">
                 <!-- Vectors will be loaded here -->
-            </div>
-
-            <!-- SELECTED FOR YOU (Only on page 1) -->
-            <div id="selectedForYouSection" class="selected-for-you">
-                <h2 class="section-title">Selected for you</h2>
-                <div class="selected-grid-container">
-                    <button class="scroll-btn prev">❮</button>
-                    <div id="selectedGrid" class="selected-grid">
-                        <!-- Selected items here -->
-                    </div>
-                    <button class="scroll-btn next">❯</button>
-                </div>
-            </div>
-
-            <!-- KEYWORD TAGS (Bottom of grid) -->
-            <div id="categoryKeywords" class="category-keywords">
-                <!-- Dynamic keyword tags here -->
             </div>
 
             <!-- PAGINATION -->
@@ -106,7 +80,6 @@
                     <input type="number" id="pageInput" class="page-input" value="1" min="1">
                     <button id="nextBtn" class="pagination-btn">❯</button>
                 </div>
-                <button id="nextPageLargeBtn" class="next-page-large">Next</button>
             </div>
         </main>
     </div>
@@ -126,7 +99,7 @@
         </div>
     </footer>
 
-    <!-- DOWNLOAD MODAL (Replaces separate page for better UX) -->
+    <!-- DOWNLOAD MODAL -->
     <div id="downloadModal" class="modal" style="display: none;">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
@@ -148,18 +121,13 @@
                     </table>
 
                     <div class="download-action">
-                        <button id="downloadBtn" class="download-btn">download</button>
+                        <div class="download-countdown">
+                            <div>Your download will start in</div>
+                            <div class="countdown-display" id="countdownDisplay">4</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- INFO MODAL (For About, Privacy, etc.) -->
-    <div id="infoModal" class="modal" style="display: none;">
-        <div class="modal-content info-modal-content">
-            <button class="modal-close">&times;</button>
-            <div id="infoContent" class="info-content"></div>
         </div>
     </div>
 

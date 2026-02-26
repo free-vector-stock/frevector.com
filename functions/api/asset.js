@@ -1,6 +1,6 @@
 /**
  * GET /api/asset?key=assets/Category/filename.jpg
- * Serves files from R2 bucket through Worker (no direct public access)
+ * Serves files from R2 bucket through Worker
  */
 export async function onRequestGet(context) {
   try {
@@ -26,7 +26,7 @@ export async function onRequestGet(context) {
     if (!object) {
       // Return placeholder for missing images
       if (key.endsWith(".jpg") || key.endsWith(".jpeg") || key.endsWith(".png")) {
-        return Response.redirect("https://placehold.co/400x300/1a1a1a/666666?text=Preview+Not+Available", 302);
+        return Response.redirect("https://placehold.co/400x300/1a1a1a/666666?text=Preview", 302);
       }
       return new Response("File not found", { status: 404 });
     }

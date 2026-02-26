@@ -17,8 +17,6 @@
                 <a href="#" class="nav-link active" data-section="dashboard">Dashboard</a>
                 <a href="#" class="nav-link" data-section="upload">Upload Vector</a>
                 <a href="#" class="nav-link" data-section="manage">Manage Vectors</a>
-                <a href="#" class="nav-link" data-section="categories">Categories</a>
-                <a href="#" class="nav-link" data-section="settings">Settings</a>
             </nav>
             <div class="admin-footer">
                 <button id="logoutBtn" class="logout-btn">Logout</button>
@@ -30,9 +28,6 @@
             <!-- HEADER -->
             <header class="admin-header">
                 <h1>Frevector Admin Panel</h1>
-                <div class="admin-user">
-                    <span id="adminUsername">Admin User</span>
-                </div>
             </header>
 
             <!-- DASHBOARD SECTION -->
@@ -44,22 +39,14 @@
                         <div class="stat-label">Total Vectors</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="totalCategories">0</div>
-                        <div class="stat-label">Categories</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalStorage">0 MB</div>
-                        <div class="stat-label">Storage Used</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="recentUploads">0</div>
-                        <div class="stat-label">Recent Uploads</div>
+                        <div class="stat-value" id="totalDownloads">0</div>
+                        <div class="stat-label">Total Downloads</div>
                     </div>
                 </div>
-                <div class="recent-activity">
-                    <h3>Recent Activity</h3>
-                    <div id="activityLog" class="activity-log">
-                        <p>No recent activity</p>
+                <div class="category-stats">
+                    <h3>Category Statistics</h3>
+                    <div id="categoriesList" class="categories-list-admin">
+                        <p>Loading statistics...</p>
                     </div>
                 </div>
             </section>
@@ -69,137 +56,31 @@
                 <h2>Upload Vector</h2>
                 <form id="uploadForm" class="upload-form">
                     <div class="form-group">
-                        <label for="vectorTitle">Vector Title</label>
-                        <input type="text" id="vectorTitle" required placeholder="Enter vector title">
+                        <label for="vectorJson">JSON Metadata File</label>
+                        <input type="file" id="vectorJson" accept=".json" required>
+                        <small>Example: food-00000010.json</small>
                     </div>
 
                     <div class="form-group">
-                        <label for="vectorDescription">Description</label>
-                        <textarea id="vectorDescription" required placeholder="Enter vector description" rows="4"></textarea>
+                        <label for="vectorJpeg">JPEG Preview Image</label>
+                        <input type="file" id="vectorJpeg" accept="image/jpeg" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="vectorCategory">Category</label>
-                        <select id="vectorCategory" required>
-                            <option value="">Select Category</option>
-                            <option value="Abstract">Abstract</option>
-                            <option value="Animals/Wildlife">Animals/Wildlife</option>
-                            <option value="The Arts">The Arts</option>
-                            <option value="Backgrounds/Textures">Backgrounds/Textures</option>
-                            <option value="Beauty/Fashion">Beauty/Fashion</option>
-                            <option value="Buildings/Landmarks">Buildings/Landmarks</option>
-                            <option value="Business/Finance">Business/Finance</option>
-                            <option value="Celebrities">Celebrities</option>
-                            <option value="Education">Education</option>
-                            <option value="Food">Food</option>
-                            <option value="Drink">Drink</option>
-                            <option value="Healthcare/Medical">Healthcare/Medical</option>
-                            <option value="Holidays">Holidays</option>
-                            <option value="Industrial">Industrial</option>
-                            <option value="Interiors">Interiors</option>
-                            <option value="Miscellaneous">Miscellaneous</option>
-                            <option value="Nature">Nature</option>
-                            <option value="Objects">Objects</option>
-                            <option value="Parks/Outdoor">Parks/Outdoor</option>
-                            <option value="People">People</option>
-                            <option value="Religion">Religion</option>
-                            <option value="Science">Science</option>
-                            <option value="Signs/Symbols">Signs/Symbols</option>
-                            <option value="Sports/Recreation">Sports/Recreation</option>
-                            <option value="Technology">Technology</option>
-                            <option value="Transportation">Transportation</option>
-                            <option value="Vintage">Vintage</option>
-                            <option value="Logo">Logo</option>
-                            <option value="Font">Font</option>
-                            <option value="Icon">Icon</option>
-                        </select>
+                        <label for="vectorZip">ZIP File (EPS, SVG, JPEG)</label>
+                        <input type="file" id="vectorZip" accept=".zip" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="vectorKeywords">Keywords (comma-separated)</label>
-                        <input type="text" id="vectorKeywords" required placeholder="free, vector, svg, eps, keyword1, keyword2">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="vectorThumbnail">Thumbnail Image</label>
-                        <input type="file" id="vectorThumbnail" accept="image/*" required>
-                        <small>Recommended: 200x200px</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="vectorZipFile">ZIP File (EPS, SVG, JPEG)</label>
-                        <input type="file" id="vectorZipFile" accept=".zip" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="vectorFileSize">File Size</label>
-                        <input type="text" id="vectorFileSize" placeholder="e.g., 1.8 MB">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Upload Vector</button>
+                    <button type="submit" class="btn btn-primary">Upload to Cloudflare</button>
                 </form>
-                <div id="uploadStatus" class="upload-status"></div>
+                <div id="uploadStatus" class="upload-status">Ready...</div>
             </section>
 
             <!-- MANAGE SECTION -->
             <section id="manage" class="admin-section">
                 <h2>Manage Vectors</h2>
-                <div class="manage-controls">
-                    <input type="text" id="searchVectors" placeholder="Search vectors..." class="search-input">
-                    <button id="refreshBtn" class="btn btn-secondary">Refresh</button>
-                </div>
                 <div id="vectorsList" class="vectors-list">
                     <p>Loading vectors...</p>
-                </div>
-            </section>
-
-            <!-- CATEGORIES SECTION -->
-            <section id="categories" class="admin-section">
-                <h2>Manage Categories</h2>
-                <div class="categories-management">
-                    <div class="add-category">
-                        <h3>Add New Category</h3>
-                        <form id="addCategoryForm">
-                            <input type="text" id="categoryName" placeholder="Category Name" required>
-                            <textarea id="categoryDescription" placeholder="Category Description" rows="3"></textarea>
-                            <button type="submit" class="btn btn-primary">Add Category</button>
-                        </form>
-                    </div>
-                    <div class="categories-list-admin">
-                        <h3>Existing Categories</h3>
-                        <div id="categoriesList" class="categories-list-items">
-                            <p>Loading categories...</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SETTINGS SECTION -->
-            <section id="settings" class="admin-section">
-                <h2>Settings</h2>
-                <div class="settings-form">
-                    <div class="form-group">
-                        <label for="r2Bucket">Cloudflare R2 Bucket Name</label>
-                        <input type="text" id="r2Bucket" placeholder="your-bucket-name" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="kvNamespace">Cloudflare KV Namespace ID</label>
-                        <input type="text" id="kvNamespace" placeholder="namespace-id" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="workerUrl">Worker API URL</label>
-                        <input type="text" id="workerUrl" placeholder="https://api.example.com" readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="adminPassword">Admin Password</label>
-                        <input type="password" id="adminPassword" placeholder="Enter new password">
-                        <small>Leave empty to keep current password</small>
-                    </div>
-
-                    <button id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
                 </div>
             </section>
         </main>

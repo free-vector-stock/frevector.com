@@ -37,7 +37,8 @@ export async function onRequestGet(context) {
     }
 
     const allVectorsRaw = await kv.get("all_vectors");
-    return new Response(allVectorsRaw || JSON.stringify({ vectors: [] }), { status: 200, headers });
+    const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+    return new Response(JSON.stringify({ vectors: allVectors }), { status: 200, headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
   }
@@ -61,7 +62,10 @@ export async function onRequestPost(context) {
     const metadata = JSON.parse(await jsonFile.text());
     const slug = jsonFile.name.replace(/\.json$/, "");
 
-    const existing = await kv.get(`vector:${slug}`);
+    const allVectorsRaw = await kv.get("all_vectors");
+    const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+
+    const existing = allVectors.find(v => v.name === slug);
     if (existing) return new Response(JSON.stringify({ error: "DUPLICATE" }), { status: 409, headers });
 
     const category = metadata.category || "Miscellaneous";
@@ -79,9 +83,6 @@ export async function onRequestPost(context) {
       fileSize: `${(zipFile.size / (1024 * 1024)).toFixed(1)} MB`
     };
 
-    await kv.put(`vector:${slug}`, JSON.stringify(vectorRecord));
-    const allVectorsRaw = await kv.get("all_vectors");
-    const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
     allVectors.unshift(vectorRecord);
     await kv.put("all_vectors", JSON.stringify(allVectors));
 
@@ -100,19 +101,20 @@ export async function onRequestDelete(context) {
     const r2 = context.env.VECTOR_ASSETS;
     const slug = new URL(context.request.url).searchParams.get("slug");
 
-    const vectorRaw = await kv.get(`vector:${slug}`);
-    if (!vectorRaw) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+    const allVectorsRaw = await kv.get("all_vectors");
+    if (!allVectorsRaw) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
-    const vector = JSON.parse(vectorRaw);
+    const allVectors = JSON.parse(allVectorsRaw);
+    const vectorIndex = allVectors.findIndex(v => v.name === slug);
+
+    if (vectorIndex === -1) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
+
+    const vector = allVectors[vectorIndex];
     await r2.delete(`assets/${vector.category}/${slug}.jpg`);
     await r2.delete(`assets/${vector.category}/${slug}.zip`);
-    await kv.delete(`vector:${slug}`);
 
-    const allVectorsRaw = await kv.get("all_vectors");
-    if (allVectorsRaw) {
-      const allVectors = JSON.parse(allVectorsRaw);
-      await kv.put("all_vectors", JSON.stringify(allVectors.filter(v => v.name !== slug)));
-    }
+    allVectors.splice(vectorIndex, 1);
+    await kv.put("all_vectors", JSON.stringify(allVectors));
 
     return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   } catch (e) {

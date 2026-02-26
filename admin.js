@@ -1,6 +1,5 @@
 /**
- * frevector.com - Gelişmiş Admin Panel Mantığı
- * Cloudflare R2 ve KV ile doğrudan etkileşim kurar.
+ * Admin Panel Logic
  */
 
 const state = {
@@ -31,6 +30,8 @@ function promptLogin() {
         state.adminKey = key;
         localStorage.setItem('adminKey', key);
         init();
+    } else {
+        window.location.href = '/';
     }
 }
 
@@ -100,7 +101,7 @@ function renderVectorsList() {
         item.className = 'vector-list-item';
         item.innerHTML = `
             <div class="vector-list-info">
-                <strong>${v.name}</strong> - ${v.category} (${v.downloads} downloads)
+                <strong>${v.name}</strong> - ${v.category} (${v.downloads || 0} downloads)
             </div>
             <div class="vector-list-actions">
                 <button onclick="deleteVector('${v.name}')" class="btn-delete">Delete</button>
@@ -194,7 +195,7 @@ function setupEventListeners() {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) logoutBtn.onclick = () => {
         localStorage.removeItem('adminKey');
-        window.location.reload();
+        window.location.href = '/';
     };
 }
 

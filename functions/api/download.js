@@ -13,13 +13,20 @@ export async function onRequestGet(context) {
       return new Response("Missing slug parameter", { status: 400 });
     }
 
-    // Get vector metadata
-    const vectorRaw = await kv.get(`vector:${slug}`);
-    if (!vectorRaw) {
+    // Get all vectors
+    const allVectorsRaw = await kv.get("all_vectors");
+    if (!allVectorsRaw) {
       return new Response("Vector not found", { status: 404 });
     }
 
-    const vector = JSON.parse(vectorRaw);
+    const allVectors = JSON.parse(allVectorsRaw);
+    const vectorIndex = allVectors.findIndex(v => v.name === slug);
+
+    if (vectorIndex === -1) {
+      return new Response("Vector not found", { status: 404 });
+    }
+
+    const vector = allVectors[vectorIndex];
     const zipKey = `assets/${vector.category}/${slug}.zip`;
 
     // Get ZIP from R2
@@ -32,18 +39,8 @@ export async function onRequestGet(context) {
     context.waitUntil((async () => {
       try {
         vector.downloads = (vector.downloads || 0) + 1;
-        await kv.put(`vector:${slug}`, JSON.stringify(vector));
-
-        // Update in all_vectors index
-        const allVectorsRaw = await kv.get("all_vectors");
-        if (allVectorsRaw) {
-          const allVectors = JSON.parse(allVectorsRaw);
-          const idx = allVectors.findIndex(v => v.name === slug);
-          if (idx !== -1) {
-            allVectors[idx].downloads = vector.downloads;
-            await kv.put("all_vectors", JSON.stringify(allVectors));
-          }
-        }
+        allVectors[vectorIndex] = vector;
+        await kv.put("all_vectors", JSON.stringify(allVectors));
       } catch (e) {
         console.error("Counter update failed:", e);
       }

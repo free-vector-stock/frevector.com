@@ -25,23 +25,10 @@ export async function onRequestGet(context) {
       categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
     }
 
-    // All defined categories (sorted A-Z)
-    const allCategories = [
-      "Abstract", "Animals/Wildlife", "The Arts", "Backgrounds/Textures",
-      "Beauty/Fashion", "Buildings/Landmarks", "Business/Finance", "Celebrities",
-      "Education", "Food", "Drink", "Healthcare/Medical", "Holidays",
-      "Industrial", "Interiors", "Miscellaneous", "Nature", "Objects",
-      "Parks/Outdoor", "People", "Religion", "Science", "Signs/Symbols",
-      "Sports/Recreation", "Technology", "Transportation", "Vintage",
-      "Logo", "Font", "Icon"
-    ];
-
-    const categories = allCategories
-      .filter(cat => categoryCounts[cat] > 0)
-      .map(cat => ({
-        name: cat,
-        count: categoryCounts[cat] || 0
-      }));
+    // Sort by count (descending) then by name (ascending)
+    const categories = Object.entries(categoryCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
     return new Response(JSON.stringify({ categories }), { status: 200, headers });
 

@@ -1,6 +1,6 @@
 /**
  * GET /api/vectors
- * Mevcut frevector.com sitesi için geliştirilmiş API
+ * Mevcut KV yapısına (all_vectors) tam uyumlu API
  */
 export async function onRequestGet(context) {
   const headers = {
@@ -24,11 +24,17 @@ export async function onRequestGet(context) {
 
     // Tekil vektör detayı
     if (slug) {
-      const vectorData = await kv.get(`vector:${slug}`);
-      if (!vectorData) {
+      const allVectorsRaw = await kv.get("all_vectors");
+      if (!allVectorsRaw) {
         return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers });
       }
-      const vector = JSON.parse(vectorData);
+      const allVectors = JSON.parse(allVectorsRaw);
+      const vector = allVectors.find(v => v.name === slug);
+      
+      if (!vector) {
+        return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers });
+      }
+
       // URL'leri ekle
       vector.thumbnail = `/api/asset?key=assets/${vector.category}/${vector.name}.jpg`;
       vector.zipUrl = `/api/asset?key=assets/${vector.category}/${vector.name}.zip`;
