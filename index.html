@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- TOP BANNER -->
+    <!-- TOP BANNER WITH ANIMATED TEXT -->
     <div class="top-banner">
         <div class="banner-content">
             <div class="banner-center">
@@ -20,7 +20,7 @@
                     <div class="line"></div>
                     <div class="line"></div>
                 </div>
-                <p class="banner-tagline">Premium quality professional graphic designs offered 100% free.</p>
+                <p class="banner-tagline" id="bannerText">We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.</p>
             </div>
         </div>
     </div>
@@ -122,12 +122,9 @@
 
             <!-- PAGINATION -->
             <div class="pagination-wrapper">
-                <div class="pagination-info">
-                    <span id="currentPage">1</span> / <span id="totalPageCount">1</span>
-                </div>
                 <div class="pagination-controls">
                     <button id="prevBtn" class="pagination-btn">❮</button>
-                    <input type="number" id="pageInput" class="page-input" value="1" min="1">
+                    <span id="pageNumber" class="page-number">1</span>
                     <button id="nextBtn" class="pagination-btn">❯</button>
                 </div>
             </div>
@@ -141,13 +138,63 @@
         </div>
         <div class="footer-right">
             <nav class="footer-nav">
-                <a href="#" data-modal="about">About Us</a>
-                <a href="#" data-modal="privacy">Privacy Policy</a>
-                <a href="#" data-modal="terms">Terms of Service</a>
-                <a href="#" data-modal="contact">Contact</a>
+                <a href="#" class="modal-link" data-modal="about">About Us</a>
+                <a href="#" class="modal-link" data-modal="privacy">Privacy Policy</a>
+                <a href="#" class="modal-link" data-modal="terms">Terms of Service</a>
+                <a href="#" class="modal-link" data-modal="contact">Contact</a>
             </nav>
         </div>
     </footer>
+
+    <!-- DOWNLOAD MODAL -->
+    <div id="downloadModal" class="modal" style="display: none;">
+        <div class="modal-content download-modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="download-modal-body">
+                <div class="download-modal-left">
+                    <img id="downloadModalImage" src="" alt="Vector">
+                </div>
+                <div class="download-modal-right">
+                    <h2 id="downloadModalTitle"></h2>
+                    <table class="vector-details-table">
+                        <tr>
+                            <td class="table-label">File Format</td>
+                            <td class="table-value">EPS, SVG, JPEG</td>
+                        </tr>
+                        <tr>
+                            <td class="table-label">Category</td>
+                            <td id="downloadModalCategory" class="table-value">-</td>
+                        </tr>
+                        <tr>
+                            <td class="table-label">Resolution</td>
+                            <td class="table-value">High Quality / Fully Scalable</td>
+                        </tr>
+                        <tr>
+                            <td class="table-label">License</td>
+                            <td class="table-value">Free for Personal & Commercial Use</td>
+                        </tr>
+                        <tr>
+                            <td class="table-label">File Size</td>
+                            <td id="downloadModalFileSize" class="table-value">-</td>
+                        </tr>
+                    </table>
+                    <div class="download-countdown">
+                        <p>Your download will start in: <span id="countdownNumber">4</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFO MODALS -->
+    <div id="infoModal" class="modal" style="display: none;">
+        <div class="modal-content info-modal-content">
+            <button class="modal-close">&times;</button>
+            <div id="modalBody" class="modal-body">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
+    </div>
 
     <!-- LOADER -->
     <div id="loader" class="loader-overlay" style="display: none;">

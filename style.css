@@ -48,6 +48,7 @@ body {
 
 .banner-center {
     text-align: center;
+    max-width: 800px;
 }
 
 .animated-lines {
@@ -76,6 +77,7 @@ body {
 
 .banner-tagline {
     font-size: 12px;
+    line-height: 1.5;
 }
 
 /* ===========================
@@ -224,6 +226,7 @@ body {
     max-height: 300px;
     object-fit: cover;
     border-radius: 8px;
+    cursor: pointer;
 }
 
 .featured-info {
@@ -425,29 +428,23 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 30px;
     margin-top: 60px;
     padding: 20px 0;
-}
-
-.pagination-info {
-    font-size: 14px;
-    color: var(--text-light);
 }
 
 .pagination-controls {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 20px;
 }
 
 .pagination-btn {
     background: none;
     border: 1px solid var(--border-light);
-    padding: 6px 12px;
+    padding: 8px 15px;
     cursor: pointer;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 16px;
     transition: all 0.3s;
 }
 
@@ -457,13 +454,11 @@ body {
     border-color: var(--primary-black);
 }
 
-.page-input {
-    width: 50px;
+.page-number {
+    font-size: 16px;
+    font-weight: bold;
+    min-width: 30px;
     text-align: center;
-    padding: 6px;
-    border: 1px solid var(--border-light);
-    border-radius: 4px;
-    font-size: 14px;
 }
 
 /* ===========================
@@ -488,10 +483,158 @@ body {
     text-decoration: none;
     color: var(--text-light);
     transition: color 0.3s;
+    cursor: pointer;
 }
 
 .footer-nav a:hover {
     color: var(--primary-black);
+}
+
+/* ===========================
+   MODALS
+   =========================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--primary-white);
+    border-radius: 8px;
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--text-dark);
+}
+
+.modal-close:hover {
+    color: var(--accent-red);
+}
+
+/* Download Modal */
+.download-modal-content {
+    width: 600px;
+    padding: 40px;
+}
+
+.download-modal-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.download-modal-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.download-modal-left img {
+    width: 100%;
+    max-width: 250px;
+    border-radius: 8px;
+}
+
+.download-modal-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.download-modal-right h2 {
+    font-size: 20px;
+}
+
+.vector-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.vector-details-table tr {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.vector-details-table tr:last-child {
+    border-bottom: none;
+}
+
+.table-label {
+    font-weight: 600;
+    padding: 10px 0;
+    color: var(--text-dark);
+}
+
+.table-value {
+    padding: 10px 0;
+    color: var(--text-light);
+    text-align: right;
+}
+
+.download-countdown {
+    background-color: var(--hover-bg);
+    padding: 20px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.download-countdown p {
+    margin: 0;
+}
+
+#countdownNumber {
+    color: var(--accent-red);
+    font-size: 24px;
+}
+
+/* Info Modal */
+.info-modal-content {
+    width: 600px;
+    padding: 40px;
+}
+
+.modal-body {
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.modal-body h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.modal-body p {
+    margin-bottom: 15px;
+}
+
+.modal-body a {
+    color: var(--accent-red);
+    text-decoration: none;
+}
+
+.modal-body a:hover {
+    text-decoration: underline;
 }
 
 /* ===========================
@@ -503,7 +646,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255, 255, 255, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -545,6 +688,9 @@ body {
     .featured-section {
         grid-template-columns: 1fr;
     }
+    .download-modal-body {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
@@ -566,6 +712,14 @@ body {
     .footer {
         flex-direction: column;
         gap: 15px;
+    }
+    .download-modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+    .info-modal-content {
+        width: 95%;
+        padding: 20px;
     }
 }
 
