@@ -22,6 +22,7 @@ export async function onRequestGet(context) {
         const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
         const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "24")));
         const search = (url.searchParams.get("search") || "").toLowerCase().trim();
+        const sort = url.searchParams.get("sort") || "";
 
         const allVectorsRaw = await kv.get("all_vectors");
         if (!allVectorsRaw) {
@@ -62,6 +63,13 @@ export async function onRequestGet(context) {
             });
         }
 
+        // Sort
+        if (sort === "newest") {
+            allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        } else if (sort === "oldest") {
+            allVectors.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+        }
+
         const total = allVectors.length;
         const totalPages = Math.max(1, Math.ceil(total / limit));
         const offset = (page - 1) * limit;
@@ -85,7 +93,8 @@ function enrichVector(v) {
         ...v,
         title: v.title || v.name || "",
         thumbnail: `/api/asset?key=assets/${encodeURIComponent(v.category)}/${encodeURIComponent(v.name)}.jpg`,
-        zipUrl: `/api/asset?key=assets/${encodeURIComponent(v.category)}/${encodeURIComponent(v.name)}.zip`
+        zipUrl: `/api/asset?key=assets/${encodeURIComponent(v.category)}/${encodeURIComponent(v.name)}.zip`,
+        fileSize: v.fileSize || null
     };
 }
 

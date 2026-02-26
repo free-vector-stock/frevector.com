@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Notify Deploy
 
 on:
   push:
@@ -7,16 +7,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  notify:
     runs-on: ubuntu-latest
-    name: Deploy to Cloudflare Pages
+    name: Deploy Notification
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name=frevector-com --branch=main
+      - name: Deployment Info
+        run: |
+          echo "✅ Code pushed to main branch"
+          echo "📦 Cloudflare Pages will automatically deploy via GitHub integration"
+          echo "🔗 Site: https://frevector.com"
+          echo "📅 Timestamp: $(date -u)"
+          echo "📝 Commit: ${{ github.sha }}"

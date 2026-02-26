@@ -151,6 +151,9 @@ async function fetchVectors() {
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
+        const sortVal = document.getElementById('sortFilter')?.value || '';
+        if (sortVal === 'newest') url.searchParams.set('sort', 'newest');
+        else if (sortVal === 'oldest') url.searchParams.set('sort', 'oldest');
 
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
