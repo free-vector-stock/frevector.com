@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * Mevcut KV verilerine (all_vectors) tam uyumlu
+ * Mevcut KV verilerine (all_vectors) tam uyumlu ve "ANASAYFA DÜZENİ" görseline uygun
  */
 
 const state = {
@@ -10,13 +10,13 @@ const state = {
     currentPage: 1,
     totalPages: 1,
     searchQuery: '',
-    isLoading: false
+    isLoading: false,
+    featured: null
 };
 
 // --- BAŞLATMA ---
 async function init() {
     setupEventListeners();
-    startBannerAnimation();
     await fetchCategories();
     await fetchVectors();
 }
@@ -51,12 +51,19 @@ async function fetchVectors() {
         state.allVectors = data.vectors || [];
         state.totalPages = data.totalPages || 1;
         
+        // Set featured item (first item on page 1)
+        if (state.currentPage === 1 && state.allVectors.length > 0) {
+            state.featured = state.allVectors[0];
+            renderFeatured();
+            renderSelectedForYou();
+            renderKeywords();
+        }
+        
         renderVectors();
         updatePagination();
         updateCategoryTitle();
     } catch (e) {
         console.error("Vektör çekme hatası:", e);
-        showLoader(false);
     } finally {
         state.isLoading = false;
         showLoader(false);
@@ -97,6 +104,72 @@ function createCategoryItem(name, value) {
     return a;
 }
 
+function renderFeatured() {
+    if (!state.featured) return;
+
+    const v = state.featured;
+    document.getElementById('featuredImage').src = v.thumbnail;
+    document.getElementById('featuredTitle').textContent = v.title;
+    document.getElementById('featuredDescription').textContent = v.description;
+    document.getElementById('featuredCategory').textContent = v.category;
+    document.getElementById('featuredFileSize').textContent = v.fileSize || '1.8 MB';
+
+    const kwList = document.getElementById('featuredKeywords');
+    kwList.innerHTML = '';
+    (v.keywords || []).slice(0, 8).forEach(kw => {
+        const span = document.createElement('span');
+        span.className = 'keyword-badge';
+        span.textContent = kw;
+        kwList.appendChild(span);
+    });
+}
+
+function renderSelectedForYou() {
+    const grid = document.getElementById('selectedGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    
+    // Show 10 random items from all vectors
+    const randomItems = state.allVectors.sort(() => Math.random() - 0.5).slice(0, 10);
+    
+    randomItems.forEach(v => {
+        const item = document.createElement('div');
+        item.className = 'selected-item';
+        item.innerHTML = `<img src="${v.thumbnail}" alt="${v.title}" onerror="this.src='https://placehold.co/150x120/1a1a1a/666666?text=Preview'">`;
+        item.onclick = () => selectFeatured(v);
+        grid.appendChild(item);
+    });
+}
+
+function renderKeywords() {
+    const list = document.getElementById('keywordsList');
+    if (!list) return;
+
+    list.innerHTML = '';
+    
+    // Get all unique keywords from all vectors
+    const allKeywords = new Set();
+    state.allVectors.forEach(v => {
+        (v.keywords || []).forEach(kw => allKeywords.add(kw));
+    });
+
+    // Show first 20 keywords
+    Array.from(allKeywords).slice(0, 20).forEach(kw => {
+        const btn = document.createElement('button');
+        btn.className = 'keyword-btn';
+        btn.textContent = kw;
+        btn.onclick = (e) => {
+            e.preventDefault();
+            document.getElementById('searchInput').value = kw;
+            state.searchQuery = kw;
+            state.currentPage = 1;
+            fetchVectors();
+        };
+        list.appendChild(btn);
+    });
+}
+
 function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
     if (!grid) return;
@@ -113,24 +186,33 @@ function renderVectors() {
         card.className = 'vector-card';
         card.innerHTML = `
             <div class="vector-image-container">
-                <img src="${v.thumbnail}" alt="${v.title}" class="vector-image" onerror="this.src='https://placehold.co/400x300/1a1a1a/666666?text=Preview'">
+                <img src="${v.thumbnail}" alt="${v.title}" class="vector-image" onerror="this.src='https://placehold.co/150x120/1a1a1a/666666?text=Preview'">
             </div>
             <div class="vector-info">
                 <div class="vector-title">${v.title}</div>
-                <div class="vector-keywords">${(v.keywords || []).slice(0, 3).join(', ')}</div>
+                <div class="vector-keywords">${(v.keywords || []).slice(0, 2).join(', ')}</div>
             </div>
         `;
-        card.onclick = () => openDownloadModal(v.name);
+        card.onclick = () => selectFeatured(v);
         grid.appendChild(card);
     });
 }
 
+function selectFeatured(vector) {
+    state.featured = vector;
+    renderFeatured();
+    // Scroll to featured section
+    document.querySelector('.featured-section').scrollIntoView({ behavior: 'smooth' });
+}
+
 function updatePagination() {
     const pageInput = document.getElementById('pageInput');
+    const currentPageSpan = document.getElementById('currentPage');
     const totalPageCount = document.getElementById('totalPageCount');
     
     if (pageInput) pageInput.value = state.currentPage;
-    if (totalPageCount) totalPageCount.textContent = `/ ${state.totalPages}`;
+    if (currentPageSpan) currentPageSpan.textContent = state.currentPage;
+    if (totalPageCount) totalPageCount.textContent = state.totalPages;
 }
 
 function updateCategoryTitle() {
@@ -141,70 +223,11 @@ function updateCategoryTitle() {
     title.textContent = `Free ${catName} Vector, SVG, EPS & JPEG Downloads`;
 }
 
-// --- MODAL VE İNDİRME ---
-async function openDownloadModal(slug) {
-    const modal = document.getElementById('downloadModal');
-    if (!modal) return;
-
-    showLoader(true);
-    try {
-        const response = await fetch(`/api/vectors?slug=${slug}`);
-        const v = await response.json();
-
-        document.getElementById('modalImage').src = v.thumbnail;
-        document.getElementById('modalTitle').textContent = v.title;
-        document.getElementById('modalDescription').textContent = v.description;
-        document.getElementById('modalCategory').textContent = v.category;
-        document.getElementById('modalFileSize').textContent = v.fileSize || '1.8 MB';
-        
-        const kwList = document.getElementById('modalKeywords');
-        kwList.innerHTML = '';
-        const allKws = ["free", "svg", "eps", "vector", ...(v.keywords || [])];
-        allKws.slice(0, 10).forEach(kw => {
-            const span = document.createElement('span');
-            span.className = 'keyword-badge';
-            span.textContent = kw;
-            kwList.appendChild(span);
-        });
-
-        modal.style.display = 'flex';
-        document.body.classList.add('no-scroll');
-
-        // Geri sayım ve indirme
-        let count = 4;
-        const countdownDisplay = document.getElementById('countdownDisplay');
-        countdownDisplay.textContent = count;
-
-        const timer = setInterval(() => {
-            count--;
-            if (count > 0) {
-                countdownDisplay.textContent = count;
-            } else {
-                clearInterval(timer);
-                // Otomatik indirme
-                window.location.href = `/api/download?slug=${v.name}`;
-                setTimeout(() => closeModals(), 1000);
-            }
-        }, 1000);
-
-        modal.dataset.timerId = timer;
-
-    } catch (e) {
-        console.error("Detay çekme hatası:", e);
-    } finally {
-        showLoader(false);
+// --- DOWNLOAD ---
+function downloadFeatured() {
+    if (state.featured) {
+        window.location.href = `/api/download?slug=${state.featured.name}`;
     }
-}
-
-function closeModals() {
-    const downloadModal = document.getElementById('downloadModal');
-    
-    if (downloadModal) {
-        downloadModal.style.display = 'none';
-        if (downloadModal.dataset.timerId) clearInterval(parseInt(downloadModal.dataset.timerId));
-    }
-    
-    document.body.classList.remove('no-scroll');
 }
 
 // --- EVENT LISTENERS ---
@@ -229,6 +252,7 @@ function setupEventListeners() {
         if (state.currentPage > 1) {
             state.currentPage--;
             fetchVectors();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
@@ -236,6 +260,7 @@ function setupEventListeners() {
         if (state.currentPage < state.totalPages) {
             state.currentPage++;
             fetchVectors();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
@@ -244,21 +269,17 @@ function setupEventListeners() {
         if (val >= 1 && val <= state.totalPages) {
             state.currentPage = val;
             fetchVectors();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
             pageInput.value = state.currentPage;
         }
     };
 
-    // Modal kapatma
-    window.onclick = (event) => {
-        if (event.target.classList.contains('modal')) {
-            closeModals();
-        }
-    };
-
-    document.querySelectorAll('.modal-close').forEach(btn => {
-        btn.onclick = closeModals;
-    });
+    // Download button
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) {
+        downloadBtn.onclick = downloadFeatured;
+    }
 
     // Logo yenileme
     const logoLink = document.getElementById('logoLink');
@@ -268,19 +289,6 @@ function setupEventListeners() {
             window.location.reload();
         };
     }
-}
-
-// --- BANNER ANİMASYONU ---
-function startBannerAnimation() {
-    const texts = document.querySelectorAll('.animated-text');
-    if (texts.length === 0) return;
-
-    let current = 0;
-    setInterval(() => {
-        texts[current].classList.remove('active');
-        current = (current + 1) % texts.length;
-        texts[current].classList.add('active');
-    }, 5000);
 }
 
 function showLoader(show) {

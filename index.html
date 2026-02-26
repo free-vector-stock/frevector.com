@@ -9,22 +9,31 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- TOP BLACK BANNER WITH ANIMATED TEXT -->
+    <!-- TOP BANNER WITH LOGO AND INFO -->
     <div class="top-banner">
-        <div class="banner-lines">
-            <div class="line"></div>
-            <div class="line"></div>
-            <div class="line"></div>
-            <div class="line"></div>
-            <div class="line"></div>
-        </div>
-        <div class="animated-text-container">
-            <div class="animated-text active">We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.</div>
-            <div class="animated-text">Our goal is to provide a comprehensive and ideal platform for those seeking graphic resources.</div>
-            <div class="animated-text">We aim to offer a wide archive of graphics, including vector illustrations, stock photos, icons, logos, and various design elements.</div>
-            <div class="animated-text">Our only and absolute rule is that our files may not be redistributed in any way.</div>
-            <div class="animated-text">The advertisements on our website generate revenue to enable us to continue our work. Therefore, we ask for your understanding.</div>
-            <div class="animated-text">Our website's sustainability depends on advertising revenue. Some features may be restricted while an ad blocker is active. Please disable the blocker and refresh the page.</div>
+        <div class="banner-content">
+            <div class="banner-left">
+                <svg class="logo-icon" width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <rect width="40" height="40" rx="4" fill="black"/>
+                    <text x="50%" y="50%" font-size="28" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="central">f</text>
+                </svg>
+                <span class="banner-text">LOGO BURADA OLACAK<br>ÜLZEME TILARINCIHA SAHTA TEHLİLERCEK</span>
+            </div>
+            <div class="banner-center">
+                <div class="animated-lines">
+                    <div class="line"></div>
+                    <div class="line"></div>
+                    <div class="line"></div>
+                    <div class="line"></div>
+                    <div class="line"></div>
+                </div>
+                <p class="banner-tagline">Premium quality professional graphic designs offered 100% free.</p>
+            </div>
+            <div class="banner-right">
+                <div class="banner-info">
+                    <span class="info-label">ÜZERİNİ TIKLAYACAĞINDA SAYFADA GÖRMEK İSTEDİĞİ AÇIKLAMALAR OLACAK VE AÇIKLAMALAR MODAL OLACAK</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -47,6 +56,13 @@
                 </svg>
                 <input type="text" id="searchInput" class="search-input" placeholder="Search vectors...">
             </div>
+            <div class="sort-container">
+                <select id="sortFilter" class="sort-filter">
+                    <option value="newest">Newest</option>
+                    <option value="popular">Most Popular</option>
+                    <option value="downloads">Most Downloaded</option>
+                </select>
+            </div>
         </div>
     </header>
 
@@ -62,8 +78,57 @@
 
         <!-- CENTER CONTENT -->
         <main class="content">
-            <!-- CATEGORY TITLE (H1) -->
+            <!-- H1 TITLE -->
             <h1 id="categoryTitle" class="category-title">Free Food Vector, SVG, EPS & JPEG Downloads</h1>
+
+            <!-- FEATURED SECTION -->
+            <section class="featured-section">
+                <div class="featured-left">
+                    <img id="featuredImage" src="" alt="Featured" class="featured-image">
+                    <div class="featured-info">
+                        <div class="info-row">
+                            <span class="info-label">CATEGORY</span>
+                            <span id="featuredCategory" class="info-value">Food</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">RESOLUTION</span>
+                            <span class="info-value">High Quality / Fully Scalable</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">LICENSE</span>
+                            <span class="info-value">Free for Personal & Commercial Use</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">FILE SIZE</span>
+                            <span id="featuredFileSize" class="info-value">1.8 MB</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="featured-right">
+                    <h3 id="featuredTitle">Title metni yazılacak burada (food-00000 dosya adı yazılmayacak )</h3>
+                    <p id="featuredDescription">Description metni yazılacak burada (food-00000 dosya adı yazılmayacak )</p>
+                    <div class="featured-keywords" id="featuredKeywords"></div>
+                    <button id="downloadBtn" class="download-btn">download</button>
+                    <p class="download-info">download başlınca indirme sayısı açılacak</p>
+                </div>
+            </section>
+
+            <!-- SELECTED FOR YOU SECTION -->
+            <section class="selected-section">
+                <h2 class="section-title">Sizin için seçtiklerimiz</h2>
+                <p class="section-subtitle">DİKKAT BU BÖLÜM SADECE 1. SAYFADA OLACAK 1. SAYFADAN SONRA GÖRÜNMEYECEK</p>
+                <div class="selected-grid" id="selectedGrid">
+                    <!-- Selected items here -->
+                </div>
+            </section>
+
+            <!-- KEYWORDS SECTION -->
+            <section class="keywords-section">
+                <p class="keywords-intro">GÖRSELE TIKLANDI ĞINDA ALTTA BU ŞEKİLDE AÇILACAK VE AÇIKLAMALARINDA OLACAK</p>
+                <div class="keywords-list" id="keywordsList">
+                    <!-- Keywords here -->
+                </div>
+            </section>
 
             <!-- VECTORS GRID -->
             <div id="vectorsGrid" class="vectors-grid">
@@ -73,7 +138,7 @@
             <!-- PAGINATION -->
             <div class="pagination-wrapper">
                 <div class="pagination-info">
-                    <span id="totalPageCount">/ 1</span>
+                    <span id="currentPage">1</span> / <span id="totalPageCount">1</span>
                 </div>
                 <div class="pagination-controls">
                     <button id="prevBtn" class="pagination-btn">❮</button>
@@ -89,6 +154,9 @@
         <div class="footer-left">
             <span class="copyright">© 2026 © frevector.com Registered Trademark</span>
         </div>
+        <div class="footer-center">
+            <span class="footer-text">SOL TARAFTA YASLANACAK</span>
+        </div>
         <div class="footer-right">
             <nav class="footer-nav">
                 <a href="#" data-modal="about">About Us</a>
@@ -98,38 +166,6 @@
             </nav>
         </div>
     </footer>
-
-    <!-- DOWNLOAD MODAL -->
-    <div id="downloadModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <div class="download-layout">
-                <div class="download-preview">
-                    <img id="modalImage" src="" alt="Vector Preview">
-                </div>
-                <div class="download-details">
-                    <h2 id="modalTitle">Title</h2>
-                    <p id="modalDescription">Description</p>
-                    <div id="modalKeywords" class="modal-keywords-list"></div>
-                    
-                    <table class="details-table">
-                        <tr><td>FILE FORMAT</td><td>EPS, SVG, JPEG</td></tr>
-                        <tr><td>CATEGORY</td><td id="modalCategory">-</td></tr>
-                        <tr><td>RESOLUTION</td><td>High Quality / Fully Scalable</td></tr>
-                        <tr><td>LICENSE</td><td>Free for Personal & Commercial Use</td></tr>
-                        <tr><td>FILE SIZE</td><td id="modalFileSize">1.8 MB</td></tr>
-                    </table>
-
-                    <div class="download-action">
-                        <div class="download-countdown">
-                            <div>Your download will start in</div>
-                            <div class="countdown-display" id="countdownDisplay">4</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- LOADER -->
     <div id="loader" class="loader-overlay" style="display: none;">
