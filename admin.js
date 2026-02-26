@@ -1,5 +1,5 @@
 /**
- * Admin Panel Logic
+ * Admin Panel Logic - Geliştirilmiş Versiyon
  */
 
 const state = {
@@ -96,12 +96,20 @@ function renderVectorsList() {
     if (!list) return;
 
     list.innerHTML = '';
+    
+    if (state.vectors.length === 0) {
+        list.innerHTML = '<p>No vectors uploaded yet.</p>';
+        return;
+    }
+
     state.vectors.forEach(v => {
         const item = document.createElement('div');
         item.className = 'vector-list-item';
         item.innerHTML = `
             <div class="vector-list-info">
-                <strong>${v.name}</strong> - ${v.category} (${v.downloads || 0} downloads)
+                <strong>${v.title || v.name}</strong>
+                <br>
+                <small>${v.category} • ${v.downloads || 0} downloads • ${v.fileSize || '-'}</small>
             </div>
             <div class="vector-list-actions">
                 <button onclick="deleteVector('${v.name}')" class="btn-delete">Delete</button>
@@ -122,14 +130,14 @@ async function deleteVector(slug) {
         });
         const data = await response.json();
         if (data.success) {
-            alert("Deleted successfully!");
+            showStatus("Deleted successfully!", "success");
             await fetchStats();
             await fetchVectors();
         } else {
-            alert("Error: " + data.error);
+            showStatus("Error: " + data.error, "error");
         }
     } catch (e) {
-        alert("Delete failed: " + e.message);
+        showStatus("Delete failed: " + e.message, "error");
     }
 }
 
@@ -137,14 +145,42 @@ async function handleUpload(e) {
     e.preventDefault();
     const form = e.target;
     const status = document.getElementById('uploadStatus');
+    const progress = document.getElementById('uploadProgress');
     
-    status.textContent = "Uploading... Please wait.";
-    status.className = "upload-status info";
+    // Validate files
+    const jsonFile = document.getElementById('vectorJson').files[0];
+    const jpegFile = document.getElementById('vectorJpeg').files[0];
+    const zipFile = document.getElementById('vectorZip').files[0];
+
+    if (!jsonFile || !jpegFile || !zipFile) {
+        showStatus("All files are required", "error");
+        return;
+    }
+
+    // Parse JSON to check validity
+    let metadata;
+    try {
+        metadata = JSON.parse(await jsonFile.text());
+    } catch (e) {
+        showStatus("Invalid JSON file", "error");
+        return;
+    }
+
+    const slug = jsonFile.name.replace(/\.json$/, '');
+    
+    // Check for duplicates
+    if (state.vectors.find(v => v.name === slug)) {
+        showStatus("THIS FILE HAS ALREADY BEEN UPLOADED", "error");
+        return;
+    }
+
+    showStatus("Uploading... Please wait.", "info");
+    progress.style.display = 'block';
 
     const formData = new FormData();
-    formData.append('json', document.getElementById('vectorJson').files[0]);
-    formData.append('jpeg', document.getElementById('vectorJpeg').files[0]);
-    formData.append('zip', document.getElementById('vectorZip').files[0]);
+    formData.append('json', jsonFile);
+    formData.append('jpeg', jpegFile);
+    formData.append('zip', zipFile);
 
     try {
         const response = await fetch('/api/admin', {
@@ -156,24 +192,49 @@ async function handleUpload(e) {
         const data = await response.json();
         
         if (response.ok) {
-            status.textContent = data.message;
-            status.className = "upload-status success";
+            showStatus("✓ " + data.message, "success");
             form.reset();
-            await fetchStats();
-            await fetchVectors();
+            progress.style.display = 'none';
+            
+            // Refresh data anında
+            setTimeout(async () => {
+                await fetchStats();
+                await fetchVectors();
+            }, 500);
         } else {
             if (data.error === "DUPLICATE") {
-                status.textContent = "THIS FILE HAS ALREADY BEEN UPLOADED";
-                status.className = "upload-status error";
+                showStatus("THIS FILE HAS ALREADY BEEN UPLOADED", "error");
             } else {
-                status.textContent = "Error: " + (data.error || "Upload failed");
-                status.className = "upload-status error";
+                showStatus("Error: " + (data.error || "Upload failed"), "error");
             }
+            progress.style.display = 'none';
         }
     } catch (e) {
-        status.textContent = "Upload failed: " + e.message;
-        status.className = "upload-status error";
+        showStatus("Upload failed: " + e.message, "error");
+        progress.style.display = 'none';
     }
+}
+
+function showStatus(message, type) {
+    const status = document.getElementById('uploadStatus');
+    status.textContent = message;
+    status.className = `upload-status ${type}`;
+}
+
+// --- SEARCH MANAGE ---
+function setupSearchManage() {
+    const searchInput = document.getElementById('searchManage');
+    if (!searchInput) return;
+
+    searchInput.oninput = (e) => {
+        const query = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('.vector-list-item');
+        
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+    };
 }
 
 // --- EVENT LISTENERS ---
@@ -197,6 +258,9 @@ function setupEventListeners() {
         localStorage.removeItem('adminKey');
         window.location.href = '/';
     };
+
+    // Search
+    setupSearchManage();
 }
 
 function switchSection(section) {
