@@ -72,13 +72,20 @@ export async function onRequestGet(context) {
 
         const total = allVectors.length;
         const totalPages = Math.max(1, Math.ceil(total / limit));
-        const offset = (page - 1) * limit;
+        
+        // Validate page number - ensure it doesn't exceed totalPages
+        let validPage = page;
+        if (page > totalPages && totalPages > 0) {
+            validPage = totalPages;
+        }
+        
+        const offset = (validPage - 1) * limit;
         const pageVectors = allVectors.slice(offset, offset + limit);
 
         return new Response(JSON.stringify({
             vectors: pageVectors.map(enrichVector),
             total,
-            page,
+            page: validPage,
             totalPages,
             category: category || "all"
         }), { status: 200, headers: CORS_HEADERS });

@@ -28,10 +28,19 @@ export async function onRequestGet(context) {
         const object = await r2.get(decodedKey);
 
         if (!object) {
+            // Log missing file for debugging
+            console.warn(`Missing R2 file: ${decodedKey}`);
+            
             // Return placeholder for missing images
             if (decodedKey.endsWith(".jpg") || decodedKey.endsWith(".jpeg") || decodedKey.endsWith(".png")) {
                 return Response.redirect("https://placehold.co/400x300/f5f5f5/999999?text=Preview", 302);
             }
+            
+            // For ZIP files, return 404 to prevent broken downloads
+            if (decodedKey.endsWith(".zip")) {
+                return new Response(JSON.stringify({ error: "File not found in storage" }), { status: 404, headers: { "Content-Type": "application/json" } });
+            }
+            
             return new Response("File not found", { status: 404 });
         }
 

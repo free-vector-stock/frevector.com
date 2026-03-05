@@ -176,6 +176,18 @@ async function fetchVectors() {
         state.totalPages = data.totalPages || 1;
         state.total = data.total || 0;
 
+        // If current page is empty but there are results, redirect to last valid page
+        if (!state.vectors.length && state.total > 0 && state.currentPage > 1) {
+            state.currentPage = Math.max(1, state.totalPages);
+            return fetchVectors();
+        }
+
+        // Ensure page number is valid
+        if (state.currentPage > state.totalPages && state.totalPages > 0) {
+            state.currentPage = state.totalPages;
+            return fetchVectors();
+        }
+
         renderVectors();
         updatePagination();
 
@@ -506,7 +518,7 @@ function setupEventListeners() {
     });
 
     document.getElementById('nextBtn')?.addEventListener('click', () => {
-        if (state.currentPage < state.totalPages) {
+        if (state.currentPage < state.totalPages && state.totalPages > 1) {
             state.currentPage++;
             closeDetailPanel();
             fetchVectors();
@@ -514,7 +526,7 @@ function setupEventListeners() {
     });
 
     document.getElementById('nextPageBtn')?.addEventListener('click', () => {
-        if (state.currentPage < state.totalPages) {
+        if (state.currentPage < state.totalPages && state.totalPages > 1) {
             state.currentPage++;
             closeDetailPanel();
             fetchVectors();
