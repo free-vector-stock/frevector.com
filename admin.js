@@ -276,33 +276,24 @@ async function handleBulkAnalyze() {
                 const metaCategory = getField(meta, 'category');
                 const metaTitle = getField(meta, 'title');
                 
-                if (!metaTitle) result.issues.push('Metadata eksik: title');
+                if (!metaTitle) result.issues.push('Metadata uyarısı: title bulunamadı');
                 
                 if (!metaCategory) {
-                    result.issues.push('Metadata eksik: category');
+                    result.issues.push('Metadata uyarısı: category bulunamadı');
                 } else {
-                    // Mevcut kategorilerle eşleşiyor mu? (Case-insensitive kontrol)
                     const matchedCat = CATEGORIES.find(c => c.toLowerCase() === String(metaCategory).toLowerCase());
-                    if (!matchedCat) {
-                        // Eğer eşleşme yoksa ama bir değer varsa, Miscellaneous olarak kabul edelim veya hatayı yumuşatalım
-                        result.issues.push(`Geçersiz kategori: ${metaCategory}`);
-                    } else {
-                        // Eşleşen kategoriyi orijinal haliyle set edelim
-                        meta.category = matchedCat;
-                    }
+                    if (matchedCat) meta.category = matchedCat;
                 }
                 
-                if (!getField(meta, 'description')) result.issues.push('Metadata eksik: description');
-                if (!getField(meta, 'keywords')) result.issues.push('Metadata eksik: keywords');
+                if (!getField(meta, 'description')) result.issues.push('Metadata uyarısı: description bulunamadı');
+                if (!getField(meta, 'keywords')) result.issues.push('Metadata uyarısı: keywords bulunamadı');
                 
-                // Metadata'yı paket içine saklayalım ki yükleme sırasında kullanabilelim
                 group.metadata = meta;
-                
             } catch (e) { 
-                result.issues.push('JSON parse hatası: ' + e.message); 
+                result.issues.push('JSON parse uyarısı: ' + e.message); 
             }
         }
-        // Hataları 'warning' olarak işaretleyelim ama yüklemeye engel olmayalım
+        // Sadece dosyaların varlığına bakalım, metadata hataları engel olmasın
         result.status = (result.hasJson && result.hasJpeg && result.hasZip) ? 'ready' : 'warning';
         results.push(result);
     }
@@ -317,10 +308,10 @@ function displayBulkAnalysisResults(results) {
         const div = document.createElement('div');
         div.style.cssText = `padding: 12px; border-bottom: 1px solid var(--border); background: var(--white);`;
         
-        // Sadece 3 dosya da varsa 'Hazır' diyelim, metadata hataları 'Uyarı' olsun ama yüklemeye engel olmasın
+        // Sadece 3 dosya da varsa 'Hazır' diyelim
         const isComplete = r.hasJson && r.hasJpeg && r.hasZip;
         const statusColor = isComplete ? 'var(--green)' : 'var(--red)';
-        const statusText = isComplete ? 'Yüklenebilir' : 'Eksik Dosya';
+        const statusText = isComplete ? 'Hazır' : 'Eksik Dosya';
         
         div.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -330,7 +321,7 @@ function displayBulkAnalysisResults(results) {
             <div style="font-size: 11px; color: #666;">
                 ${r.hasJson ? '✓' : '✗'} JSON | ${r.hasJpeg ? '✓' : '✗'} JPEG | ${r.hasZip ? '✓' : '✗'} ZIP
             </div>
-            ${r.issues.length > 0 ? `<div style="font-size: 11px; color: var(--orange); margin-top: 4px;">${r.issues.map(i => '• ' + escHtml(i)).join('<br>')}</div>` : ''}
+            ${r.issues.length > 0 ? `<div style="font-size: 11px; color: #999; margin-top: 4px;">${r.issues.map(i => '• ' + escHtml(i)).join('<br>')}</div>` : ''}
         `;
         list.appendChild(div);
     });
