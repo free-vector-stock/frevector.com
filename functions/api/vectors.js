@@ -43,11 +43,13 @@ export async function onRequestGet(context) {
             return new Response(JSON.stringify(enrichVector(vector)), { status: 200, headers: CORS_HEADERS });
         }
 
-        // Category filter
+        // Category filter - case-insensitive, trim whitespace
         if (category && category !== "all") {
-            allVectors = allVectors.filter(v =>
-                (v.category || "").toLowerCase() === category.toLowerCase()
-            );
+            const catLower = category.toLowerCase().trim();
+            allVectors = allVectors.filter(v => {
+                const vCatLower = (v.category || "").toLowerCase().trim();
+                return vCatLower === catLower;
+            });
         }
 
         // Search filter (keywords + title + description)
@@ -63,11 +65,13 @@ export async function onRequestGet(context) {
             });
         }
 
-        // Sort
-        if (sort === "newest") {
-            allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-        } else if (sort === "oldest") {
+        // Sort - DEFAULT TO NEWEST (most recent first)
+        // This ensures new uploads always appear on page 1
+        if (sort === "oldest") {
             allVectors.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+        } else {
+            // Default: sort by newest first (newest first is the default)
+            allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
         }
 
         const total = allVectors.length;

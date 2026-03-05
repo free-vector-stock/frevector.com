@@ -164,9 +164,9 @@ async function fetchVectors() {
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
-        const sortVal = document.getElementById('sortFilter')?.value || '';
-        if (sortVal === 'newest') url.searchParams.set('sort', 'newest');
-        else if (sortVal === 'oldest') url.searchParams.set('sort', 'oldest');
+        const sortVal = document.getElementById('sortFilter')?.value || 'newest';
+        if (sortVal === 'oldest') url.searchParams.set('sort', 'oldest');
+        else url.searchParams.set('sort', 'newest');  // Default to newest
 
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -499,9 +499,10 @@ function setupEventListeners() {
         });
     }
 
-    // Sort filter
+    // Sort filter - default to "newest"
     const sortFilter = document.getElementById('sortFilter');
     if (sortFilter) {
+        sortFilter.value = 'newest';  // Set default to newest
         sortFilter.addEventListener('change', () => {
             state.currentPage = 1;
             fetchVectors();
