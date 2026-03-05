@@ -1,1 +1,2 @@
-/admin /admin.html 200
+# Frevector Redirects
+# Note: admin.html is served directly - no redirect needed
