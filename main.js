@@ -68,19 +68,13 @@ const state = {
 async function init() {
     setupCategories();
     setupEventListeners();
-    startBannerAnimation();
     await fetchVectors();
 }
 
 /* ===========================
    BANNER ANIMATION
    =========================== */
-function startBannerAnimation() {
-    const el = document.getElementById('bannerText');
-    if (!el) return;
-    // Display only the first banner text, no animation
-    el.textContent = BANNER_TEXTS[0];
-}
+// Banner animation removed - logo only
 
 /* ===========================
    CATEGORIES
