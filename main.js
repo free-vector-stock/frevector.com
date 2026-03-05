@@ -5,14 +5,40 @@
 
 const EXTRA_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
 
+// Categories list - MUST match categories-config.js exactly
 const CATEGORIES = [
-    'Abstract','Animals/Wildlife','The Arts','Backgrounds/Textures',
-    'Beauty/Fashion','Buildings/Landmarks','Business/Finance','Celebrities',
-    'Drink','Education','Font','Food','Healthcare/Medical','Holidays',
-    'Icon','Industrial','Interiors','Logo','Miscellaneous','Nature',
-    'Objects','Parks/Outdoor','People','Religion','Science',
-    'Signs/Symbols','Sports/Recreation','Technology','Transportation','Vintage'
+    'Abstract',
+    'Animals/Wildlife',
+    'The Arts',
+    'Backgrounds/Textures',
+    'Beauty/Fashion',
+    'Buildings/Landmarks',
+    'Business/Finance',
+    'Celebrities',
+    'Drink',
+    'Education',
+    'Font',
+    'Food',
+    'Healthcare/Medical',
+    'Holidays',
+    'Icon',
+    'Industrial',
+    'Interiors',
+    'Logo',
+    'Miscellaneous',
+    'Nature',
+    'Objects',
+    'Parks/Outdoor',
+    'People',
+    'Religion',
+    'Science',
+    'Signs/Symbols',
+    'Sports/Recreation',
+    'Technology',
+    'Transportation',
+    'Vintage'
 ];
+// Total: 30 categories
 
 const BANNER_TEXTS = [
     "We operate our own in-house studio to produce graphic designs and offer them free of charge for both personal and commercial projects.",

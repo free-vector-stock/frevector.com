@@ -11,6 +11,7 @@ const CORS_HEADERS = {
 };
 
 // All predefined categories (A-Z)
+// Categories list - MUST match categories-config.js exactly
 const ALL_CATEGORIES = [
     "Abstract",
     "Animals/Wildlife",
@@ -43,6 +44,7 @@ const ALL_CATEGORIES = [
     "Transportation",
     "Vintage"
 ];
+// Total: 30 categories
 
 export async function onRequestGet(context) {
     try {

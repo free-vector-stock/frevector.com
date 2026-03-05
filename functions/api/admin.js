@@ -4,14 +4,40 @@
 
 const ADMIN_PASSWORD = "Frevector@2026!";
 
+// Categories list - MUST match categories-config.js exactly
 const VALID_CATEGORIES = [
-  "Abstract","Animals/Wildlife","The Arts","Backgrounds/Textures",
-  "Beauty/Fashion","Buildings/Landmarks","Business/Finance","Celebrities",
-  "Drink","Education","Font","Food","Healthcare/Medical","Holidays",
-  "Icon","Industrial","Interiors","Logo","Miscellaneous","Nature",
-  "Objects","Parks/Outdoor","People","Religion","Science",
-  "Signs/Symbols","Sports/Recreation","Technology","Transportation","Vintage"
+  "Abstract",
+  "Animals/Wildlife",
+  "The Arts",
+  "Backgrounds/Textures",
+  "Beauty/Fashion",
+  "Buildings/Landmarks",
+  "Business/Finance",
+  "Celebrities",
+  "Drink",
+  "Education",
+  "Font",
+  "Food",
+  "Healthcare/Medical",
+  "Holidays",
+  "Icon",
+  "Industrial",
+  "Interiors",
+  "Logo",
+  "Miscellaneous",
+  "Nature",
+  "Objects",
+  "Parks/Outdoor",
+  "People",
+  "Religion",
+  "Science",
+  "Signs/Symbols",
+  "Sports/Recreation",
+  "Technology",
+  "Transportation",
+  "Vintage"
 ];
+// Total: 30 categories
 
 function authenticate(request) {
   const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization");
