@@ -46,15 +46,19 @@ function authenticate(request) {
 }
 
 function generateSeoSlug(title) {
-  if (!title) return null;
-  const titleStr = (title || "").toString();
+  if (!title || title.trim() === "") return null;
+  
+  const titleStr = title.toString().trim();
+  
+  // Clean and normalize the title
   const slug = titleStr
     .toLowerCase()
-    .trim()
     .replace(/[^a-z0-9\s-]/g, '')  // Remove special characters
     .replace(/\s+/g, '-')            // Replace spaces with dashes
     .replace(/-+/g, '-')              // Replace multiple dashes
     .replace(/^-|-$/g, '');           // Remove leading/trailing dashes
+  
+  // Return the full SEO slug with title content
   return slug ? `free-vector-${slug}` : null;
 }
 
@@ -106,8 +110,16 @@ export async function onRequestGet(context) {
           continue;
         }
 
-        // Generate new SEO slug from title
-        const newSlug = generateSeoSlug(v.title || v.name);
+        // Generate new SEO slug from title (prefer title, fallback to name)
+        let newSlug = null;
+        if (v.title && v.title.trim() && !v.title.includes("00000")) {
+          // Use title if it's not empty and not a numeric ID
+          newSlug = generateSeoSlug(v.title);
+        } else if (v.name && !v.name.startsWith("free-vector-")) {
+          // Use the old name as fallback, clean it up
+          newSlug = generateSeoSlug(v.name);
+        }
+        
         if (!newSlug || newSlug === v.name) {
           results.failed++;
           updated.push(v);
@@ -172,8 +184,15 @@ export async function onRequestPost(context) {
     
     // Generate SEO-friendly slug from title
     // Format: free-vector-[title-in-lowercase-with-dashes]
-    let slug;
-    slug = generateSeoSlug(metadata.title) || jsonFile.name.replace(/\.json$/, "");
+    let slug = null;
+    if (metadata.title && metadata.title.trim()) {
+      slug = generateSeoSlug(metadata.title);
+    }
+    if (!slug) {
+      // Fallback to filename if no title
+      const filename = jsonFile.name.replace(/\.json$/, "");
+      slug = generateSeoSlug(filename) || filename;
+    }
 
     // Validate category
     const category = metadata.category || "Miscellaneous";
