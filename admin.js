@@ -266,26 +266,36 @@ async function handleBulkAnalyze() {
                 const text = await group.json.text();
                 const meta = JSON.parse(text);
                 
-                // Kategori kontrolünü daha esnek yapalım (büyük/küçük harf duyarlılığı vb.)
-                const metaCategory = meta.category || meta.Category || meta.CATEGORY;
-                const metaTitle = meta.title || meta.Title || meta.TITLE;
+                // Metadata alanlarını bulalım (case-insensitive)
+                const getField = (obj, field) => {
+                    const key = Object.keys(obj).find(k => k.toLowerCase() === field.toLowerCase());
+                    return key ? obj[key] : null;
+                };
+
+                const metaCategory = getField(meta, 'category');
+                const metaTitle = getField(meta, 'title');
                 
                 if (!metaTitle) result.issues.push('Metadata eksik: title');
+                
                 if (!metaCategory) {
                     result.issues.push('Metadata eksik: category');
                 } else {
                     // Mevcut kategorilerle eşleşiyor mu? (Case-insensitive kontrol)
-                    const matchedCat = CATEGORIES.find(c => c.toLowerCase() === metaCategory.toLowerCase());
+                    const matchedCat = CATEGORIES.find(c => c.toLowerCase() === String(metaCategory).toLowerCase());
                     if (!matchedCat) {
+                        // Eğer eşleşme yoksa ama bir değer varsa, Miscellaneous olarak kabul edelim veya hatayı yumuşatalım
                         result.issues.push(`Geçersiz kategori: ${metaCategory}`);
                     } else {
-                        // Eşleşen kategoriyi orijinal haliyle set edelim (backend için önemli olabilir)
+                        // Eşleşen kategoriyi orijinal haliyle set edelim
                         meta.category = matchedCat;
                     }
                 }
                 
-                if (!meta.description && !meta.Description) result.issues.push('Metadata eksik: description');
-                if (!meta.keywords && !meta.Keywords) result.issues.push('Metadata eksik: keywords');
+                if (!getField(meta, 'description')) result.issues.push('Metadata eksik: description');
+                if (!getField(meta, 'keywords')) result.issues.push('Metadata eksik: keywords');
+                
+                // Metadata'yı paket içine saklayalım ki yükleme sırasında kullanabilelim
+                group.metadata = meta;
                 
             } catch (e) { 
                 result.issues.push('JSON parse hatası: ' + e.message); 
@@ -348,7 +358,15 @@ async function handleBulkUpload() {
     for (const [name, group] of readyGroups) {
         try {
             const formData = new FormData();
-            formData.append('json', group.json);
+            
+            // Eğer analiz sırasında metadata düzeltilmişse onu kullanalım, yoksa orijinal dosyayı
+            if (group.metadata) {
+                const metaBlob = new Blob([JSON.stringify(group.metadata)], { type: 'application/json' });
+                formData.append('json', metaBlob, `${name}.json`);
+            } else {
+                formData.append('json', group.json);
+            }
+            
             formData.append('jpeg', group.jpeg);
             formData.append('zip', group.zip);
             const res = await fetch('/api/admin', {
