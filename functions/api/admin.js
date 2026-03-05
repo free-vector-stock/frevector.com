@@ -74,11 +74,15 @@ export async function onRequestGet(context) {
     const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
 
     if (action === "migrate") {
-      const results = { total: allVectors.length, migrated: 0, alreadySeo: 0, failed: 0 };
+      const results = { total: allVectors.length, migrated: 0, alreadySeo: 0, failed: 0, logs: [] };
       const updated = [];
       const r2 = context.env.VECTOR_ASSETS;
 
       for (const v of allVectors) {
+        if (results.migrated >= 50) { // Limit to 50 per run to avoid timeout
+          updated.push(...allVectors.slice(allVectors.indexOf(v)));
+          break;
+        }
         if (!v || !v.name) {
           results.failed++;
           continue;
