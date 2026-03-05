@@ -180,9 +180,10 @@ function renderManageTable() {
 
     pageItems.forEach(v => {
         const tr = document.createElement('tr');
-        const previewUrl = `/api/asset?category=${v.category}&slug=${v.name}&type=jpg`;
+        // Correct API path for assets: /api/asset?key=assets/Category/slug.jpg
+        const previewUrl = `/api/asset?key=assets/${encodeURIComponent(v.category)}/${encodeURIComponent(v.name)}.jpg`;
         tr.innerHTML = `
-            <td><img src="${previewUrl}" class="preview-img" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='"></td>
+            <td><img src="${previewUrl}" class="preview-img" onerror="this.src='https://placehold.co/400x300/f5f5f5/999999?text=Preview'"></td>
             <td><div style="font-weight:600;">${escHtml(v.title)}</div><div style="font-size:11px;color:#888;">${escHtml(v.name)}</div></td>
             <td><span class="badge badge-orange">${escHtml(v.category)}</span></td>
             <td>${v.date}</td>
@@ -301,7 +302,8 @@ async function handleBulkAnalyze() {
                 result.issues.push('JSON parse hatası: ' + e.message); 
             }
         }
-        result.status = result.issues.length === 0 ? 'ready' : 'warning';
+        // Hataları 'warning' olarak işaretleyelim ama yüklemeye engel olmayalım
+        result.status = (result.hasJson && result.hasJpeg && result.hasZip) ? 'ready' : 'warning';
         results.push(result);
     }
     displayBulkAnalysisResults(results);
@@ -314,8 +316,12 @@ function displayBulkAnalysisResults(results) {
     results.forEach(r => {
         const div = document.createElement('div');
         div.style.cssText = `padding: 12px; border-bottom: 1px solid var(--border); background: var(--white);`;
-        const statusColor = r.status === 'ready' ? 'var(--green)' : 'var(--orange)';
-        const statusText = r.status === 'ready' ? 'Hazır' : 'Uyarı';
+        
+        // Sadece 3 dosya da varsa 'Hazır' diyelim, metadata hataları 'Uyarı' olsun ama yüklemeye engel olmasın
+        const isComplete = r.hasJson && r.hasJpeg && r.hasZip;
+        const statusColor = isComplete ? 'var(--green)' : 'var(--red)';
+        const statusText = isComplete ? 'Yüklenebilir' : 'Eksik Dosya';
+        
         div.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <strong style="font-size: 13px;">${escHtml(r.baseName)}</strong>
@@ -324,13 +330,14 @@ function displayBulkAnalysisResults(results) {
             <div style="font-size: 11px; color: #666;">
                 ${r.hasJson ? '✓' : '✗'} JSON | ${r.hasJpeg ? '✓' : '✗'} JPEG | ${r.hasZip ? '✓' : '✗'} ZIP
             </div>
-            ${r.issues.length > 0 ? `<div style="font-size: 11px; color: var(--red); margin-top: 4px;">${r.issues.map(i => '• ' + escHtml(i)).join('<br>')}</div>` : ''}
+            ${r.issues.length > 0 ? `<div style="font-size: 11px; color: var(--orange); margin-top: 4px;">${r.issues.map(i => '• ' + escHtml(i)).join('<br>')}</div>` : ''}
         `;
         list.appendChild(div);
     });
-    const ready = results.filter(r => r.status === 'ready').length;
-    summary.innerHTML = `<strong>Özet:</strong> ${results.length} paket | <span style="color: var(--green);">✓ ${ready} hazır</span>`;
+    const ready = results.filter(r => r.hasJson && r.hasJpeg && r.hasZip).length;
+    summary.innerHTML = `<strong>Özet:</strong> ${results.length} paket | <span style="color: var(--green);">✓ ${ready} yüklenebilir</span>`;
     document.getElementById('bulkAnalysisResults').style.display = 'block';
+    // Sadece dosyaları tam olanları yüklemeye izin verelim
     document.getElementById('bulkUploadBtn').disabled = ready === 0;
 }
 
