@@ -522,7 +522,10 @@
 
             <!-- SYSTEM HEALTH -->
             <section id="health" class="admin-section">
-                <button class="btn-refresh" id="refreshHealthBtn">&#8635; Refresh Health Report</button>
+                <div style="display:flex;gap:12px;margin-bottom:20px;">
+                    <button class="btn-refresh" id="refreshHealthBtn" style="margin-bottom:0;">&#8635; Refresh Health Report</button>
+                    <button class="btn-refresh" id="runCleanupBtn" style="margin-bottom:0;background:var(--red);">&#128465; Run Cleanup (Remove Orphans)</button>
+                </div>
                 <div class="health-grid" id="healthGrid">
                     <div class="health-card">
                         <div class="health-icon">&#9203;</div>
@@ -537,10 +540,11 @@
                             <th>Vector Slug</th>
                             <th>Problem Type</th>
                             <th>Suggested Fix</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="healthIssuesBody">
-                        <tr><td colspan="3" style="text-align:center;padding:20px;color:#666;">Run health check to see results.</td></tr>
+                        <tr><td colspan="4" style="text-align:center;padding:20px;color:#666;">Run health check to see results.</td></tr>
                     </tbody>
                 </table>
             </section>
@@ -548,6 +552,6 @@
     </div>
 </div>
 
-<script src="admin.js?v=20260306_v4"></script>
+<script src="admin.js?v=20260306_v5"></script>
 </body>
 </html>

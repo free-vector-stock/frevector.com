@@ -4,7 +4,7 @@
  * This prevents "ghost" vectors (in KV but not in R2) and orphaned R2 files
  */
 
-const ADMIN_PASSWORD = "Frevector@2026!";
+const ADMIN_PASSWORD = "vector2026";
 
 function authenticate(request) {
   const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization");
@@ -15,7 +15,7 @@ function authenticate(request) {
 
 export async function onRequestPost(context) {
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  
+
   if (!authenticate(context.request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
   }
@@ -28,27 +28,22 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: "Services not configured" }), { status: 500, headers });
     }
 
-    // Get all vectors from KV
     const allVectorsRaw = await kv.get("all_vectors");
     const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
 
     let removedCount = 0;
     const orphanedVectors = [];
-
-    // Check each vector in KV - verify files exist in R2
     const validVectors = [];
+
     for (const vector of allVectors) {
       const jpgKey = `assets/${vector.category}/${vector.name}.jpg`;
       const zipKey = `assets/${vector.category}/${vector.name}.zip`;
 
-      const jpgExists = await r2.get(jpgKey);
-      const zipExists = await r2.get(zipKey);
+      const [jpgExists, zipExists] = await Promise.all([r2.head(jpgKey), r2.head(zipKey)]);
 
       if (jpgExists && zipExists) {
-        // Both files exist, keep the vector
         validVectors.push(vector);
       } else {
-        // One or both files missing, remove from KV
         orphanedVectors.push({
           name: vector.name,
           category: vector.category,
@@ -59,7 +54,6 @@ export async function onRequestPost(context) {
       }
     }
 
-    // Update KV with only valid vectors
     if (removedCount > 0) {
       await kv.put("all_vectors", JSON.stringify(validVectors));
     }
