@@ -657,15 +657,16 @@ async function loadHealthReport() {
 // ─── CLEANUP ─────────────────────────────────────────────────────────────────
 
 async function runCleanup() {
-    if (!confirm('Run cleanup? This will remove KV entries where R2 files are missing.')) return;
+    if (!confirm('Run cleanup? This will remove KV entries where R2 files are missing and fix invalid categories.')) return;
     try {
-        const res = await fetch('/api/cleanup', {
-            method: 'POST',
+        const res = await fetch('/api/admin?action=cleanup', {
+            method: 'PATCH',
             headers: { 'X-Admin-Key': ADMIN_KEY }
         });
         const data = await res.json();
         if (data.success) {
-            alert(`Cleanup complete. Removed ${data.removedCount} orphaned entries. Total vectors: ${data.totalVectorsAfter}`);
+            const { removed, fixed, total } = data.results;
+            alert(`Cleanup complete.\nRemoved: ${removed} orphaned entries\nFixed: ${fixed} category issues\nTotal vectors: ${total - removed}`);
             loadHealthReport();
             loadDashboard();
             loadManageVectors();

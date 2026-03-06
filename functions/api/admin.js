@@ -581,6 +581,70 @@ export async function onRequestDelete(context) {
 }
 
 // ─────────────────────────────────────────────
+// PATCH  /api/admin?action=cleanup (remove orphans)
+// ─────────────────────────────────────────────
+export async function onRequestPatch(context) {
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+
+  try {
+    const kv = context.env.VECTOR_DB;
+    const r2 = context.env.VECTOR_ASSETS;
+    const url = new URL(context.request.url);
+    const action = url.searchParams.get("action");
+
+    // ── CLEANUP: Remove orphaned records ──
+    if (action === "cleanup") {
+      const allVectorsRaw = await kv.get("all_vectors");
+      const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+      
+      const results = { total: allVectors.length, removed: 0, fixed: 0, errors: [] };
+      const cleaned = [];
+
+      for (const v of allVectors) {
+        try {
+          // Check if R2 files exist
+          const [jpgCheck, zipCheck] = await Promise.all([
+            r2.head(`assets/${v.category}/${v.name}.jpg`),
+            r2.head(`assets/${v.category}/${v.name}.zip`)
+          ]);
+
+          if (!jpgCheck || !zipCheck) {
+            // Missing files - remove from KV
+            results.removed++;
+            continue;
+          }
+
+          // Validate category
+          if (!VALID_CATEGORIES.includes(v.category)) {
+            v.category = normalizeCategory(v.category) || "Miscellaneous";
+            results.fixed++;
+          }
+
+          // Validate title
+          const titleCheck = validateTitle(v.title);
+          if (!titleCheck.valid) {
+            results.removed++;
+            continue;
+          }
+
+          cleaned.push(v);
+        } catch (e) {
+          results.errors.push({ slug: v.name, error: e.message });
+        }
+      }
+
+      await kv.put("all_vectors", JSON.stringify(cleaned));
+      return new Response(JSON.stringify({ success: true, results }), { status: 200, headers });
+    }
+
+    return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+  }
+}
+
+// ─────────────────────────────────────────────
 // OPTIONS  (CORS preflight)
 // ─────────────────────────────────────────────
 export async function onRequestOptions() {
@@ -588,7 +652,7 @@ export async function onRequestOptions() {
     status: 204,
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, Authorization"
     }
   });
