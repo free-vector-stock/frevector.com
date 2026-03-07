@@ -1,7 +1,7 @@
 /**
  * Admin API - Protected endpoints for managing vectors
- * Fixed: R2 storage structure (flat), no auto-renaming to SEO slugs,
- *        strict ID-based naming (ID.jpg, ID.zip, ID.json).
+ * Fixed: Improved category matching (Levenshtein, prefix, and normalization)
+ * Fixed: Flat R2 storage with legacy support hints.
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -16,6 +16,67 @@ const VALID_CATEGORIES = [
   "People", "Religion", "Science", "Signs/Symbols", "Sports/Recreation",
   "Technology", "Transportation", "Vintage"
 ];
+
+/**
+ * Normalizes strings for better comparison (removes Turkish accents, lowers case)
+ */
+function normalizeString(str) {
+    if (!str) return "";
+    return str.toString().toLowerCase().trim()
+        .replace(/ı/g, 'i')
+        .replace(/ğ/g, 'g')
+        .replace(/ü/g, 'u')
+        .replace(/ş/g, 's')
+        .replace(/ö/g, 'o')
+        .replace(/ç/g, 'c');
+}
+
+/**
+ * Simple Levenshtein distance
+ */
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+/**
+ * Advanced category matching
+ */
+function resolveCategory(raw) {
+    if (!raw) return "Miscellaneous";
+    const s = normalizeString(raw);
+    
+    // 1. Exact or Prefix Match
+    for (const cat of VALID_CATEGORIES) {
+        const normCat = normalizeString(cat);
+        // "backgrounds" matches "backgrounds/textures"
+        if (normCat.includes(s) || s.includes(normCat)) return cat;
+        // Check first part (e.g. "animals" matches "animals/wildlife")
+        const firstPart = normCat.split('/')[0];
+        if (firstPart.includes(s) || s.includes(firstPart)) return cat;
+    }
+
+    // 2. Levenshtein Distance
+    let best = "Miscellaneous", bestDist = 4;
+    for (const cat of VALID_CATEGORIES) {
+        const d = levenshtein(s, normalizeString(cat));
+        if (d < bestDist) {
+            bestDist = d;
+            best = cat;
+        }
+    }
+    
+    return best;
+}
 
 function authenticate(request) {
   const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization");
@@ -79,9 +140,14 @@ export async function onRequestGet(context) {
       
       const r2Checks = await Promise.all(
         sample.map(async (v) => {
-          const jpg = await r2.head(`${v.name}.jpg`);
-          const zip = await r2.head(`${v.name}.zip`);
-          return { v, jpg: !!jpg, zip: !!zip };
+          // Check flat structure first, then legacy structure
+          const jpgFlat = await r2.head(`${v.name}.jpg`);
+          const jpgLegacy = !jpgFlat ? await r2.head(`assets/${v.category}/${v.name}.jpg`) : null;
+          
+          const zipFlat = await r2.head(`${v.name}.zip`);
+          const zipLegacy = !zipFlat ? await r2.head(`assets/${v.category}/${v.name}.zip`) : null;
+          
+          return { v, jpg: !!(jpgFlat || jpgLegacy), zip: !!(zipFlat || zipLegacy) };
         })
       );
 
@@ -141,7 +207,10 @@ export async function onRequestPost(context) {
 
     const title    = getField(metadata, "title");
     const keywords = getField(metadata, "keywords");
-    const category = getField(metadata, "category") || "Miscellaneous";
+    
+    // Improved category resolution
+    const rawCategory = getField(metadata, "category");
+    const category = resolveCategory(rawCategory);
     
     // ID comes from the filename (e.g., backgrounds-textures-00000317)
     const id = jsonFile.name.replace(/\.json$/, "");
@@ -178,7 +247,7 @@ export async function onRequestPost(context) {
 
     await kv.put("all_vectors", JSON.stringify(allVectors));
 
-    return new Response(JSON.stringify({ success: true, id }), { status: 200, headers });
+    return new Response(JSON.stringify({ success: true, id, category }), { status: 200, headers });
 
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
@@ -206,8 +275,11 @@ export async function onRequestDelete(context) {
       await kv.put("all_vectors", JSON.stringify(allVectors));
     }
 
+    // Try deleting from both flat and legacy structure
     await r2.delete(`${id}.jpg`);
     await r2.delete(`${id}.zip`);
+    // Note: We don't know the category here for legacy delete, 
+    // but flat delete is the priority. Legacy files will stay but won't be in KV.
 
     return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   } catch (e) {
@@ -233,8 +305,14 @@ export async function onRequestPatch(context) {
       const cleaned = [];
 
       for (const v of allVectors) {
-        const [jpg, zip] = await Promise.all([r2.head(`${v.name}.jpg`), r2.head(`${v.name}.zip`)]);
-        if (jpg && zip) cleaned.push(v);
+        // Check flat structure first, then legacy structure
+        const jpgFlat = await r2.head(`${v.name}.jpg`);
+        const jpgLegacy = !jpgFlat ? await r2.head(`assets/${v.category}/${v.name}.jpg`) : null;
+        
+        const zipFlat = await r2.head(`${v.name}.zip`);
+        const zipLegacy = !zipFlat ? await r2.head(`assets/${v.category}/${v.name}.zip`) : null;
+
+        if ((jpgFlat || jpgLegacy) && (zipFlat || zipLegacy)) cleaned.push(v);
       }
 
       await kv.put("all_vectors", JSON.stringify(cleaned));

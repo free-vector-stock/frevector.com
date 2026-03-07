@@ -78,11 +78,13 @@ export async function onRequestGet(context) {
 }
 
 function enrichVector(v) {
+    const cat = v.category || "Miscellaneous";
     return {
         ...v,
         title: v.title || v.name || "",
-        thumbnail: `/api/asset?key=${encodeURIComponent(v.name)}.jpg`,
-        zipUrl: `/api/asset?key=${encodeURIComponent(v.name)}.zip`,
+        // Include cat= hint to help asset.js find the file if it's in a legacy category folder
+        thumbnail: `/api/asset?key=${encodeURIComponent(v.name)}.jpg&cat=${encodeURIComponent(cat)}`,
+        zipUrl: `/api/asset?key=${encodeURIComponent(v.name)}.zip&cat=${encodeURIComponent(cat)}`,
         fileSize: v.fileSize || null
     };
 }
