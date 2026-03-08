@@ -19,7 +19,8 @@ const state = {
     managePage: 1,
     manageLimit: 20,
     searchQuery: '',
-    filterCat: ''
+    filterCat: '',
+    selectedVectors: new Set()
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -81,6 +82,22 @@ document.addEventListener('DOMContentLoaded', () => {
         state.managePage = 1;
         filterAndRenderManage();
     });
+
+    document.getElementById('selectAllCheckbox')?.addEventListener('change', (e) => {
+        const checked = e.target.checked;
+        const start = (state.managePage - 1) * state.manageLimit;
+        const end = start + state.manageLimit;
+        const pageItems = state.filteredVectors.slice(start, end);
+        if (checked) {
+            pageItems.forEach(v => state.selectedVectors.add(v.name));
+        } else {
+            pageItems.forEach(v => state.selectedVectors.delete(v.name));
+        }
+        renderManageTable();
+        updateBulkDeleteUI();
+    });
+
+    document.getElementById('bulkDeleteBtn')?.addEventListener('click', bulkDeleteVectors);
 
     const filterSel = document.getElementById('filterCategory');
     CATEGORIES.forEach(cat => {
@@ -173,7 +190,7 @@ function renderManageTable() {
     const pageItems = state.filteredVectors.slice(start, end);
 
     if (pageItems.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">No vectors found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No vectors found</td></tr>';
         pag.innerHTML = '';
         return;
     }
@@ -182,7 +199,9 @@ function renderManageTable() {
         const tr = document.createElement('tr');
         const r2cat = v.r2_category || '';
         const previewUrl = `/api/asset?key=${encodeURIComponent(v.name)}.jpg&cat=${encodeURIComponent(v.category || '')}&r2cat=${encodeURIComponent(r2cat)}`;
+        const isSelected = state.selectedVectors.has(v.name);
         tr.innerHTML = `
+            <td><input type="checkbox" class="vector-checkbox" data-slug="${escHtml(v.name)}" ${isSelected ? 'checked' : ''}></td>
             <td><img src="${previewUrl}" class="preview-img" onerror="this.src='https://placehold.co/400x300/f5f5f5/999999?text=Preview'"></td>
             <td><div style="font-weight:600;">${escHtml(v.title)}</div><div style="font-size:11px;color:#888;">${escHtml(v.name)}</div></td>
             <td><span class="badge badge-orange">${escHtml(v.category)}</span></td>
@@ -190,10 +209,20 @@ function renderManageTable() {
             <td>${v.downloads}</td>
             <td><button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">Delete</button></td>
         `;
+        const checkbox = tr.querySelector('.vector-checkbox');
+        checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                state.selectedVectors.add(v.name);
+            } else {
+                state.selectedVectors.delete(v.name);
+            }
+            updateBulkDeleteUI();
+        });
         tbody.appendChild(tr);
     });
 
     renderPagination();
+    updateBulkDeleteUI();
 }
 
 function renderPagination() {
@@ -232,10 +261,63 @@ async function deleteVector(slug) {
         const data = await res.json();
         if (data.success) {
             state.vectors = state.vectors.filter(v => v.name !== slug);
+            state.selectedVectors.delete(slug);
             filterAndRenderManage();
             loadDashboard();
         } else { alert('Delete failed: ' + data.error); }
     } catch (e) { alert(e.message); }
+}
+
+function updateBulkDeleteUI() {
+    const count = state.selectedVectors.size;
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (count > 0) {
+        bulkDeleteBtn.style.display = 'block';
+        selectedCount.style.display = 'inline';
+        selectedCount.textContent = `${count} selected`;
+    } else {
+        bulkDeleteBtn.style.display = 'none';
+        selectedCount.style.display = 'none';
+    }
+}
+
+async function bulkDeleteVectors() {
+    if (state.selectedVectors.size === 0) {
+        alert('No vectors selected.');
+        return;
+    }
+    
+    const count = state.selectedVectors.size;
+    if (!confirm(`Are you sure you want to delete ${count} vector(s)? This action cannot be undone.`)) return;
+    
+    const slugs = Array.from(state.selectedVectors);
+    let deleted = 0;
+    let failed = 0;
+    
+    for (const slug of slugs) {
+        try {
+            const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
+                method: 'DELETE',
+                headers: { 'X-Admin-Key': ADMIN_KEY }
+            });
+            const data = await res.json();
+            if (data.success) {
+                state.vectors = state.vectors.filter(v => v.name !== slug);
+                state.selectedVectors.delete(slug);
+                deleted++;
+            } else {
+                failed++;
+            }
+        } catch (e) {
+            failed++;
+        }
+    }
+    
+    alert(`Deleted: ${deleted}, Failed: ${failed}`);
+    filterAndRenderManage();
+    loadDashboard();
 }
 
 async function handleBulkAnalyze() {
