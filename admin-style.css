@@ -416,3 +416,65 @@ body {
         gap: 5px;
     }
 }
+
+/* ===========================
+   ADMIN PAGINATION
+   =========================== */
+.pag-admin-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+    padding: 15px;
+    background: var(--hover-bg);
+    border-radius: 4px;
+}
+
+.pag-admin-btn {
+    background: var(--primary-black);
+    color: var(--primary-white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.pag-admin-btn:hover:not(:disabled) {
+    background: var(--accent-red);
+}
+
+.pag-admin-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pag-admin-info {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* ===========================
+   ADMIN TABLE ENHANCEMENTS
+   =========================== */
+.preview-img {
+    width: 60px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 3px;
+    background: #eee;
+}
+
+.badge {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-orange { background: #fff3e0; color: #ef6c00; }
+.badge-red { background: #ffebee; color: #c62828; }

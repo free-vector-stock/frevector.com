@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * Fixed: Flat R2 structure, no category folders in paths.
+ * Fixed: Detail panel IDs, pagination sync, and download button.
  */
 
 const EXTRA_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
@@ -164,7 +164,7 @@ function openDetailPanel(v, cardEl) {
     const titleEl = document.getElementById('breadcrumbTitle');
     if (catEl) {
         catEl.textContent = v.category || 'All';
-        catEl.onclick = () => selectCategory(v.category);
+        catEl.onclick = (e) => { e.preventDefault(); selectCategory(v.category); };
     }
     if (titleEl) titleEl.textContent = v.title;
 
@@ -190,16 +190,23 @@ function openDetailPanel(v, cardEl) {
 
     const grid = document.getElementById('vectorsGrid');
     if (grid && cardEl) {
-        if (panel.parentNode) panel.parentNode.removeChild(panel);
+        // Find all cards currently in the grid
         const cards = Array.from(grid.querySelectorAll('.vector-card'));
         const cardIndex = cards.indexOf(cardEl);
+        
+        // Find the last card in the same row
         const cardTop = cardEl.offsetTop;
-        let lastInRow = cardIndex;
+        let lastInRowIndex = cardIndex;
         for (let i = cardIndex + 1; i < cards.length; i++) {
-            if (cards[i].offsetTop === cardTop) lastInRow = i;
-            else break;
+            if (cards[i].offsetTop === cardTop) {
+                lastInRowIndex = i;
+            } else {
+                break;
+            }
         }
-        cards[lastInRow].after(panel);
+        
+        // Insert panel after the last card in the row
+        cards[lastInRowIndex].after(panel);
     }
 
     panel.style.display = 'block';
@@ -218,30 +225,16 @@ function closeDetailPanel() {
 }
 
 function updatePagination() {
-    const wrap = document.getElementById('paginationWrap');
-    if (!wrap) return;
-    wrap.innerHTML = '';
-    if (state.totalPages <= 1) return;
+    const pageNumEl = document.getElementById('pageNumber');
+    const pageTotalEl = document.getElementById('pageTotal');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
 
-    const createBtn = (label, page, active = false) => {
-        const b = document.createElement('button');
-        b.className = 'pag-btn' + (active ? ' active' : '');
-        b.textContent = label;
-        b.onclick = () => { state.currentPage = page; fetchVectors(); };
-        return b;
-    };
-
-    if (state.currentPage > 1) wrap.appendChild(createBtn('‹', state.currentPage - 1));
+    if (pageNumEl) pageNumEl.textContent = state.currentPage;
+    if (pageTotalEl) pageTotalEl.textContent = `/ ${state.totalPages}`;
     
-    let start = Math.max(1, state.currentPage - 2);
-    let end = Math.min(state.totalPages, start + 4);
-    if (end === state.totalPages) start = Math.max(1, end - 4);
-
-    for (let i = start; i <= end; i++) {
-        wrap.appendChild(createBtn(i, i, i === state.currentPage));
-    }
-
-    if (state.currentPage < state.totalPages) wrap.appendChild(createBtn('›', state.currentPage + 1));
+    if (prevBtn) prevBtn.disabled = state.currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = state.currentPage >= state.totalPages;
 }
 
 function setupEventListeners() {
@@ -257,11 +250,12 @@ function setupEventListeners() {
             fetchVectors();
         }
     });
-    document.getElementById('closeDetail')?.addEventListener('click', closeDetailPanel);
     
-    document.getElementById('downloadBtn')?.addEventListener('click', () => {
+    document.getElementById('detailCloseBtn')?.addEventListener('click', closeDetailPanel);
+    
+    document.getElementById('detailDownloadBtn')?.addEventListener('click', () => {
         if (!state.openedVector) return;
-        const btn = document.getElementById('downloadBtn');
+        const btn = document.getElementById('detailDownloadBtn');
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = 'Preparing...';
@@ -269,13 +263,32 @@ function setupEventListeners() {
         setTimeout(() => {
             const a = document.createElement('a');
             a.href = state.openedVector.zipUrl;
-            a.download = `${state.openedVector.name}.zip`;
+            // Use .zip as extension, asset.js will handle the content-disposition
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             btn.disabled = false;
             btn.innerHTML = originalText;
         }, 1000);
+    });
+
+    document.getElementById('prevBtn')?.addEventListener('click', () => {
+        if (state.currentPage > 1) {
+            state.currentPage--;
+            fetchVectors();
+        }
+    });
+
+    document.getElementById('nextBtn')?.addEventListener('click', () => {
+        if (state.currentPage < state.totalPages) {
+            state.currentPage++;
+            fetchVectors();
+        }
+    });
+
+    document.getElementById('breadcrumbHome')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectCategory('all');
     });
 }
 

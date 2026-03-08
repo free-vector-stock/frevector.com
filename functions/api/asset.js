@@ -58,7 +58,7 @@ export async function onRequestGet(context) {
             headers["Content-Type"] = "application/zip";
             // Use the actual filename for the download
             const downloadName = decodedKey.split('/').pop();
-            headers["Content-Disposition"] = `attachment; filename="${downloadName}"`;
+            headers["Content-Disposition"] = `attachment; filename="${encodeURIComponent(downloadName)}"`;
         } else if (isJpeg) {
             headers["Content-Type"] = "image/jpeg";
         } else {
