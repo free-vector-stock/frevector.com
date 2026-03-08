@@ -1,7 +1,6 @@
 /**
  * Admin API - Protected endpoints for managing vectors
- * Fixed: Improved category matching (Levenshtein, prefix, and normalization)
- * Fixed: Flat R2 storage with legacy support hints.
+ * Fixed: Correct R2 folder mapping for category names
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -17,8 +16,42 @@ const VALID_CATEGORIES = [
   "Technology", "Transportation", "Vintage"
 ];
 
+// Maps KV category names to R2 folder names
+const CATEGORY_TO_R2_FOLDER = {
+    "Abstract": "Abstract",
+    "Animals/Wildlife": "Animals",
+    "The Arts": "The Arts",
+    "Backgrounds/Textures": "Backgrounds-Textures",
+    "Beauty/Fashion": "Beauty-Fashion",
+    "Buildings/Landmarks": "Buildings-Landmarks",
+    "Business/Finance": "Business",
+    "Celebrities": "Celebrities",
+    "Drink": "Drink",
+    "Education": "Education",
+    "Font": "Font",
+    "Food": "Food",
+    "Healthcare/Medical": "Healthcare",
+    "Holidays": "Holidays",
+    "Icon": "Icon",
+    "Industrial": "Industrial",
+    "Interiors": "Interiors",
+    "Logo": "Logo",
+    "Miscellaneous": "Miscellaneous",
+    "Nature": "Nature",
+    "Objects": "Objects",
+    "Parks/Outdoor": "Parks",
+    "People": "People",
+    "Religion": "Religion",
+    "Science": "Science",
+    "Signs/Symbols": "Signs",
+    "Sports/Recreation": "Sports",
+    "Technology": "Technology",
+    "Transportation": "Transportation",
+    "Vintage": "Vintage"
+};
+
 /**
- * Normalizes strings for better comparison (removes Turkish accents, lowers case)
+ * Normalizes strings for better comparison
  */
 function normalizeString(str) {
     if (!str) return "";
@@ -49,23 +82,26 @@ function levenshtein(a, b) {
 }
 
 /**
- * Advanced category matching
+ * Advanced category matching - resolves to valid KV category name
  */
 function resolveCategory(raw) {
     if (!raw) return "Miscellaneous";
     const s = normalizeString(raw);
     
-    // 1. Exact or Prefix Match
+    // 1. Exact match
+    for (const cat of VALID_CATEGORIES) {
+        if (normalizeString(cat) === s) return cat;
+    }
+    
+    // 2. Prefix/contains match
     for (const cat of VALID_CATEGORIES) {
         const normCat = normalizeString(cat);
-        // "backgrounds" matches "backgrounds/textures"
         if (normCat.includes(s) || s.includes(normCat)) return cat;
-        // Check first part (e.g. "animals" matches "animals/wildlife")
         const firstPart = normCat.split('/')[0];
         if (firstPart.includes(s) || s.includes(firstPart)) return cat;
     }
 
-    // 2. Levenshtein Distance
+    // 3. Levenshtein Distance
     let best = "Miscellaneous", bestDist = 4;
     for (const cat of VALID_CATEGORIES) {
         const d = levenshtein(s, normalizeString(cat));
@@ -76,6 +112,54 @@ function resolveCategory(raw) {
     }
     
     return best;
+}
+
+/**
+ * Resolve category from filename prefix
+ * e.g., "abstract-00000002" → "Abstract"
+ * e.g., "backgrounds-textures-00000307" → "Backgrounds/Textures"
+ */
+function resolveCategoryFromFilename(filename) {
+    const lower = filename.toLowerCase();
+    
+    const prefixMap = [
+        { prefix: "abstract-", cat: "Abstract" },
+        { prefix: "animals-", cat: "Animals/Wildlife" },
+        { prefix: "the-arts-", cat: "The Arts" },
+        { prefix: "backgrounds-textures-", cat: "Backgrounds/Textures" },
+        { prefix: "beauty-fashion-", cat: "Beauty/Fashion" },
+        { prefix: "buildings-landmarks-", cat: "Buildings/Landmarks" },
+        { prefix: "business-finance-", cat: "Business/Finance" },
+        { prefix: "celebrities-", cat: "Celebrities" },
+        { prefix: "drink-", cat: "Drink" },
+        { prefix: "education-", cat: "Education" },
+        { prefix: "font-", cat: "Font" },
+        { prefix: "food-", cat: "Food" },
+        { prefix: "healthcare-medical-", cat: "Healthcare/Medical" },
+        { prefix: "holidays-", cat: "Holidays" },
+        { prefix: "icon-", cat: "Icon" },
+        { prefix: "industrial-", cat: "Industrial" },
+        { prefix: "interiors-", cat: "Interiors" },
+        { prefix: "logo-", cat: "Logo" },
+        { prefix: "miscellaneous-", cat: "Miscellaneous" },
+        { prefix: "nature-", cat: "Nature" },
+        { prefix: "objects-", cat: "Objects" },
+        { prefix: "parks-outdoor-", cat: "Parks/Outdoor" },
+        { prefix: "people-", cat: "People" },
+        { prefix: "religion-", cat: "Religion" },
+        { prefix: "science-", cat: "Science" },
+        { prefix: "signs-symbols-", cat: "Signs/Symbols" },
+        { prefix: "sports-recreation-", cat: "Sports/Recreation" },
+        { prefix: "technology-", cat: "Technology" },
+        { prefix: "transportation-", cat: "Transportation" },
+        { prefix: "vintage-", cat: "Vintage" },
+    ];
+    
+    for (const { prefix, cat } of prefixMap) {
+        if (lower.startsWith(prefix)) return cat;
+    }
+    
+    return null;
 }
 
 function authenticate(request) {
@@ -140,14 +224,18 @@ export async function onRequestGet(context) {
       
       const r2Checks = await Promise.all(
         sample.map(async (v) => {
-          // Check flat structure first, then legacy structure
-          const jpgFlat = await r2.head(`${v.name}.jpg`);
-          const jpgLegacy = !jpgFlat ? await r2.head(`assets/${v.category}/${v.name}.jpg`) : null;
+          const cat = v.category || "Miscellaneous";
+          const r2cat = v.r2_category || CATEGORY_TO_R2_FOLDER[cat] || cat;
           
-          const zipFlat = await r2.head(`${v.name}.zip`);
-          const zipLegacy = !zipFlat ? await r2.head(`assets/${v.category}/${v.name}.zip`) : null;
+          // Check nested structure (primary)
+          const jpgNested = await r2.head(`assets/${r2cat}/${v.name}.jpg`);
+          // Check flat structure
+          const jpgFlat = !jpgNested ? await r2.head(`${v.name}.jpg`) : null;
           
-          return { v, jpg: !!(jpgFlat || jpgLegacy), zip: !!(zipFlat || zipLegacy) };
+          const zipNested = await r2.head(`assets/${r2cat}/${v.name}.zip`);
+          const zipFlat = !zipNested ? await r2.head(`${v.name}.zip`) : null;
+          
+          return { v, jpg: !!(jpgNested || jpgFlat), zip: !!(zipNested || zipFlat) };
         })
       );
 
@@ -208,27 +296,37 @@ export async function onRequestPost(context) {
     const title    = getField(metadata, "title");
     const keywords = getField(metadata, "keywords");
     
-    // Improved category resolution
-    const rawCategory = getField(metadata, "category");
-    const category = resolveCategory(rawCategory);
-    
     // ID comes from the filename (e.g., backgrounds-textures-00000317)
     const id = jsonFile.name.replace(/\.json$/, "");
+    
+    // Resolve category: first try filename prefix, then JSON field
+    let category = resolveCategoryFromFilename(id);
+    if (!category) {
+        const rawCategory = getField(metadata, "category");
+        category = resolveCategory(rawCategory);
+    }
+    
+    // Get R2 folder name for this category
+    const r2Folder = CATEGORY_TO_R2_FOLDER[category] || category;
+    
+    // Upload to R2 using nested structure: assets/R2Folder/filename
+    const r2JpgKey = `assets/${r2Folder}/${id}.jpg`;
+    const r2ZipKey = `assets/${r2Folder}/${id}.zip`;
 
-    // 1. Upload to R2 (Flat structure)
-    const jpgUpload = await uploadWithRetry(r2, `${id}.jpg`, jpegBuffer, { contentType: "image/jpeg" });
+    const jpgUpload = await uploadWithRetry(r2, r2JpgKey, jpegBuffer, { contentType: "image/jpeg" });
     if (!jpgUpload.success) return new Response(JSON.stringify({ error: "JPG upload failed" }), { status: 500, headers });
 
-    const zipUpload = await uploadWithRetry(r2, `${id}.zip`, zipBuffer, { 
+    const zipUpload = await uploadWithRetry(r2, r2ZipKey, zipBuffer, { 
       contentType: "application/zip",
       contentDisposition: `attachment; filename="${id}.zip"`
     });
     if (!zipUpload.success) return new Response(JSON.stringify({ error: "ZIP upload failed" }), { status: 500, headers });
 
-    // 2. Save to KV
+    // Save to KV
     const vectorRecord = {
       name: id,
       category: category,
+      r2_category: r2Folder,
       title: String(title || id).trim(),
       description: getField(metadata, "description") || "",
       keywords: Array.isArray(keywords) ? keywords : String(keywords || "").split(",").map(k => k.trim()).filter(Boolean),
@@ -247,7 +345,7 @@ export async function onRequestPost(context) {
 
     await kv.put("all_vectors", JSON.stringify(allVectors));
 
-    return new Response(JSON.stringify({ success: true, id, category }), { status: 200, headers });
+    return new Response(JSON.stringify({ success: true, id, category, r2Folder }), { status: 200, headers });
 
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
@@ -268,18 +366,25 @@ export async function onRequestDelete(context) {
 
     if (!id) return new Response(JSON.stringify({ error: "Missing ID" }), { status: 400, headers });
 
+    // Get vector info to find R2 folder
     const allVectorsRaw = await kv.get("all_vectors");
-    if (allVectorsRaw) {
-      let allVectors = JSON.parse(allVectorsRaw);
-      allVectors = allVectors.filter(v => v.name !== id);
-      await kv.put("all_vectors", JSON.stringify(allVectors));
+    let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+    const vector = allVectors.find(v => v.name === id);
+    
+    if (vector) {
+        const cat = vector.category || "Miscellaneous";
+        const r2cat = vector.r2_category || CATEGORY_TO_R2_FOLDER[cat] || cat;
+        
+        // Delete from R2 (try both nested and flat)
+        await r2.delete(`assets/${r2cat}/${id}.jpg`).catch(() => {});
+        await r2.delete(`assets/${r2cat}/${id}.zip`).catch(() => {});
+        await r2.delete(`${id}.jpg`).catch(() => {});
+        await r2.delete(`${id}.zip`).catch(() => {});
     }
 
-    // Try deleting from both flat and legacy structure
-    await r2.delete(`${id}.jpg`);
-    await r2.delete(`${id}.zip`);
-    // Note: We don't know the category here for legacy delete, 
-    // but flat delete is the priority. Legacy files will stay but won't be in KV.
+    // Remove from KV
+    allVectors = allVectors.filter(v => v.name !== id);
+    await kv.put("all_vectors", JSON.stringify(allVectors));
 
     return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   } catch (e) {
@@ -305,14 +410,16 @@ export async function onRequestPatch(context) {
       const cleaned = [];
 
       for (const v of allVectors) {
-        // Check flat structure first, then legacy structure
-        const jpgFlat = await r2.head(`${v.name}.jpg`);
-        const jpgLegacy = !jpgFlat ? await r2.head(`assets/${v.category}/${v.name}.jpg`) : null;
+        const cat = v.category || "Miscellaneous";
+        const r2cat = v.r2_category || CATEGORY_TO_R2_FOLDER[cat] || cat;
         
-        const zipFlat = await r2.head(`${v.name}.zip`);
-        const zipLegacy = !zipFlat ? await r2.head(`assets/${v.category}/${v.name}.zip`) : null;
+        const jpgNested = await r2.head(`assets/${r2cat}/${v.name}.jpg`);
+        const jpgFlat = !jpgNested ? await r2.head(`${v.name}.jpg`) : null;
+        
+        const zipNested = await r2.head(`assets/${r2cat}/${v.name}.zip`);
+        const zipFlat = !zipNested ? await r2.head(`${v.name}.zip`) : null;
 
-        if ((jpgFlat || jpgLegacy) && (zipFlat || zipLegacy)) cleaned.push(v);
+        if ((jpgNested || jpgFlat) && (zipNested || zipFlat)) cleaned.push(v);
       }
 
       await kv.put("all_vectors", JSON.stringify(cleaned));

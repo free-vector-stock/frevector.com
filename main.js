@@ -337,6 +337,13 @@ function openDownloadPage(vector) {
 
     if (titleEl) titleEl.textContent = vector.title;
     if (descEl) descEl.textContent = vector.description || '';
+    
+    // Update header info
+    const headerTitleEl = document.getElementById('dpHeaderTitle');
+    const headerDescEl = document.getElementById('dpHeaderDesc');
+    if (headerTitleEl) headerTitleEl.textContent = `Free ${vector.category || ''} Vector, SVG, EPS & JPEG Downloads`;
+    if (headerDescEl) headerDescEl.textContent = vector.description || '';
+    
     if (imgEl) {
         imgEl.src = vector.thumbnail;
         imgEl.alt = vector.title;

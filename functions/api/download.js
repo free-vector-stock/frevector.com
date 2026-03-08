@@ -3,6 +3,40 @@
  * Increments download counter and serves ZIP file from R2
  */
 
+// Maps KV category names to R2 folder names
+const CATEGORY_TO_R2_FOLDER = {
+    "Abstract": "Abstract",
+    "Animals/Wildlife": "Animals",
+    "The Arts": "The Arts",
+    "Backgrounds/Textures": "Backgrounds-Textures",
+    "Beauty/Fashion": "Beauty-Fashion",
+    "Buildings/Landmarks": "Buildings-Landmarks",
+    "Business/Finance": "Business",
+    "Celebrities": "Celebrities",
+    "Drink": "Drink",
+    "Education": "Education",
+    "Font": "Font",
+    "Food": "Food",
+    "Healthcare/Medical": "Healthcare",
+    "Holidays": "Holidays",
+    "Icon": "Icon",
+    "Industrial": "Industrial",
+    "Interiors": "Interiors",
+    "Logo": "Logo",
+    "Miscellaneous": "Miscellaneous",
+    "Nature": "Nature",
+    "Objects": "Objects",
+    "Parks/Outdoor": "Parks",
+    "People": "People",
+    "Religion": "Religion",
+    "Science": "Science",
+    "Signs/Symbols": "Signs",
+    "Sports/Recreation": "Sports",
+    "Technology": "Technology",
+    "Transportation": "Transportation",
+    "Vintage": "Vintage"
+};
+
 export async function onRequestGet(context) {
     try {
         const kv = context.env.VECTOR_DB;
@@ -33,14 +67,34 @@ export async function onRequestGet(context) {
         }
 
         const vector = allVectors[vectorIndex];
+        const cat = vector.category || "Miscellaneous";
+        const r2cat = vector.r2_category || CATEGORY_TO_R2_FOLDER[cat] || cat;
         
-        // Try flat structure first
-        let object = await r2.get(`${slug}.zip`);
-        
-        // If not found, try legacy structure
+        let object = null;
+
+        // 1. Try with R2 category folder (primary)
+        if (r2cat) {
+            object = await r2.get(`assets/${r2cat}/${slug}.zip`);
+        }
+
+        // 2. Try flat structure
         if (!object) {
-            const zipKey = `assets/${vector.category}/${slug}.zip`;
-            object = await r2.get(zipKey);
+            object = await r2.get(`${slug}.zip`);
+        }
+
+        // 3. Try with KV category as folder name
+        if (!object && cat) {
+            object = await r2.get(`assets/${cat}/${slug}.zip`);
+        }
+
+        // 4. Try all known R2 folders as fallback
+        if (!object) {
+            const r2Folders = Object.values(CATEGORY_TO_R2_FOLDER);
+            const uniqueFolders = [...new Set(r2Folders)];
+            for (const folder of uniqueFolders) {
+                object = await r2.get(`assets/${folder}/${slug}.zip`);
+                if (object) break;
+            }
         }
         
         if (!object) {
