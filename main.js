@@ -146,15 +146,15 @@ function renderVectors() {
 function openDetailPanel(v, cardEl) {
     state.openedVector = v;
     state.openedCardEl = cardEl;
-
     const panel = document.getElementById('detailPanel');
     if (!panel) {
         console.error('Detail panel element not found');
         return;
     }
     
-    // Close any existing detail panel first
-    closeDetailPanel();
+    // Close any existing detail panel first (without clearing state)
+    panel.style.display = 'none';
+    document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('card-active'));;
 
     const img = document.getElementById('detailImage');
     if (img) {
