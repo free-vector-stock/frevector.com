@@ -301,7 +301,7 @@ function setupEventListeners() {
             return;
         }
         startDownloadCountdown();
-    });
+     });
 
     document.getElementById('prevBtn')?.addEventListener('click', () => {
         if (state.currentPage > 1) {
@@ -361,8 +361,10 @@ function openDownloadPage(vector) {
     const countdownBox = document.getElementById('dpCountdownBox');
     const countdownNum = document.getElementById('dpCountdown');
     const downloadBtn = document.getElementById('dpDownloadBtn');
+    const countdownStatus = document.getElementById('dpCountdownStatus');
     if (countdownBox) countdownBox.style.display = 'none';
-    if (countdownNum) countdownNum.textContent = '4';
+    if (countdownNum) countdownNum.textContent = '5';
+    if (countdownStatus) countdownStatus.textContent = 'Your download will start in';
     if (downloadBtn) downloadBtn.style.display = 'block';
 
     // Show download page
@@ -380,6 +382,7 @@ function closeDownloadPage() {
         clearInterval(state.countdownInterval);
         state.countdownInterval = null;
     }
+    state.openedVector = null;
 }
 
 function startDownloadCountdown() {
@@ -391,11 +394,13 @@ function startDownloadCountdown() {
     const downloadBtn = document.getElementById('dpDownloadBtn');
     const countdownBox = document.getElementById('dpCountdownBox');
     const countdownNum = document.getElementById('dpCountdown');
+    const countdownStatus = document.getElementById('dpCountdownStatus');
 
     if (downloadBtn) downloadBtn.style.display = 'none';
     if (countdownBox) countdownBox.style.display = 'block';
+    if (countdownStatus) countdownStatus.textContent = 'Your download will start in';
 
-    let count = 4;
+    let count = 5;
     if (countdownNum) countdownNum.textContent = count;
 
     // Stop any existing countdown
@@ -407,7 +412,7 @@ function startDownloadCountdown() {
         count--;
         if (countdownNum) countdownNum.textContent = count;
 
-        if (count < 0) {
+        if (count <= 0) {
             clearInterval(state.countdownInterval);
             state.countdownInterval = null;
             
@@ -426,7 +431,8 @@ function triggerDownload(vector) {
         
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = (vector.name || 'vector') + '.zip';
+        const fileName = vector.name || 'vector';
+        a.download = fileName + '.zip';
         a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
