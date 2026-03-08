@@ -33,10 +33,16 @@ export async function onRequestGet(context) {
         }
 
         const vector = allVectors[vectorIndex];
-        const zipKey = `assets/${vector.category}/${slug}.zip`;
-
-        // Get ZIP from R2
-        const object = await r2.get(zipKey);
+        
+        // Try flat structure first
+        let object = await r2.get(`${slug}.zip`);
+        
+        // If not found, try legacy structure
+        if (!object) {
+            const zipKey = `assets/${vector.category}/${slug}.zip`;
+            object = await r2.get(zipKey);
+        }
+        
         if (!object) {
             return new Response("ZIP file not found in storage", { status: 404 });
         }

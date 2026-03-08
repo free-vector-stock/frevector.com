@@ -150,23 +150,30 @@ function openDetailPanel(v, cardEl) {
     if (!panel) return;
 
     const img = document.getElementById('detailImage');
-    img.src = v.thumbnail;
-    img.alt = v.title;
-    img.onerror = () => { img.src = 'https://placehold.co/400x300/f5f5f5/999?text=Preview'; };
+    if (img) {
+        img.src = v.thumbnail;
+        img.alt = v.title;
+        img.onerror = () => { img.src = 'https://placehold.co/400x300/f5f5f5/999?text=Preview'; };
+    }
 
-    document.getElementById('detailTitle').textContent = v.title;
-    document.getElementById('detailDescription').textContent = v.description || '';
-    document.getElementById('detailCategory').textContent = v.category || '-';
-    document.getElementById('detailFileSize').textContent = v.fileSize || '-';
+    const titleEl = document.getElementById('detailTitle');
+    const descEl = document.getElementById('detailDescription');
+    const catEl = document.getElementById('detailCategory');
+    const sizeEl = document.getElementById('detailFileSize');
+    
+    if (titleEl) titleEl.textContent = v.title;
+    if (descEl) descEl.textContent = v.description || '';
+    if (catEl) catEl.textContent = v.category || '-';
+    if (sizeEl) sizeEl.textContent = v.fileSize || '-';
 
     // Breadcrumb
-    const catEl = document.getElementById('breadcrumbCategory');
-    const titleEl = document.getElementById('breadcrumbTitle');
-    if (catEl) {
-        catEl.textContent = v.category || 'All';
-        catEl.onclick = (e) => { e.preventDefault(); selectCategory(v.category); };
+    const breadcrumbCatEl = document.getElementById('breadcrumbCategory');
+    const breadcrumbTitleEl = document.getElementById('breadcrumbTitle');
+    if (breadcrumbCatEl) {
+        breadcrumbCatEl.textContent = v.category || 'All';
+        breadcrumbCatEl.onclick = (e) => { e.preventDefault(); selectCategory(v.category); };
     }
-    if (titleEl) titleEl.textContent = v.title;
+    if (breadcrumbTitleEl) breadcrumbTitleEl.textContent = v.title;
 
     // Keywords
     const kwContainer = document.getElementById('detailKeywords');
@@ -178,7 +185,8 @@ function openDetailPanel(v, cardEl) {
             span.className = 'kw-tag';
             span.textContent = kw;
             span.addEventListener('click', () => {
-                document.getElementById('searchInput').value = kw;
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = kw;
                 state.searchQuery = kw;
                 state.currentPage = 1;
                 closeDetailPanel();
@@ -239,7 +247,8 @@ function updatePagination() {
 
 function setupEventListeners() {
     document.getElementById('searchBtn')?.addEventListener('click', () => {
-        state.searchQuery = document.getElementById('searchInput').value.trim();
+        const searchInput = document.getElementById('searchInput');
+        state.searchQuery = searchInput ? searchInput.value.trim() : '';
         state.currentPage = 1;
         fetchVectors();
     });
@@ -256,20 +265,30 @@ function setupEventListeners() {
     document.getElementById('detailDownloadBtn')?.addEventListener('click', () => {
         if (!state.openedVector) return;
         const btn = document.getElementById('detailDownloadBtn');
+        if (!btn) return;
         const originalText = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = 'Preparing...';
+        btn.innerHTML = 'Downloading...';
         
         setTimeout(() => {
-            const a = document.createElement('a');
-            a.href = state.openedVector.zipUrl;
-            // Use .zip as extension, asset.js will handle the content-disposition
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }, 1000);
+            try {
+                const a = document.createElement('a');
+                a.href = state.openedVector.zipUrl;
+                a.download = state.openedVector.name + '.zip';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    try { document.body.removeChild(a); } catch (e) {}
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }, 100);
+            } catch (err) {
+                console.error('Download error:', err);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }, 500);
     });
 
     document.getElementById('prevBtn')?.addEventListener('click', () => {
