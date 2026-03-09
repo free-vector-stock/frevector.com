@@ -196,7 +196,6 @@ function renderManageTable() {
 
     pageItems.forEach(v => {
         const tr = document.createElement('tr');
-        // Requirement: Strict "icon/" folder structure
         const previewUrl = `/api/asset?key=${encodeURIComponent(v.name)}.jpg`;
         const isSelected = state.selectedVectors.has(v.name);
         tr.innerHTML = `
@@ -273,8 +272,14 @@ function updateBulkDeleteUI() {
     const btn = document.getElementById('bulkDeleteBtn');
     if (!btn) return;
     const count = state.selectedVectors.size;
-    btn.disabled = count === 0;
-    btn.textContent = count > 0 ? `Delete Selected (${count})` : 'Delete Selected';
+    btn.style.display = count > 0 ? 'inline-block' : 'none';
+    btn.textContent = `Delete Selected (${count})`;
+    
+    const countSpan = document.getElementById('selectedCount');
+    if (countSpan) {
+        countSpan.style.display = count > 0 ? 'inline' : 'none';
+        countSpan.textContent = `${count} selected`;
+    }
 }
 
 async function bulkDeleteVectors() {
@@ -331,7 +336,7 @@ function handleBulkAnalyze() {
 
     bulkFiles = Object.entries(groups).map(([id, g]) => ({ id, ...g })).filter(g => g.json && g.jpeg && g.zip);
     
-    const status = document.getElementById('bulkStatus');
+    const status = document.getElementById('bulkUploadStatus');
     status.className = 'status-box info';
     status.textContent = `Found ${bulkFiles.length} valid vector sets (JSON+JPG+ZIP). Ready to upload.`;
     document.getElementById('bulkUploadBtn').disabled = bulkFiles.length === 0;
@@ -344,7 +349,7 @@ async function handleBulkUpload() {
     const progressWrap = document.getElementById('bulkProgressWrap');
     const progressFill = document.getElementById('bulkProgressFill');
     const progressText = document.getElementById('bulkProgressText');
-    const status = document.getElementById('bulkStatus');
+    const status = document.getElementById('bulkUploadStatus');
 
     btn.disabled = true;
     progressWrap.style.display = 'block';
@@ -389,26 +394,52 @@ async function handleBulkUpload() {
 }
 
 async function loadHealthReport() {
-    const list = document.getElementById('healthIssuesList');
-    list.innerHTML = 'Checking R2 synchronization...';
+    const body = document.getElementById('healthIssuesBody');
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Checking R2 synchronization...</td></tr>';
     try {
         const res = await fetch('/api/admin?action=health&sample=100', {
             headers: { 'X-Admin-Key': ADMIN_KEY }
         });
         const data = await res.json();
-        list.innerHTML = '';
+        body.innerHTML = '';
+        
+        // Update Health Cards
+        const grid = document.getElementById('healthGrid');
+        grid.innerHTML = `
+            <div class="health-card ${data.issueCount === 0 ? 'ok' : 'error'}">
+                <div class="health-icon">${data.issueCount === 0 ? '✓' : '⚠'}</div>
+                <div class="health-label">Issues Found</div>
+                <div class="health-value">${data.issueCount}</div>
+            </div>
+            <div class="health-card ok">
+                <div class="health-icon">📁</div>
+                <div class="health-label">Sample Size</div>
+                <div class="health-value">${data.r2SampleSize}</div>
+            </div>
+            <div class="health-card ok">
+                <div class="health-icon">📊</div>
+                <div class="health-label">Total Vectors</div>
+                <div class="health-value">${data.totalVectors}</div>
+            </div>
+        `;
+
         if (data.issueCount === 0) {
-            list.innerHTML = '<div style="color:var(--green);font-weight:600;">✓ All sampled vectors are correctly synced with R2.</div>';
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--green);font-weight:600;">✓ All sampled vectors are correctly synced with R2.</td></tr>';
         } else {
             data.issues.forEach(iss => {
-                const div = document.createElement('div');
-                div.style.padding = '8px';
-                div.style.borderBottom = '1px solid #eee';
-                div.innerHTML = `<span style="color:var(--red)">[${iss.type}]</span> <strong>${iss.slug}</strong> - ${iss.fix}`;
-                list.appendChild(div);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${escHtml(iss.slug)}</strong></td>
+                    <td><span class="badge badge-red">${escHtml(iss.type)}</span></td>
+                    <td>${escHtml(iss.fix)}</td>
+                    <td><button class="btn-delete" onclick="deleteVector('${escHtml(iss.slug)}')">Delete Record</button></td>
+                `;
+                body.appendChild(tr);
             });
         }
-    } catch (e) { list.innerHTML = 'Error: ' + e.message; }
+    } catch (e) { 
+        body.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--red);">Error: ${e.message}</td></tr>`;
+    }
 }
 
 async function runCleanup() {
@@ -417,22 +448,21 @@ async function runCleanup() {
     btn.disabled = true;
     btn.textContent = 'Cleaning...';
     try {
-        const res = await fetch('/api/cleanup', {
-            method: 'POST',
+        const res = await fetch('/api/admin?action=cleanup', {
+            method: 'PATCH',
             headers: { 'X-Admin-Key': ADMIN_KEY }
         });
         const data = await res.json();
-        alert(data.message);
+        alert(`Cleanup finished. Remaining vectors: ${data.count}`);
         loadDashboard();
         loadManageVectors();
         loadHealthReport();
     } catch (e) { alert(e.message); }
     btn.disabled = false;
-    btn.textContent = 'Run Cleanup';
+    btn.textContent = 'Run Cleanup (Remove Orphans)';
 }
 
 async function verifySync() {
-    alert('Verification started. Check Health Report for results.');
     loadHealthReport();
 }
 
