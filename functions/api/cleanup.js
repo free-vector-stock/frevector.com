@@ -1,7 +1,7 @@
 /**
  * POST /api/cleanup
  * Admin-only endpoint to sync KV and R2, removing orphaned entries
- * Optimized for the new "icon/" folder structure.
+ * Requirement: Strict "icon/" folder structure.
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -36,7 +36,7 @@ export async function onRequestPost(context) {
     const validVectors = [];
 
     for (const vector of allVectors) {
-      // Check for the new "icon/" folder structure (Requirement)
+      // Requirement: Files must be in "icon/" folder
       const jpgKey = `icon/${vector.name}.jpg`;
       const zipKey = `icon/${vector.name}.zip`;
 
@@ -48,26 +48,13 @@ export async function onRequestPost(context) {
       if (jpgExists && zipExists) {
         validVectors.push(vector);
       } else {
-        // Fallback check for legacy structure
-        const legacyJpgKey = `assets/${vector.category}/${vector.name}.jpg`;
-        const legacyZipKey = `assets/${vector.category}/${vector.name}.zip`;
-        
-        const [legacyJpgExists, legacyZipExists] = await Promise.all([
-          r2.head(legacyJpgKey),
-          r2.head(legacyZipKey)
-        ]);
-        
-        if (legacyJpgExists && legacyZipExists) {
-          validVectors.push(vector);
-        } else {
-          orphanedVectors.push({
-            name: vector.name,
-            category: vector.category,
-            jpgExists: !!jpgExists || !!legacyJpgExists,
-            zipExists: !!zipExists || !!legacyZipExists
-          });
-          removedCount++;
-        }
+        orphanedVectors.push({
+          name: vector.name,
+          category: vector.category,
+          jpgExists: !!jpgExists,
+          zipExists: !!zipExists
+        });
+        removedCount++;
       }
     }
 

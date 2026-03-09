@@ -1,6 +1,7 @@
 /**
  * Admin API - Protected endpoints for managing vectors
- * Fixed: Flat R2 structure in "icon/" folder for all files.
+ * Fixed: Strict R2 structure in "icon/" folder for all files.
+ * Requirement: No local storage, direct R2 upload, sync delete.
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -186,7 +187,7 @@ export async function onRequestPost(context) {
     const rawCategory = getField(metadata, "category");
     const category = resolveCategory(rawCategory);
     
-    // Upload to R2 in "icon/" folder
+    // Upload to R2 in "icon/" folder (Requirement: Direct to R2, no local)
     const r2JpgKey = `icon/${id}.jpg`;
     const r2ZipKey = `icon/${id}.zip`;
     const r2JsonKey = `icon/${id}.json`;
@@ -246,7 +247,7 @@ export async function onRequestDelete(context) {
 
     if (!id) return new Response(JSON.stringify({ error: "Missing ID" }), { status: 400, headers });
 
-    // Delete from R2 "icon/" folder
+    // Delete from R2 "icon/" folder (Requirement: Sync delete)
     await r2.delete(`icon/${id}.jpg`).catch(() => {});
     await r2.delete(`icon/${id}.zip`).catch(() => {});
     await r2.delete(`icon/${id}.json`).catch(() => {});

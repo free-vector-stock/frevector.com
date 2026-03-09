@@ -1,6 +1,7 @@
 /**
  * GET /api/categories
  * Returns list of all categories with vector counts, sorted A-Z
+ * Requirement: Updated category list from şartname.txt
  */
 
 const CORS_HEADERS = {
@@ -41,13 +42,6 @@ export async function onRequestGet(context) {
             name,
             count: categoryCounts[name] || 0
         }));
-
-        // Also add any categories from KV that aren't in predefined list (for compatibility)
-        for (const [name, count] of Object.entries(categoryCounts)) {
-            if (!ALL_CATEGORIES.includes(name)) {
-                categories.push({ name, count });
-            }
-        }
 
         // Sort A-Z
         categories.sort((a, b) => a.name.localeCompare(b.name));

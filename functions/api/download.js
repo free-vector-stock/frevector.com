@@ -1,7 +1,7 @@
 /**
  * GET /api/download?slug=xxx
  * Increments download counter and serves ZIP file from R2
- * Optimized for the new "icon/" folder structure.
+ * Requirement: Strict "icon/" folder structure.
  */
 
 export async function onRequestGet(context) {
@@ -20,54 +20,14 @@ export async function onRequestGet(context) {
             return new Response("Missing slug parameter", { status: 400 });
         }
 
-        // Get all vectors from KV
-        const allVectorsRaw = await kv.get("all_vectors");
-        if (!allVectorsRaw) {
-            return new Response("Vector not found", { status: 404 });
-        }
-
-        const allVectors = JSON.parse(allVectorsRaw);
-        const vectorIndex = allVectors.findIndex(v => v.name === slug);
-
-        if (vectorIndex === -1) {
-            return new Response("Vector not found", { status: 404 });
-        }
-
-        const vector = allVectors[vectorIndex];
-        const cat = vector.category || "Miscellaneous";
-        
-        let object = null;
-
-        // 1. Try with the new "icon/" folder structure (Requirement)
-        object = await r2.get(`icon/${slug}.zip`);
-
-        // 2. Fallback to legacy structure (for existing files)
-        if (!object) {
-            const legacyFolders = [
-                "Abstract", "Animals", "The Arts", "Backgrounds-Textures", "Beauty-Fashion",
-                "Buildings-Landmarks", "Business", "Celebrities", "Drink", "Education",
-                "Font", "Food", "Healthcare", "Holidays", "Icon", "Industrial",
-                "Interiors", "Logo", "Miscellaneous", "Nature", "Objects", "Parks",
-                "People", "Religion", "Science", "Signs", "Sports", "Technology",
-                "Transportation", "Vintage"
-            ];
-            
-            for (const folder of legacyFolders) {
-                object = await r2.get(`assets/${folder}/${slug}.zip`);
-                if (object) break;
-            }
-            
-            if (!object) {
-                // Try flat root
-                object = await r2.get(`${slug}.zip`);
-            }
-        }
+        // Requirement: Files must be in "icon/" folder
+        const object = await r2.get(`icon/${slug}.zip`);
         
         if (!object) {
             return new Response("ZIP file not found in storage", { status: 404 });
         }
 
-        // Increment download counter (fire and forget)
+        // Increment download counter
         context.waitUntil((async () => {
             try {
                 const freshRaw = await kv.get("all_vectors");

@@ -1,6 +1,7 @@
 /**
  * GET /api/vectors
  * Returns paginated vector list with thumbnails from R2.
+ * Requirement: Strict "icon/" folder structure.
  */
 
 const CORS_HEADERS = {
@@ -81,7 +82,7 @@ function enrichVector(v) {
     return {
         ...v,
         title: v.title || v.name || "",
-        // Simplified URL: asset.js handles the "icon/" prefixing and fallback
+        // Requirement: Strict "icon/" folder structure
         thumbnail: `/api/asset?key=${encodeURIComponent(v.name)}.jpg`,
         zipUrl: `/api/asset?key=${encodeURIComponent(v.name)}.zip`,
         fileSize: v.fileSize || null

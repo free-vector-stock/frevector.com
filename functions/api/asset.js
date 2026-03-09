@@ -1,7 +1,7 @@
 /**
  * GET /api/asset?key=filename.jpg
  * Serves files from R2 bucket.
- * Optimized for the new "icon/" folder structure.
+ * Requirement: Strict "icon/" folder structure.
  */
 
 export async function onRequestGet(context) {
@@ -18,36 +18,9 @@ export async function onRequestGet(context) {
         const decodedKey = decodeURIComponent(key);
         let object = null;
 
-        // 1. Try with the new "icon/" folder structure (Requirement)
-        if (!decodedKey.startsWith("icon/")) {
-            object = await r2.get(`icon/${decodedKey}`);
-        } else {
-            object = await r2.get(decodedKey);
-        }
-
-        // 2. Fallback to legacy structure (for existing files)
-        if (!object && !decodedKey.startsWith("assets/")) {
-            // Try all possible legacy locations if not found in icon/
-            // This ensures existing site content doesn't break
-            const legacyFolders = [
-                "Abstract", "Animals", "The Arts", "Backgrounds-Textures", "Beauty-Fashion",
-                "Buildings-Landmarks", "Business", "Celebrities", "Drink", "Education",
-                "Font", "Food", "Healthcare", "Holidays", "Icon", "Industrial",
-                "Interiors", "Logo", "Miscellaneous", "Nature", "Objects", "Parks",
-                "People", "Religion", "Science", "Signs", "Sports", "Technology",
-                "Transportation", "Vintage"
-            ];
-            
-            for (const folder of legacyFolders) {
-                object = await r2.get(`assets/${folder}/${decodedKey}`);
-                if (object) break;
-            }
-            
-            if (!object) {
-                // Try flat root
-                object = await r2.get(decodedKey);
-            }
-        }
+        // Requirement: Files must be in "icon/" folder
+        const r2Key = decodedKey.startsWith("icon/") ? decodedKey : `icon/${decodedKey}`;
+        object = await r2.get(r2Key);
 
         if (!object) {
             // Placeholder for missing images

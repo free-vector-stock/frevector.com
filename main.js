@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * Fixed: Detail panel IDs, pagination sync, download button, modal contents in English, click issue
+ * Fixed: Updated category list, strict R2 structure.
  */
 
 const EXTRA_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
@@ -209,9 +209,12 @@ function renderVectors() {
         const mainKws = (v.keywords || []).slice(0, 3).join(', ');
         const displayKws = mainKws ? `${extraKws}, ${mainKws}` : extraKws;
 
+        // Requirement: Strict "icon/" folder structure
+        const thumbnail = `/api/asset?key=${encodeURIComponent(v.name)}.jpg`;
+
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy"
+                <img class="vc-img" src="${thumbnail}" alt="${escHtml(v.title)}" loading="lazy"
                      onerror="this.src='https://placehold.co/280x210/f5f5f5/999?text=Preview'">
             </div>
             <div class="vc-info">
@@ -235,18 +238,15 @@ function openDetailPanel(v, cardEl) {
     state.detailPanelOpen = true;
     
     const panel = document.getElementById('detailPanel');
-    if (!panel) {
-        console.error('Detail panel element not found');
-        return;
-    }
+    if (!panel) return;
     
-    // Close any existing detail panel first
     panel.style.display = 'none';
     document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('card-active'));
 
+    const thumbnail = `/api/asset?key=${encodeURIComponent(v.name)}.jpg`;
     const img = document.getElementById('detailImage');
     if (img) {
-        img.src = v.thumbnail;
+        img.src = thumbnail;
         img.alt = v.title;
         img.onerror = () => { img.src = 'https://placehold.co/400x300/f5f5f5/999?text=Preview'; };
     }
@@ -261,350 +261,205 @@ function openDetailPanel(v, cardEl) {
     if (catEl) catEl.textContent = v.category || '-';
     if (sizeEl) sizeEl.textContent = v.fileSize || '-';
 
-    // Breadcrumb
-    const breadcrumbCatEl = document.getElementById('breadcrumbCategory');
-    const breadcrumbTitleEl = document.getElementById('breadcrumbTitle');
-    if (breadcrumbCatEl) {
-        breadcrumbCatEl.textContent = v.category || 'All';
-        breadcrumbCatEl.onclick = (e) => { e.preventDefault(); selectCategory(v.category); };
-    }
-    if (breadcrumbTitleEl) breadcrumbTitleEl.textContent = v.title;
-
-    // Keywords
-    const kwContainer = document.getElementById('detailKeywords');
-    if (kwContainer) {
-        kwContainer.innerHTML = '';
-        const allKws = [...EXTRA_KEYWORDS, ...(v.keywords || [])];
-        allKws.forEach(kw => {
+    const tagsWrap = document.getElementById('detailTags');
+    if (tagsWrap) {
+        tagsWrap.innerHTML = '';
+        (v.keywords || []).forEach(kw => {
             const span = document.createElement('span');
-            span.className = 'kw-tag';
+            span.className = 'tag';
             span.textContent = kw;
-            span.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) searchInput.value = kw;
-                state.searchQuery = kw;
-                state.currentPage = 1;
-                closeDetailPanel();
-                fetchVectors();
-            });
-            kwContainer.appendChild(span);
+            tagsWrap.appendChild(span);
         });
     }
 
-    const grid = document.getElementById('vectorsGrid');
-    if (grid && cardEl) {
-        const cards = Array.from(grid.querySelectorAll('.vector-card'));
-        const cardIndex = cards.indexOf(cardEl);
-        
-        if (cardIndex !== -1) {
-            const cardTop = cardEl.offsetTop;
-            let lastInRowIndex = cardIndex;
-            for (let i = cardIndex + 1; i < cards.length; i++) {
-                if (cards[i].offsetTop === cardTop) {
-                    lastInRowIndex = i;
-                } else {
-                    break;
-                }
-            }
-            
-            if (lastInRowIndex < cards.length) {
-                cards[lastInRowIndex].after(panel);
-            } else {
-                grid.appendChild(panel);
-            }
-        } else {
-            grid.appendChild(panel);
-        }
-    } else if (grid) {
-        grid.appendChild(panel);
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) {
+        downloadBtn.onclick = () => startDownload(v);
     }
 
-    panel.style.display = 'block';
     cardEl.classList.add('card-active');
-
-    setTimeout(() => { 
-        try {
-            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); 
-        } catch (e) {
-            console.error('Scroll error:', e);
-        }
-    }, 50);
+    panel.style.display = 'block';
+    
+    const rect = cardEl.getBoundingClientRect();
+    const panelHeight = panel.offsetHeight;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    
+    if (spaceBelow < panelHeight + 20) {
+        panel.style.top = (rect.top + window.scrollY - panelHeight - 10) + 'px';
+    } else {
+        panel.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+    }
 }
 
 function closeDetailPanel() {
     const panel = document.getElementById('detailPanel');
     if (panel) panel.style.display = 'none';
     document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('card-active'));
-    state.openedVector = null;
-    state.openedCardEl = null;
     state.detailPanelOpen = false;
-}
-
-function updatePagination() {
-    const pageNumEl = document.getElementById('pageNumber');
-    const pageTotalEl = document.getElementById('pageTotal');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    if (pageNumEl) pageNumEl.textContent = state.currentPage;
-    if (pageTotalEl) pageTotalEl.textContent = `/ ${state.totalPages}`;
-    
-    if (prevBtn) prevBtn.disabled = state.currentPage <= 1;
-    if (nextBtn) nextBtn.disabled = state.currentPage >= state.totalPages;
-}
-
-function setupEventListeners() {
-    document.getElementById('searchBtn')?.addEventListener('click', () => {
-        const searchInput = document.getElementById('searchInput');
-        state.searchQuery = searchInput ? searchInput.value.trim() : '';
-        state.currentPage = 1;
-        closeDetailPanel();
-        fetchVectors();
-    });
-    document.getElementById('searchInput')?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            state.searchQuery = e.target.value.trim();
-            state.currentPage = 1;
-            closeDetailPanel();
-            fetchVectors();
-        }
-    });
-    
-    document.getElementById('detailCloseBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeDetailPanel();
-    });
-    
-    document.getElementById('detailDownloadBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!state.openedVector) {
-            console.error('No vector selected');
-            return;
-        }
-        openDownloadPage(state.openedVector);
-    });
-
-    document.getElementById('dpClose')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeDownloadPage();
-    });
-
-    document.getElementById('dpDownloadBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!state.openedVector) {
-            console.error('No vector selected for download');
-            return;
-        }
-        startDownloadCountdown();
-    });
-
-    document.getElementById('prevBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (state.currentPage > 1) {
-            state.currentPage--;
-            closeDetailPanel();
-            fetchVectors();
-        }
-    });
-
-    document.getElementById('nextBtn')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (state.currentPage < state.totalPages) {
-            state.currentPage++;
-            closeDetailPanel();
-            fetchVectors();
-        }
-    });
-
-    document.getElementById('breadcrumbHome')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        selectCategory('all');
-    });
-
-    // Close detail panel when clicking outside
-    document.addEventListener('click', (e) => {
-        if (state.detailPanelOpen) {
-            const panel = document.getElementById('detailPanel');
-            const grid = document.getElementById('vectorsGrid');
-            if (panel && grid && !panel.contains(e.target) && !e.target.closest('.vector-card')) {
-                closeDetailPanel();
-            }
-        }
-    });
-}
-
-function setupModalHandlers() {
-    const modalTriggers = document.querySelectorAll('.modal-trigger');
-    const infoModal = document.getElementById('infoModal');
-    const infoModalClose = document.getElementById('infoModalClose');
-    const infoModalBody = document.getElementById('infoModalBody');
-
-    modalTriggers.forEach(trigger => {
-        trigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const modalKey = trigger.dataset.modal;
-            const content = MODAL_CONTENTS[modalKey];
-            if (content && infoModalBody) {
-                infoModalBody.innerHTML = content.content;
-                if (infoModal) infoModal.style.display = 'flex';
-            }
-        });
-    });
-
-    infoModalClose?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (infoModal) infoModal.style.display = 'none';
-    });
-
-    infoModal?.addEventListener('click', (e) => {
-        if (e.target === infoModal) {
-            e.preventDefault();
-            e.stopPropagation();
-            infoModal.style.display = 'none';
-        }
-    });
-}
-
-function openDownloadPage(vector) {
-    const page = document.getElementById('downloadPage');
-    if (!page) return;
-
-    const titleEl = document.getElementById('dpTitle');
-    const descEl = document.getElementById('dpDescription');
-    const imgEl = document.getElementById('dpImage');
-    const catEl = document.getElementById('dpCategory');
-    const sizeEl = document.getElementById('dpFileSize');
-    const kwContainer = document.getElementById('dpKeywords');
-
-    if (titleEl) titleEl.textContent = vector.title;
-    if (descEl) descEl.textContent = vector.description || '';
-    
-    const headerTitleEl = document.getElementById('dpHeaderTitle');
-    const headerDescEl = document.getElementById('dpHeaderDesc');
-    if (headerTitleEl) headerTitleEl.textContent = `Free ${vector.category || ''} Vector, SVG, EPS & JPEG Downloads`;
-    if (headerDescEl) headerDescEl.textContent = vector.description || '';
-    
-    if (imgEl) {
-        imgEl.src = vector.thumbnail;
-        imgEl.alt = vector.title;
-        imgEl.onerror = () => { imgEl.src = 'https://placehold.co/400x300/f5f5f5/999?text=Preview'; };
-    }
-    if (catEl) catEl.textContent = vector.category || '-';
-    if (sizeEl) sizeEl.textContent = vector.fileSize || '-';
-
-    if (kwContainer) {
-        kwContainer.innerHTML = '';
-        const allKws = [...EXTRA_KEYWORDS, ...(vector.keywords || [])];
-        allKws.forEach(kw => {
-            const span = document.createElement('span');
-            span.className = 'dp-kw';
-            span.textContent = kw;
-            kwContainer.appendChild(span);
-        });
-    }
-
-    const countdownBox = document.getElementById('dpCountdownBox');
-    const countdownNum = document.getElementById('dpCountdown');
-    const downloadBtn = document.getElementById('dpDownloadBtn');
-    const countdownStatus = document.getElementById('dpCountdownStatus');
-    if (countdownBox) countdownBox.style.display = 'none';
-    if (countdownNum) countdownNum.textContent = '4';
-    if (countdownStatus) countdownStatus.textContent = 'Your download will start in';
-    if (downloadBtn) downloadBtn.style.display = 'block';
-
-    page.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-function closeDownloadPage() {
-    const page = document.getElementById('downloadPage');
-    if (page) page.style.display = 'none';
-    document.body.style.overflow = '';
-    
-    if (state.countdownInterval) {
-        clearInterval(state.countdownInterval);
-        state.countdownInterval = null;
-    }
     state.openedVector = null;
 }
 
-function startDownloadCountdown() {
-    if (!state.openedVector) {
-        console.error('No vector for countdown');
-        return;
-    }
-
-    const downloadBtn = document.getElementById('dpDownloadBtn');
-    const countdownBox = document.getElementById('dpCountdownBox');
-    const countdownNum = document.getElementById('dpCountdown');
-    const countdownStatus = document.getElementById('dpCountdownStatus');
-
-    if (downloadBtn) downloadBtn.style.display = 'none';
-    if (countdownBox) countdownBox.style.display = 'block';
-    if (countdownStatus) countdownStatus.textContent = 'Your download will start in';
-
-    let count = 4;
-    if (countdownNum) countdownNum.textContent = count;
-
-    if (state.countdownInterval) {
-        clearInterval(state.countdownInterval);
-    }
-
+function startDownload(v) {
+    const modal = document.getElementById('downloadModal');
+    const counter = document.getElementById('downloadCounter');
+    const loader = document.getElementById('downloadLoader');
+    const success = document.getElementById('downloadSuccess');
+    const fileName = document.getElementById('downloadFileName');
+    
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    counter.style.display = 'block';
+    loader.style.display = 'none';
+    success.style.display = 'none';
+    fileName.textContent = `${v.name}.zip`;
+    
+    let seconds = 5;
+    counter.textContent = seconds;
+    
+    if (state.countdownInterval) clearInterval(state.countdownInterval);
+    
     state.countdownInterval = setInterval(() => {
-        count--;
-        if (countdownNum) countdownNum.textContent = count;
-
-        if (count <= 0) {
+        seconds--;
+        counter.textContent = seconds;
+        if (seconds <= 0) {
             clearInterval(state.countdownInterval);
-            state.countdownInterval = null;
-            
-            if (state.openedVector) {
-                triggerDownload(state.openedVector);
-            }
+            counter.style.display = 'none';
+            loader.style.display = 'block';
+            executeDownload(v);
         }
     }, 1000);
 }
 
-function triggerDownload(vector) {
+async function executeDownload(v) {
     try {
-        const downloadUrl = `/api/download?slug=${encodeURIComponent(vector.name)}`;
-        
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        const fileName = vector.name || 'vector';
-        a.download = fileName + '.zip';
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        
-        setTimeout(() => {
-            try { document.body.removeChild(a); } catch (e) {}
-        }, 100);
+        const res = await fetch(`/api/download?slug=${v.name}`);
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${v.name}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            document.getElementById('downloadLoader').style.display = 'none';
+            document.getElementById('downloadSuccess').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('downloadModal').style.display = 'none';
+            }, 2000);
+        } else {
+            alert('Download failed. Please try again.');
+            document.getElementById('downloadModal').style.display = 'none';
+        }
     } catch (err) {
-        console.error('Download error:', err);
-        alert('Download could not be started. Please try again.');
+        console.error(err);
+        document.getElementById('downloadModal').style.display = 'none';
     }
 }
 
+function setupEventListeners() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            state.searchQuery = e.target.value.toLowerCase();
+            state.currentPage = 1;
+            // Debounce search
+            clearTimeout(state.searchTimeout);
+            state.searchTimeout = setTimeout(() => fetchVectors(), 400);
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (state.detailPanelOpen && !e.target.closest('.vector-card') && !e.target.closest('#detailPanel')) {
+            closeDetailPanel();
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        if (state.detailPanelOpen && state.openedVector && state.openedCardEl) {
+            openDetailPanel(state.openedVector, state.openedCardEl);
+        }
+    });
+}
+
+function updatePagination() {
+    const wrap = document.getElementById('pagination');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    
+    if (state.totalPages <= 1) return;
+
+    const createBtn = (text, page, active = false, disabled = false) => {
+        const btn = document.createElement('button');
+        btn.className = `pag-btn ${active ? 'active' : ''}`;
+        btn.textContent = text;
+        btn.disabled = disabled;
+        if (!disabled && !active) {
+            btn.onclick = () => {
+                state.currentPage = page;
+                fetchVectors();
+            };
+        }
+        return btn;
+    };
+
+    wrap.appendChild(createBtn('Prev', state.currentPage - 1, false, state.currentPage === 1));
+
+    let start = Math.max(1, state.currentPage - 2);
+    let end = Math.min(state.totalPages, start + 4);
+    if (end - start < 4) start = Math.max(1, end - 4);
+
+    for (let i = start; i <= end; i++) {
+        wrap.appendChild(createBtn(i, i, i === state.currentPage));
+    }
+
+    wrap.appendChild(createBtn('Next', state.currentPage + 1, false, state.currentPage === state.totalPages));
+}
+
+function setupModalHandlers() {
+    const modal = document.getElementById('infoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const closeBtn = modal?.querySelector('.modal-close');
+
+    if (closeBtn) {
+        closeBtn.onclick = () => { modal.style.display = 'none'; };
+    }
+
+    window.onclick = (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+        if (e.target === document.getElementById('downloadModal')) {
+            clearInterval(state.countdownInterval);
+            document.getElementById('downloadModal').style.display = 'none';
+        }
+    };
+
+    document.querySelectorAll('[data-modal]').forEach(btn => {
+        btn.onclick = (e) => {
+            e.preventDefault();
+            const type = btn.dataset.modal;
+            const content = MODAL_CONTENTS[type];
+            if (content) {
+                modalTitle.textContent = content.title;
+                modalBody.innerHTML = content.content;
+                modal.style.display = 'flex';
+            }
+        };
+    });
+}
+
 function showLoader(show) {
-    const l = document.getElementById('loader');
-    if (l) l.style.display = show ? 'flex' : 'none';
+    const loader = document.getElementById('mainLoader');
+    if (loader) loader.style.display = show ? 'flex' : 'none';
 }
 
 function escHtml(str) {
     if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 document.addEventListener('DOMContentLoaded', init);
