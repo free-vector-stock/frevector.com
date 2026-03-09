@@ -1,7 +1,7 @@
 /**
  * POST /api/cleanup
  * Admin-only endpoint to sync KV and R2, removing orphaned entries
- * This prevents "ghost" vectors (in KV but not in R2) and orphaned R2 files
+ * Optimized for the new "icon/" folder structure.
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -36,21 +36,38 @@ export async function onRequestPost(context) {
     const validVectors = [];
 
     for (const vector of allVectors) {
-      const jpgKey = `assets/${vector.category}/${vector.name}.jpg`;
-      const zipKey = `assets/${vector.category}/${vector.name}.zip`;
+      // Check for the new "icon/" folder structure (Requirement)
+      const jpgKey = `icon/${vector.name}.jpg`;
+      const zipKey = `icon/${vector.name}.zip`;
 
-      const [jpgExists, zipExists] = await Promise.all([r2.head(jpgKey), r2.head(zipKey)]);
+      const [jpgExists, zipExists] = await Promise.all([
+        r2.head(jpgKey),
+        r2.head(zipKey)
+      ]);
 
       if (jpgExists && zipExists) {
         validVectors.push(vector);
       } else {
-        orphanedVectors.push({
-          name: vector.name,
-          category: vector.category,
-          jpgExists: !!jpgExists,
-          zipExists: !!zipExists
-        });
-        removedCount++;
+        // Fallback check for legacy structure
+        const legacyJpgKey = `assets/${vector.category}/${vector.name}.jpg`;
+        const legacyZipKey = `assets/${vector.category}/${vector.name}.zip`;
+        
+        const [legacyJpgExists, legacyZipExists] = await Promise.all([
+          r2.head(legacyJpgKey),
+          r2.head(legacyZipKey)
+        ]);
+        
+        if (legacyJpgExists && legacyZipExists) {
+          validVectors.push(vector);
+        } else {
+          orphanedVectors.push({
+            name: vector.name,
+            category: vector.category,
+            jpgExists: !!jpgExists || !!legacyJpgExists,
+            zipExists: !!zipExists || !!legacyZipExists
+          });
+          removedCount++;
+        }
       }
     }
 

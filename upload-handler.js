@@ -10,12 +10,10 @@ class VectorUploadHandler {
     this.MAX_PREVIEW_SIZE = 800; // pixels
     this.PREVIEW_SIZES = [300, 800];
     this.CATEGORIES = [
-      'Abstract', 'Animals/Wildlife', 'The Arts', 'Backgrounds/Textures',
-      'Beauty/Fashion', 'Buildings/Landmarks', 'Business/Finance', 'Celebrities',
-      'Drink', 'Education', 'Font', 'Food', 'Healthcare/Medical', 'Holidays',
-      'Icon', 'Industrial', 'Interiors', 'Logo', 'Miscellaneous', 'Nature',
-      'Objects', 'Parks/Outdoor', 'People', 'Religion', 'Science',
-      'Signs/Symbols', 'Sports/Recreation', 'Technology', 'Transportation', 'Vintage'
+      'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
+      'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous',
+      'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports',
+      'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
     ];
   }
 
@@ -162,16 +160,22 @@ class VectorUploadHandler {
     // Simple keyword-based guessing
     const categoryMap = {
       'abstract': 'Abstract',
-      'animal': 'Animals/Wildlife',
+      'animal': 'Animals',
       'nature': 'Nature',
-      'background': 'Backgrounds/Textures',
+      'background': 'Backgrounds',
       'icon': 'Icon',
       'logo': 'Logo',
       'food': 'Food',
       'tech': 'Technology',
-      'business': 'Business/Finance',
+      'business': 'Business',
       'people': 'People',
-      'building': 'Buildings/Landmarks'
+      'building': 'Buildings',
+      'fashion': 'Fashion',
+      'medical': 'Medical',
+      'holiday': 'Holidays',
+      'sport': 'Sports',
+      'transport': 'Transportation',
+      'vintage': 'Vintage'
     };
     
     for (const [key, cat] of Object.entries(categoryMap)) {
