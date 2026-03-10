@@ -182,13 +182,8 @@ async function fetchVectors() {
 
         renderVectors();
         
-        // Show "Our Picks" only on page 1 and when no search/category is selected (or just page 1)
-        if (state.currentPage === 1 && state.selectedCategory === 'all' && !state.searchQuery) {
-            renderOurPicks();
-        } else {
-            const picksSec = document.getElementById('ourPicksSection');
-            if (picksSec) picksSec.style.display = 'none';
-        }
+        // Show "Our Picks" on all pages
+        renderOurPicks();
 
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
