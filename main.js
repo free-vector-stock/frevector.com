@@ -578,8 +578,17 @@ function setupModalHandlers() {
         closeBtn.onclick = () => { modal.style.display = 'none'; };
     }
 
+    // Modal dışına veya modal'ın kendisine tıklandığında kapat
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            // Eğer tıklanan yer modal'ın kendisi (arka plan) ise veya modal içindeki bir eleman değilse kapat
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
     window.onclick = (e) => {
-        if (e.target === modal) modal.style.display = 'none';
         if (e.target === document.getElementById('downloadPage')) {
             document.getElementById('downloadPage').style.display = 'none';
             if (state.countdownInterval) clearInterval(state.countdownInterval);
@@ -595,6 +604,8 @@ function setupModalHandlers() {
                 const body = document.getElementById('infoModalBody');
                 if (body) body.innerHTML = content.content;
                 modal.style.display = 'flex';
+                // Modal açıldığında sayfanın en üstüne odaklanmasını engellemek için scroll'u sabit tutabiliriz
+                // Ama modal zaten fixed olduğu için ortada görünecektir.
             }
         });
     });
