@@ -656,24 +656,35 @@ body {
 }
 
 .our-picks-track .vector-card {
-    width: 140px;
-    min-width: 140px;
+    width: 140px !important;
+    min-width: 140px !important;
     flex-shrink: 0;
-    height: fit-content;
+    height: auto !important;
 }
 
 .our-picks-track .vc-img-wrap {
-    aspect-ratio: 4/3;
-    width: 100%;
-    height: 105px; /* Explicit height to match 140px width 4:3 aspect ratio */
+    aspect-ratio: 4/3 !important;
+    width: 140px !important;
+    height: 105px !important;
     overflow: hidden;
 }
 
 .our-picks-track .vc-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 140px !important;
+    height: 105px !important;
+    object-fit: cover !important;
     display: block;
+}
+
+.our-picks-track .vc-info {
+    width: 140px !important;
+}
+
+.our-picks-track .vc-title {
+    font-size: 11px;
+    line-height: 1.4;
+    height: 2.8em;
+    overflow: hidden;
 }
 
 .picks-arrow {
