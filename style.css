@@ -659,14 +659,23 @@ body {
     width: 140px;
     min-width: 140px;
     flex-shrink: 0;
+    margin: 0;
 }
 
 .our-picks-track .vc-img-wrap {
+    width: 140px;
     height: 105px;
+    aspect-ratio: 4/3;
 }
 
 .our-picks-track .vc-img {
+    width: 140px;
     height: 105px;
+    object-fit: cover;
+}
+
+.our-picks-track .vc-info {
+    width: 140px;
 }
 
 .picks-arrow {
