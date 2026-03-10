@@ -458,7 +458,8 @@ body {
 .dp-right {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
+    justify-content: flex-start;
 }
 
 .dp-title {
@@ -475,6 +476,24 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dp-keywords .kw-tag {
+    background: var(--gray-light);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.dp-keywords .kw-tag:hover {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black);
 }
 
 .dp-table {
@@ -502,12 +521,22 @@ body {
     background: var(--black);
     color: var(--white);
     border: none;
-    padding: 16px;
-    font-size: 16px;
+    padding: 14px 28px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     border-radius: 4px;
-    margin-top: 10px;
+    margin-top: 8px;
+    transition: background 0.15s;
+}
+
+.dp-download-btn:hover:not(:disabled) {
+    background: #333;
+}
+
+.dp-download-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .dp-countdown-box {
@@ -521,6 +550,18 @@ body {
     font-size: 60px;
     font-weight: 800;
     margin: 10px 0;
+}
+
+.dp-countdown-status {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.dp-countdown-sub {
+    font-size: 12px;
+    color: #999;
+    margin: 0;
 }
 
 /* ===========================
@@ -551,9 +592,17 @@ body {
     .download-page-body {
         grid-template-columns: 1fr;
         padding: 20px;
+        gap: 20px;
     }
     .dp-image {
         max-height: 300px;
+        width: 100%;
+    }
+    .dp-title {
+        font-size: 20px;
+    }
+    .dp-desc {
+        font-size: 13px;
     }
 }
 

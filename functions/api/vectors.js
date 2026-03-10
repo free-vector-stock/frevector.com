@@ -43,20 +43,57 @@ export async function onRequestGet(context) {
             allVectors = allVectors.filter(v => (v.category || "").toLowerCase().trim() === catLower);
         }
 
-        // Search filter
+        // Search filter with relevance scoring
         if (search) {
             const terms = search.split(/\s+/).filter(Boolean);
-            allVectors = allVectors.filter(v => {
-                const searchText = [v.title || "", v.description || "", ...(v.keywords || [])].join(" ").toLowerCase();
-                return terms.every(term => searchText.includes(term));
-            });
+            allVectors = allVectors
+                .map(v => {
+                    const title = (v.title || "").toLowerCase();
+                    const keywords = (v.keywords || []).map(k => k.toLowerCase());
+                    const description = (v.description || "").toLowerCase();
+                    
+                    let score = 0;
+                    let matchCount = 0;
+                    
+                    for (const term of terms) {
+                        let termMatched = false;
+                        if (title.includes(term)) {
+                            score += 10;
+                            termMatched = true;
+                        }
+                        for (const kw of keywords) {
+                            if (kw === term) {
+                                score += 5;
+                                termMatched = true;
+                            } else if (kw.includes(term)) {
+                                score += 2;
+                                termMatched = true;
+                            }
+                        }
+                        if (description.includes(term)) {
+                            score += 1;
+                            termMatched = true;
+                        }
+                        if (termMatched) matchCount++;
+                    }
+                    
+                    if (matchCount === terms.length) {
+                        return { ...v, _score: score };
+                    }
+                    return null;
+                })
+                .filter(v => v !== null)
+                .sort((a, b) => b._score - a._score)
+                .map(({ _score, ...v }) => v);
         }
 
-        // Sort
-        if (sort === "oldest") {
-            allVectors.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
-        } else {
-            allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        // Sort (only if no search query - preserve relevance for search)
+        if (!search) {
+            if (sort === "oldest") {
+                allVectors.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+            } else {
+                allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            }
         }
 
         const total = allVectors.length;

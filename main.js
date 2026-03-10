@@ -348,6 +348,19 @@ function openDownloadPage(v) {
             const span = document.createElement('span');
             span.className = 'kw-tag';
             span.textContent = kw;
+            span.style.cursor = 'pointer';
+            span.addEventListener('click', () => {
+                state.searchQuery = kw;
+                state.currentPage = 1;
+                state.selectedCategory = 'all';
+                document.getElementById('searchInput').value = kw;
+                document.querySelectorAll('.category-item').forEach(el => {
+                    el.classList.toggle('active', el.dataset.cat === 'all');
+                });
+                downloadPage.style.display = 'none';
+                if (state.countdownInterval) clearInterval(state.countdownInterval);
+                fetchVectors();
+            });
             dpKeywords.appendChild(span);
         });
     }
@@ -433,10 +446,14 @@ function setupEventListeners() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-            state.searchQuery = e.target.value.toLowerCase();
+            state.searchQuery = e.target.value.toLowerCase().trim();
             state.currentPage = 1;
             clearTimeout(state.searchTimeout);
-            state.searchTimeout = setTimeout(() => fetchVectors(), 300);
+            if (state.searchQuery.length === 0) {
+                fetchVectors();
+            } else {
+                state.searchTimeout = setTimeout(() => fetchVectors(), 200);
+            }
         });
     }
 
