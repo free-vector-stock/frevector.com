@@ -703,7 +703,7 @@ body {
    FOOTER (Black background, white text)
    =========================== */
 .footer {
-    background: red !important;
+    background: var(--black) !important;
     color: var(--white) !important;
     padding: 12px 0 !important;
     width: 100% !important;
