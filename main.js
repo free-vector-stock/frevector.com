@@ -249,256 +249,205 @@ function renderVectors() {
     state.vectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        card.setAttribute('data-slug', v.name);
-
-        const mainKws = (v.keywords || []).slice(0, 5).join(', ');
-        const displayKws = mainKws || 'vector design';
-
         const id = v.name;
         const category = v.category || "Miscellaneous";
         const thumbnail = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
 
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${thumbnail}" alt="${escHtml(v.title)}" loading="lazy"
-                     onerror="this.src='https://placehold.co/280x210/f5f5f5/999?text=Preview'">
+                <img class="vc-img" src="${thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
             </div>
             <div class="vc-info">
                 <div class="vc-title">${escHtml(v.title)}</div>
-                <div class="vc-keywords">${escHtml(displayKws)}</div>
+                <div class="vc-keywords">${escHtml((v.keywords || []).concat(EXTRA_KEYWORDS).join(', '))}</div>
             </div>
         `;
-
-        card.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            openDetailPanel(v, card);
-        });
+        card.addEventListener('click', () => openDetailPanel(v, card));
         grid.appendChild(card);
     });
 }
 
-function openDetailPanel(v, cardEl) {
-    state.openedVector = v;
-    state.openedCardEl = cardEl;
-    state.detailPanelOpen = true;
-    
+function openDetailPanel(vector, cardEl) {
     const panel = document.getElementById('detailPanel');
     if (!panel) return;
-    
-    panel.style.display = 'none';
-    document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('card-active'));
 
-    const id = v.name;
-    const category = v.category || "Miscellaneous";
-    const thumbnail = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
-    const img = document.getElementById('detailImage');
-    if (img) {
-        img.src = thumbnail;
-        img.alt = v.title;
-        img.onerror = () => { img.src = 'https://placehold.co/400x300/f5f5f5/999?text=Preview'; };
-    }
+    state.openedVector = vector;
+    state.openedCardEl = cardEl;
+    state.detailPanelOpen = true;
 
-    const titleEl = document.getElementById('detailTitle');
-    const descEl = document.getElementById('detailDescription');
-    const catEl = document.getElementById('detailCategory');
-    const sizeEl = document.getElementById('detailFileSize');
-    
-    if (titleEl) titleEl.textContent = v.title;
-    if (descEl) descEl.textContent = v.description || '';
-    if (catEl) catEl.textContent = v.category || '-';
-    if (sizeEl) sizeEl.textContent = v.fileSize || '-';
-
-    const tagsWrap = document.getElementById('detailKeywords');
-    if (tagsWrap) {
-        tagsWrap.innerHTML = '';
-        const allKws = [...EXTRA_KEYWORDS, ...(v.keywords || [])];
-        allKws.forEach(kw => {
-            const span = document.createElement('span');
-            span.className = 'kw-tag';
-            span.textContent = kw;
-            span.style.cursor = 'pointer';
-            span.addEventListener('click', () => {
-                state.searchQuery = kw;
-                state.currentPage = 1;
-                state.selectedCategory = 'all';
-                document.getElementById('searchInput').value = kw;
-                document.querySelectorAll('.category-item').forEach(el => {
-                    el.classList.toggle('active', el.dataset.cat === 'all');
-                });
-                closeDetailPanel();
-                fetchVectors();
-            });
-            tagsWrap.appendChild(span);
-        });
-    }
-
-    const downloadBtn = document.getElementById('detailDownloadBtn');
-    if (downloadBtn) {
-        downloadBtn.onclick = () => openDownloadPage(v);
-    }
-
-    const closeBtn = document.getElementById('detailCloseBtn');
-    if (closeBtn) {
-        closeBtn.onclick = closeDetailPanel;
-    }
-
+    document.querySelectorAll('.vector-card').forEach(el => el.classList.remove('card-active'));
     cardEl.classList.add('card-active');
+
+    // Find current row and insert panel after it
+    const grid = document.getElementById('vectorsGrid');
+    const cards = Array.from(grid.children);
+    const index = cards.indexOf(cardEl);
+    const columns = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+    const rowEndIndex = Math.min(Math.ceil((index + 1) / columns) * columns - 1, cards.length - 1);
+    
+    grid.insertBefore(panel, cards[rowEndIndex].nextSibling);
+
+    // Update panel content
+    document.getElementById('detailTitle').textContent = vector.title;
+    document.getElementById('detailDescription').textContent = vector.description || 'Professional quality vector graphic for your projects.';
+    document.getElementById('detailCategory').textContent = vector.category || 'Miscellaneous';
+    document.getElementById('detailFileSize').textContent = vector.fileSize || 'N/A';
+    
+    const category = vector.category || "Miscellaneous";
+    const id = vector.name;
+    const imageUrl = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
+    document.getElementById('detailImage').src = imageUrl;
+
+    const kwContainer = document.getElementById('detailKeywords');
+    kwContainer.innerHTML = '';
+    const keywords = (vector.keywords || []).concat(EXTRA_KEYWORDS);
+    keywords.slice(0, 15).forEach(kw => {
+        const span = document.createElement('span');
+        span.className = 'kw-tag';
+        span.textContent = kw;
+        kwContainer.appendChild(span);
+    });
+
     panel.style.display = 'block';
+
+    // Breadcrumb
+    document.getElementById('breadcrumbCategory').textContent = vector.category || 'Miscellaneous';
+    document.getElementById('breadcrumbTitle').textContent = vector.title;
+
+    // Scroll to panel
+    setTimeout(() => {
+        const offset = panel.offsetTop - 120;
+        window.scrollTo({ top: offset, behavior: 'smooth' });
+    }, 100);
+
+    // Related
+    renderRelatedVectors(vector);
+
+    // Event Listeners
+    document.getElementById('detailCloseBtn').onclick = closeDetailPanel;
+    document.getElementById('detailDownloadBtn').onclick = () => openDownloadPage(vector);
 }
 
 function closeDetailPanel() {
     const panel = document.getElementById('detailPanel');
     if (panel) panel.style.display = 'none';
-    document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('card-active'));
+    document.querySelectorAll('.vector-card').forEach(el => el.classList.remove('card-active'));
     state.detailPanelOpen = false;
     state.openedVector = null;
+    state.openedCardEl = null;
 }
 
-function openDownloadPage(v) {
-    const downloadPage = document.getElementById('downloadPage');
-    if (!downloadPage) return;
+function renderRelatedVectors(currentVector) {
+    const section = document.getElementById('relatedVectorsSection');
+    const grid = document.getElementById('relatedVectorsGrid');
+    if (!section || !grid) return;
 
-    const id = v.name;
-    const category = v.category || "Miscellaneous";
-    const thumbnail = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
-    
-    // Set header info
-    const dpHeaderTitle = document.getElementById('dpHeaderTitle');
-    const dpHeaderDesc = document.getElementById('dpHeaderDesc');
-    if (dpHeaderTitle) dpHeaderTitle.textContent = v.title;
-    if (dpHeaderDesc) dpHeaderDesc.textContent = v.description || '';
+    const related = state.vectors
+        .filter(v => v.name !== currentVector.name && v.category === currentVector.category)
+        .slice(0, 4);
 
-    // Set main content
-    const dpImage = document.getElementById('dpImage');
-    if (dpImage) {
-        dpImage.src = thumbnail;
-        dpImage.alt = v.title;
-        dpImage.onerror = () => { dpImage.src = 'https://placehold.co/400x300/f5f5f5/999?text=Preview'; };
+    if (related.length === 0) {
+        section.style.display = 'none';
+        return;
     }
 
-    const dpTitle = document.getElementById('dpTitle');
-    const dpDesc = document.getElementById('dpDescription');
-    const dpCategory = document.getElementById('dpCategory');
-    const dpFileSize = document.getElementById('dpFileSize');
-    
-    if (dpTitle) dpTitle.textContent = v.title;
-    if (dpDesc) dpDesc.textContent = v.description || '';
-    if (dpCategory) dpCategory.textContent = v.category || '-';
-    if (dpFileSize) dpFileSize.textContent = v.fileSize || '-';
+    grid.innerHTML = '';
+    related.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'vector-card';
+        const id = v.name;
+        const category = v.category || "Miscellaneous";
+        const thumbnail = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
 
-    // Set keywords
-    const dpKeywords = document.getElementById('dpKeywords');
-    if (dpKeywords) {
-        dpKeywords.innerHTML = '';
-        const allKws = [...EXTRA_KEYWORDS, ...(v.keywords || [])];
-        allKws.forEach(kw => {
-            const span = document.createElement('span');
-            span.className = 'kw-tag';
-            span.textContent = kw;
-            span.style.cursor = 'pointer';
-            span.addEventListener('click', () => {
-                state.searchQuery = kw;
-                state.currentPage = 1;
-                state.selectedCategory = 'all';
-                document.getElementById('searchInput').value = kw;
-                document.querySelectorAll('.category-item').forEach(el => {
-                    el.classList.toggle('active', el.dataset.cat === 'all');
-                });
-                downloadPage.style.display = 'none';
-                if (state.countdownInterval) clearInterval(state.countdownInterval);
-                fetchVectors();
-            });
-            dpKeywords.appendChild(span);
-        });
-    }
-
-    // Setup download button
-    const dpDownloadBtn = document.getElementById('dpDownloadBtn');
-    if (dpDownloadBtn) {
-        dpDownloadBtn.onclick = () => startCountdown(v);
-    }
-
-    // Setup close button
-    const dpClose = document.getElementById('dpClose');
-    if (dpClose) {
-        dpClose.onclick = () => {
-            downloadPage.style.display = 'none';
-            if (state.countdownInterval) clearInterval(state.countdownInterval);
-        };
-    }
-
-    // Reset countdown box
-    const dpCountdownBox = document.getElementById('dpCountdownBox');
-    if (dpCountdownBox) dpCountdownBox.style.display = 'none';
-
-    downloadPage.style.display = 'flex';
-    closeDetailPanel();
+        card.innerHTML = `
+            <div class="vc-img-wrap">
+                <img class="vc-img" src="${thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+            </div>
+            <div class="vc-info">
+                <div class="vc-title">${escHtml(v.title)}</div>
+            </div>
+        `;
+        card.addEventListener('click', () => openDetailPanel(v, card));
+        grid.appendChild(card);
+    });
+    section.style.display = 'block';
 }
 
-function startCountdown(v) {
-    const dpCountdownBox = document.getElementById('dpCountdownBox');
-    const dpCountdown = document.getElementById('dpCountdown');
-    const dpDownloadBtn = document.getElementById('dpDownloadBtn');
-    
-    if (!dpCountdownBox || !dpCountdown) return;
+function openDownloadPage(vector) {
+    const dp = document.getElementById('downloadPage');
+    if (!dp) return;
 
-    dpDownloadBtn.disabled = true;
-    dpCountdownBox.style.display = 'block';
+    document.getElementById('dpTitle').textContent = vector.title;
+    document.getElementById('dpHeaderTitle').textContent = vector.title;
+    document.getElementById('dpDescription').textContent = vector.description || 'Professional quality vector graphic.';
+    document.getElementById('dpCategory').textContent = vector.category || 'Miscellaneous';
+    document.getElementById('dpFileSize').textContent = vector.fileSize || 'N/A';
     
-    let count = 4;
-    dpCountdown.textContent = count;
-    
-    if (state.countdownInterval) clearInterval(state.countdownInterval);
-    
-    state.countdownInterval = setInterval(() => {
-        count--;
-        if (count >= 0) {
-            dpCountdown.textContent = count;
-        }
-        
-        if (count <= 0) {
-            clearInterval(state.countdownInterval);
-            dpCountdownBox.style.display = 'none';
-            executeDownload(v);
-            dpDownloadBtn.disabled = false;
-        }
-    }, 1000);
+    const category = vector.category || "Miscellaneous";
+    const id = vector.name;
+    const imageUrl = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
+    document.getElementById('dpImage').src = imageUrl;
+
+    const kwContainer = document.getElementById('dpKeywords');
+    kwContainer.innerHTML = '';
+    const keywords = (vector.keywords || []).concat(EXTRA_KEYWORDS);
+    keywords.slice(0, 15).forEach(kw => {
+        const span = document.createElement('span');
+        span.className = 'kw-tag';
+        span.textContent = kw;
+        kwContainer.appendChild(span);
+    });
+
+    dp.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    const downloadBtn = document.getElementById('dpDownloadBtn');
+    const countdownBox = document.getElementById('dpCountdownBox');
+    const countdownNum = document.getElementById('dpCountdown');
+
+    downloadBtn.style.display = 'block';
+    downloadBtn.disabled = false;
+    countdownBox.style.display = 'none';
+
+    downloadBtn.onclick = () => {
+        downloadBtn.disabled = true;
+        countdownBox.style.display = 'block';
+        let count = 4;
+        countdownNum.textContent = count;
+
+        if (state.countdownInterval) clearInterval(state.countdownInterval);
+        state.countdownInterval = setInterval(() => {
+            count--;
+            countdownNum.textContent = count;
+            if (count <= 0) {
+                clearInterval(state.countdownInterval);
+                triggerDownload(vector);
+                countdownBox.innerHTML = '<p style="color:green; font-weight:bold;">Download Started!</p>';
+            }
+        }, 1000);
+    };
+
+    document.getElementById('dpClose').onclick = () => {
+        dp.style.display = 'none';
+        document.body.style.overflow = '';
+        if (state.countdownInterval) clearInterval(state.countdownInterval);
+    };
 }
 
-async function executeDownload(v) {
-    try {
-        state.downloadInProgress = true;
-        const res = await fetch(`/api/download?slug=${encodeURIComponent(v.name)}`);
-        
-        if (res.ok) {
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${v.name}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } else {
-            alert('Download failed. Please try again.');
-        }
-    } catch (err) {
-        console.error('Download error:', err);
-        alert('Download error. Please try again.');
-    } finally {
-        state.downloadInProgress = false;
-    }
+async function triggerDownload(vector) {
+    const category = vector.category || "Miscellaneous";
+    const id = vector.name;
+    const key = `${category}/${id}/${id}.zip`;
+    window.location.href = `/api/asset?key=${encodeURIComponent(key)}&download=1`;
 }
 
 function setupEventListeners() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
-            state.searchQuery = e.target.value.toLowerCase().trim();
+            state.searchQuery = e.target.value.trim();
             state.currentPage = 1;
-            clearTimeout(state.searchTimeout);
+            if (state.searchTimeout) clearTimeout(state.searchTimeout);
             if (state.searchQuery.length === 0) {
                 fetchVectors();
             } else {
@@ -565,6 +514,7 @@ function setupDownloadPageHandlers() {
     window.addEventListener('click', (e) => {
         if (e.target === downloadPage) {
             downloadPage.style.display = 'none';
+            document.body.style.overflow = '';
             if (state.countdownInterval) clearInterval(state.countdownInterval);
         }
     });
@@ -581,22 +531,27 @@ function setupModalHandlers() {
         };
     }
 
-    // Modal dışına tıklandığında kapat (arka plan tıklaması)
+    // Modal dışına veya üstüne tıklandığında kapat
     if (modal) {
         modal.addEventListener('click', (e) => {
-            // Eğer tıklanan yer modal'ın kendisi (arka plan) ise kapat
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
+            // Arka plana veya modal içeriğine tıklandığında kapat
+            modal.style.display = 'none';
         });
-    }
-
-    window.onclick = (e) => {
-        if (e.target === document.getElementById('downloadPage')) {
-            document.getElementById('downloadPage').style.display = 'none';
-            if (state.countdownInterval) clearInterval(state.countdownInterval);
+        
+        // Modal içeriğinin (box) tıklamaları durdurmasını engelliyoruz ki modal her yere tıklayınca kapansın
+        const modalBox = document.querySelector('.info-modal-box');
+        if (modalBox) {
+            modalBox.addEventListener('click', (e) => {
+                // Eğer tıklanan şey bir link değilse modalı kapat
+                if (e.target.tagName !== 'A') {
+                    // Linke tıklanmadıysa modalı kapatmak için event'in modal'a ulaşmasına izin veriyoruz
+                } else {
+                    // Linke tıklandıysa modalın kapanmasını engelleyebiliriz veya linke gitmesini sağlayabiliriz
+                    e.stopPropagation();
+                }
+            });
         }
-    };
+    }
 
     document.querySelectorAll('.modal-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -608,13 +563,6 @@ function setupModalHandlers() {
                 const body = document.getElementById('infoModalBody');
                 if (body) body.innerHTML = content.content;
                 modal.style.display = 'flex';
-                // Modal'ın üstüne tıklandığında kapanması için event listener ekle
-                const modalBox = document.querySelector('.info-modal-box');
-                if (modalBox) {
-                    // Önceki event listener'ları temizle
-                    const newModalBox = modalBox.cloneNode(true);
-                    modalBox.parentNode.replaceChild(newModalBox, modalBox);
-                }
             }
         });
     });

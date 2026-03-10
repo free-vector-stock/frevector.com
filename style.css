@@ -821,7 +821,7 @@ body {
 
 /* ===========================
    FOOTER (Black background, white text)
-   ===========================*//
+   ===========================*/
 .footer {
     background: var(--black) !important;
     color: var(--white) !important;
