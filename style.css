@@ -659,17 +659,21 @@ body {
     width: 140px;
     min-width: 140px;
     flex-shrink: 0;
+    height: fit-content;
 }
 
 .our-picks-track .vc-img-wrap {
     aspect-ratio: 4/3;
     width: 100%;
+    height: 105px; /* Explicit height to match 140px width 4:3 aspect ratio */
+    overflow: hidden;
 }
 
 .our-picks-track .vc-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
 .picks-arrow {
