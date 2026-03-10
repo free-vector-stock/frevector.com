@@ -22,9 +22,14 @@ export async function onRequestGet(context) {
         let r2Key = decodedKey;
         if (!decodedKey.includes('/')) {
             // If no folder specified, search in all category folders
-            const categories = ['abstract', 'animals', 'the-arts', 'backgrounds', 'fashion', 'buildings', 'business', 'celebrities', 'education', 'food', 'drink', 'medical', 'holidays', 'industrial', 'interiors', 'miscellaneous', 'nature', 'objects', 'outdoor', 'people', 'religion', 'science', 'symbols', 'sports', 'technology', 'transportation', 'vintage', 'logo', 'font', 'icon'];
+            const categories = ['Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities', 'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous', 'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports', 'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'];
+            
+            // Extract ID from filename (e.g., abstract-00000003.jpg -> abstract-00000003)
+            const id = decodedKey.split('.')[0];
+            
+            // 1. Try the new structure: Category/ID/ID.ext
             for (const cat of categories) {
-                const testKey = `${cat}/${decodedKey}`;
+                const testKey = `${cat}/${id}/${decodedKey}`;
                 const testObj = await r2.get(testKey);
                 if (testObj) {
                     object = testObj;
@@ -32,11 +37,29 @@ export async function onRequestGet(context) {
                 }
             }
             
-            // Fallback to old "icon/" folder if not found in category folders
+            // 2. Try the previous structure: category-folder/ID.ext
+            if (!object) {
+                for (const cat of categories) {
+                    const catFolder = cat.replace(/\s+/g, '-').toLowerCase();
+                    const testKey = `${catFolder}/${decodedKey}`;
+                    const testObj = await r2.get(testKey);
+                    if (testObj) {
+                        object = testObj;
+                        break;
+                    }
+                }
+            }
+            
+            // 3. Fallback to old "icon/" folder
             if (!object) {
                 const iconKey = `icon/${decodedKey}`;
                 const iconObj = await r2.get(iconKey);
                 if (iconObj) object = iconObj;
+            }
+            
+            // 4. Last resort: try root
+            if (!object) {
+                object = await r2.get(decodedKey);
             }
         } else {
             object = await r2.get(r2Key);

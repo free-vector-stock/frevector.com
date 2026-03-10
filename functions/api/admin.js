@@ -32,9 +32,16 @@ function normalizeString(str) {
 /**
  * Advanced category matching - resolves to valid KV category name
  */
-function resolveCategory(raw) {
-    if (!raw) return "Miscellaneous";
-    const s = normalizeString(raw);
+function resolveCategory(raw, id) {
+    if (!raw && !id) return "Miscellaneous";
+    
+    // Try to infer from ID if raw is missing or Miscellaneous
+    let searchStr = (raw || "").toString().toLowerCase();
+    if ((!raw || searchStr === "miscellaneous") && id) {
+        searchStr = id.toString().toLowerCase();
+    }
+    
+    const s = normalizeString(searchStr);
     
     // 1. Exact match
     for (const cat of VALID_CATEGORIES) {
@@ -208,15 +215,15 @@ export async function onRequestPost(context) {
     // ID comes from the filename (e.g., icon-00000001)
     const id = jsonFile.name.replace(/\.json$/, "");
     
-    // Resolve category from JSON field
+    // Resolve category from JSON field or ID
     const rawCategory = getField(metadata, "category");
-    const category = resolveCategory(rawCategory);
+    const category = resolveCategory(rawCategory, id);
     
-    // Upload to R2 in category-specific folder
-    const categoryFolder = category.replace(/\s+/g, '-').toLowerCase();
-    const r2JpgKey = `${categoryFolder}/${id}.jpg`;
-    const r2ZipKey = `${categoryFolder}/${id}.zip`;
-    const r2JsonKey = `${categoryFolder}/${id}.json`;
+    // Upload to R2 in category-specific folder: Category/ID/ID.ext
+    // Requirement: "aynı ada sahip işleri (jpeg + json + zip) bir klasör oluşturup aynı ada sahip klasöre koyması lazım"
+    const r2JpgKey = `${category}/${id}/${id}.jpg`;
+    const r2ZipKey = `${category}/${id}/${id}.zip`;
+    const r2JsonKey = `${category}/${id}/${id}.json`;
 
     const jpgUpload = await uploadWithRetry(r2, r2JpgKey, jpegBuffer, { contentType: "image/jpeg" });
     if (!jpgUpload.success) return new Response(JSON.stringify({ error: "JPG upload failed" }), { status: 500, headers });
@@ -285,13 +292,20 @@ export async function onRequestDelete(context) {
     const allVectorsRaw = await kv.get("all_vectors");
     let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
     const vector = allVectors.find(v => v.name === id);
-    const categoryFolder = vector ? vector.category.replace(/\s+/g, '-').toLowerCase() : '*';
+    const category = vector ? vector.category : null;
     
-    // Delete from R2 category-specific folder
-    if (categoryFolder !== '*') {
-      await r2.delete(`${categoryFolder}/${id}.jpg`).catch(() => {});
-      await r2.delete(`${categoryFolder}/${id}.zip`).catch(() => {});
-      await r2.delete(`${categoryFolder}/${id}.json`).catch(() => {});
+    // Delete from R2 category-specific folder: Category/ID/ID.ext
+    if (category) {
+      await r2.delete(`${category}/${id}/${id}.jpg`).catch(() => {});
+      await r2.delete(`${category}/${id}/${id}.zip`).catch(() => {});
+      await r2.delete(`${category}/${id}/${id}.json`).catch(() => {});
+    } else {
+      // Fallback: search in all categories if category not in KV
+      for (const cat of VALID_CATEGORIES) {
+        await r2.delete(`${cat}/${id}/${id}.jpg`).catch(() => {});
+        await r2.delete(`${cat}/${id}/${id}.zip`).catch(() => {});
+        await r2.delete(`${cat}/${id}/${id}.json`).catch(() => {});
+      }
     }
 
     // Remove from KV

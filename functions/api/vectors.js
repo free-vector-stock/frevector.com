@@ -126,12 +126,19 @@ export async function onRequestGet(context) {
 }
 
 function enrichVector(v) {
+    const id = v.name;
+    const category = v.category || "Miscellaneous";
+    
+    // New structure: Category/ID/ID.ext
+    // We pass the full path as the key to /api/asset
+    const jpgKey = `${category}/${id}/${id}.jpg`;
+    const zipKey = `${category}/${id}/${id}.zip`;
+
     return {
         ...v,
         title: v.title || v.name || "",
-        // Requirement: Strict "icon/" folder structure
-        thumbnail: `/api/asset?key=${encodeURIComponent(v.name)}.jpg`,
-        zipUrl: `/api/asset?key=${encodeURIComponent(v.name)}.zip`,
+        thumbnail: `/api/asset?key=${encodeURIComponent(jpgKey)}`,
+        zipUrl: `/api/asset?key=${encodeURIComponent(zipKey)}`,
         fileSize: v.fileSize || null
     };
 }

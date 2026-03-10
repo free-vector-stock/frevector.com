@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Health Check Buttons
     document.getElementById('refreshHealthBtn')?.addEventListener('click', loadHealthReport);
     document.getElementById('verifySyncBtn')?.addEventListener('click', verifySync);
+    document.getElementById('fixCategoriesBtn')?.addEventListener('click', fixCategories);
     document.getElementById('runCleanupBtn')?.addEventListener('click', runCleanup);
 });
 
@@ -291,7 +292,9 @@ function renderManageTable() {
 
     pageItems.forEach(v => {
         const tr = document.createElement('tr');
-        const previewUrl = `/api/asset?key=${encodeURIComponent(v.name)}.jpg`;
+        const id = v.name;
+        const category = v.category || "Miscellaneous";
+        const previewUrl = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
         const isSelected = state.selectedVectors.has(v.name);
         tr.innerHTML = `
             <td><input type="checkbox" class="vector-checkbox" data-slug="${escHtml(v.name)}" ${isSelected ? 'checked' : ''}></td>
@@ -587,6 +590,39 @@ async function runCleanup() {
 
 async function verifySync() {
     loadHealthReport();
+}
+
+async function fixCategories() {
+    if (!confirm("This will scan all vectors and fix those in 'Miscellaneous' if their ID matches a category name. Continue?")) return;
+    
+    const key = sessionStorage.getItem('fv_admin');
+    const btn = document.getElementById('fixCategoriesBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Fixing...";
+    }
+
+    try {
+        const res = await fetch('/api/fix-categories', {
+            method: 'POST',
+            headers: { 'X-Admin-Key': key }
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(`Success! Fixed ${data.fixedCount} vectors.`);
+            loadManageVectors();
+            loadDashboard();
+        } else {
+            alert("Error: " + (data.error || "Unknown error"));
+        }
+    } catch (e) {
+        alert("Request failed: " + e.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Fix Categories (ID-based)";
+        }
+    }
 }
 
 function escHtml(str) {
