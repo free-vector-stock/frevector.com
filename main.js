@@ -16,10 +16,10 @@ const CATEGORIES = [
 const MODAL_CONTENTS = {
     about: {
         title: 'About Us',
-        content: `<h2>About Us</h2>
-<p>Frevector.com is an independent design platform created to provide access to original resources in the field of graphic design.</p>
-<p>The platform is run by a team that produces in its own internal studio. All designs on the site are prepared only by Frevector artists. Content is not taken from other platforms, copied, or rearranged. Each work is created from scratch and goes through an original production process.</p>
-<p>Each design is shared after idea development, drawing, vector editing, technical adjustments, and quality control stages. Our aim is to create a growing and reliably usable graphic archive over time.</p>
+        content: `<h2>ABOUT US</h2>
+<p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
+<p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
+<p>Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
 <p><strong>Frevector.com includes the following content:</strong></p>
 <ul>
 <li>Vector illustrations</li>
@@ -28,69 +28,67 @@ const MODAL_CONTENTS = {
 <li>Graphic elements</li>
 <li>Various design resources</li>
 </ul>
-<p>All files can be used in personal and commercial projects.</p>
-<p>Our only rule is this: Files cannot be redistributed, uploaded to other platforms, sold, or shared again in package form.</p>
-<p>Frevector is a platform that values effort, original production, and ethical design understanding.</p>`
+<p>All files can be used in both personal and commercial projects.</p>
+<p><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>
+<p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>`
     },
     privacy: {
         title: 'Privacy Policy',
-        content: `<h2>Privacy Policy</h2>
-<p>At Frevector.com, we value user privacy. This policy explains what data may be collected when you visit the site and how it may be used.</p>
+        content: `<h2>PRIVACY POLICY</h2>
+<p>As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>
 <h3>1. Data Collected</h3>
-<p>When you visit the site, some anonymous data may be automatically collected. This data does not directly identify you.</p>
-<p><strong>Data that may be collected:</strong></p>
+<p>When you visit the site, certain anonymous data may be collected automatically. This data does not directly identify you.</p>
+<p><strong>Collected data may include:</strong></p>
 <ul>
 <li>Cookies</li>
 <li>Browser and device information</li>
-<li>IP address (for anonymous analysis purposes)</li>
+<li>IP address (for anonymous analytical purposes)</li>
 <li>Page visit and interaction data</li>
-<li>Analytics usage information</li>
+<li>Analytical usage information</li>
 </ul>
 <h3>2. Purposes of Data Use</h3>
-<p>Collected data may be used for the following purposes:</p>
+<p>The collected data may be used for the following purposes:</p>
 <ul>
-<li>Improve site performance</li>
-<li>Enhance user experience</li>
-<li>Identify technical issues</li>
-<li>Ensure security</li>
-<li>Support content development process</li>
+<li>Improving site performance</li>
+<li>Enhancing user experience</li>
+<li>Detecting technical issues</li>
+<li>Ensuring security</li>
+<li>Supporting the content development process</li>
 </ul>
 <h3>3. Personal Data</h3>
-<p>Personal data (name, email, etc.) is processed only when voluntarily shared by the user. For example, emails sent for contact purposes fall under this category.</p>
-<p>Frevector does not sell user data to third parties or share it for commercial purposes.</p>
+<p>Personal data (name, email, etc.) is only processed when voluntarily shared by the user—for example, via emails sent for communication purposes. Frevector does not sell user data to third parties or share it for commercial purposes.</p>
 <h3>4. Cookie Policy</h3>
-<p>Cookies may be used on the site. Cookies are used to support site functionality, remember user preferences, and measure performance.</p>
-<p>Users can restrict or disable cookie usage from their browser settings.</p>
+<p>Cookies may be used on the site to support site functions, remember user preferences, and measure performance. Users can limit or disable the use of cookies through their browser settings.</p>
 <h3>5. Data Security</h3>
-<p>Necessary technical and administrative measures are taken to protect data. However, the security of data transmitted over the internet cannot be guaranteed.</p>`
+<p>Necessary technical and administrative measures are taken to protect data. However, it cannot be guaranteed that data transmission over the internet is completely secure.</p>`
     },
     terms: {
         title: 'Terms of Service',
-        content: `<h2>Terms of Service</h2>
-<p>Every visitor using Frevector.com is considered to have accepted the following terms.</p>
+        content: `<h2>TERMS OF SERVICE</h2>
+<p>Every visitor using Frevector.com is deemed to have accepted the following terms.</p>
 <h3>1. Content Ownership</h3>
 <p>All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector.</p>
 <h3>2. Right of Use</h3>
-<p>Downloaded files can be used in personal and commercial projects. Users can edit files for their own projects and include them in their work.</p>
+<p>Downloaded files can be used in personal and commercial projects. The user may edit the files for their own projects and incorporate them into their work.</p>
 <h3>3. Prohibited Uses</h3>
-<p><strong>The following operations are prohibited:</strong></p>
+<p><strong>The following actions are prohibited:</strong></p>
 <ul>
-<li>Redistribution of files</li>
-<li>Uploading to other websites</li>
-<li>Selling digitally or physically</li>
-<li>Sharing in archive or package form</li>
-<li>Presenting Frevector content as a source on other platforms</li>
+<li>Redistributing files</li>
+<li>Uploading to other sites</li>
+<li>Selling files digitally or physically</li>
+<li>Sharing as an archive, package, or collection</li>
+<li>Presenting Frevector content as a resource on other platforms</li>
 </ul>
 <h3>4. Liability</h3>
-<p>Frevector cannot be held responsible for direct or indirect damages that may result from the use of content. The platform may occasionally experience technical issues or temporary access problems.</p>
+<p>Frevector cannot be held responsible for any direct or indirect damages arising from the use of the content. Technical malfunctions or temporary access issues may occur on the platform from time to time.</p>
 <h3>5. Right to Change</h3>
-<p>Frevector reserves the right to update service terms and site content as needed.</p>`
+<p>Frevector reserves the right to update the terms of service and site content as necessary.</p>`
     },
     contact: {
         title: 'Contact',
         content: `<h2>Contact</h2>
 <p>If you have any questions about Frevector.com or have something you would like to communicate, you can contact us.</p>
-<p><strong>Email:</strong> hakankacar2014@gmail.com</p>
+<p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color: inherit; text-decoration: underline;">hakankacar2014@gmail.com</a></p>
 <p>Frevector values open and clear communication with its users.</p>`
     }
 };
@@ -183,6 +181,15 @@ async function fetchVectors() {
         state.total = data.total || 0;
 
         renderVectors();
+        
+        // Show "Our Picks" only on page 1 and when no search/category is selected (or just page 1)
+        if (state.currentPage === 1 && state.selectedCategory === 'all' && !state.searchQuery) {
+            renderOurPicks();
+        } else {
+            const picksSec = document.getElementById('ourPicksSection');
+            if (picksSec) picksSec.style.display = 'none';
+        }
+
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -191,6 +198,42 @@ async function fetchVectors() {
         state.isLoading = false;
         showLoader(false);
     }
+}
+
+function renderOurPicks() {
+    const section = document.getElementById('ourPicksSection');
+    const track = document.getElementById('ourPicksTrack');
+    if (!section || !track || !state.vectors.length) return;
+
+    track.innerHTML = '';
+    // Use first 10 vectors as "picks" for now, or random ones
+    const picks = state.vectors.slice(0, 10);
+    
+    picks.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'vector-card';
+        const id = v.name;
+        const category = v.category || "Miscellaneous";
+        const thumbnail = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
+
+        card.innerHTML = `
+            <div class="vc-img-wrap">
+                <img class="vc-img" src="${thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+            </div>
+            <div class="vc-info">
+                <div class="vc-title">${escHtml(v.title)}</div>
+            </div>
+        `;
+        card.addEventListener('click', () => openDetailPanel(v, card));
+        track.appendChild(card);
+    });
+
+    section.style.display = 'block';
+
+    const prev = document.getElementById('picksPrev');
+    const next = document.getElementById('picksNext');
+    if (prev) prev.onclick = () => track.scrollBy({ left: -320, behavior: 'smooth' });
+    if (next) next.onclick = () => track.scrollBy({ left: 320, behavior: 'smooth' });
 }
 
 function renderVectors() {
