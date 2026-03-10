@@ -1,7 +1,5 @@
 /**
  * frevector.com - Frontend Logic
- * Fixed: Updated category list, strict R2 structure, download page, countdown timer.
- * Requirement: Keywords visibility (2 lines), Download fix, Real-time search.
  */
 
 const EXTRA_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
@@ -186,10 +184,7 @@ async function fetchVectors() {
         state.total = data.total || 0;
 
         renderVectors();
-        
-        // Show "Our Picks" on all pages
         renderOurPicks();
-
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -206,7 +201,6 @@ function renderOurPicks() {
     if (!section || !track || !state.vectors.length) return;
 
     track.innerHTML = '';
-    // Use first 10 vectors as "picks" for now, or random ones
     const picks = state.vectors.slice(0, 10);
     
     picks.forEach(v => {
@@ -278,7 +272,6 @@ function openDetailPanel(vector, cardEl) {
     document.querySelectorAll('.vector-card').forEach(el => el.classList.remove('card-active'));
     cardEl.classList.add('card-active');
 
-    // Find current row and insert panel after it
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
@@ -287,7 +280,6 @@ function openDetailPanel(vector, cardEl) {
     
     grid.insertBefore(panel, cards[rowEndIndex].nextSibling);
 
-    // Update panel content
     document.getElementById('detailTitle').textContent = vector.title;
     document.getElementById('detailDescription').textContent = vector.description || 'Professional quality vector graphic for your projects.';
     document.getElementById('detailCategory').textContent = vector.category || 'Miscellaneous';
@@ -309,21 +301,16 @@ function openDetailPanel(vector, cardEl) {
     });
 
     panel.style.display = 'block';
-
-    // Breadcrumb
     document.getElementById('breadcrumbCategory').textContent = vector.category || 'Miscellaneous';
     document.getElementById('breadcrumbTitle').textContent = vector.title;
 
-    // Scroll to panel
     setTimeout(() => {
         const offset = panel.offsetTop - 120;
         window.scrollTo({ top: offset, behavior: 'smooth' });
     }, 100);
 
-    // Related
     renderRelatedVectors(vector);
 
-    // Event Listeners
     document.getElementById('detailCloseBtn').onclick = closeDetailPanel;
     document.getElementById('detailDownloadBtn').onclick = () => openDownloadPage(vector);
 }
@@ -531,22 +518,17 @@ function setupModalHandlers() {
         };
     }
 
-    // Modal dışına veya üstüne tıklandığında kapat
     if (modal) {
         modal.addEventListener('click', (e) => {
-            // Arka plana veya modal içeriğine tıklandığında kapat
             modal.style.display = 'none';
         });
         
-        // Modal içeriğinin (box) tıklamaları durdurmasını engelliyoruz ki modal her yere tıklayınca kapansın
         const modalBox = document.querySelector('.info-modal-box');
         if (modalBox) {
             modalBox.addEventListener('click', (e) => {
-                // Eğer tıklanan şey bir link değilse modalı kapat
                 if (e.target.tagName !== 'A') {
-                    // Linke tıklanmadıysa modalı kapatmak için event'in modal'a ulaşmasına izin veriyoruz
+                    // Modal kapansın
                 } else {
-                    // Linke tıklandıysa modalın kapanmasını engelleyebiliriz veya linke gitmesini sağlayabiliriz
                     e.stopPropagation();
                 }
             });
