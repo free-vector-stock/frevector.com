@@ -169,6 +169,14 @@ async function fetchVectors() {
     state.isLoading = true;
     showLoader(true);
 
+    // Ensure the loader is hidden even if the API call fails or is empty
+    setTimeout(() => {
+        if (state.isLoading) {
+            showLoader(false);
+            state.isLoading = false;
+        }
+    }, 8000); // 8-second timeout as a safeguard
+
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('page', state.currentPage);
