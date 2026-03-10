@@ -1,6 +1,6 @@
 /**
  * Admin API - Protected endpoints for managing vectors
- * Fixed: Category-specific folder structure in R2.
+ * Fixed: Robust authentication and category-specific folder structure in R2.
  * Requirement: No local storage, direct R2 upload, sync delete.
  */
 
@@ -50,11 +50,18 @@ function resolveCategory(raw) {
     return "Miscellaneous";
 }
 
+/**
+ * Robust authentication check
+ */
 function authenticate(request) {
-  const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization");
-  if (!authHeader) return false;
+  const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization") || "";
   const key = authHeader.replace("Bearer ", "").trim();
-  return key === ADMIN_PASSWORD;
+  
+  // Also check for password in URL as a fallback for some legacy calls
+  const url = new URL(request.url);
+  const urlKey = url.searchParams.get("key");
+  
+  return key === ADMIN_PASSWORD || urlKey === ADMIN_PASSWORD;
 }
 
 async function uploadWithRetry(r2, key, buffer, metadata, retries = MAX_RETRIES) {
@@ -79,8 +86,16 @@ async function uploadWithRetry(r2, key, buffer, metadata, retries = MAX_RETRIES)
 // GET /api/admin
 // ─────────────────────────────────────────────
 export async function onRequestGet(context) {
-  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  const headers = { 
+    "Content-Type": "application/json", 
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, Authorization"
+  };
+  
+  if (!authenticate(context.request)) {
+    return new Response(JSON.stringify({ error: "Unauthorized", message: "Invalid admin password" }), { status: 401, headers });
+  }
 
   try {
     const kv = context.env.VECTOR_DB;
@@ -135,6 +150,7 @@ export async function onRequestGet(context) {
       }), { status: 200, headers });
     }
 
+    // Default: return all vectors
     return new Response(JSON.stringify({ vectors: allVectors }), { status: 200, headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
@@ -145,8 +161,16 @@ export async function onRequestGet(context) {
 // POST /api/admin (upload vector)
 // ─────────────────────────────────────────────
 export async function onRequestPost(context) {
-  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  const headers = { 
+    "Content-Type": "application/json", 
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, Authorization"
+  };
+  
+  if (!authenticate(context.request)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
 
   try {
     const kv = context.env.VECTOR_DB;
@@ -239,8 +263,16 @@ export async function onRequestPost(context) {
 // DELETE /api/admin?slug=xxx
 // ─────────────────────────────────────────────
 export async function onRequestDelete(context) {
-  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  const headers = { 
+    "Content-Type": "application/json", 
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, Authorization"
+  };
+  
+  if (!authenticate(context.request)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
 
   try {
     const kv = context.env.VECTOR_DB;
@@ -276,8 +308,16 @@ export async function onRequestDelete(context) {
 // PATCH /api/admin?action=cleanup
 // ─────────────────────────────────────────────
 export async function onRequestPatch(context) {
-  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  const headers = { 
+    "Content-Type": "application/json", 
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key, Authorization"
+  };
+  
+  if (!authenticate(context.request)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
 
   try {
     const kv = context.env.VECTOR_DB;

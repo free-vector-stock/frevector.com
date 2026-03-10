@@ -1,6 +1,6 @@
 /**
  * Frevector Admin Panel - Frontend Logic
- * Fixed: Admin login logic and R2 structure.
+ * Fixed: Robust admin login, session management, and R2 structure.
  * Requirement: Category list updated, R2 sync.
  */
 
@@ -22,10 +22,21 @@ const state = {
     selectedVectors: new Set()
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("Admin Panel Initialized");
+    
     // Check if already logged in
-    if (sessionStorage.getItem('fv_admin') === ADMIN_KEY) {
-        showApp();
+    const savedKey = sessionStorage.getItem('fv_admin');
+    if (savedKey === ADMIN_KEY) {
+        const isValid = await verifyLogin(savedKey);
+        if (isValid) {
+            showApp();
+        } else {
+            sessionStorage.removeItem('fv_admin');
+            showLogin();
+        }
+    } else {
+        showLogin();
     }
 
     // Login Event Listeners
@@ -33,33 +44,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginPassword = document.getElementById('loginPassword');
 
     if (loginBtn) {
-        loginBtn.addEventListener('click', (e) => {
+        loginBtn.onclick = (e) => {
             e.preventDefault();
             doLogin();
-        });
+        };
     }
 
     if (loginPassword) {
-        loginPassword.addEventListener('keydown', (e) => {
+        loginPassword.onkeydown = (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 doLogin();
             }
-        });
+        };
     }
 
     // Logout Event Listener
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.onclick = () => {
             sessionStorage.removeItem('fv_admin');
             location.reload();
-        });
+        };
     }
 
     // Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchSection(btn.dataset.section));
+        btn.onclick = () => switchSection(btn.dataset.section);
     });
 
     // Bulk Upload Setup
@@ -67,17 +78,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const bulkInput = document.getElementById('bulkFileInput');
 
     if (dropZone && bulkInput) {
-        dropZone.addEventListener('click', () => bulkInput.click());
-        dropZone.addEventListener('dragover', (e) => {
+        dropZone.onclick = () => bulkInput.click();
+        dropZone.ondragover = (e) => {
             e.preventDefault();
             dropZone.style.borderColor = 'var(--black)';
             dropZone.style.backgroundColor = '#f0f0f0';
-        });
-        dropZone.addEventListener('dragleave', () => {
+        };
+        dropZone.ondragleave = () => {
             dropZone.style.borderColor = '#ccc';
             dropZone.style.backgroundColor = '#f9f9f9';
-        });
-        dropZone.addEventListener('drop', (e) => {
+        };
+        dropZone.ondrop = (e) => {
             e.preventDefault();
             dropZone.style.borderColor = '#ccc';
             dropZone.style.backgroundColor = '#f9f9f9';
@@ -85,8 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 bulkInput.files = e.dataTransfer.files;
                 handleBulkAnalyze();
             }
-        });
-        bulkInput.addEventListener('change', handleBulkAnalyze);
+        };
+        bulkInput.onchange = handleBulkAnalyze;
     }
 
     document.getElementById('bulkAnalyzeBtn')?.addEventListener('click', handleBulkAnalyze);
@@ -138,20 +149,55 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('runCleanupBtn')?.addEventListener('click', runCleanup);
 });
 
-function doLogin() {
+async function verifyLogin(key) {
+    try {
+        const res = await fetch('/api/admin?action=stats', {
+            headers: { 'X-Admin-Key': key }
+        });
+        return res.status === 200;
+    } catch (e) {
+        return false;
+    }
+}
+
+async function doLogin() {
     const pwInput = document.getElementById('loginPassword');
     const errorEl = document.getElementById('loginError');
+    const loginBtn = document.getElementById('loginBtn');
     
     if (!pwInput) return;
     
     const pw = pwInput.value.trim();
-    if (pw === ADMIN_KEY) {
+    if (!pw) return;
+
+    if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Verifying...";
+    }
+
+    const isValid = await verifyLogin(pw);
+    
+    if (isValid) {
         sessionStorage.setItem('fv_admin', pw);
         if (errorEl) errorEl.style.display = 'none';
         showApp();
     } else {
-        if (errorEl) errorEl.style.display = 'block';
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = "Invalid password. Please try again.";
+        }
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Login";
+        }
     }
+}
+
+function showLogin() {
+    const loginScreen = document.getElementById('loginScreen');
+    const adminApp = document.getElementById('adminApp');
+    if (loginScreen) loginScreen.style.display = 'flex';
+    if (adminApp) adminApp.style.display = 'none';
 }
 
 function showApp() {
@@ -181,9 +227,10 @@ function switchSection(name) {
 }
 
 async function loadDashboard() {
+    const key = sessionStorage.getItem('fv_admin');
     try {
         const res = await fetch('/api/admin?action=stats', {
-            headers: { 'X-Admin-Key': ADMIN_KEY }
+            headers: { 'X-Admin-Key': key }
         });
         const data = await res.json();
         
@@ -208,9 +255,10 @@ async function loadDashboard() {
 }
 
 async function loadManageVectors() {
+    const key = sessionStorage.getItem('fv_admin');
     try {
         const res = await fetch('/api/admin', {
-            headers: { 'X-Admin-Key': ADMIN_KEY }
+            headers: { 'X-Admin-Key': key }
         });
         const data = await res.json();
         state.vectors = data.vectors || [];
@@ -305,11 +353,12 @@ function renderPagination() {
 }
 
 async function deleteVector(slug) {
+    const key = sessionStorage.getItem('fv_admin');
     if (!confirm(`Are you sure you want to delete "${slug}"?`)) return;
     try {
         const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
             method: 'DELETE',
-            headers: { 'X-Admin-Key': ADMIN_KEY }
+            headers: { 'X-Admin-Key': key }
         });
         const data = await res.json();
         if (data.success) {
@@ -338,6 +387,7 @@ function updateBulkDeleteUI() {
 }
 
 async function bulkDeleteVectors() {
+    const key = sessionStorage.getItem('fv_admin');
     const count = state.selectedVectors.size;
     if (count === 0) return;
     if (!confirm(`Are you sure you want to delete ${count} selected vectors?`)) return;
@@ -353,7 +403,7 @@ async function bulkDeleteVectors() {
         try {
             const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
                 method: 'DELETE',
-                headers: { 'X-Admin-Key': ADMIN_KEY }
+                headers: { 'X-Admin-Key': key }
             });
             const data = await res.json();
             if (data.success) {
@@ -404,6 +454,7 @@ function handleBulkAnalyze() {
 }
 
 async function handleBulkUpload() {
+    const key = sessionStorage.getItem('fv_admin');
     if (bulkFiles.length === 0) return;
     
     const btn = document.getElementById('bulkUploadBtn');
@@ -432,7 +483,7 @@ async function handleBulkUpload() {
         try {
             const res = await fetch('/api/admin', {
                 method: 'POST',
-                headers: { 'X-Admin-Key': ADMIN_KEY },
+                headers: { 'X-Admin-Key': key },
                 body: formData
             });
             const data = await res.json();
@@ -457,12 +508,13 @@ async function handleBulkUpload() {
 }
 
 async function loadHealthReport() {
+    const key = sessionStorage.getItem('fv_admin');
     const body = document.getElementById('healthIssuesBody');
     if (body) body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Checking R2 synchronization...</td></tr>';
     
     try {
         const res = await fetch('/api/admin?action=health&sample=100', {
-            headers: { 'X-Admin-Key': ADMIN_KEY }
+            headers: { 'X-Admin-Key': key }
         });
         const data = await res.json();
         if (body) body.innerHTML = '';
@@ -511,6 +563,7 @@ async function loadHealthReport() {
 }
 
 async function runCleanup() {
+    const key = sessionStorage.getItem('fv_admin');
     if (!confirm('This will remove all KV entries that do not have corresponding files in R2. Continue?')) return;
     const btn = document.getElementById('runCleanupBtn');
     if (btn) {
@@ -520,7 +573,7 @@ async function runCleanup() {
     try {
         const res = await fetch('/api/admin?action=cleanup', {
             method: 'PATCH',
-            headers: { 'X-Admin-Key': ADMIN_KEY }
+            headers: { 'X-Admin-Key': key }
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
