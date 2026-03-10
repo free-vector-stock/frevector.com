@@ -86,10 +86,15 @@ const MODAL_CONTENTS = {
     },
     contact: {
         title: 'Contact',
-        content: `<h2>Contact</h2>
-<p>If you have any questions about Frevector.com or have something you would like to communicate, you can contact us.</p>
-<p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color: inherit; text-decoration: underline;">hakankacar2014@gmail.com</a></p>
-<p>Frevector values open and clear communication with its users.</p>`
+        content: `<div style="text-align: center;">
+<h2>Contact Us</h2>
+<p style="margin-bottom: 30px; font-size: 16px;">If you have any questions about Frevector.com or have something you would like to communicate, you can contact us.</p>
+<div style="background: #f5f5f5; padding: 30px; border-radius: 8px; display: inline-block;">
+<p style="margin: 0 0 15px 0; font-size: 14px; color: #666;"><strong>Email Address:</strong></p>
+<p style="margin: 0;"><a href="mailto:hakankacar2014@gmail.com" style="color: #0066cc; text-decoration: none; font-size: 18px; font-weight: 600;">hakankacar2014@gmail.com</a></p>
+</div>
+<p style="margin-top: 30px; font-size: 14px; color: #666;">Frevector values open and clear communication with its users.</p>
+</div>`
     }
 };
 
