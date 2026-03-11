@@ -243,6 +243,21 @@ body {
     display: block;
 }
 
+.vc-type-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--white);
+    z-index: 10;
+    text-transform: uppercase;
+}
+.vc-type-badge.vector { background: #15803d; }
+.vc-type-badge.jpeg { background: #1d4ed8; }
+
 .vc-info {
     padding: 6px 8px;
     background: var(--white);
@@ -277,9 +292,27 @@ body {
     margin-top: 2px;
 }
 
+.badge-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; }
+.badge-green { background: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
+
+.drop-zone {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 40px;
+    text-align: center;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+}
+.drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--blue);
+    background: #f0f7ff;
+}
+
 /* ===========================
-   INLINE DETAIL PANEL
-   =========================== */
+   ADMIN PANEL STYLES
+   =========================== *//
 .detail-panel {
     background: var(--white);
     border: 1px solid var(--border);

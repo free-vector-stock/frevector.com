@@ -43,7 +43,7 @@ export async function onRequestGet(context) {
             allVectors = allVectors.filter(v => (v.category || "").toLowerCase().trim() === catLower);
         }
 
-        // Search filter with relevance scoring
+        // Search filter with relevance scoring (Keywords focused)
         if (search) {
             const terms = search.split(/\s+/).filter(Boolean);
             allVectors = allVectors
@@ -58,7 +58,19 @@ export async function onRequestGet(context) {
                     
                     for (const term of terms) {
                         let termMatched = false;
-                        // Title match (highest priority)
+                        
+                        // Keywords match (Highest priority as per requirement)
+                        for (const kw of keywords) {
+                            if (kw === term) {
+                                score += 50;
+                                termMatched = true;
+                            } else if (kw.includes(term)) {
+                                score += 20;
+                                termMatched = true;
+                            }
+                        }
+
+                        // Title match
                         if (title.includes(term)) {
                             score += 15;
                             termMatched = true;
@@ -68,25 +80,15 @@ export async function onRequestGet(context) {
                             score += 10;
                             termMatched = true;
                         }
-                        // Keywords match
-                        for (const kw of keywords) {
-                            if (kw === term) {
-                                score += 8;
-                                termMatched = true;
-                            } else if (kw.includes(term)) {
-                                score += 4;
-                                termMatched = true;
-                            }
-                        }
                         // Description match
                         if (description.includes(term)) {
-                            score += 2;
+                            score += 5;
                             termMatched = true;
                         }
                         if (termMatched) matchCount++;
                     }
                     
-                    // Allow partial matches (at least one term matched)
+                    // Must match at least one term
                     if (matchCount > 0) {
                         return { ...v, _score: score };
                     }

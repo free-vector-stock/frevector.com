@@ -471,18 +471,34 @@
             <!-- UPLOAD -->
             <section id="upload" class="admin-section">
                 <div class="upload-card">
-                    <h2>Bulk Vector Upload</h2>
+                    <h2>Bulk Vector Upload (JSON + JPEG + ZIP)</h2>
                     <p class="upload-subtitle">Upload multiple vector packages at once. The system automatically matches files, validates metadata, and normalizes previews.</p>
                     
-                    <div id="drop-zone">
+                    <div id="drop-zone" class="drop-zone">
                         <p style="font-size: 18px; color: #333; font-weight: 600;">Drag and drop files here or click to select</p>
-                        <p style="font-size: 13px; color: #888; margin-top: 10px;">You can select JSON, JPEG and ZIP files at once. ZIP is optional for JPEG-only content.</p>
+                        <p style="font-size: 13px; color: #888; margin-top: 10px;">You can select JSON, JPEG and ZIP files at once.</p>
                         <input type="file" id="bulkFileInput" multiple accept=".json,.jpg,.jpeg,.zip" style="display: none;">
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-bottom: 16px;">
                         <button type="button" class="btn-upload" id="bulkAnalyzeBtn" style="flex: 1;">Analyze</button>
                         <button type="button" class="btn-upload" id="bulkUploadBtn" style="flex: 1; background: var(--green);" disabled>Upload All</button>
+                    </div>
+                </div>
+
+                <div class="upload-card" style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 30px;">
+                    <h2>Bulk JPEG-Only Upload (JSON + JPEG)</h2>
+                    <p class="upload-subtitle">Upload multiple JPEG-only packages. ZIP files are not required for this section.</p>
+                    
+                    <div id="drop-zone-jpeg" class="drop-zone">
+                        <p style="font-size: 18px; color: #333; font-weight: 600;">Drag and drop JPEG & JSON files here</p>
+                        <p style="font-size: 13px; color: #888; margin-top: 10px;">Only JSON and JPEG files will be processed.</p>
+                        <input type="file" id="bulkFileInputJpeg" multiple accept=".json,.jpg,.jpeg" style="display: none;">
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                        <button type="button" class="btn-upload" id="bulkAnalyzeBtnJpeg" style="flex: 1;">Analyze JPEG-Only</button>
+                        <button type="button" class="btn-upload" id="bulkUploadBtnJpeg" style="flex: 1; background: var(--blue);" disabled>Upload All JPEG-Only</button>
                     </div>
 
                     <!-- BULK ANALYSIS RESULTS -->

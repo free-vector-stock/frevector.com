@@ -69,14 +69,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Bulk Upload Setup
     const dropZone = document.getElementById('drop-zone');
-    const bulkInput = document.getElementById('bulkFileInput');
-
+     const bulkInput = document.getElementById('bulkFileInput');
     if (dropZone && bulkInput) {
         dropZone.onclick = () => bulkInput.click();
         dropZone.ondragover = (e) => {
             e.preventDefault();
-            dropZone.style.borderColor = 'var(--black)';
-            dropZone.style.backgroundColor = '#f0f0f0';
+            dropZone.style.borderColor = 'var(--blue)';
+            dropZone.style.backgroundColor = '#f0f7ff';
         };
         dropZone.ondragleave = () => {
             dropZone.style.borderColor = '#ccc';
@@ -88,14 +87,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             dropZone.style.backgroundColor = '#f9f9f9';
             if (e.dataTransfer.files.length > 0) {
                 bulkInput.files = e.dataTransfer.files;
-                handleBulkAnalyze();
+                handleBulkAnalyze('vector');
             }
         };
-        bulkInput.onchange = handleBulkAnalyze;
+        bulkInput.onchange = () => handleBulkAnalyze('vector');
     }
 
-    document.getElementById('bulkAnalyzeBtn')?.addEventListener('click', handleBulkAnalyze);
-    document.getElementById('bulkUploadBtn')?.addEventListener('click', handleBulkUpload);
+    const dropZoneJpeg = document.getElementById('drop-zone-jpeg');
+    const bulkInputJpeg = document.getElementById('bulkFileInputJpeg');
+    if (dropZoneJpeg && bulkInputJpeg) {
+        dropZoneJpeg.onclick = () => bulkInputJpeg.click();
+        dropZoneJpeg.ondragover = (e) => {
+            e.preventDefault();
+            dropZoneJpeg.style.borderColor = 'var(--blue)';
+            dropZoneJpeg.style.backgroundColor = '#f0f7ff';
+        };
+        dropZoneJpeg.ondragleave = () => {
+            dropZoneJpeg.style.borderColor = '#ccc';
+            dropZoneJpeg.style.backgroundColor = '#f9f9f9';
+        };
+        dropZoneJpeg.ondrop = (e) => {
+            e.preventDefault();
+            dropZoneJpeg.style.borderColor = '#ccc';
+            dropZoneJpeg.style.backgroundColor = '#f9f9f9';
+            if (e.dataTransfer.files.length > 0) {
+                bulkInputJpeg.files = e.dataTransfer.files;
+                handleBulkAnalyze('jpeg');
+            }
+        };
+        bulkInputJpeg.onchange = () => handleBulkAnalyze('jpeg');
+    }
+
+    document.getElementById('bulkAnalyzeBtn')?.addEventListener('click', () => handleBulkAnalyze('vector'));
+    document.getElementById('bulkUploadBtn')?.addEventListener('click', () => handleBulkUpload('vector'));
+    document.getElementById('bulkAnalyzeBtnJpeg')?.addEventListener('click', () => handleBulkAnalyze('jpeg'));
+    document.getElementById('bulkUploadBtnJpeg')?.addEventListener('click', () => handleBulkUpload('jpeg'));;
 
     // Manage Vectors Filters
     document.getElementById('searchManage')?.addEventListener('input', (e) => {
@@ -291,21 +317,24 @@ function renderManageTable() {
         return;
     }
 
-    pageItems.forEach(v => {
-        const tr = document.createElement('tr');
-        const id = v.name;
-        const category = v.category || "Miscellaneous";
-        const previewUrl = `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
-        const isSelected = state.selectedVectors.has(v.name);
-        tr.innerHTML = `
-            <td><input type="checkbox" class="vector-checkbox" data-slug="${escHtml(v.name)}" ${isSelected ? 'checked' : ''}></td>
-            <td><img src="${previewUrl}" class="preview-img" onerror="this.src='https://placehold.co/400x300/f5f5f5/999999?text=Preview'"></td>
-            <td><div style="font-weight:600;">${escHtml(v.title)}</div><div style="font-size:11px;color:#888;">${escHtml(v.name)}</div></td>
-            <td><span class="badge badge-orange">${escHtml(v.category)}</span></td>
-            <td>${v.date}</td>
-            <td>${v.downloads}</td>
-            <td><button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">Delete</button></td>
-        `;
+        pageItems.forEach(v => {
+            const tr = document.createElement('tr');
+            const id = v.name;
+            const category = v.category || "Miscellaneous";
+            const thumbKey = `${category}/${id}/${id}-thumb.jpg`;
+            const jpgKey = `${category}/${id}/${id}.jpg`;
+            const previewUrl = `/api/asset?key=${encodeURIComponent(thumbKey)}&fallback=${encodeURIComponent(jpgKey)}`;
+            const isSelected = state.selectedVectors.has(v.name);
+            const typeBadge = v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>';
+            tr.innerHTML = `
+                <td><input type="checkbox" class="vector-checkbox" data-slug="${escHtml(v.name)}" ${isSelected ? 'checked' : ''}></td>
+                <td><img src="${previewUrl}" class="preview-img" onerror="this.src='https://placehold.co/400x300/f5f5f5/999999?text=Preview'"></td>
+                <td><div style="font-weight:600;">${escHtml(v.title)} ${typeBadge}</div><div style="font-size:11px;color:#888;">${escHtml(v.name)}</div></td>
+                <td><span class="badge badge-orange">${escHtml(v.category)}</span></td>
+                <td>${v.date}</td>
+                <td>${v.downloads}</td>
+                <td><button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">Delete</button></td>
+            `;
         const checkbox = tr.querySelector('.vector-checkbox');
         checkbox.addEventListener('change', (e) => {
             if (e.target.checked) {
@@ -454,8 +483,9 @@ async function bulkDownloadVectors() {
 // BULK UPLOAD LOGIC
 let bulkFiles = [];
 
-function handleBulkAnalyze() {
-    const input = document.getElementById('bulkFileInput');
+function handleBulkAnalyze(type = 'vector') {
+    const inputId = type === 'vector' ? 'bulkFileInput' : 'bulkFileInputJpeg';
+    const input = document.getElementById(inputId);
     if (!input) return;
     
     const files = Array.from(input.files);
@@ -471,26 +501,32 @@ function handleBulkAnalyze() {
         else if (ext === 'zip') groups[name].zip = f;
     });
 
-    // ZIP is optional for JPEG-only content
-    bulkFiles = Object.entries(groups).map(([id, g]) => ({ id, ...g })).filter(g => g.json && g.jpeg);
+    let currentBulkFiles = [];
+    if (type === 'vector') {
+        currentBulkFiles = Object.entries(groups).map(([id, g]) => ({ id, ...g })).filter(g => g.json && g.jpeg && g.zip);
+    } else {
+        currentBulkFiles = Object.entries(groups).map(([id, g]) => ({ id, ...g })).filter(g => g.json && g.jpeg);
+    }
+    
+    bulkFiles = currentBulkFiles;
     
     const status = document.getElementById('bulkUploadStatus');
-    const uploadBtn = document.getElementById('bulkUploadBtn');
-    const jpegOnlyCount = bulkFiles.filter(g => !g.zip).length;
-    const vectorCount = bulkFiles.filter(g => g.zip).length;
+    const uploadBtnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
+    const uploadBtn = document.getElementById(uploadBtnId);
     
     if (status) {
         status.className = 'status-box info';
-        status.textContent = `Found ${bulkFiles.length} valid sets: ${vectorCount} vector (JSON+JPG+ZIP), ${jpegOnlyCount} JPEG-only (JSON+JPG). Ready to upload.`;
+        status.textContent = `Found ${bulkFiles.length} valid ${type} sets. Ready to upload.`;
     }
     if (uploadBtn) uploadBtn.disabled = bulkFiles.length === 0;
 }
 
-async function handleBulkUpload() {
+async function handleBulkUpload(type = 'vector') {
     const key = sessionStorage.getItem('fv_admin');
     if (bulkFiles.length === 0) return;
     
-    const btn = document.getElementById('bulkUploadBtn');
+    const btnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
+    const btn = document.getElementById(btnId);
     const progressWrap = document.getElementById('bulkProgressWrap');
     const progressFill = document.getElementById('bulkProgressFill');
     const progressText = document.getElementById('bulkProgressText');

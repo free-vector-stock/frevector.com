@@ -371,12 +371,14 @@ function setupEventListeners() {
     const nextBtn = document.getElementById('nextBtn');
 
     if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
                 state.searchQuery = searchInput.value.trim();
                 state.currentPage = 1;
                 fetchVectors();
-            }
+            }, 300); // 300ms debounce
         });
     }
 
