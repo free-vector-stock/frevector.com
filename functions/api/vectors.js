@@ -21,6 +21,7 @@ export async function onRequestGet(context) {
         const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "24")));
         const search = (url.searchParams.get("search") || "").toLowerCase().trim();
         const sort = url.searchParams.get("sort") || "";
+        const type = url.searchParams.get("type") || ""; // 'vector', 'jpeg', or empty for all
 
         const allVectorsRaw = await kv.get("all_vectors");
         if (!allVectorsRaw) return new Response(JSON.stringify({ vectors: [], total: 0, page: 1, totalPages: 0 }), { status: 200, headers: CORS_HEADERS });
@@ -38,6 +39,13 @@ export async function onRequestGet(context) {
         if (category && category !== "all") {
             const catLower = category.toLowerCase().trim();
             allVectors = allVectors.filter(v => (v.category || "").toLowerCase().trim() === catLower);
+        }
+
+        // Type filter (vector or jpeg)
+        if (type === "vector") {
+            allVectors = allVectors.filter(v => v.contentType !== "jpeg");
+        } else if (type === "jpeg") {
+            allVectors = allVectors.filter(v => v.contentType === "jpeg");
         }
 
         // Search filter
