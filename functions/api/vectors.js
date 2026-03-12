@@ -140,8 +140,9 @@ function enrichVector(v) {
     return {
         ...v,
         title: v.title || v.name || "",
-        // Use thumbnail if available, fallback to original jpg
-        thumbnail: `/api/asset?key=${encodeURIComponent(thumbKey)}&fallback=${encodeURIComponent(jpgKey)}`,
+        // Use thumbnail if available, NO FALLBACK to original jpg as per requirement (must be re-generated)
+        thumbnail: `/api/asset?key=${encodeURIComponent(thumbKey)}`,
+        originalUrl: `/api/asset?key=${encodeURIComponent(jpgKey)}`,
         zipUrl: isJpegOnly ? `/api/asset?key=${encodeURIComponent(jpgKey)}` : `/api/asset?key=${encodeURIComponent(zipKey)}`,
         fileSize: v.fileSize || null,
         isJpegOnly: isJpegOnly

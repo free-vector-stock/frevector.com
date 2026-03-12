@@ -2,7 +2,8 @@
  * frevector.com - Frontend Logic
  */
 
-const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre', 'free vector', 'free svg', 'free svg icon', 'free eps', 'vector eps', 'svg'];
+const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
+const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'vector eps', 'svg'];
 
 const CATEGORIES = [
     'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
@@ -210,9 +211,7 @@ function renderOurPicks() {
     picks.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        const id = v.name;
-        const category = v.category || "Miscellaneous";
-        const thumbnail = v.thumbnail || `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
+        const thumbnail = v.thumbnail;
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
 
         card.innerHTML = `
@@ -249,13 +248,19 @@ function renderVectors() {
     state.vectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        const id = v.name;
-        const category = v.category || "Miscellaneous";
-        const thumbnail = v.thumbnail || `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
+        if (state.openedVector && state.openedVector.name === v.name) card.classList.add('card-active');
+        
+        const thumbnail = v.thumbnail;
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
 
-        const descriptionText = v.description || '';
-        const keywordsText = (v.keywords || []).slice(0, 5).join(', ');
+        // Requirement: Extra keywords added to keywords display
+        let displayKeywords = [...EXTRA_KEYWORDS];
+        if (!v.isJpegOnly) displayKeywords = [...displayKeywords, ...VECTOR_KEYWORDS];
+        if (v.keywords && Array.isArray(v.keywords)) {
+            displayKeywords = [...displayKeywords, ...v.keywords];
+        }
+        const keywordsStr = [...new Set(displayKeywords)].join(', ');
+
         card.innerHTML = `
             <div class="vc-img-wrap">
                 <img class="vc-img" src="${thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
@@ -263,8 +268,8 @@ function renderVectors() {
             </div>
             <div class="vc-info">
                 <div class="vc-title">${escHtml(v.title)}</div>
-                <div class="vc-description">${escHtml(descriptionText)}</div>
-                <div class="vc-keywords">${escHtml(keywordsText)}</div>
+                <div class="vc-description">${escHtml(v.description || "")}</div>
+                <div class="vc-keywords">${escHtml(keywordsStr)}</div>
             </div>
         `;
         card.addEventListener('click', () => openDetailPanel(v, card));
@@ -272,231 +277,113 @@ function renderVectors() {
     });
 }
 
-function openDetailPanel(v, card) {
-    if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
-    state.openedCardEl = card;
-    card.classList.add('card-active');
+function openDetailPanel(v, cardEl) {
+    if (state.openedVector && state.openedVector.name === v.name) {
+        closeDetailPanel();
+        return;
+    }
+
+    closeDetailPanel();
     state.openedVector = v;
-    state.detailPanelOpen = true;
+    state.openedCardEl = cardEl;
+    cardEl.classList.add('card-active');
 
-    const panel = document.getElementById('detailPanel');
-    if (!panel) return;
-
-    const category = v.category || 'Miscellaneous';
-    const id = v.name;
-    const thumbnail = v.thumbnail || `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
-
-    const breadcrumbCat = document.getElementById('breadcrumbCategory');
-    if (breadcrumbCat) {
-        breadcrumbCat.textContent = category;
-        breadcrumbCat.href = '#';
-        breadcrumbCat.onclick = (e) => { e.preventDefault(); selectCategory(category); };
+    const panel = document.createElement('div');
+    panel.id = 'detailPanel';
+    panel.className = 'detail-panel';
+    
+    // Calculate keywords for detail panel
+    let displayKeywords = [...EXTRA_KEYWORDS];
+    if (!v.isJpegOnly) displayKeywords = [...displayKeywords, ...VECTOR_KEYWORDS];
+    if (v.keywords && Array.isArray(v.keywords)) {
+        displayKeywords = [...displayKeywords, ...v.keywords];
     }
+    const finalKeywords = [...new Set(displayKeywords)];
 
-    const breadcrumbTitle = document.getElementById('breadcrumbTitle');
-    if (breadcrumbTitle) breadcrumbTitle.textContent = v.title;
+    panel.innerHTML = `
+        <div class="detail-inner">
+            <div class="detail-left">
+                <img class="detail-img" src="${v.originalUrl || v.thumbnail}" alt="${escHtml(v.title)}">
+                <table class="detail-table">
+                    <tr><td class="dt-label">File Format</td><td class="dt-value">${v.isJpegOnly ? 'JPEG' : 'EPS / SVG / JPEG'}</td></tr>
+                    <tr><td class="dt-label">Category</td><td class="dt-value">${escHtml(v.category)}</td></tr>
+                    <tr><td class="dt-label">Resolution</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
+                    <tr><td class="dt-label">License</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
+                    <tr><td class="dt-label">File Size</td><td class="dt-value">${v.fileSize || 'N/A'}</td></tr>
+                </table>
+            </div>
+            <div class="detail-right">
+                <h2 class="detail-title">${escHtml(v.title)}</h2>
+                <p class="detail-desc">${escHtml(v.description || "No description available.")}</p>
+                <div class="detail-keywords">
+                    ${finalKeywords.map(kw => `<span class="kw-tag">${escHtml(kw)}</span>`).join('')}
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 12px; align-items: center;">
+                    <button class="download-btn" id="mainDownloadBtn">DOWNLOAD NOW</button>
+                    <button class="detail-close-btn" id="mainCloseBtn">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    `;
 
-    const img = document.getElementById('detailImage');
-    if (img) img.src = thumbnail;
-
-    const titleEl = document.getElementById('detailTitle');
-    if (titleEl) titleEl.textContent = v.title;
-
-    const descEl = document.getElementById('detailDescription');
-    if (descEl) descEl.textContent = v.description || '';
-
-    const catEl = document.getElementById('detailCategory');
-    if (catEl) catEl.textContent = category;
-
-    const fileSizeEl = document.getElementById('detailFileSize');
-    if (fileSizeEl) fileSizeEl.textContent = v.fileSize || 'N/A';
-
-    const keywordsEl = document.getElementById('detailKeywords');
-    if (keywordsEl) {
-        keywordsEl.innerHTML = '';
-        const allKws = [...EXTRA_KEYWORDS, ...(v.keywords || []).filter(k => !EXTRA_KEYWORDS.includes(k))];
-        allKws.forEach(kw => {
-            const tag = document.createElement('span');
-            tag.className = 'kw-tag';
-            tag.textContent = kw;
-            keywordsEl.appendChild(tag);
-        });
-    }
-
-    const downloadBtn = document.getElementById('detailDownloadBtn');
-    if (downloadBtn) {
-        downloadBtn.onclick = () => openDownloadPage(v);
-    }
-
-    const closeBtn = document.getElementById('detailCloseBtn');
-    if (closeBtn) {
-        closeBtn.onclick = closeDetailPanel;
-    }
-
-    panel.style.display = 'block';
+    // Insert panel after the row containing the card
     const grid = document.getElementById('vectorsGrid');
-    if (grid) {
-        const rect = card.getBoundingClientRect();
-        const gridRect = grid.getBoundingClientRect();
-        const scrollTop = window.pageYOffset;
-        const panelTop = gridRect.top + scrollTop + (rect.top - gridRect.top) + rect.height + 12;
-        panel.style.marginTop = '12px';
-        setTimeout(() => {
-            window.scrollTo({ top: panelTop - 100, behavior: 'smooth' });
-        }, 50);
-    }
+    const cards = Array.from(grid.children);
+    const index = cards.indexOf(cardEl);
+    const columns = getGridColumns();
+    const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
+    grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
+
+    document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
+    document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
+
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    state.detailPanelOpen = true;
+}
+
+function getGridColumns() {
+    const width = window.innerWidth;
+    if (width >= 1200) return 6;
+    if (width >= 992) return 5;
+    if (width >= 768) return 4;
+    if (width >= 576) return 3;
+    return 2;
 }
 
 function closeDetailPanel() {
     const panel = document.getElementById('detailPanel');
-    if (panel) panel.style.display = 'none';
+    if (panel) panel.remove();
     if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
-    state.detailPanelOpen = false;
     state.openedVector = null;
     state.openedCardEl = null;
+    state.detailPanelOpen = false;
 }
 
-function updatePagination() {
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const pageNum = document.getElementById('pageNumber');
-    const pageTotal = document.getElementById('pageTotal');
-
-    if (prevBtn) prevBtn.disabled = state.currentPage <= 1;
-    if (nextBtn) nextBtn.disabled = state.currentPage >= state.totalPages;
-    if (pageNum) pageNum.textContent = state.currentPage;
-    if (pageTotal) pageTotal.textContent = `/ ${state.totalPages}`;
-}
-
-function setupEventListeners() {
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const sortFilter = document.getElementById('sortFilter');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    if (searchInput) {
-        let searchTimeout;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                state.searchQuery = searchInput.value.trim();
-                state.currentPage = 1;
-                fetchVectors();
-            }, 300); // 300ms debounce
-        });
-    }
-
-    if (searchBtn) {
-        searchBtn.addEventListener('click', () => {
-            state.searchQuery = searchInput ? searchInput.value.trim() : '';
-            state.currentPage = 1;
-            fetchVectors();
-        });
-    }
-
-    if (sortFilter) {
-        sortFilter.addEventListener('change', (e) => {
-            const sortValue = e.target.value;
-            state.currentPage = 1;
-            if (sortValue === 'newest') {
-                state.vectors.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
-            } else if (sortValue === 'oldest') {
-                state.vectors.sort((a, b) => new Date(a.uploadDate) - new Date(b.uploadDate));
-            }
-            renderVectors();
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            if (state.currentPage > 1) {
-                state.currentPage--;
-                fetchVectors();
-            }
-        });
-    }
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            if (state.currentPage < state.totalPages) {
-                state.currentPage++;
-                fetchVectors();
-            }
-        });
-    }
-}
-
-function openDownloadPage(v) {
-    if (state.downloadInProgress) return;
-    state.downloadInProgress = true;
-
+function showDownloadPage(v) {
     const downloadPage = document.getElementById('downloadPage');
     if (!downloadPage) return;
 
-    const category = v.category || 'Miscellaneous';
     const id = v.name;
-    const thumbnail = v.thumbnail || `/api/asset?key=${encodeURIComponent(category + '/' + id + '/' + id + '.jpg')}`;
-
     const dpTitle = document.getElementById('dpTitle');
-    if (dpTitle) dpTitle.textContent = v.title;
-
-    const dpDesc = document.getElementById('dpDescription');
-    if (dpDesc) dpDesc.textContent = v.description || '';
-
-    const dpCategory = document.getElementById('dpCategory');
-    if (dpCategory) dpCategory.textContent = category;
-
-    const dpFileSize = document.getElementById('dpFileSize');
-    if (dpFileSize) dpFileSize.textContent = v.fileSize || 'N/A';
-
-    const dpImage = document.getElementById('dpImage');
-    if (dpImage) dpImage.src = thumbnail;
-
-    const dpKeywords = document.getElementById('dpKeywords');
-    if (dpKeywords) {
-        dpKeywords.innerHTML = '';
-        const dpAllKws = [...EXTRA_KEYWORDS, ...(v.keywords || []).filter(k => !EXTRA_KEYWORDS.includes(k))];
-        dpAllKws.forEach(kw => {
-            const tag = document.createElement('span');
-            tag.className = 'kw-tag';
-            tag.textContent = kw;
-            tag.style.cursor = 'pointer';
-            tag.addEventListener('click', () => {
-                state.searchQuery = kw;
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) searchInput.value = kw;
-                state.currentPage = 1;
-                downloadPage.style.display = 'none';
-                document.body.style.overflow = '';
-                state.downloadInProgress = false;
-                fetchVectors();
-            });
-            dpKeywords.appendChild(tag);
-        });
-    }
-
-    const dpHeaderTitle = document.getElementById('dpHeaderTitle');
-    if (dpHeaderTitle) dpHeaderTitle.textContent = v.title;
-
-    const dpHeaderDesc = document.getElementById('dpHeaderDesc');
-    if (dpHeaderDesc) dpHeaderDesc.textContent = v.description || '';
-
-    // Update format based on content type
-    const dpFormatEl = document.querySelector('#downloadPage .dp-table tr:first-child .dp-value');
-    if (dpFormatEl) dpFormatEl.textContent = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
-
+    const dpImg = document.getElementById('dpImg');
     const dpDownloadBtn = document.getElementById('dpDownloadBtn');
+    const countdownBox = document.getElementById('countdownBox');
+    const countdownNum = document.getElementById('countdownNum');
+
+    if (dpTitle) dpTitle.textContent = v.title;
+    if (dpImg) dpImg.src = v.originalUrl || v.thumbnail;
+    
     if (dpDownloadBtn) {
+        dpDownloadBtn.style.display = 'block';
         dpDownloadBtn.onclick = () => {
-            const countdownBox = document.getElementById('dpCountdownBox');
-            if (countdownBox) countdownBox.style.display = 'block';
+            if (state.downloadInProgress) return;
+            state.downloadInProgress = true;
             dpDownloadBtn.style.display = 'none';
-
-            let countdown = 4;
-            const countdownNum = document.getElementById('dpCountdown');
+            if (countdownBox) countdownBox.style.display = 'block';
+            
+            let countdown = 4; // Requirement: 4 seconds
             if (countdownNum) countdownNum.textContent = countdown;
-
+            
             if (state.countdownInterval) clearInterval(state.countdownInterval);
             state.countdownInterval = setInterval(() => {
                 countdown--;
@@ -584,6 +471,34 @@ function setupModalHandlers() {
             }
         });
     });
+}
+
+function setupEventListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchInput) {
+        searchInput.onkeydown = (e) => { if (e.key === 'Enter') { state.searchQuery = searchInput.value; state.currentPage = 1; fetchVectors(); } };
+    }
+    if (searchBtn) {
+        searchBtn.onclick = () => { state.searchQuery = searchInput.value; state.currentPage = 1; fetchVectors(); };
+    }
+
+    const sortFilter = document.getElementById('sortFilter');
+    if (sortFilter) {
+        sortFilter.onchange = () => { state.currentPage = 1; fetchVectors(); };
+    }
+}
+
+function updatePagination() {
+    const prev = document.getElementById('prevPage');
+    const next = document.getElementById('nextPage');
+    const info = document.getElementById('pageInfo');
+    if (prev) prev.disabled = state.currentPage <= 1;
+    if (next) next.disabled = state.currentPage >= state.totalPages;
+    if (info) info.textContent = `Page ${state.currentPage} of ${state.totalPages}`;
+
+    if (prev) prev.onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+    if (next) next.onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
 }
 
 function showLoader(show) {

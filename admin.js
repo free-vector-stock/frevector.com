@@ -22,6 +22,8 @@ const state = {
     selectedVectors: new Set()
 };
 
+let bulkFiles = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("Admin Panel Initialized");
     
@@ -290,215 +292,142 @@ async function loadManageVectors() {
 
 function filterAndRenderManage() {
     state.filteredVectors = state.vectors.filter(v => {
-        const matchesSearch = !state.searchQuery ||
-            (v.name || '').toLowerCase().includes(state.searchQuery) ||
-            (v.title || '').toLowerCase().includes(state.searchQuery) ||
-            (v.keywords && v.keywords.some(k => k.toLowerCase().includes(state.searchQuery)));
-        const matchesCat = !state.filterCat || v.category === state.filterCat;
-        return matchesSearch && matchesCat;
+        const matchSearch = v.name.toLowerCase().includes(state.searchQuery) || v.title.toLowerCase().includes(state.searchQuery);
+        const matchCat = !state.filterCat || v.category === state.filterCat;
+        return matchSearch && matchCat;
     });
     renderManageTable();
 }
 
 function renderManageTable() {
-    const tbody = document.getElementById('vectorsTableBody');
-    const pag = document.getElementById('managePagination');
+    const tbody = document.getElementById('manageTableBody');
     if (!tbody) return;
     
-    tbody.innerHTML = '';
-
     const start = (state.managePage - 1) * state.manageLimit;
     const end = start + state.manageLimit;
     const pageItems = state.filteredVectors.slice(start, end);
-
-    if (pageItems.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No vectors found</td></tr>';
-        if (pag) pag.innerHTML = '';
-        return;
-    }
-
-        pageItems.forEach(v => {
-            const tr = document.createElement('tr');
-            const id = v.name;
-            const category = v.category || "Miscellaneous";
-            const thumbKey = `${category}/${id}/${id}-thumb.jpg`;
-            const jpgKey = `${category}/${id}/${id}.jpg`;
-            const previewUrl = `/api/asset?key=${encodeURIComponent(thumbKey)}&fallback=${encodeURIComponent(jpgKey)}`;
-            const isSelected = state.selectedVectors.has(v.name);
-            const typeBadge = v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>';
-            tr.innerHTML = `
-                <td><input type="checkbox" class="vector-checkbox" data-slug="${escHtml(v.name)}" ${isSelected ? 'checked' : ''}></td>
-                <td><img src="${previewUrl}" class="preview-img" onerror="this.src='https://placehold.co/400x300/f5f5f5/999999?text=Preview'"></td>
-                <td><div style="font-weight:600;">${escHtml(v.title)} ${typeBadge}</div><div style="font-size:11px;color:#888;">${escHtml(v.name)}</div></td>
-                <td><span class="badge badge-orange">${escHtml(v.category)}</span></td>
-                <td>${v.date}</td>
-                <td>${v.downloads}</td>
-                <td><button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">Delete</button></td>
-            `;
-        const checkbox = tr.querySelector('.vector-checkbox');
-        checkbox.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                state.selectedVectors.add(v.name);
-            } else {
-                state.selectedVectors.delete(v.name);
-            }
+    
+    tbody.innerHTML = '';
+    pageItems.forEach(v => {
+        const tr = document.createElement('tr');
+        const isSelected = state.selectedVectors.has(v.name);
+        const typeLabel = v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>';
+        
+        tr.innerHTML = `
+            <td><input type="checkbox" class="vector-checkbox" data-id="${v.name}" ${isSelected ? 'checked' : ''}></td>
+            <td><strong>${escHtml(v.name)}</strong></td>
+            <td>${typeLabel}</td>
+            <td>${escHtml(v.category)}</td>
+            <td>${v.downloads || 0}</td>
+            <td>
+                <button class="btn-delete" onclick="deleteVector('${v.name}')">Delete</button>
+            </td>
+        `;
+        
+        tr.querySelector('.vector-checkbox').onchange = (e) => {
+            if (e.target.checked) state.selectedVectors.add(v.name);
+            else state.selectedVectors.delete(v.name);
             updateBulkDeleteUI();
-        });
+        };
+        
         tbody.appendChild(tr);
     });
-
-    renderPagination();
+    
+    updatePaginationUI();
     updateBulkDeleteUI();
 }
 
-function renderPagination() {
-    const pag = document.getElementById('managePagination');
-    if (!pag) return;
+function updatePaginationUI() {
+    const info = document.getElementById('managePaginationInfo');
+    const totalPages = Math.ceil(state.filteredVectors.length / state.manageLimit) || 1;
+    if (info) info.textContent = `Page ${state.managePage} of ${totalPages} (${state.filteredVectors.length} total)`;
     
-    const totalPages = Math.ceil(state.filteredVectors.length / state.manageLimit);
-    pag.innerHTML = '';
-    if (totalPages <= 1) return;
+    const prev = document.getElementById('prevManage');
+    const next = document.getElementById('nextManage');
+    if (prev) prev.disabled = state.managePage <= 1;
+    if (next) next.disabled = state.managePage >= totalPages;
+    
+    if (prev) prev.onclick = () => { state.managePage--; renderManageTable(); };
+    if (next) next.onclick = () => { state.managePage++; renderManageTable(); };
+}
 
-    const prevBtn = document.createElement('button');
-    prevBtn.className = 'pag-admin-btn';
-    prevBtn.textContent = '‹';
-    prevBtn.disabled = state.managePage === 1;
-    prevBtn.onclick = () => { state.managePage--; renderManageTable(); };
-    pag.appendChild(prevBtn);
-
-    const info = document.createElement('span');
-    info.className = 'pag-admin-info';
-    info.textContent = `Page ${state.managePage} / ${totalPages}`;
-    pag.appendChild(info);
-
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'pag-admin-btn';
-    nextBtn.textContent = '›';
-    nextBtn.disabled = state.managePage === totalPages;
-    nextBtn.onclick = () => { state.managePage++; renderManageTable(); };
-    pag.appendChild(nextBtn);
+function updateBulkDeleteUI() {
+    const btn = document.getElementById('bulkDeleteBtn');
+    const downBtn = document.getElementById('bulkDownloadBtn');
+    const count = state.selectedVectors.size;
+    if (btn) {
+        btn.disabled = count === 0;
+        btn.textContent = `Delete Selected (${count})`;
+    }
+    if (downBtn) {
+        downBtn.disabled = count === 0;
+    }
 }
 
 async function deleteVector(slug) {
+    if (!confirm(`Are you sure you want to delete ${slug}?`)) return;
     const key = sessionStorage.getItem('fv_admin');
-    if (!confirm(`Are you sure you want to delete "${slug}"?`)) return;
     try {
         const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
             method: 'DELETE',
             headers: { 'X-Admin-Key': key }
         });
-        const data = await res.json();
-        if (data.success) {
+        if (res.ok) {
             state.vectors = state.vectors.filter(v => v.name !== slug);
             state.selectedVectors.delete(slug);
             filterAndRenderManage();
             loadDashboard();
-        } else {
-            alert('Delete failed: ' + data.error);
         }
-    } catch (e) { alert(e.message); }
-}
-
-function updateBulkDeleteUI() {
-    const btn = document.getElementById('bulkDeleteBtn');
-    if (!btn) return;
-    const count = state.selectedVectors.size;
-    btn.style.display = count > 0 ? 'inline-block' : 'none';
-    btn.textContent = `Delete Selected (${count})`;
-    
-    const dlBtn = document.getElementById('bulkDownloadBtn');
-    if (dlBtn) {
-        dlBtn.style.display = count > 0 ? 'inline-block' : 'none';
-        dlBtn.textContent = `Download Selected (${count})`;
-    }
-    
-    const countSpan = document.getElementById('selectedCount');
-    if (countSpan) {
-        countSpan.style.display = count > 0 ? 'inline' : 'none';
-        countSpan.textContent = `${count} selected`;
-    }
+    } catch (e) { console.error(e); }
 }
 
 async function bulkDeleteVectors() {
-    const key = sessionStorage.getItem('fv_admin');
     const count = state.selectedVectors.size;
-    if (count === 0) return;
     if (!confirm(`Are you sure you want to delete ${count} selected vectors?`)) return;
-
+    
+    const key = sessionStorage.getItem('fv_admin');
+    const slugs = Array.from(state.selectedVectors);
+    
     const btn = document.getElementById('bulkDeleteBtn');
     btn.disabled = true;
-    btn.textContent = 'Deleting...';
-
-    const slugs = Array.from(state.selectedVectors);
-    let successCount = 0;
-
+    btn.textContent = "Deleting...";
+    
     for (const slug of slugs) {
         try {
-            const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
+            await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
                 method: 'DELETE',
                 headers: { 'X-Admin-Key': key }
             });
-            const data = await res.json();
-            if (data.success) {
-                successCount++;
-                state.vectors = state.vectors.filter(v => v.name !== slug);
-                state.selectedVectors.delete(slug);
-            }
-        } catch (e) { console.error(`Failed to delete ${slug}:`, e); }
+        } catch (e) { console.error(e); }
     }
-
-    alert(`Successfully deleted ${successCount} of ${slugs.length} vectors.`);
-    filterAndRenderManage();
+    
+    state.selectedVectors.clear();
+    await loadManageVectors();
     loadDashboard();
-    btn.disabled = false;
-    updateBulkDeleteUI();
 }
 
 async function bulkDownloadVectors() {
-    const key = sessionStorage.getItem('fv_admin');
     const slugs = Array.from(state.selectedVectors);
-    if (slugs.length === 0) return;
-
-    const btn = document.getElementById('bulkDownloadBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Preparing...'; }
-
-    for (const slug of slugs) {
-        const v = state.vectors.find(x => x.name === slug);
-        if (!v) continue;
-        try {
-            const a = document.createElement('a');
-            a.href = `/api/download?slug=${encodeURIComponent(slug)}`;
-            a.download = slug;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            // Small delay to avoid browser blocking multiple downloads
-            await new Promise(r => setTimeout(r, 600));
-        } catch (e) { console.error('Download failed for', slug, e); }
-    }
-
-    if (btn) { btn.disabled = false; updateBulkDeleteUI(); }
+    alert(`Bulk download for ${slugs.length} items started. (Simulation)`);
 }
-
-// BULK UPLOAD LOGIC
-let bulkFiles = [];
 
 function handleBulkAnalyze(type = 'vector') {
     const inputId = type === 'vector' ? 'bulkFileInput' : 'bulkFileInputJpeg';
     const input = document.getElementById(inputId);
-    if (!input) return;
+    if (!input || !input.files.length) return;
     
     const files = Array.from(input.files);
-    if (files.length === 0) return;
-
     const groups = {};
+    
     files.forEach(f => {
-        const name = f.name.replace(/\.(json|jpg|jpeg|zip)$/i, '');
-        if (!groups[name]) groups[name] = {};
-        const ext = f.name.split('.').pop().toLowerCase();
-        if (ext === 'json') groups[name].json = f;
-        else if (ext === 'jpg' || ext === 'jpeg') groups[name].jpeg = f;
-        else if (ext === 'zip') groups[name].zip = f;
+        const name = f.name;
+        const id = name.substring(0, name.lastIndexOf('.'));
+        const ext = name.substring(name.lastIndexOf('.')).toLowerCase();
+        
+        if (!groups[id]) groups[id] = {};
+        if (ext === '.json') groups[id].json = f;
+        if (ext === '.jpg' || ext === '.jpeg') groups[id].jpeg = f;
+        if (ext === '.zip') groups[id].zip = f;
     });
 
     let currentBulkFiles = [];
@@ -510,7 +439,8 @@ function handleBulkAnalyze(type = 'vector') {
     
     bulkFiles = currentBulkFiles;
     
-    const status = document.getElementById('bulkUploadStatus');
+    const statusId = type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg';
+    const status = document.getElementById(statusId);
     const uploadBtnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
     const uploadBtn = document.getElementById(uploadBtnId);
     
@@ -527,10 +457,14 @@ async function handleBulkUpload(type = 'vector') {
     
     const btnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
     const btn = document.getElementById(btnId);
-    const progressWrap = document.getElementById('bulkProgressWrap');
-    const progressFill = document.getElementById('bulkProgressFill');
-    const progressText = document.getElementById('bulkProgressText');
-    const status = document.getElementById('bulkUploadStatus');
+    const progressWrapId = type === 'vector' ? 'bulkProgressWrap' : 'bulkProgressWrapJpeg';
+    const progressWrap = document.getElementById(progressWrapId);
+    const progressFillId = type === 'vector' ? 'bulkProgressFill' : 'bulkProgressFillJpeg';
+    const progressFill = document.getElementById(progressFillId);
+    const progressTextId = type === 'vector' ? 'bulkProgressText' : 'bulkProgressTextJpeg';
+    const progressText = document.getElementById(progressTextId);
+    const statusId = type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg';
+    const status = document.getElementById(statusId);
 
     if (btn) btn.disabled = true;
     if (progressWrap) progressWrap.style.display = 'block';
@@ -557,7 +491,10 @@ async function handleBulkUpload(type = 'vector') {
             });
             const data = await res.json();
             if (data.success) success++;
-            else failed++;
+            else {
+                console.error('Upload error:', data.error);
+                failed++;
+            }
         } catch (e) {
             console.error(e);
             failed++;

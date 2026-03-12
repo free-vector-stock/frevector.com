@@ -19,14 +19,14 @@ async function initSharp() {
     return sharp;
 }
 
-export async function generateThumbnail(jpegBuffer, maxWidth = 400) {
+export async function generateThumbnail(jpegBuffer, maxWidth = 512) {
     try {
         const sharpLib = await initSharp();
         if (!sharpLib) return jpegBuffer;
         
-        // Resize to max 400px width, maintaining aspect ratio
+        // Resize to max width, maintaining aspect ratio
         const thumbnail = await sharpLib(jpegBuffer)
-            .resize(maxWidth, maxWidth * 0.75, {
+            .resize(maxWidth, null, {
                 fit: 'inside',
                 withoutEnlargement: true
             })

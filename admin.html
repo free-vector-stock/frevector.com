@@ -375,6 +375,8 @@
         }
         .badge-red { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
         .badge-orange { background: #fffaf0; color: #9c4221; border: 1px solid #fbd38d; }
+        .badge-blue { background: #ebf8ff; color: #3182ce; border: 1px solid #bee3f8; }
+        .badge-green { background: #f0fff4; color: #38a169; border: 1px solid #9ae6b4; }
 
         .btn-refresh {
             padding: 8px 16px;
@@ -387,7 +389,7 @@
             margin-bottom: 20px;
         }
 
-        #drop-zone {
+        .drop-zone {
             border: 2px dashed #ccc;
             padding: 60px 40px;
             text-align: center;
@@ -397,8 +399,8 @@
             border-radius: 8px;
             transition: all 0.2s;
         }
-        #drop-zone:hover { border-color: var(--black); background-color: #f0f0f0; }
-        #drop-zone p { margin: 0; }
+        .drop-zone:hover { border-color: var(--black); background-color: #f0f0f0; }
+        .drop-zone p { margin: 0; }
     </style>
 </head>
 <body>
@@ -484,6 +486,14 @@
                         <button type="button" class="btn-upload" id="bulkAnalyzeBtn" style="flex: 1;">Analyze</button>
                         <button type="button" class="btn-upload" id="bulkUploadBtn" style="flex: 1; background: var(--green);" disabled>Upload All</button>
                     </div>
+
+                    <div class="status-box" id="bulkUploadStatus"></div>
+                    <div class="progress-wrap" id="bulkProgressWrap">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="bulkProgressFill" style="width:0%"></div>
+                        </div>
+                        <div class="progress-text" id="bulkProgressText">Uploading...</div>
+                    </div>
                 </div>
 
                 <div class="upload-card" style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 30px;">
@@ -498,30 +508,15 @@
 
                     <div style="display: flex; gap: 12px; margin-bottom: 16px;">
                         <button type="button" class="btn-upload" id="bulkAnalyzeBtnJpeg" style="flex: 1;">Analyze JPEG-Only</button>
-                        <button type="button" class="btn-upload" id="bulkUploadBtnJpeg" style="flex: 1; background: var(--blue);" disabled>Upload All JPEG-Only</button>
+                        <button type="button" class="btn-upload" id="bulkUploadBtnJpeg" style="flex: 1; background: var(--green);" disabled>Upload All JPEG-Only</button>
                     </div>
 
-                    <!-- BULK ANALYSIS RESULTS -->
-                    <div id="bulkAnalysisResults" style="display: none; margin-top: 20px;">
-                        <h3 style="font-size: 15px; margin-bottom: 12px;">Analysis Results</h3>
-                        <div id="bulkPackagesList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 4px; background: var(--gray);">
-                        </div>
-                        <div id="bulkSummary" style="margin-top: 16px; padding: 12px; background: var(--gray); border-radius: 4px; font-size: 13px;">
-                        </div>
-                    </div>
-
-                    <div class="status-box" id="bulkUploadStatus"></div>
-                    <div class="progress-wrap" id="bulkProgressWrap">
+                    <div class="status-box" id="bulkUploadStatusJpeg"></div>
+                    <div class="progress-wrap" id="bulkProgressWrapJpeg">
                         <div class="progress-bar">
-                            <div class="progress-fill" id="bulkProgressFill" style="width:0%"></div>
+                            <div class="progress-fill" id="bulkProgressFillJpeg" style="width:0%"></div>
                         </div>
-                        <div class="progress-text" id="bulkProgressText">Uploading...</div>
-                    </div>
-
-                    <!-- UPLOAD REPORT -->
-                    <div id="bulkUploadReport" style="display: none; margin-top: 20px; padding: 16px; background: var(--gray); border-radius: 4px;">
-                        <h3 style="font-size: 15px; margin-bottom: 12px;">Upload Report</h3>
-                        <div id="reportContent" style="font-size: 13px; line-height: 1.6;"></div>
+                        <div class="progress-text" id="bulkProgressTextJpeg">Uploading...</div>
                     </div>
                 </div>
             </section>
@@ -533,29 +528,31 @@
                     <select id="filterCategory">
                         <option value="">All Categories</option>
                     </select>
-                    <button id="bulkDeleteBtn" class="btn-delete" style="display:none;" title="Delete selected vectors">Delete Selected</button>
-                    <button id="bulkDownloadBtn" class="btn-upload" style="display:none; background:#2b6cb0;" title="Download selected vectors">Download Selected</button>
-                    <span id="selectedCount" style="font-size:13px;color:#666;display:none;">0 selected</span>
+                    <button id="bulkDeleteBtn" disabled>Delete Selected (0)</button>
+                    <button id="bulkDownloadBtn" class="btn-upload" style="background:#2b6cb0;" disabled>Download Selected</button>
                 </div>
                 <div class="vectors-table-wrap">
                     <table class="vectors-table">
                         <thead>
                             <tr>
-                                <th style="width:40px;"><input type="checkbox" id="selectAllCheckbox" title="Select all vectors"></th>
-                                <th>Preview</th>
-                                <th>Title</th>
+                                <th style="width:40px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                                <th>Name</th>
+                                <th>Type</th>
                                 <th>Category</th>
-                                <th>Date</th>
                                 <th>Downloads</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="vectorsTableBody">
-                            <tr class="loading-row"><td colspan="6">Loading vectors...</td></tr>
+                        <tbody id="manageTableBody">
+                            <tr><td colspan="6" style="text-align:center;padding:20px;color:#666;">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="pagination-admin" id="managePagination"></div>
+                <div class="pagination-admin">
+                    <button id="prevManage" class="pag-admin-btn" disabled>Previous</button>
+                    <span id="managePaginationInfo" class="pag-admin-info">Page 1 of 1</span>
+                    <button id="nextManage" class="pag-admin-btn" disabled>Next</button>
+                </div>
             </section>
 
             <!-- SYSTEM HEALTH -->
@@ -592,6 +589,6 @@
     </div>
 </div>
 
-<script src="admin.js?v=20260306_v5"></script>
+<script src="admin.js"></script>
 </body>
 </html>
