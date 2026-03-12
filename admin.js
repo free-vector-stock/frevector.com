@@ -1,5 +1,6 @@
 /**
  * Frevector Admin Panel - Frontend Logic
+ * Updated for JPEG Support
  */
 
 const ADMIN_KEY = "vector2026";
@@ -12,12 +13,18 @@ const CATEGORIES = [
 
 const state = {
     vectors: [],
+    jpegFiles: [],
     filteredVectors: [],
+    filteredJpegs: [],
     managePage: 1,
+    managePageJpeg: 1,
     manageLimit: 200,
     searchQuery: '',
+    searchQueryJpeg: '',
     filterCat: '',
-    selectedVectors: new Set()
+    filterCatJpeg: '',
+    selectedVectors: new Set(),
+    selectedJpegs: new Set()
 };
 
 let bulkFiles = [];
@@ -61,27 +68,81 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('bulkUploadBtn')?.addEventListener('click', () => handleBulkUpload('vector'));
     document.getElementById('bulkUploadBtnJpeg')?.addEventListener('click', () => handleBulkUpload('jpeg'));
 
+    // Manage Vectors
     document.getElementById('searchManage')?.addEventListener('input', (e) => {
         state.searchQuery = e.target.value.toLowerCase();
         state.managePage = 1;
-        filterAndRenderManage();
+        filterAndRenderManage('vector');
     });
 
     document.getElementById('filterCategory')?.addEventListener('change', (e) => {
         state.filterCat = e.target.value;
         state.managePage = 1;
-        filterAndRenderManage();
+        filterAndRenderManage('vector');
     });
 
-    const filterSel = document.getElementById('filterCategory');
-    if (filterSel) {
-        CATEGORIES.forEach(cat => {
-            const opt = document.createElement('option');
-            opt.value = cat;
-            opt.textContent = cat;
-            filterSel.appendChild(opt);
-        });
-    }
+    // Manage JPEG
+    document.getElementById('searchManageJpeg')?.addEventListener('input', (e) => {
+        state.searchQueryJpeg = e.target.value.toLowerCase();
+        state.managePageJpeg = 1;
+        filterAndRenderManage('jpeg');
+    });
+
+    document.getElementById('filterCategoryJpeg')?.addEventListener('change', (e) => {
+        state.filterCatJpeg = e.target.value;
+        state.managePageJpeg = 1;
+        filterAndRenderManage('jpeg');
+    });
+
+    // Setup category filters
+    const setupCategoryFilter = (selectId) => {
+        const filterSel = document.getElementById(selectId);
+        if (filterSel) {
+            CATEGORIES.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                filterSel.appendChild(opt);
+            });
+        }
+    };
+    setupCategoryFilter('filterCategory');
+    setupCategoryFilter('filterCategoryJpeg');
+
+    // Pagination
+    document.getElementById('prevManage')?.addEventListener('click', () => {
+        if (state.managePage > 1) {
+            state.managePage--;
+            filterAndRenderManage('vector');
+        }
+    });
+    document.getElementById('nextManage')?.addEventListener('click', () => {
+        const total = state.filteredVectors.length;
+        const maxPage = Math.ceil(total / state.manageLimit);
+        if (state.managePage < maxPage) {
+            state.managePage++;
+            filterAndRenderManage('vector');
+        }
+    });
+
+    document.getElementById('prevManageJpeg')?.addEventListener('click', () => {
+        if (state.managePageJpeg > 1) {
+            state.managePageJpeg--;
+            filterAndRenderManage('jpeg');
+        }
+    });
+    document.getElementById('nextManageJpeg')?.addEventListener('click', () => {
+        const total = state.filteredJpegs.length;
+        const maxPage = Math.ceil(total / state.manageLimit);
+        if (state.managePageJpeg < maxPage) {
+            state.managePageJpeg++;
+            filterAndRenderManage('jpeg');
+        }
+    });
+
+    // Bulk delete
+    document.getElementById('bulkDeleteBtn')?.addEventListener('click', () => bulkDeleteVectors('vector'));
+    document.getElementById('bulkDeleteBtnJpeg')?.addEventListener('click', () => bulkDeleteVectors('jpeg'));
 });
 
 async function doLogin() {
@@ -104,6 +165,7 @@ function showApp() {
     document.getElementById('adminApp').style.display = 'block';
     loadDashboard();
     loadManageVectors();
+    loadManageJpegs();
 }
 
 function switchSection(sectionId) {
@@ -119,6 +181,7 @@ function switchSection(sectionId) {
         'dashboard': 'Dashboard',
         'upload': 'Upload Vector',
         'manage': 'Manage Vectors',
+        'manage-jpeg': 'Manage JPEG',
         'health': 'System Health'
     };
     const titleEl = document.getElementById('sectionTitle');
@@ -133,8 +196,45 @@ async function loadDashboard() {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
+        
+        // Separate vectors and jpegs
+        const vectors = state.vectors.filter(v => v.contentType !== 'jpeg');
+        const jpegs = state.vectors.filter(v => v.contentType === 'jpeg');
+        
         document.getElementById('totalVectors').textContent = state.vectors.length;
         document.getElementById('totalDownloads').textContent = state.vectors.reduce((sum, v) => sum + (v.downloads || 0), 0);
+        
+        // Build category table
+        const catMap = {};
+        vectors.forEach(v => {
+            const cat = v.category || 'Miscellaneous';
+            if (!catMap[cat]) catMap[cat] = { vectors: 0, jpegs: 0, downloads: 0 };
+            catMap[cat].vectors++;
+            catMap[cat].downloads += v.downloads || 0;
+        });
+        jpegs.forEach(v => {
+            const cat = v.category || 'Miscellaneous';
+            if (!catMap[cat]) catMap[cat] = { vectors: 0, jpegs: 0, downloads: 0 };
+            catMap[cat].jpegs++;
+            catMap[cat].downloads += v.downloads || 0;
+        });
+
+        const tbody = document.getElementById('catTableBody');
+        if (tbody) {
+            tbody.innerHTML = '';
+            Object.keys(catMap).sort().forEach(cat => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${escHtml(cat)}</td>
+                    <td>${catMap[cat].vectors}</td>
+                    <td>${catMap[cat].jpegs}</td>
+                    <td>${catMap[cat].downloads}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        document.getElementById('totalCategories').textContent = Object.keys(catMap).length;
     } catch (e) { console.error(e); }
 }
 
@@ -144,37 +244,79 @@ async function loadManageVectors() {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
-        filterAndRenderManage();
+        state.filteredVectors = state.vectors.filter(v => v.contentType !== 'jpeg');
+        filterAndRenderManage('vector');
     } catch (e) { console.error(e); }
 }
 
-function filterAndRenderManage() {
-    state.filteredVectors = state.vectors.filter(v => {
-        const matchesSearch = v.name.toLowerCase().includes(state.searchQuery) || (v.title || "").toLowerCase().includes(state.searchQuery);
-        const matchesCat = !state.filterCat || v.category === state.filterCat;
-        return matchesSearch && matchesCat;
-    });
-    renderManageTable();
+async function loadManageJpegs() {
+    const key = sessionStorage.getItem('fv_admin');
+    try {
+        const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
+        const data = await res.json();
+        state.vectors = data.vectors || [];
+        state.filteredJpegs = state.vectors.filter(v => v.contentType === 'jpeg');
+        filterAndRenderManage('jpeg');
+    } catch (e) { console.error(e); }
 }
 
-function renderManageTable() {
-    const tbody = document.getElementById('manageTableBody');
+function filterAndRenderManage(type = 'vector') {
+    if (type === 'vector') {
+        let filtered = state.vectors.filter(v => v.contentType !== 'jpeg');
+        const matchesSearch = v => v.name.toLowerCase().includes(state.searchQuery) || (v.title || "").toLowerCase().includes(state.searchQuery);
+        const matchesCat = v => !state.filterCat || v.category === state.filterCat;
+        state.filteredVectors = filtered.filter(v => matchesSearch(v) && matchesCat(v));
+        renderManageTable('vector');
+    } else {
+        let filtered = state.vectors.filter(v => v.contentType === 'jpeg');
+        const matchesSearch = v => v.name.toLowerCase().includes(state.searchQueryJpeg) || (v.title || "").toLowerCase().includes(state.searchQueryJpeg);
+        const matchesCat = v => !state.filterCatJpeg || v.category === state.filterCatJpeg;
+        state.filteredJpegs = filtered.filter(v => matchesSearch(v) && matchesCat(v));
+        renderManageTable('jpeg');
+    }
+}
+
+function renderManageTable(type = 'vector') {
+    const tbodyId = type === 'vector' ? 'manageTableBody' : 'manageTableBodyJpeg';
+    const paginationId = type === 'vector' ? 'managePaginationInfo' : 'managePaginationInfoJpeg';
+    const filtered = type === 'vector' ? state.filteredVectors : state.filteredJpegs;
+    const currentPage = type === 'vector' ? state.managePage : state.managePageJpeg;
+    
+    const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
-    const start = (state.managePage - 1) * state.manageLimit;
-    const pageItems = state.filteredVectors.slice(start, start + state.manageLimit);
+    
+    const start = (currentPage - 1) * state.manageLimit;
+    const pageItems = filtered.slice(start, start + state.manageLimit);
     tbody.innerHTML = '';
+    
     pageItems.forEach(v => {
         const tr = document.createElement('tr');
+        const typeLabel = v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>';
         tr.innerHTML = `
-            <td><input type="checkbox" class="vector-checkbox" data-id="${v.name}"></td>
+            <td><input type="checkbox" class="vector-checkbox" data-id="${v.name}" data-type="${type}"></td>
             <td><strong>${escHtml(v.name)}</strong></td>
-            <td>${v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>'}</td>
+            <td>${typeLabel}</td>
             <td>${escHtml(v.category)}</td>
             <td>${v.downloads || 0}</td>
             <td><button class="btn-delete" onclick="deleteVector('${v.name}')">Delete</button></td>
         `;
         tbody.appendChild(tr);
     });
+
+    // Update pagination
+    const totalPages = Math.max(1, Math.ceil(filtered.length / state.manageLimit));
+    const paginationEl = document.getElementById(paginationId);
+    if (paginationEl) {
+        paginationEl.textContent = `Page ${currentPage} of ${totalPages}`;
+    }
+
+    // Update prev/next buttons
+    const prevBtnId = type === 'vector' ? 'prevManage' : 'prevManageJpeg';
+    const nextBtnId = type === 'vector' ? 'nextManage' : 'nextManageJpeg';
+    const prevBtn = document.getElementById(prevBtnId);
+    const nextBtn = document.getElementById(nextBtnId);
+    if (prevBtn) prevBtn.disabled = currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
 }
 
 async function deleteVector(slug) {
@@ -187,9 +329,41 @@ async function deleteVector(slug) {
         });
         if (res.ok) {
             state.vectors = state.vectors.filter(v => v.name !== slug);
-            filterAndRenderManage();
+            loadManageVectors();
+            loadManageJpegs();
+            loadDashboard();
         }
     } catch (e) { console.error(e); }
+}
+
+async function bulkDeleteVectors(type = 'vector') {
+    const checkboxes = document.querySelectorAll(`input[type="checkbox"][data-type="${type}"]`);
+    const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.id);
+    
+    if (selected.length === 0) {
+        alert('No items selected');
+        return;
+    }
+
+    if (!confirm(`Delete ${selected.length} items?`)) return;
+
+    const key = sessionStorage.getItem('fv_admin');
+    let deleted = 0;
+    for (const slug of selected) {
+        try {
+            const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
+                method: 'DELETE',
+                headers: { 'X-Admin-Key': key }
+            });
+            if (res.ok) deleted++;
+        } catch (e) { console.error(e); }
+    }
+
+    alert(`Deleted ${deleted}/${selected.length} items`);
+    state.vectors = state.vectors.filter(v => !selected.includes(v.name));
+    loadManageVectors();
+    loadManageJpegs();
+    loadDashboard();
 }
 
 function handleBulkAnalyze(type = 'vector') {
@@ -250,6 +424,7 @@ async function handleBulkUpload(type = 'vector') {
     document.getElementById(btnId).disabled = false;
     loadDashboard();
     loadManageVectors();
+    loadManageJpegs();
 }
 
 function escHtml(str) {

@@ -426,6 +426,7 @@
                 <button class="nav-btn active" data-section="dashboard">Dashboard</button>
                 <button class="nav-btn" data-section="upload">Upload Vector</button>
                 <button class="nav-btn" data-section="manage">Manage Vectors</button>
+                <button class="nav-btn" data-section="manage-jpeg">Manage JPEG</button>
                 <button class="nav-btn" data-section="health">System Health</button>
             </nav>
             <div class="sidebar-footer">
@@ -455,17 +456,18 @@
                     </div>
                 </div>
 
-                <h3 style="margin-bottom:16px; font-size:16px;">Vectors by Category</h3>
+                <h3 style="margin-bottom:16px; font-size:16px;">Vectors and JPEG by Category</h3>
                 <table class="cat-table">
                     <thead>
                         <tr>
                             <th>Category</th>
                             <th>Vectors</th>
+                            <th>JPEG</th>
                             <th>Downloads</th>
                         </tr>
                     </thead>
                     <tbody id="catTableBody">
-                        <tr><td colspan="3" style="text-align:center;padding:20px;color:#666;">Loading...</td></tr>
+                        <tr><td colspan="4" style="text-align:center;padding:20px;color:#666;">Loading...</td></tr>
                     </tbody>
                 </table>
             </section>
@@ -555,13 +557,47 @@
                 </div>
             </section>
 
+            <!-- MANAGE JPEG -->
+            <section id="manage-jpeg" class="admin-section">
+                <div class="manage-toolbar">
+                    <input type="text" id="searchManageJpeg" placeholder="Search by name, category, keyword...">
+                    <select id="filterCategoryJpeg">
+                        <option value="">All Categories</option>
+                    </select>
+                    <button id="bulkDeleteBtnJpeg" disabled>Delete Selected (0)</button>
+                    <button id="bulkDownloadBtnJpeg" class="btn-upload" style="background:#2b6cb0;" disabled>Download Selected</button>
+                </div>
+                <div class="vectors-table-wrap">
+                    <table class="vectors-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;"><input type="checkbox" id="selectAllCheckboxJpeg"></th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Downloads</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageTableBodyJpeg">
+                            <tr><td colspan="6" style="text-align:center;padding:20px;color:#666;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination-admin">
+                    <button id="prevManageJpeg" class="pag-admin-btn" disabled>Previous</button>
+                    <span id="managePaginationInfoJpeg" class="pag-admin-info">Page 1 of 1</span>
+                    <button id="nextManageJpeg" class="pag-admin-btn" disabled>Next</button>
+                </div>
+            </section>
+
             <!-- SYSTEM HEALTH -->
             <section id="health" class="admin-section">
                 <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
                     <button class="btn-refresh" id="refreshHealthBtn" style="margin-bottom:0;">&#8635; Refresh Health Report</button>
                     <button class="btn-refresh" id="verifySyncBtn" style="margin-bottom:0;background:var(--blue);">&#10003; Verify R2 Sync</button>
                     <button class="btn-refresh" id="fixCategoriesBtn" style="margin-bottom:0;background:var(--green);">&#9881; Fix Categories (ID-based)</button>
-                    <button class="btn-refresh" id="runCleanupBtn" style="margin-bottom:0;background:var(--orange);">&#9888; Run Cleanup (Remove Orphans)</button>
+
                 </div>
                 <div class="health-grid" id="healthGrid">
                     <div class="health-card">
