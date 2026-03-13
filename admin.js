@@ -475,7 +475,7 @@ function handleBulkAnalyze(type = 'vector') {
     });
 
     bulkFiles = Object.entries(groups).map(([id, g]) => ({ id, ...g }))
-        .filter(g => g.json && g.jpeg && (type === 'vector' ? g.zip : true));
+        .filter(g => g.json && g.jpeg);
     
     const statusId = type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg';
     const status = document.getElementById(statusId);
@@ -493,20 +493,28 @@ async function handleBulkUpload(type = 'vector') {
     const btnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
     const analyzeBtnId = type === 'vector' ? 'bulkAnalyzeBtn' : 'bulkAnalyzeBtnJpeg';
     const statusId = type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg';
+    
     const progressText = document.getElementById(type === 'vector' ? 'bulkProgressText' : 'bulkProgressTextJpeg');
     const progressFill = document.getElementById(type === 'vector' ? 'bulkProgressFill' : 'bulkProgressFillJpeg');
     const progressWrap = document.getElementById(type === 'vector' ? 'bulkProgressWrap' : 'bulkProgressWrapJpeg');
+    
+    const progressTextSingle = document.getElementById(type === 'vector' ? 'bulkProgressTextSingle' : 'bulkProgressTextSingleJpeg');
+    const progressFillSingle = document.getElementById(type === 'vector' ? 'bulkProgressFillSingle' : 'bulkProgressFillSingleJpeg');
+    const progressWrapSingle = document.getElementById(type === 'vector' ? 'bulkProgressWrapSingle' : 'bulkProgressWrapSingleJpeg');
 
     document.getElementById(btnId).disabled = true;
     document.getElementById(analyzeBtnId).disabled = true;
     if (progressWrap) progressWrap.style.display = 'block';
+    if (progressWrapSingle) progressWrapSingle.style.display = 'block';
     
     let success = 0;
     let errors = 0;
     for (let i = 0; i < bulkFiles.length; i++) {
         const group = bulkFiles[i];
-        if (progressText) progressText.textContent = `Uploading ${group.id} (${i+1}/${bulkFiles.length})...`;
+        if (progressText) progressText.textContent = `Processing ${group.id} (${i+1}/${bulkFiles.length})...`;
         if (progressFill) progressFill.style.width = `${Math.round(((i) / bulkFiles.length) * 100)}%`;
+        if (progressFillSingle) progressFillSingle.style.width = '0%';
+        if (progressTextSingle) progressTextSingle.textContent = `Starting upload for ${group.id}...`;
 
         const formData = new FormData();
         formData.append('json', group.json);
@@ -514,13 +522,32 @@ async function handleBulkUpload(type = 'vector') {
         if (group.zip) formData.append('zip', group.zip);
 
         try {
-            const res = await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Key': key }, body: formData });
+            const res = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/admin');
+                xhr.setRequestHeader('X-Admin-Key', key);
+                
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        if (progressFillSingle) progressFillSingle.style.width = `${percent}%`;
+                        if (progressTextSingle) progressTextSingle.textContent = `Uploading ${group.id}: ${percent}%`;
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true });
+                    else resolve({ ok: false, status: xhr.status });
+                };
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.send(formData);
+            });
+
             if (res.ok) {
                 success++;
             } else {
                 errors++;
-                const errData = await res.json().catch(() => ({}));
-                console.warn(`Upload failed for ${group.id}:`, errData.error || res.status);
+                console.warn(`Upload failed for ${group.id}:`, res.status);
             }
         } catch (e) { 
             errors++;
@@ -530,6 +557,7 @@ async function handleBulkUpload(type = 'vector') {
 
     if (progressFill) progressFill.style.width = '100%';
     if (progressText) progressText.textContent = `Upload complete. Success: ${success}, Errors: ${errors}`;
+    if (progressWrapSingle) progressWrapSingle.style.display = 'none';
     
     const status = document.getElementById(statusId);
     if (status) {

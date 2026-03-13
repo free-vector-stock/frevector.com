@@ -488,22 +488,28 @@
                     </div>
 
                     <div class="status-box" id="bulkUploadStatus"></div>
-                    <div class="progress-wrap" id="bulkProgressWrap">
+                    <div class="progress-wrap" id="bulkProgressWrap" style="display: none;">
                         <div class="progress-bar">
                             <div class="progress-fill" id="bulkProgressFill" style="width:0%"></div>
                         </div>
                         <div class="progress-text" id="bulkProgressText">Uploading...</div>
                     </div>
+                    <div class="progress-wrap" id="bulkProgressWrapSingle" style="display: none; margin-top: 8px;">
+                        <div class="progress-bar" style="height: 4px; background: #eee;">
+                            <div class="progress-fill" id="bulkProgressFillSingle" style="width:0%; background: var(--blue);"></div>
+                        </div>
+                        <div class="progress-text" id="bulkProgressTextSingle" style="font-size: 10px;">File progress...</div>
+                    </div>
                 </div>
 
                 <div class="upload-card" style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 30px;">
-                    <h2>Bulk JPEG-Only Upload (JSON + JPEG)</h2>
-                    <p class="upload-subtitle">Upload multiple JPEG-only packages. ZIP files are not required for this section.</p>
+                    <h2>Bulk JPEG-Only Upload (JSON + JPEG + ZIP)</h2>
+                    <p class="upload-subtitle">Upload multiple JPEG-only packages. ZIP files are optional for this section.</p>
                     
                     <div id="drop-zone-jpeg" class="drop-zone">
-                        <p style="font-size: 18px; color: #333; font-weight: 600;">Drag and drop JPEG & JSON files here</p>
-                        <p style="font-size: 13px; color: #888; margin-top: 10px;">Only JSON and JPEG files will be processed.</p>
-                        <input type="file" id="bulkFileInputJpeg" multiple accept=".json,.jpg,.jpeg" style="display: none;">
+                        <p style="font-size: 18px; color: #333; font-weight: 600;">Drag and drop JPEG, JSON & ZIP files here</p>
+                        <p style="font-size: 13px; color: #888; margin-top: 10px;">Only JSON, JPEG and ZIP files will be processed.</p>
+                        <input type="file" id="bulkFileInputJpeg" multiple accept=".json,.jpg,.jpeg,.zip" style="display: none;">
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-bottom: 16px;">
@@ -512,11 +518,17 @@
                     </div>
 
                     <div class="status-box" id="bulkUploadStatusJpeg"></div>
-                    <div class="progress-wrap" id="bulkProgressWrapJpeg">
+                    <div class="progress-wrap" id="bulkProgressWrapJpeg" style="display: none;">
                         <div class="progress-bar">
                             <div class="progress-fill" id="bulkProgressFillJpeg" style="width:0%"></div>
                         </div>
                         <div class="progress-text" id="bulkProgressTextJpeg">Uploading...</div>
+                    </div>
+                    <div class="progress-wrap" id="bulkProgressWrapSingleJpeg" style="display: none; margin-top: 8px;">
+                        <div class="progress-bar" style="height: 4px; background: #eee;">
+                            <div class="progress-fill" id="bulkProgressFillSingleJpeg" style="width:0%; background: var(--blue);"></div>
+                        </div>
+                        <div class="progress-text" id="bulkProgressTextSingleJpeg" style="font-size: 10px;">File progress...</div>
                     </div>
                 </div>
             </section>
