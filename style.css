@@ -333,7 +333,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     }
     
     .category-item { 
-        padding: 10px 16px; 
+        padding: 4px 16px; 
         font-size: 12px;
         font-weight: 500;
         line-height: 1.2;
@@ -350,15 +350,30 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     
     .bottom-fixed-container { position: static; height: auto; border-top: 1px solid var(--border); }
     .our-picks-section { padding: 12px 0; margin-left: 0; }
-    .our-picks-track .vector-card { width: 70px; min-width: 70px; }
+    .our-picks-header { padding: 0 16px; }
+    .our-picks-label { font-size: 9px; }
+    .our-picks-nav { gap: 6px; }
+    .our-picks-arrow { width: 28px; height: 28px; font-size: 16px; }
+    .our-picks-track-wrap { padding: 0 16px; }
+    .our-picks-track .vector-card { width: 60px; min-width: 60px; }
+    .our-picks-track .vector-card .vc-img-wrap { aspect-ratio: 4/3; }
     
     .pagination-wrapper { padding: 12px 0; margin-left: 0; }
     .pag-btn { padding: 5px 10px; font-size: 11px; }
     .page-num { font-size: 12px; }
     
-    .footer { padding: 10px 16px; font-size: 10px; margin-left: 0; }
-    .footer-nav { gap: 12px; }
-    .footer-link { font-size: 10px; }
+    .footer { 
+        padding: 16px; 
+        font-size: 12px; 
+        margin-left: 0;
+        min-height: auto;
+        padding-bottom: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+    .footer-nav { gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .footer-link { font-size: 11px; }
 }
 
 .download-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--white); z-index: 2000; display: flex; flex-direction: column; overflow-y: auto; }
@@ -369,6 +384,8 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .dp-image { width: 100%; max-height: 500px; object-fit: contain; background: #f9f9f9; border-radius: 8px; }
 
 @media (max-width: 768px) {
+    .download-page { position: fixed; bottom: 0; top: auto; height: auto; max-height: 90vh; border-radius: 16px 16px 0 0; }
+    .download-page-header { border-radius: 16px 16px 0 0; }
     .download-page-body { grid-template-columns: 1fr; padding: 20px; gap: 20px; }
 }
 
