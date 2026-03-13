@@ -327,7 +327,10 @@ function renderManageTable(type = 'vector') {
         pageItems.forEach(v => {
             const tr = document.createElement('tr');
             const typeLabel = v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>';
-            const thumbnailUrl = v.thumbnail || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2275%22%3E%3Crect fill=%22%23eee%22 width=%22100%22 height=%2275%22/%3E%3C/svg%3E';
+            // REVİZYON 2: Thumbnail URL'sini category/id/id-thumb.jpg yapısına göre oluştur
+            const cat = v.category || 'Miscellaneous';
+            const thumbKey = encodeURIComponent(`${cat}/${v.name}/${v.name}-thumb.jpg`);
+            const thumbnailUrl = `/api/asset?key=${thumbKey}`;
             tr.innerHTML = `
                 <td><input type="checkbox" class="vector-checkbox" data-id="${escHtml(v.name)}" data-type="${type}"></td>
                 <td><img src="${thumbnailUrl}" alt="${escHtml(v.name)}" class="preview-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2275%22%3E%3Crect fill=%22%23eee%22 width=%22100%22 height=%2275%22/%3E%3C/svg%3E'"></td>

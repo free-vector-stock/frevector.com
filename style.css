@@ -23,10 +23,11 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .sort-filter { border: 1px solid var(--border); padding: 7px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; background: var(--white); color: #1a1a1a; white-space: nowrap; flex-shrink: 0; }
 
 .main-container { display: flex; flex: 1; }
-.sidebar { width: 160px; min-width: 160px; padding: 20px 0; border-right: 1px solid var(--border); background: var(--white); position: sticky; top: 53px; height: calc(100vh - 53px); overflow-y: auto; flex-shrink: 0; }
-.sidebar-title { font-size: 10px; font-weight: 700; color: var(--gray-text); letter-spacing: 1.5px; padding: 0 16px 12px; }
+.sidebar { width: 160px; min-width: 160px; padding: 16px 0; border-right: 1px solid var(--border); background: var(--white); position: sticky; top: 53px; height: calc(100vh - 53px); overflow-y: auto; flex-shrink: 0; }
+.sidebar-title { font-size: 10px; font-weight: 700; color: var(--gray-text); letter-spacing: 1.5px; padding: 0 16px 8px; }
 .categories-list { display: flex; flex-direction: column; }
-.category-item { text-decoration: none; color: #1a1a1a; font-size: 13px; padding: 7px 16px; cursor: pointer; border-left: 3px solid transparent; transition: background 0.15s; display: block; }
+/* REVİZYON 4: Kategori boşlukları azaltıldı */
+.category-item { text-decoration: none; color: #1a1a1a; font-size: 12px; padding: 4px 16px; cursor: pointer; border-left: 3px solid transparent; transition: background 0.15s; display: block; line-height: 1.4; }
 .category-item:hover { background: var(--gray-light); }
 .category-item.active { background: var(--black); color: var(--white); font-weight: 600; border-left-color: var(--black); }
 
@@ -62,6 +63,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .download-btn { background: var(--black); color: var(--white); border: none; padding: 12px 32px; font-size: 14px; font-weight: 800; cursor: pointer; border-radius: 3px; }
 .detail-close-btn { background: none; border: 1px solid var(--border); padding: 12px 20px; font-size: 13px; cursor: pointer; border-radius: 3px; color: var(--gray-text); }
 
+/* REVİZYON 3: Our Picks - footer üstünde sabit, kategorileri kapatmıyor, ok butonları */
 .pagination-wrapper { position: fixed; bottom: 52px; left: 0; right: 0; background: var(--white); padding: 12px 0; border-top: 1px solid #eee; display: flex; justify-content: center; z-index: 99; }
 .pagination-nav { display: flex; align-items: center; gap: 20px; }
 .pag-btn { background: none; border: 1px solid var(--border); padding: 8px 16px; cursor: pointer; border-radius: 4px; font-weight: bold; }
@@ -83,12 +85,144 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--black); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+/* ============================================================
+   REVİZYON 1: MOBİL GÖRÜNÜM - Tam dikey akış
+   ============================================================ */
 @media (max-width: 768px) {
-    .sidebar { display: block; width: 100%; min-width: 100%; border-right: none; border-bottom: 1px solid var(--border); position: sticky; top: 53px; height: auto; overflow-y: visible; padding: 12px 0; }
-    .sidebar-title { padding: 0 16px 8px; }
-    .categories-list { flex-direction: row; flex-wrap: wrap; }
-    .category-item { padding: 6px 12px; font-size: 12px; }
-    .header { flex-direction: column; }
-    .download-page-body { grid-template-columns: 1fr; }
+    /* Header: dikey düzen */
+    .header { flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 16px; }
+    .header-center { width: 100%; }
+    .header-right { width: 100%; }
+    .sort-filter { width: 100%; }
+
+    /* Ana container: dikey akış */
+    .main-container { flex-direction: column; }
+
+    /* Sidebar: yatay değil, dikey liste */
+    .sidebar {
+        display: block;
+        width: 100%;
+        min-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        position: static;
+        height: auto;
+        overflow-y: visible;
+        overflow-x: visible;
+        padding: 10px 0;
+    }
+    .sidebar-title { padding: 0 16px 6px; }
+
+    /* Kategoriler: dikey liste, sıkı boşluk */
+    .categories-list {
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+    .category-item {
+        padding: 4px 16px;
+        font-size: 13px;
+        border-left: 3px solid transparent;
+        white-space: nowrap;
+    }
+    .category-item.active {
+        background: var(--black);
+        color: var(--white);
+        border-left-color: var(--black);
+    }
+
+    /* İçerik: tam genişlik */
+    .content {
+        padding: 16px;
+        padding-bottom: 300px;
+        width: 100%;
+    }
+
+    /* Görseller: tek sütun, tam genişlik */
+    .vectors-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Detail panel: tek sütun */
+    .detail-inner { grid-template-columns: 1fr; }
+
+    /* Download sayfası */
+    .download-page-body { grid-template-columns: 1fr; padding: 20px; gap: 20px; }
+
+    /* Our picks: mobilde de çalışsın */
+    .our-picks-section { left: 0; right: 0; }
 }
-/* Cache bust: 1773345842 */
+
+/* ============================================================
+   REVİZYON 3: OUR SELECTIONS FOR YOU - Sabit, footer üstünde
+   Kategorileri KAPATMAZ, ok butonları mevcut
+   ============================================================ */
+.our-picks-section {
+    position: fixed;
+    bottom: 104px;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 1px solid #eee;
+    padding: 10px 24px;
+    z-index: 98;
+    max-height: 160px;
+    overflow: hidden;
+}
+.our-picks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.our-picks-label {
+    font-weight: bold;
+    font-size: 13px;
+    flex: 1;
+}
+.our-picks-nav {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.our-picks-arrow {
+    background: var(--white);
+    border: 1px solid var(--border);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    line-height: 1;
+    padding: 0;
+}
+.our-picks-arrow:hover { background: var(--gray-light); }
+.our-picks-track-wrap {
+    overflow: hidden;
+    position: relative;
+}
+.our-picks-track {
+    display: flex;
+    gap: 10px;
+    transition: transform 0.3s ease;
+}
+.our-picks-track .vector-card {
+    width: 90px;
+    min-width: 90px;
+    flex-shrink: 0;
+}
+.our-picks-track .vector-card .vc-img-wrap {
+    aspect-ratio: 4/3;
+    width: 100%;
+}
+.our-picks-track .vector-card .vc-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Cache bust: 2026031401 */

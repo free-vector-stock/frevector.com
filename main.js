@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031302
+ * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -20,7 +20,7 @@ const MODAL_CONTENTS = {
             <h2 style="margin-bottom:16px;">About Us</h2>
             <p style="margin-bottom:12px;">Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
             <p style="margin-bottom:12px;">The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
-            <p style="margin-bottom:12px;">Every design is shared only after passing through a quality review process. The goal is to provide designers, developers, and creative professionals with high-quality, ready-to-use resources.</p>
+            <p style="margin-bottom:12px;">Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
             <p style="margin-bottom:12px;">Frevector.com includes the following content:</p>
             <ul style="margin-left:20px;margin-bottom:12px;">
                 <li>Vector illustrations</li>
@@ -150,7 +150,9 @@ const state = {
     openedCardEl: null,
     countdownInterval: null,
     detailPanelOpen: false,
-    downloadInProgress: false
+    downloadInProgress: false,
+    // REVİZYON 3: Our Picks kaydırma durumu
+    ourPicksOffset: 0
 };
 
 async function init() {
@@ -158,6 +160,7 @@ async function init() {
     setupEventListeners();
     setupModalHandlers();
     setupDownloadPageHandlers();
+    setupOurPicksArrows();
     await fetchVectors();
 }
 
@@ -168,16 +171,16 @@ function setupCategories() {
 
     // Type selector (Vector / JPEG)
     const typeContainer = document.createElement('div');
-    typeContainer.style.padding = '0 16px 16px';
-    typeContainer.style.marginBottom = '12px';
-    typeContainer.style.paddingBottom = '12px';
+    typeContainer.style.padding = '0 16px 8px';
+    typeContainer.style.marginBottom = '8px';
+    typeContainer.style.paddingBottom = '8px';
     typeContainer.style.borderBottom = '1px solid #ddd';
     
     const typeLabel = document.createElement('div');
-    typeLabel.style.fontSize = '11px';
+    typeLabel.style.fontSize = '10px';
     typeLabel.style.fontWeight = '600';
     typeLabel.style.color = '#666';
-    typeLabel.style.marginBottom = '8px';
+    typeLabel.style.marginBottom = '4px';
     typeLabel.textContent = 'TYPE';
     typeContainer.appendChild(typeLabel);
     
@@ -321,14 +324,17 @@ function renderVectors() {
     });
 }
 
+// REVİZYON 3: Our Picks - VECTOR/JPEG etiketi eklendi, ok butonları ile kaydırma
 function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track || !state.vectors.length) return;
     track.innerHTML = '';
+    state.ourPicksOffset = 0;
     
-    state.vectors.slice(0, 10).forEach(v => {
+    state.vectors.slice(0, 20).forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
+        // REVİZYON 3: VECTOR veya JPEG etiketi sağ üst köşede
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
         card.innerHTML = `
             <div class="vc-img-wrap">
@@ -339,6 +345,50 @@ function renderOurPicks() {
         card.onclick = () => openDetailPanel(v, card);
         track.appendChild(card);
     });
+
+    // Ok butonlarını güncelle
+    updateOurPicksArrows();
+}
+
+// REVİZYON 3: Our Picks ok butonları kurulumu
+function setupOurPicksArrows() {
+    const prevBtn = document.getElementById('ourPicksPrev');
+    const nextBtn = document.getElementById('ourPicksNext');
+    if (!prevBtn || !nextBtn) return;
+
+    prevBtn.onclick = () => scrollOurPicks(-1);
+    nextBtn.onclick = () => scrollOurPicks(1);
+}
+
+function scrollOurPicks(direction) {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track) return;
+
+    const cardWidth = 100; // 90px card + 10px gap
+    const visibleWidth = track.parentElement.offsetWidth;
+    const totalWidth = track.scrollWidth;
+    const maxOffset = Math.max(0, totalWidth - visibleWidth);
+    const step = Math.floor(visibleWidth / cardWidth) * cardWidth;
+
+    state.ourPicksOffset = Math.max(0, Math.min(maxOffset, state.ourPicksOffset + direction * step));
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+    updateOurPicksArrows();
+}
+
+function updateOurPicksArrows() {
+    const track = document.getElementById('ourPicksTrack');
+    const prevBtn = document.getElementById('ourPicksPrev');
+    const nextBtn = document.getElementById('ourPicksNext');
+    if (!track || !prevBtn || !nextBtn) return;
+
+    const visibleWidth = track.parentElement ? track.parentElement.offsetWidth : 0;
+    const totalWidth = track.scrollWidth;
+    const maxOffset = Math.max(0, totalWidth - visibleWidth);
+
+    prevBtn.style.opacity = state.ourPicksOffset <= 0 ? '0.3' : '1';
+    prevBtn.style.cursor = state.ourPicksOffset <= 0 ? 'default' : 'pointer';
+    nextBtn.style.opacity = state.ourPicksOffset >= maxOffset ? '0.3' : '1';
+    nextBtn.style.cursor = state.ourPicksOffset >= maxOffset ? 'default' : 'pointer';
 }
 
 function openDetailPanel(v, cardEl) {
@@ -367,7 +417,7 @@ function openDetailPanel(v, cardEl) {
                     <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
                     <tr><td class="dt-label">CATEGORY</td><td class="dt-value">${escHtml(v.category)}</td></tr>
                     <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
+                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
                     <tr><td class="dt-label">FILE SIZE</td><td class="dt-value">${v.fileSize || 'N/A'}</td></tr>
                 </table>
             </div>
@@ -388,7 +438,7 @@ function openDetailPanel(v, cardEl) {
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
-    const columns = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 2);
+    const columns = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
     grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
 
