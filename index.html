@@ -9,10 +9,10 @@
         .footer { background: #000; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
         .footer-nav { display: flex; gap: 20px; }
         .footer-link { color: #fff; text-decoration: none; font-size: 12px; }
-        .our-picks-section { margin: 40px 0; border-top: 1px solid #eee; padding-top: 20px; }
-        .our-picks-label { font-weight: bold; margin-bottom: 20px; font-size: 18px; }
-        .our-picks-track { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; }
-        .our-picks-track .vector-card { width: 140px; min-width: 140px; flex-shrink: 0; }
+        .our-picks-section { position: fixed; bottom: 52px; left: 0; right: 0; background: var(--white); border-top: 1px solid #eee; padding: 16px 24px; z-index: 99; max-height: 180px; overflow-y: auto; }
+        .our-picks-label { font-weight: bold; margin-bottom: 12px; font-size: 14px; }
+        .our-picks-track { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 0; }
+        .our-picks-track .vector-card { width: 100px; min-width: 100px; flex-shrink: 0; }
         .our-picks-track .vector-card .vc-img-wrap { aspect-ratio: 4/3; width: 100%; }
         .our-picks-track .vector-card .vc-img { width: 100%; height: 100%; object-fit: cover; }
         .dp-countdown-box { text-align: center; margin-top: 20px; }

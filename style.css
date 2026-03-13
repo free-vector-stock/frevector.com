@@ -30,7 +30,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .category-item:hover { background: var(--gray-light); }
 .category-item.active { background: var(--black); color: var(--white); font-weight: 600; border-left-color: var(--black); }
 
-.content { flex: 1; padding: 20px 24px; min-width: 0; }
+.content { flex: 1; padding: 20px 24px; min-width: 0; padding-bottom: 200px; }
 .category-title { font-size: 24px; font-weight: 800; margin-bottom: 20px; text-transform: capitalize; }
 
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; min-height: 200px; }
@@ -62,7 +62,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .download-btn { background: var(--black); color: var(--white); border: none; padding: 12px 32px; font-size: 14px; font-weight: 800; cursor: pointer; border-radius: 3px; }
 .detail-close-btn { background: none; border: 1px solid var(--border); padding: 12px 20px; font-size: 13px; cursor: pointer; border-radius: 3px; color: var(--gray-text); }
 
-.pagination-wrapper { margin-top: 40px; padding: 20px 0; border-top: 1px solid #eee; display: flex; justify-content: center; }
+.pagination-wrapper { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); padding: 12px 0; border-top: 1px solid #eee; display: flex; justify-content: center; z-index: 100; }
 .pagination-nav { display: flex; align-items: center; gap: 20px; }
 .pag-btn { background: none; border: 1px solid var(--border); padding: 8px 16px; cursor: pointer; border-radius: 4px; font-weight: bold; }
 .page-num { font-weight: bold; font-size: 16px; }
@@ -84,7 +84,10 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
-    .sidebar { display: none; }
+    .sidebar { display: block; width: 100%; min-width: 100%; border-right: none; border-bottom: 1px solid var(--border); position: sticky; top: 53px; height: auto; overflow-y: visible; padding: 12px 0; }
+    .sidebar-title { padding: 0 16px 8px; }
+    .categories-list { flex-direction: row; flex-wrap: wrap; }
+    .category-item { padding: 6px 12px; font-size: 12px; }
     .header { flex-direction: column; }
     .download-page-body { grid-template-columns: 1fr; }
 }
