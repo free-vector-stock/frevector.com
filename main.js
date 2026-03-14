@@ -169,49 +169,75 @@ function setupCategories() {
     if (!list) return;
     list.innerHTML = '';
 
-    // Type selector (Vector / JPEG)
-    const typeContainer = document.createElement('div');
-    typeContainer.style.padding = '0 16px 8px';
-    typeContainer.style.marginBottom = '8px';
-    typeContainer.style.paddingBottom = '8px';
-    typeContainer.style.borderBottom = '1px solid #ddd';
-    
-    const typeLabel = document.createElement('div');
-    typeLabel.style.fontSize = '10px';
-    typeLabel.style.fontWeight = '600';
-    typeLabel.style.color = '#666';
-    typeLabel.style.marginBottom = '4px';
-    typeLabel.textContent = 'TYPE';
-    typeContainer.appendChild(typeLabel);
-    
-    const typeAll = document.createElement('a');
-    typeAll.href = '#';
-    typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
-    typeAll.textContent = 'All';
-    typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
-    typeContainer.appendChild(typeAll);
-    
-    const typeVector = document.createElement('a');
-    typeVector.href = '#';
-    typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
-    typeVector.textContent = 'Vector';
-    typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
-    typeContainer.appendChild(typeVector);
-    
-    const typeJpeg = document.createElement('a');
-    typeJpeg.href = '#';
-    typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
-    typeJpeg.textContent = 'JPEG';
-    typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
-    typeContainer.appendChild(typeJpeg);
-    
-    list.appendChild(typeContainer);
+    const isMobile = window.innerWidth <= 768;
+
+    if (!isMobile) {
+        // Desktop: Keep the TYPE container
+        const typeContainer = document.createElement('div');
+        typeContainer.style.padding = '0 16px 8px';
+        typeContainer.style.marginBottom = '8px';
+        typeContainer.style.paddingBottom = '8px';
+        typeContainer.style.borderBottom = '1px solid #ddd';
+        
+        const typeLabel = document.createElement('div');
+        typeLabel.style.fontSize = '10px';
+        typeLabel.style.fontWeight = '600';
+        typeLabel.style.color = '#666';
+        typeLabel.style.marginBottom = '4px';
+        typeLabel.textContent = 'TYPE';
+        typeContainer.appendChild(typeLabel);
+        
+        const typeAll = document.createElement('a');
+        typeAll.href = '#';
+        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
+        typeAll.textContent = 'All';
+        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
+        typeContainer.appendChild(typeAll);
+        
+        const typeVector = document.createElement('a');
+        typeVector.href = '#';
+        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
+        typeVector.textContent = 'Vector';
+        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
+        typeContainer.appendChild(typeVector);
+        
+        const typeJpeg = document.createElement('a');
+        typeJpeg.href = '#';
+        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
+        typeJpeg.textContent = 'JPEG';
+        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
+        typeContainer.appendChild(typeJpeg);
+        
+        list.appendChild(typeContainer);
+    } else {
+        // Mobile: Add TYPE items directly to the list as tags
+        const typeAll = document.createElement('a');
+        typeAll.href = '#';
+        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
+        typeAll.textContent = 'All Types';
+        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
+        list.appendChild(typeAll);
+        
+        const typeVector = document.createElement('a');
+        typeVector.href = '#';
+        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
+        typeVector.textContent = 'Vector';
+        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
+        list.appendChild(typeVector);
+        
+        const typeJpeg = document.createElement('a');
+        typeJpeg.href = '#';
+        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
+        typeJpeg.textContent = 'JPEG';
+        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
+        list.appendChild(typeJpeg);
+    }
 
     const allLink = document.createElement('a');
     allLink.href = '#';
     allLink.className = 'category-item' + (state.selectedCategory === 'all' ? ' active' : '');
     allLink.dataset.cat = 'all';
-    allLink.textContent = 'All';
+    allLink.textContent = 'All Categories';
     allLink.onclick = (e) => { e.preventDefault(); selectCategory('all'); };
     list.appendChild(allLink);
 
