@@ -63,20 +63,31 @@ export async function onRequestPost(context) {
     const metadata = JSON.parse(await jsonFile.text());
     const jpegBuffer = await jpegFile.arrayBuffer();
     const zipBuffer = zipFile ? await zipFile.arrayBuffer() : null;
-    const isJpegOnly = !zipBuffer;
-
+    
     const id = jsonFile.name.replace(/\.json$/, "");
-    const category = resolveCategory(metadata.category, id);
-    const title = metadata.title || id;
-    const description = metadata.description || "";
-    const keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
+    
+    // 1. Otomatik Kategori Belirleme (Dosya adından)
+    const idParts = id.split('-');
+    let detectedCategory = idParts[0].charAt(0).toUpperCase() + idParts[0].slice(1).toLowerCase();
+    const category = resolveCategory(detectedCategory, id);
 
-    // Auto-detect content type from filename: if filename contains "-jpeg-", it's JPEG-only
+    // 2. Otomatik Tür Belirleme (Dosya adında -jpeg- varsa)
     const isJpegFromFilename = id.toLowerCase().includes('-jpeg-');
     const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
 
+    const title = metadata.title || id;
+    const description = metadata.description || "";
+    let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
+
+    // 3. Otomatik Keyword Ekleme (Şartnameye göre)
+    const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
+    const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
+    
+    const prefixKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
+    keywords = [...new Set([...prefixKeywords, ...keywords])];
+
     // Forbidden words check for JPEG-only
-    if (isJpegFromFilename || isJpegOnly) {
+    if (contentTypeToSet === 'jpeg') {
         const fullText = (title + " " + description + " " + keywords.join(" ")).toLowerCase();
         for (const word of FORBIDDEN_WORDS_JPEG) {
             if (fullText.includes(word)) return new Response(JSON.stringify({ error: `Forbidden word: ${word}` }), { status: 400, headers });

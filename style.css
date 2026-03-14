@@ -307,10 +307,27 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     body { overflow-y: auto; }
     
     .top-banner { position: static; }
-    .header { position: static; margin-left: 0; }
-    .header-center { margin-left: 0; }
+    .header { 
+        position: static; 
+        margin-left: 0; 
+        flex-direction: column; 
+        height: auto; 
+        padding: 12px; 
+        gap: 8px;
+        order: 2; /* Arama kutusu 2. sırada */
+    }
+    .header-center { margin-left: 0; width: 100%; }
+    .sort-filter { width: 100%; order: 3; } /* Filtre 3. sırada */
     
-    .main-container { position: static; top: auto; bottom: auto; flex-direction: column; }
+    .main-container { 
+        position: static; 
+        top: auto; 
+        bottom: auto; 
+        flex-direction: column; 
+        display: flex;
+        height: auto;
+        overflow: visible;
+    }
     
     .sidebar { 
         width: 100%; 
@@ -321,47 +338,41 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         border-bottom: 1px solid var(--border);
         padding: 8px 0;
         overflow: visible;
+        order: 4; /* Kategoriler 4. sırada */
     }
     
-    .sidebar-title { padding: 0 16px 8px; font-size: 9px; }
+    .sidebar-title { padding: 0 16px 4px; font-size: 9px; }
     
     .categories-list { 
         display: flex; 
         flex-direction: row; 
         flex-wrap: wrap;
         width: 100%;
-        gap: 8px;
+        gap: 4px; /* Boşluklar azaltıldı */
         overflow: visible;
-        padding: 8px 16px;
+        padding: 4px 16px;
     }
     
     .category-item { 
-        padding: 6px 12px; 
-        font-size: 12px;
+        padding: 4px 8px; /* Daha kompakt */
+        font-size: 11px;
         font-weight: 600;
         line-height: 1;
         white-space: nowrap;
         flex-shrink: 0;
-        border-radius: 4px;
-        background: var(--black);
-        color: var(--white);
+        border-radius: 3px;
+        background: var(--white); /* Yazısı kadar siyah alan kaplayacak kuralı için beyaz zemin, siyah border */
+        color: var(--black);
         border: 1px solid var(--black);
         margin: 0;
         cursor: pointer;
-        transition: background 0.15s, opacity 0.15s;
         display: inline-block;
         width: auto;
     }
     
-    .category-item:hover {
-        background: #333;
-        opacity: 0.9;
-    }
-    
     .category-item.active {
-        background: var(--white);
-        color: var(--black);
-        border: 1px solid var(--black);
+        background: var(--black);
+        color: var(--white);
     }
     
     .content { 
@@ -369,6 +380,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         width: 100%; 
         margin-left: 0; 
         overflow-y: auto;
+        order: 5; /* Görseller 5. sırada */
     }
     
     .category-title { font-size: 18px; margin-bottom: 16px; }
@@ -379,10 +391,16 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     
     .detail-inner { grid-template-columns: 1fr; }
     
-    .bottom-fixed-container { position: static; height: auto; border-top: 1px solid var(--border); }
-    .our-picks-section { padding: 12px 0; margin-left: 0; }
-    .our-picks-header { padding: 0 16px; }
-    .our-picks-label { font-size: 9px; }
+    .bottom-fixed-container { 
+        position: static; 
+        height: auto; 
+        border-top: 1px solid var(--border); 
+        display: flex;
+        flex-direction: column;
+        order: 6; /* Alt bölüm 6. sırada */
+    }
+    .our-picks-section { order: 1; padding: 12px 0; margin-left: 0; }
+    .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; }bel { font-size: 9px; }
     .our-picks-nav { gap: 6px; }
     .our-picks-arrow { width: 28px; height: 28px; font-size: 16px; }
     .our-picks-track-wrap { padding: 0 16px; }

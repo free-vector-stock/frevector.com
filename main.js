@@ -349,7 +349,7 @@ function renderVectors() {
             </div>
             <div class="vc-info">
                 <div class="vc-description">${escHtml(v.description || "")}</div>
-                <div class="vc-keywords">${escHtml([...new Set([...EXTRA_KEYWORDS, ...(v.keywords || [])])].join(', '))}</div>
+                <div class="vc-keywords">${escHtml([...new Set([...(v.keywords || [])])].join(', '))}</div>
             </div>
         `;
         card.onclick = () => openDetailPanel(v, card);
@@ -439,7 +439,7 @@ function openDetailPanel(v, cardEl) {
     panel.id = 'detailPanel';
     panel.className = 'detail-panel';
     
-    const keywords = [...new Set([...EXTRA_KEYWORDS, ...(v.keywords || [])])];
+    const keywords = [...new Set([...(v.keywords || [])])];
     const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
 
     panel.innerHTML = `
