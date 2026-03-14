@@ -25,9 +25,19 @@ function authenticate(request) {
 
 function resolveCategory(raw, id) {
     if (!raw) return "Miscellaneous";
-    const s = raw.toString().trim();
+    const s = raw.toString().trim().toLowerCase();
+    
+    // Özel durumlar için eşleştirme (Örn: "the arts" -> "The Arts")
+    const specialCats = {
+        'arts': 'The Arts',
+        'thearts': 'The Arts',
+        'the-arts': 'The Arts'
+    };
+    
+    if (specialCats[s]) return specialCats[s];
+
     for (const cat of VALID_CATEGORIES) {
-        if (cat.toLowerCase() === s.toLowerCase()) return cat;
+        if (cat.toLowerCase() === s) return cat;
     }
     return "Miscellaneous";
 }
@@ -68,8 +78,9 @@ export async function onRequestPost(context) {
     
     // 1. Otomatik Kategori Belirleme (Dosya adından)
     const idParts = id.split('-');
-    let detectedCategory = idParts[0].charAt(0).toUpperCase() + idParts[0].slice(1).toLowerCase();
-    const category = resolveCategory(detectedCategory, id);
+    // Eğer dosya adı "abstract-jpeg-0000001" ise, ilk parça kategoridir.
+    let rawCat = idParts[0];
+    const category = resolveCategory(rawCat, id);
 
     // 2. Otomatik Tür Belirleme (Dosya adında -jpeg- varsa)
     const isJpegFromFilename = id.toLowerCase().includes('-jpeg-');
