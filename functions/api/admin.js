@@ -76,21 +76,30 @@ export async function onRequestPost(context) {
     
     const id = jsonFile.name.replace(/\.json$/, "");
     
-    // 1. Otomatik Kategori Belirleme (Dosya adından)
-    const idParts = id.split('-');
-    // Eğer dosya adı "abstract-jpeg-0000001" ise, ilk parça kategoridir.
-    let rawCat = idParts[0];
-    const category = resolveCategory(rawCat, id);
-
-    // 2. Otomatik Tür Belirleme (Dosya adında -jpeg- varsa)
+    // 1. Tür Belirleme (Dosya adında -jpeg- varsa)
     const isJpegFromFilename = id.toLowerCase().includes('-jpeg-');
     const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
+
+    // 2. Kategori Belirleme (Dosya adından, -jpeg- hériç)
+    // "abstract-jpeg-0000001" -> "abstract"
+    // "abstract-0000001" -> "abstract"
+    let rawCat = id.toLowerCase();
+    if (rawCat.includes('-jpeg-')) {
+        rawCat = rawCat.split('-jpeg-')[0]; // -jpeg- öncesi al
+    } else {
+        // İlk - öncesi alın
+        const parts = rawCat.split('-');
+        rawCat = parts[0];
+    }
+    const category = resolveCategory(rawCat, id);
 
     const title = metadata.title || id;
     const description = metadata.description || "";
     let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
 
-    // 3. Otomatik Keyword Ekleme (Şartnameye göre)
+    // 3. Anahtar Kelime Ekleme (Şartnameye göre - SADECE DOSYA TÜRÜNE GÖRE)
+    // VECTOR: free vector, free svg, free svg icon, free eps, free jpeg, free, fre, vector eps, svg, jpeg
+    // JPEG: free jpeg, free, fre, jpeg
     const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
     const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
     
@@ -98,10 +107,11 @@ export async function onRequestPost(context) {
     keywords = [...new Set([...prefixKeywords, ...keywords])];
 
     // Forbidden words check for JPEG-only
+    // JPEG dosyalarında vector ile ilgili anahtar kelimeler YASAK
     if (contentTypeToSet === 'jpeg') {
         const fullText = (title + " " + description + " " + keywords.join(" ")).toLowerCase();
         for (const word of FORBIDDEN_WORDS_JPEG) {
-            if (fullText.includes(word)) return new Response(JSON.stringify({ error: `Forbidden word: ${word}` }), { status: 400, headers });
+            if (fullText.includes(word)) return new Response(JSON.stringify({ error: `Forbidden word in JPEG: ${word}` }), { status: 400, headers });
         }
     }
 
