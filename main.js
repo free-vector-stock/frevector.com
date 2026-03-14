@@ -279,9 +279,16 @@ function selectType(type) {
 function updateCategoryTitle() {
     const el = document.getElementById('categoryTitle');
     if (!el) return;
-    const cat = state.selectedCategory === 'all' ? '' : state.selectedCategory;
-    const typeStr = state.selectedType === 'all' ? '' : (state.selectedType === 'jpeg' ? ' JPEG' : ' Vector');
-    el.textContent = (cat || 'All') + typeStr || 'Vector';
+    
+    // Generate H1 title based on selected category
+    let h1Text = '';
+    if (state.selectedCategory === 'all') {
+        h1Text = 'Free Vectors, SVGs, Icons and Clipart';
+    } else {
+        h1Text = `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
+    }
+    
+    el.textContent = h1Text;
 }
 
 async function fetchVectors() {
