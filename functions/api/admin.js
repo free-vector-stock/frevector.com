@@ -1,5 +1,6 @@
 /**
  * Admin API - Updated to remove Thumbnail Generation and Sharp Dependency
+ * Optimized for R2 + Edge Cache
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -42,6 +43,14 @@ function resolveCategory(raw, id) {
     return "Miscellaneous";
 }
 
+// Function to sync all_vectors to R2
+async function syncToR2(kv, r2) {
+    const allVectorsRaw = await kv.get("all_vectors");
+    if (allVectorsRaw) {
+        await r2.put("all_vectors.json", allVectorsRaw, { httpMetadata: { contentType: "application/json" } });
+    }
+}
+
 export async function onRequestGet(context) {
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
   if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
@@ -81,13 +90,10 @@ export async function onRequestPost(context) {
     const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
 
     // 2. Kategori Belirleme (Dosya adından, -jpeg- hériç)
-    // "abstract-jpeg-0000001" -> "abstract"
-    // "abstract-0000001" -> "abstract"
     let rawCat = id.toLowerCase();
     if (rawCat.includes('-jpeg-')) {
-        rawCat = rawCat.split('-jpeg-')[0]; // -jpeg- öncesi al
+        rawCat = rawCat.split('-jpeg-')[0];
     } else {
-        // İlk - öncesi alın
         const parts = rawCat.split('-');
         rawCat = parts[0];
     }
@@ -97,17 +103,12 @@ export async function onRequestPost(context) {
     const description = metadata.description || "";
     let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
 
-    // 3. Anahtar Kelime Ekleme (Şartnameye göre - SADECE DOSYA TÜRÜNE GÖRE)
-    // VECTOR: free vector, free svg, free svg icon, free eps, free jpeg, free, fre, vector eps, svg, jpeg
-    // JPEG: free jpeg, free, fre, jpeg
     const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
     const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
     
     const prefixKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
     keywords = [...new Set([...prefixKeywords, ...keywords])];
 
-    // Forbidden words check for JPEG-only
-    // JPEG dosyalarında vector ile ilgili anahtar kelimeler YASAK
     if (contentTypeToSet === 'jpeg') {
         const fullText = (title + " " + description + " " + keywords.join(" ")).toLowerCase();
         for (const word of FORBIDDEN_WORDS_JPEG) {
@@ -115,29 +116,22 @@ export async function onRequestPost(context) {
         }
     }
 
-    // Storage Keys
     const r2JpgKey = `${category}/${id}/${id}.jpg`;
     const r2ThumbKey = `${category}/${id}/${id}-thumb.jpg`;
     const r2ZipKey = `${category}/${id}/${id}.zip`;
     const r2JsonKey = `${category}/${id}/${id}.json`;
 
-    // Upload Original JPEG
     await r2.put(r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
-
-    // Use original JPEG as thumbnail (no resizing in CF Workers)
     await r2.put(r2ThumbKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
 
-    // Upload ZIP if vector
     let fileSizeStr = `${(jpegBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
     if (zipBuffer) {
         await r2.put(r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } });
         fileSizeStr = `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
     }
 
-    // Upload JSON
     await r2.put(r2JsonKey, JSON.stringify(metadata), { httpMetadata: { contentType: "application/json" } });
 
-    // Update KV
     const vectorRecord = {
       name: id,
       category: category,
@@ -156,7 +150,11 @@ export async function onRequestPost(context) {
     if (existingIndex > -1) allVectors[existingIndex] = vectorRecord;
     else allVectors.unshift(vectorRecord);
     
-    await kv.put("all_vectors", JSON.stringify(allVectors));
+    const updatedRaw = JSON.stringify(allVectors);
+    await kv.put("all_vectors", updatedRaw);
+    
+    // Sync to R2
+    await r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } });
 
     return new Response(JSON.stringify({ success: true, vector: vectorRecord }), { status: 200, headers });
   } catch (e) {
@@ -186,7 +184,12 @@ export async function onRequestDelete(context) {
     await r2.delete(`${category}/${slug}/${slug}.json`);
 
     allVectors = allVectors.filter(v => v.name !== slug);
-    await kv.put("all_vectors", JSON.stringify(allVectors));
+    const updatedRaw = JSON.stringify(allVectors);
+    await kv.put("all_vectors", updatedRaw);
+    
+    // Sync to R2
+    await r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } });
+
     return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });

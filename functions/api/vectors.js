@@ -1,6 +1,6 @@
 /**
  * GET /api/vectors
- * Returns paginated vector list with thumbnails from R2.
+ * Returns paginated vector list with thumbnails from R2 with Edge Cache.
  */
 
 const CORS_HEADERS = {
@@ -10,11 +10,17 @@ const CORS_HEADERS = {
 };
 
 export async function onRequestGet(context) {
-    try {
-        const kv = context.env.VECTOR_DB;
-        if (!kv) return new Response(JSON.stringify({ error: "KV not configured" }), { status: 500, headers: CORS_HEADERS });
+    const cache = caches.default;
+    const url = new URL(context.request.url);
+    
+    // Check Edge Cache
+    const cacheResponse = await cache.match(context.request);
+    if (cacheResponse) {
+        return cacheResponse;
+    }
 
-        const url = new URL(context.request.url);
+    try {
+        const r2 = context.env.VECTOR_ASSETS;
         const slug = url.searchParams.get("slug");
         const category = url.searchParams.get("category") || "";
         const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
@@ -23,8 +29,20 @@ export async function onRequestGet(context) {
         const sort = url.searchParams.get("sort") || "";
         const type = url.searchParams.get("type") || ""; // 'vector', 'jpeg', or empty for all
 
-        const allVectorsRaw = await kv.get("all_vectors");
-        if (!allVectorsRaw) return new Response(JSON.stringify({ vectors: [], total: 0, page: 1, totalPages: 0 }), { status: 200, headers: CORS_HEADERS });
+        // Try to get all_vectors from R2 first (optimized)
+        let allVectorsRaw;
+        const r2Object = await r2.get("all_vectors.json");
+        if (r2Object) {
+            allVectorsRaw = await r2Object.text();
+        } else {
+            // Fallback to KV if R2 is not yet populated
+            const kv = context.env.VECTOR_DB;
+            allVectorsRaw = await kv.get("all_vectors");
+        }
+
+        if (!allVectorsRaw) {
+            return new Response(JSON.stringify({ vectors: [], total: 0, page: 1, totalPages: 0 }), { status: 200, headers: CORS_HEADERS });
+        }
 
         let allVectors = JSON.parse(allVectorsRaw);
 
@@ -32,7 +50,9 @@ export async function onRequestGet(context) {
         if (slug) {
             const vector = allVectors.find(v => v.name === slug);
             if (!vector) return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers: CORS_HEADERS });
-            return new Response(JSON.stringify(enrichVector(vector)), { status: 200, headers: CORS_HEADERS });
+            const response = new Response(JSON.stringify(enrichVector(vector)), { status: 200, headers: CORS_HEADERS });
+            context.waitUntil(cache.put(context.request, response.clone()));
+            return response;
         }
 
         // Category filter
@@ -72,13 +92,20 @@ export async function onRequestGet(context) {
         const offset = (validPage - 1) * limit;
         const pageVectors = allVectors.slice(offset, offset + limit);
 
-        return new Response(JSON.stringify({
+        const result = {
             vectors: pageVectors.map(enrichVector),
             total,
             page: validPage,
             totalPages,
             category: category || "all"
-        }), { status: 200, headers: CORS_HEADERS });
+        };
+
+        const response = new Response(JSON.stringify(result), { status: 200, headers: CORS_HEADERS });
+        
+        // Cache the response for 1 minute (as defined in max-age)
+        context.waitUntil(cache.put(context.request, response.clone()));
+
+        return response;
 
     } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });

@@ -1,7 +1,7 @@
 /**
  * GET /api/categories
  * Returns list of all categories with vector counts, sorted A-Z
- * Requirement: Updated category list from şartname.txt
+ * Optimized for R2 + Edge Cache
  */
 
 const CORS_HEADERS = {
@@ -10,7 +10,6 @@ const CORS_HEADERS = {
     "Cache-Control": "public, max-age=300"
 };
 
-// New categories list from şartname.txt
 const ALL_CATEGORIES = [
     'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
     'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous',
@@ -19,17 +18,23 @@ const ALL_CATEGORIES = [
 ];
 
 export async function onRequestGet(context) {
+    const cache = caches.default;
+    const cacheResponse = await cache.match(context.request);
+    if (cacheResponse) return cacheResponse;
+
     try {
-        const kv = context.env.VECTOR_DB;
-        if (!kv) {
-            const categories = ALL_CATEGORIES.map(name => ({ name, count: 0 }));
-            return new Response(JSON.stringify({ categories, total: 0 }), {
-                status: 200,
-                headers: CORS_HEADERS
-            });
+        const r2 = context.env.VECTOR_ASSETS;
+        
+        // Try to get all_vectors from R2 first
+        let allVectorsRaw;
+        const r2Object = await r2.get("all_vectors.json");
+        if (r2Object) {
+            allVectorsRaw = await r2Object.text();
+        } else {
+            const kv = context.env.VECTOR_DB;
+            allVectorsRaw = await kv.get("all_vectors");
         }
 
-        const allVectorsRaw = await kv.get("all_vectors");
         const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
 
         const categoryCounts = {};
@@ -43,13 +48,13 @@ export async function onRequestGet(context) {
             count: categoryCounts[name] || 0
         }));
 
-        // Sort A-Z
         categories.sort((a, b) => a.name.localeCompare(b.name));
 
-        return new Response(JSON.stringify({ categories, total: allVectors.length }), {
-            status: 200,
-            headers: CORS_HEADERS
-        });
+        const result = { categories, total: allVectors.length };
+        const response = new Response(JSON.stringify(result), { status: 200, headers: CORS_HEADERS });
+        
+        context.waitUntil(cache.put(context.request, response.clone()));
+        return response;
 
     } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS_HEADERS });
