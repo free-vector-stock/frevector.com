@@ -117,12 +117,12 @@ export async function onRequestPost(context) {
     }
 
     const r2JpgKey = `${category}/${id}/${id}.jpg`;
-    const r2ThumbKey = `${category}/${id}/${id}-thumb.jpg`;
+    // const r2ThumbKey = `${category}/${id}/${id}-thumb.jpg`; // Thumbnail removed
     const r2ZipKey = `${category}/${id}/${id}.zip`;
     const r2JsonKey = `${category}/${id}/${id}.json`;
 
     await r2.put(r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
-    await r2.put(r2ThumbKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
+    // Thumbnail generation removed - using original JPEG directly
 
     let fileSizeStr = `${(jpegBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
     if (zipBuffer) {
@@ -179,7 +179,7 @@ export async function onRequestDelete(context) {
 
     const category = vector.category || 'Miscellaneous';
     await r2.delete(`${category}/${slug}/${slug}.jpg`);
-    await r2.delete(`${category}/${slug}/${slug}-thumb.jpg`);
+    // await r2.delete(`${category}/${slug}/${slug}-thumb.jpg`); // Thumbnail removed
     await r2.delete(`${category}/${slug}/${slug}.zip`);
     await r2.delete(`${category}/${slug}/${slug}.json`);
 

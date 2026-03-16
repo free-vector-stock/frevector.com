@@ -117,7 +117,7 @@ function enrichVector(v) {
     const category = v.category || "Miscellaneous";
     
     // Structure: Category/ID/ID-thumb.jpg
-    const thumbKey = `${category}/${id}/${id}-thumb.jpg`;
+    const thumbKey = `${category}/${id}/${id}.jpg`;
     const isJpegOnly = v.contentType === 'jpeg';
 
     return {

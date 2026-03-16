@@ -70,7 +70,7 @@ export async function onRequestPost(context) {
       const keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
 
       const r2JpgKey = `${resolvedCategory}/${slug}/${slug}.jpg`;
-      const r2ThumbKey = `${resolvedCategory}/${slug}/${slug}-thumb.jpg`;
+      // const r2ThumbKey = `${resolvedCategory}/${slug}/${slug}-thumb.jpg`; // Thumbnail removed
       const r2ZipKey = `${resolvedCategory}/${slug}/${slug}.zip`;
       const r2JsonKey = `${resolvedCategory}/${slug}/${slug}.json`;
 
@@ -81,9 +81,7 @@ export async function onRequestPost(context) {
       const jpgUpload = await uploadWithRetry(r2, r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
       if (!jpgUpload.success) return new Response(JSON.stringify({ error: "JPEG upload failed: " + jpgUpload.error }), { status: 500, headers });
 
-      // Use original JPEG as thumbnail (no resizing in CF Workers)
-      const thumbUpload = await uploadWithRetry(r2, r2ThumbKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
-      if (!thumbUpload.success) return new Response(JSON.stringify({ error: "Thumbnail upload failed: " + thumbUpload.error }), { status: 500, headers });
+      // Thumbnail generation removed - using original JPEG directly
 
       // Upload ZIP if vector
       if (zipBuffer) {

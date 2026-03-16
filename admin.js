@@ -329,7 +329,7 @@ function renderManageTable(type = 'vector') {
             const typeLabel = v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>';
             // REVİZYON 2: Thumbnail URL'sini category/id/id-thumb.jpg yapısına göre oluştur
             const cat = v.category || 'Miscellaneous';
-            const thumbKey = encodeURIComponent(`${cat}/${v.name}/${v.name}-thumb.jpg`);
+            const thumbKey = encodeURIComponent(`${cat}/${v.name}/${v.name}.jpg`);
             const thumbnailUrl = `/api/asset?key=${thumbKey}`;
             tr.innerHTML = `
                 <td><input type="checkbox" class="vector-checkbox" data-id="${escHtml(v.name)}" data-type="${type}"></td>
