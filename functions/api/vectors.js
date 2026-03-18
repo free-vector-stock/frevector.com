@@ -115,9 +115,11 @@ export async function onRequestGet(context) {
 function enrichVector(v) {
     const id = v.name;
     const category = v.category || "Miscellaneous";
+    const contentType = v.contentType || 'vector';
+    const typeFolder = contentType === 'jpeg' ? 'jpeg' : 'vector';
     
-    // Structure: Category/ID/ID-thumb.jpg
-    const thumbKey = `${category}/${id}/${id}.jpg`;
+    // Structure: Category/vector/ID.jpg or Category/jpeg/ID.jpg
+    const thumbKey = `${category}/${typeFolder}/${id}.jpg`;
     const isJpegOnly = v.contentType === 'jpeg';
 
     return {

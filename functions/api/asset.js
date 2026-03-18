@@ -27,10 +27,19 @@ export async function onRequestGet(context) {
             // Extract ID from filename (e.g., abstract-00000003.jpg -> abstract-00000003)
             const id = decodedKey.split('.')[0];
             
-            // 1. Try the new structure: Category/ID/ID.ext
+            // 1. Try the new structure: Category/vector/ID.ext or Category/jpeg/ID.ext
             for (const cat of categories) {
-                const testKey = `${cat}/${id}/${decodedKey}`;
-                const testObj = await r2.get(testKey);
+                // Try vector folder first
+                let testKey = `${cat}/vector/${decodedKey}`;
+                let testObj = await r2.get(testKey);
+                if (testObj) {
+                    object = testObj;
+                    break;
+                }
+                
+                // Try jpeg folder
+                testKey = `${cat}/jpeg/${decodedKey}`;
+                testObj = await r2.get(testKey);
                 if (testObj) {
                     object = testObj;
                     break;

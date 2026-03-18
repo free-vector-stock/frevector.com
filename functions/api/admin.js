@@ -116,10 +116,12 @@ export async function onRequestPost(context) {
         }
     }
 
-    const r2JpgKey = `${category}/${id}/${id}.jpg`;
-    // const r2ThumbKey = `${category}/${id}/${id}-thumb.jpg`; // Thumbnail removed
-    const r2ZipKey = `${category}/${id}/${id}.zip`;
-    const r2JsonKey = `${category}/${id}/${id}.json`;
+    // Determine type folder (vector or jpeg) based on filename
+    const typeFolder = isJpegFromFilename ? 'jpeg' : 'vector';
+    
+    const r2JpgKey = `${category}/${typeFolder}/${id}.jpg`;
+    const r2ZipKey = `${category}/${typeFolder}/${id}.zip`;
+    const r2JsonKey = `${category}/${typeFolder}/${id}.json`;
 
     await r2.put(r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
     // Thumbnail generation removed - using original JPEG directly
@@ -178,10 +180,12 @@ export async function onRequestDelete(context) {
     if (!vector) return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers });
 
     const category = vector.category || 'Miscellaneous';
-    await r2.delete(`${category}/${slug}/${slug}.jpg`);
-    // await r2.delete(`${category}/${slug}/${slug}-thumb.jpg`); // Thumbnail removed
-    await r2.delete(`${category}/${slug}/${slug}.zip`);
-    await r2.delete(`${category}/${slug}/${slug}.json`);
+    const contentType = vector.contentType || 'vector';
+    const typeFolder = contentType === 'jpeg' ? 'jpeg' : 'vector';
+    
+    await r2.delete(`${category}/${typeFolder}/${slug}.jpg`);
+    await r2.delete(`${category}/${typeFolder}/${slug}.zip`);
+    await r2.delete(`${category}/${typeFolder}/${slug}.json`);
 
     allVectors = allVectors.filter(v => v.name !== slug);
     const updatedRaw = JSON.stringify(allVectors);
