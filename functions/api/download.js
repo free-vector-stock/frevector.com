@@ -33,15 +33,12 @@ export async function onRequestGet(context) {
 
         if (vector) {
             const category = vector.category || "Miscellaneous";
-            const contentTypeVec = vector.contentType || 'vector';
-            const typeFolder = contentTypeVec === 'jpeg' ? 'jpeg' : 'vector';
-            
             // Try ZIP first (vector content)
-            object = await r2.get(`${category}/${typeFolder}/${slug}.zip`);
+            object = await r2.get(`${category}/${slug}/${slug}.zip`);
             
             // If no ZIP, try JPEG (jpeg-only content)
             if (!object) {
-                object = await r2.get(`${category}/${typeFolder}/${slug}.jpg`);
+                object = await r2.get(`${category}/${slug}/${slug}.jpg`);
                 if (object) {
                     isJpeg = true;
                     contentType = "image/jpeg";
@@ -67,22 +64,9 @@ export async function onRequestGet(context) {
         // Fallback: search all categories
         if (!object) {
             for (const cat of categories) {
-                // Try vector folder
-                let zipObj = await r2.get(`${cat}/vector/${slug}.zip`);
+                const zipObj = await r2.get(`${cat}/${slug}/${slug}.zip`);
                 if (zipObj) { object = zipObj; break; }
-                let jpgObj = await r2.get(`${cat}/vector/${slug}.jpg`);
-                if (jpgObj) { 
-                    object = jpgObj; 
-                    isJpeg = true;
-                    contentType = "image/jpeg";
-                    filename = slug + ".jpg";
-                    break; 
-                }
-                
-                // Try jpeg folder
-                zipObj = await r2.get(`${cat}/jpeg/${slug}.zip`);
-                if (zipObj) { object = zipObj; break; }
-                jpgObj = await r2.get(`${cat}/jpeg/${slug}.jpg`);
+                const jpgObj = await r2.get(`${cat}/${slug}/${slug}.jpg`);
                 if (jpgObj) { 
                     object = jpgObj; 
                     isJpeg = true;
