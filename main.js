@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031410 - Dynamic Our Picks & Working Footer Modals
+ * v2026031415 - Full Sync: Random Selections & Click Fix
  */
 
 const CATEGORIES = [
@@ -13,19 +13,19 @@ const CATEGORIES = [
 const MODAL_CONTENTS = {
     about: { 
         title: 'About Us', 
-        content: `<h2>About Us</h2><p style="margin-top:15px; line-height:1.6;">Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design. All designs on the site are created exclusively by Frevector artists. All files can be used in both personal and commercial projects.</p>` 
+        content: `<h2>About Us</h2><p style="margin-top:15px; line-height:1.6;">Frevector.com is a specialized digital archive offering high-quality, original vector assets for designers, illustrators, and creators worldwide. Our mission is to provide a seamless creative workflow by offering free access to professionally crafted SVG and EPS files. Every piece in our collection is meticulously designed to meet modern industry standards, ensuring full scalability and easy customization for both personal and commercial projects.</p>` 
     },
     privacy: { 
         title: 'Privacy Policy', 
-        content: `<h2>Privacy Policy</h2><p style="margin-top:15px; line-height:1.6;">As Frevector.com, we prioritize user privacy. Cookies may be used on the site to support site functions, remember user preferences, and measure performance. We do not share your personal data with third parties.</p>` 
+        content: `<h2>Privacy Policy</h2><p style="margin-top:15px; line-height:1.6;">At Frevector.com, your privacy is our priority. We only collect minimal data necessary for site performance and user experience improvements. We use industry-standard encryption to protect your information and do not sell or share your data with third-party advertisers. Cookies are utilized only to remember your preferences and provide analytical insights to help us serve you better.</p>` 
     },
     terms: { 
         title: 'Terms of Service', 
-        content: `<h2>Terms of Service</h2><p style="margin-top:15px; line-height:1.6;">Every visitor using Frevector.com is deemed to have accepted the following terms. All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector. Redistribution is prohibited.</p>` 
+        content: `<h2>Terms of Service</h2><p style="margin-top:15px; line-height:1.6;">By using Frevector.com, you agree to our terms. All assets provided are free for use in personal and commercial projects. However, redistribution, sub-licensing, or selling our original files as your own is strictly prohibited. While we strive for the highest quality, Frevector.com is not liable for any damages resulting from the use of our downloaded files.</p>` 
     },
     contact: { 
         title: 'Contact', 
-        content: `<h2>Contact</h2><p style="margin-top:15px; line-height:1.6;">If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p><p style="margin-top:10px;"><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000;">hakankacar2014@gmail.com</a></p>` 
+        content: `<h2>Contact</h2><p style="margin-top:15px; line-height:1.6;">Have questions, feedback, or a custom request? We would love to hear from you. Our team is dedicated to supporting the creative community.</p><p style="margin-top:15px;"><strong>Official Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000; font-weight:bold;">hakankacar2014@gmail.com</a></p><p style="margin-top:5px;">Response time is typically within 24-48 hours.</p>` 
     }
 };
 
@@ -34,7 +34,6 @@ const state = {
     currentPage: 1,
     totalPages: 1,
     selectedCategory: 'all',
-    selectedType: 'all',
     searchQuery: '',
     isLoading: false,
     openedVector: null,
@@ -52,7 +51,7 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
     await fetchVectors();
-    await fetchAndRenderOurPicks(); // İlk açılışta yükle
+    await fetchAndRenderOurPicks(); 
 }
 
 function setupCategories() {
@@ -84,7 +83,7 @@ function selectCategory(cat) {
     setupCategories();
     updateCategoryTitle();
     fetchVectors();
-    fetchAndRenderOurPicks(); // Kategori değişince alt şeridi de güncelle!
+    fetchAndRenderOurPicks(); 
 }
 
 function updateCategoryTitle() {
@@ -141,8 +140,9 @@ async function fetchAndRenderOurPicks() {
     if (!track) return;
     try {
         const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('limit', '15');
-        // Kategori seçiliyse alt şeridi de o kategoriye göre filtrele
+        url.searchParams.set('limit', '20');
+        // Rastgele getirmek için API'ye işaret gönderiyoruz (Backend'de shuffle/random yapılmalı)
+        url.searchParams.set('sort', 'random'); 
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         
         const res = await fetch(url);
@@ -152,17 +152,20 @@ async function fetchAndRenderOurPicks() {
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         
-        if (picks.length === 0) {
-            track.innerHTML = '<p style="font-size:10px; color:#999; padding:20px;">No specific picks for this category.</p>';
-            return;
-        }
+        if (picks.length === 0) return;
 
+        // Tıklama özelliğini ekleyerek kartları oluştur
         const quadPicks = [...picks, ...picks, ...picks, ...picks];
         quadPicks.forEach(v => {
             const card = document.createElement('div');
             card.className = 'vector-card';
+            card.style.cursor = 'pointer';
             card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
-            card.onclick = () => showDownloadPage(v);
+            // Tıklayınca indirme sayfasını aç
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showDownloadPage(v);
+            });
             track.appendChild(card);
         });
         state.ourPicksOffset = picks.length * 90;
@@ -225,6 +228,7 @@ function showDownloadPage(v) {
         document.getElementById('dpDownloadBtn').style.display = 'none';
         document.getElementById('dpCountdownBox').style.display = 'block';
         let c = 4;
+        document.getElementById('dpCountdown').textContent = c;
         state.countdownInterval = setInterval(() => {
             c--;
             document.getElementById('dpCountdown').textContent = c;
@@ -268,7 +272,6 @@ function setupDownloadPageHandlers() {
 }
 
 function setupModalHandlers() { 
-    // Tüm modal tetikleyicilerini bul ve olay ekle
     document.querySelectorAll('.modal-trigger').forEach(b => {
         b.onclick = (e) => {
             e.preventDefault();
@@ -280,17 +283,12 @@ function setupModalHandlers() {
             }
         };
     });
-    
     document.getElementById('infoModalClose').onclick = () => {
         document.getElementById('infoModal').style.display = 'none';
     };
-    
-    // Dışarı tıklayınca kapatma
     window.onclick = (event) => {
         const modal = document.getElementById('infoModal');
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
+        if (event.target == modal) modal.style.display = 'none';
     };
 }
 
@@ -299,7 +297,10 @@ function setupEventListeners() {
         state.searchQuery = document.getElementById('searchInput').value; 
         state.currentPage = 1; 
         fetchVectors(); 
-    }; 
+    };
+    document.getElementById('searchInput').onkeypress = (e) => {
+        if(e.key === 'Enter') document.getElementById('searchBtn').click();
+    };
     document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
     document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
 }
