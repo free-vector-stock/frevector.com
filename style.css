@@ -242,7 +242,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .our-picks-track { 
     display: flex; 
     gap: 10px; 
-    /* Transition JS tarafından yönetiliyor, çakışma olmaması için burayı boş bırakıyoruz */
+    /* Transition JS (main.js) tarafından yönetilir, seamless döngü için burada sabit kural olmamalıdır */
 }
 
 .our-picks-track .vector-card { 
@@ -314,10 +314,10 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         height: auto; 
         padding: 12px; 
         gap: 8px;
-        order: 2; /* Arama kutusu 2. sırada */
+        order: 2; 
     }
     .header-center { margin-left: 0; width: 100%; }
-    .sort-filter { width: 100%; order: 3; } /* Filtre 3. sırada */
+    .sort-filter { width: 100%; order: 3; } 
     
     .main-container { 
         position: static; 
@@ -338,7 +338,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         border-bottom: 1px solid var(--border);
         padding: 8px 0;
         overflow: visible;
-        order: 4; /* Kategoriler 4. sırada */
+        order: 4; 
     }
     
     .sidebar-title { padding: 0 16px 4px; font-size: 9px; }
@@ -348,20 +348,20 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         flex-direction: row; 
         flex-wrap: wrap;
         width: 100%;
-        gap: 4px; /* Boşluklar azaltıldı */
+        gap: 4px; 
         overflow: visible;
         padding: 4px 16px;
     }
     
     .category-item { 
-        padding: 4px 8px; /* Daha kompakt */
+        padding: 4px 8px; 
         font-size: 11px;
         font-weight: 600;
         line-height: 1;
         white-space: nowrap;
         flex-shrink: 0;
         border-radius: 3px;
-        background: var(--white); /* Yazısı kadar siyah alan kaplayacak kuralı için beyaz zemin, siyah border */
+        background: var(--white); 
         color: var(--black);
         border: 1px solid var(--black);
         margin: 0;
@@ -380,7 +380,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         width: 100%; 
         margin-left: 0; 
         overflow-y: auto;
-        order: 5; /* Görseller 5. sırada */
+        order: 5; 
     }
     
     .category-title { font-size: 18px; margin-bottom: 16px; }
@@ -397,7 +397,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         border-top: 1px solid var(--border); 
         display: flex;
         flex-direction: column;
-        order: 6; /* Alt bölüm 6. sırada */
+        order: 6; 
     }
     .our-picks-section { order: 1; padding: 12px 0; margin-left: 0; }
     .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; }
