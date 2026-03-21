@@ -6,87 +6,6 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- KESİN ÇÖZÜM CSS --- */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column; /* Sayfayı dikey bloklara ayırır */
-        }
-
-        /* Üst Logo Bandı Yüksekliği */
-        .top-banner {
-            height: 60px;
-            background-color: #000;
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        /* Ana İçerik Alanı - Esnek yapı, boşluğu doldurur */
-        .main-container {
-            flex: 1 0 auto; /* İçerik az olsa bile alanı aşağı iter */
-            display: flex;
-        }
-
-        /* Alt Kısım - Sayfalamayı ve Footer'ı kapsayan sabit alan */
-        .bottom-fixed-area {
-            flex-shrink: 0; /* Aşağıda sabit kalmasını sağlar */
-            width: 100%;
-        }
-
-        /* Sayfalama Alanı */
-        .pagination-wrapper {
-            background-color: #fff;
-            padding: 15px 0;
-            border-top: 1px solid #eee;
-            text-align: center;
-        }
-
-        .pagination-nav {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pag-btn {
-            background-color: #1a1a1a;
-            color: #fff;
-            border: none;
-            padding: 6px 14px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-
-        /* SİYAH FOOTER - Yüksekliği üst bant (60px) ile BİREBİR AYNI */
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            background-color: #000;
-            height: 60px; /* Üst bantla eşitlendi */
-        }
-
-        .copyright, .footer-link {
-            color: #999;
-            text-decoration: none;
-            font-size: 12px;
-        }
-
-        .footer-nav {
-            display: flex;
-            gap: 20px;
-        }
-
-        .footer-link:hover { color: #fff; }
-
         .dp-countdown-box { text-align: center; margin-top: 20px; }
         .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
     </style>
@@ -128,7 +47,8 @@
         </main>
     </div>
 
-    <div class="bottom-fixed-area">
+    <div class="bottom-fixed-container">
+        
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
@@ -155,7 +75,9 @@
             <button id="dpClose" class="dp-close">&#10005;</button>
         </div>
         <div class="download-page-body">
-            <div class="dp-left"><img id="dpImage" src="" alt="" class="dp-image"></div>
+            <div class="dp-left">
+                <img id="dpImage" src="" alt="" class="dp-image">
+            </div>
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
                 <p id="dpDescription" class="dp-desc"></p>
@@ -171,6 +93,7 @@
                 <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
                     <p>Your download will start in</p>
                     <div id="dpCountdown" class="dp-countdown-num">4</div>
+                    <p>High-speed secure download from frevector.com</p>
                 </div>
             </div>
         </div>
@@ -184,6 +107,7 @@
     </div>
 
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
+
     <script src="main.js?v=2026031407"></script>
 </body>
 </html>
