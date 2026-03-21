@@ -13,9 +13,8 @@
 body { 
     font-family: var(--font); 
     background: var(--white); 
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Sayfayı en az ekran boyuna zorla */
+    overflow: hidden; /* Sayfanın tamamının kaymasını engelle, sadece orta alanı kaydıracağız */
+    height: 100vh; 
 }
 
 /* Layout Components */
@@ -27,16 +26,22 @@ body {
 .search-input { border: none; outline: none; width: 100%; font-size: 14px; }
 .search-icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-/* Ana Taşıyıcı: İçerik az olsa bile footer'ı aşağı itmesi için flex kullanıldı */
+/* Ana Taşıyıcı: Üst ve Alt sabit alanlar arasında kalan alan */
 .main-container { 
     display: flex; 
-    flex: 1; 
-    margin-top: 104px; 
-    margin-bottom: 140px; /* Alttaki sabit alanlar için yer bırak */
+    position: fixed; 
+    top: 104px; 
+    bottom: 240px; /* Alttaki sabit bölümlerin toplam yüksekliği kadar boşluk bırak */
     width: 100%; 
 }
 
-.sidebar { width: 160px; border-right: 1px solid var(--border); padding: 10px 0; background: #fff; position: sticky; top: 104px; height: calc(100vh - 104px); overflow-y: auto; }
+.sidebar { 
+    width: 160px; 
+    border-right: 1px solid var(--border); 
+    overflow-y: auto; 
+    padding: 10px 0; 
+    background: #fff; 
+}
 .sidebar-title { padding: 0 16px 5px; font-size: 11px; font-weight: bold; color: #333; text-transform: uppercase; }
 .category-item { display: block; padding: 6px 16px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; transition: 0.2s; }
 .category-item.active { background: var(--black); color: var(--white); font-weight: 500; }
@@ -45,8 +50,8 @@ body {
 .content { 
     flex: 1; 
     padding: 20px; 
+    overflow-y: auto; /* Sadece görsellerin olduğu bu alan kaydırılabilir olacak */
     background: #fff; 
-    min-height: 500px; /* İçerik boşken footer'ın çok yukarı çıkmasını önler */
 }
 .category-title { font-size: 20px; margin-bottom: 20px; font-weight: 500; }
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
@@ -75,10 +80,12 @@ body {
 .download-btn { background: #000; color: #fff; border: none; padding: 12px 25px; cursor: pointer; border-radius: 4px; font-weight: bold; }
 .detail-close-btn { background: none; border: 1px solid #ccc; padding: 12px 25px; cursor: pointer; border-radius: 4px; }
 
-/* Bottom Navigation & Picks - Sayfanın altına sabitlemek için düzenlendi */
+/* Bottom Area: EKRANIN ALTINA SABİTLENDİ */
 .bottom-fixed-container { 
-    margin-top: auto; /* Diğer her şeyi yukarı it */
+    position: fixed; 
+    bottom: 0; 
     width: 100%; 
+    height: 240px; /* Pagination + Picks + Footer toplam yüksekliği */
     background: white; 
     border-top: 1px solid var(--border); 
     z-index: 1001; 
@@ -96,7 +103,7 @@ body {
 .our-picks-track .vc-info { display: none; }
 .our-picks-arrow { background: white; border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; }
+.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; z-index: 1002; position: relative; }
 .footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; }
 
 /* Modals & Full Overlay */
@@ -119,14 +126,13 @@ body {
 .dp-countdown-box { text-align: center; padding: 20px; background: #f9f9f9; border-radius: 8px; margin-top: 20px; }
 .dp-countdown-num { font-size: 48px; font-weight: bold; color: #000; }
 
-/* Utilities */
 .loader-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:4000; display:none; justify-content:center; align-items:center; }
 .spinner { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #000; border-radius:50%; animation:spin 1s linear infinite; }
 @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 
 @media (max-width: 768px) {
-    .main-container { flex-direction: column; margin-bottom: 0; }
-    .sidebar { width: 100%; display: flex; overflow-x: auto; position: static; height: auto; border-right: none; padding: 5px; }
+    .main-container { flex-direction: column; position: static; height: auto; }
+    .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; height: auto; padding: 5px; }
     .sidebar-title { display: none; }
     .bottom-fixed-container { position: static; height: auto; }
     .download-page-body { flex-direction: column; padding: 20px; }
