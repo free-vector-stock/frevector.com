@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031406 - Fixed: Z-index overlap between pagination and Our Picks
+ * v2026031408 - Fixed: Absolute visual separation for Pagination and Our Picks
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -161,27 +161,31 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
 
-    // Pagination ve Our Picks çakışmasını önleyen yerleşim ayarları
-    const pagination = document.querySelector('.pagination');
-    if (pagination) {
-        pagination.style.position = 'relative';
-        pagination.style.zIndex = '1';
-        pagination.style.marginBottom = '20px';
-    }
-
-    const ourPicksSection = document.querySelector('.our-picks-section');
-    if (ourPicksSection) {
-        ourPicksSection.style.position = 'relative';
-        ourPicksSection.style.zIndex = '2';
-        ourPicksSection.style.clear = 'both';
-    }
-
-    const footer = document.querySelector('footer');
-    if (footer) {
-        footer.style.position = 'relative';
-        footer.style.clear = 'both';
-        footer.style.marginTop = '40px';
-    }
+    // KRİTİK DÜZELTME: Pagination ve Our Picks alanlarını birbirinden zorla ayırır
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .pagination { 
+            position: relative !important; 
+            z-index: 10 !important; 
+            margin-bottom: 50px !important; 
+            display: flex !important; 
+            justify-content: center !important;
+            clear: both !important;
+        }
+        .our-picks-section { 
+            position: relative !important; 
+            z-index: 5 !important; 
+            display: block !important; 
+            clear: both !important; 
+            padding-top: 20px !important;
+            margin-top: 40px !important;
+            border-top: 1px solid #f0f0f0 !important;
+        }
+        #ourPicksTrack {
+            pointer-events: auto !important; /* Tıklanabilirliği garanti eder */
+        }
+    `;
+    document.head.appendChild(style);
 
     await fetchVectors();
 }
@@ -378,17 +382,15 @@ function renderOurPicks() {
     state.ourPicksOffset = 0;
     track.style.transform = `translateX(0px)`;
     
-    // Oklar ve görsellerin çakışmaması için container ayarları
     container.style.position = 'relative';
     container.style.padding = '0 50px'; 
     container.style.overflow = 'hidden';
-    container.style.zIndex = '5'; // Pagination'ın üstünde kalması için
 
     state.vectors.slice(0, 20).forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         card.style.flex = '0 0 auto';
-        card.style.width = '100px'; // Biraz daha genişletildi
+        card.style.width = '100px'; 
         card.style.marginRight = '12px';
 
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
