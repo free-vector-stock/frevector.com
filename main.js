@@ -1,6 +1,5 @@
 /**
  * frevector.com - Frontend Logic
- * v20260322 - Scrolling Fixed & Type Filter Integration
  */
 
 const CATEGORIES = [
@@ -67,9 +66,7 @@ function setupTypeFilters() {
             state.selectedType = btn.dataset.type;
             state.currentPage = 1;
             closeDetailPanel();
-            fetchVectors().then(() => {
-                setTimeout(() => fetchAndRenderOurPicks(), 300);
-            });
+            fetchVectors().then(() => { setTimeout(() => fetchAndRenderOurPicks(), 300); });
         };
     });
 }
@@ -78,14 +75,12 @@ function setupCategories() {
     const list = document.getElementById('categoriesList');
     if (!list) return;
     list.innerHTML = '';
-
     const allLink = document.createElement('a');
     allLink.href = '#';
     allLink.className = 'category-item' + (state.selectedCategory === 'all' ? ' active' : '');
     allLink.textContent = 'All Categories';
     allLink.onclick = (e) => { e.preventDefault(); selectCategory('all'); };
     list.appendChild(allLink);
-
     CATEGORIES.forEach(cat => {
         const a = document.createElement('a');
         a.href = '#';
@@ -102,9 +97,7 @@ function selectCategory(cat) {
     closeDetailPanel();
     setupCategories();
     updateCategoryTitle();
-    fetchVectors().then(() => {
-        setTimeout(() => fetchAndRenderOurPicks(), 300);
-    });
+    fetchVectors().then(() => { setTimeout(() => fetchAndRenderOurPicks(), 300); });
 }
 
 function updateCategoryTitle() {
@@ -123,7 +116,6 @@ async function fetchVectors() {
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
-        
         const res = await fetch(url);
         const data = await res.json();
         state.vectors = data.vectors || [];
@@ -138,23 +130,19 @@ function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-
     if (state.vectors.length === 0) {
-        grid.innerHTML = '<p style="padding:20px; color:#999;">No items found.</p>';
+        grid.innerHTML = '<p style="padding:20px; color:#999;">No items found in this category.</p>';
         return;
     }
-
     state.vectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         const typeBadge = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
-        const displayKeywords = (v.keywords || []).slice(0, 3).join(', ');
-        
         card.innerHTML = `
             <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}">${typeBadge}</div>
             <div class="vc-info">
                 <div class="vc-description">${v.title || "Untitled"}</div>
-                <div class="vc-keywords">${displayKeywords}</div>
+                <div class="vc-keywords">${(v.keywords || []).slice(0, 3).join(', ')}</div>
             </div>
         `;
         card.onclick = () => openDetailPanel(v, card);
@@ -165,37 +153,26 @@ function renderVectors() {
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
-    
     let picks = [];
     const maxPicks = 15;
-    const totalPagesAvailable = state.totalPages || 1;
-
     try {
         let fetchPromises = [];
         for (let i = 0; i < maxPicks; i++) {
-            const randomPage = Math.floor(Math.random() * totalPagesAvailable) + 1;
+            const randomPage = Math.floor(Math.random() * (state.totalPages || 1)) + 1;
             const url = new URL('/api/vectors', window.location.origin);
             url.searchParams.set('page', randomPage);
             url.searchParams.set('limit', '5'); 
-            if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-            if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
-            
             fetchPromises.push(fetch(url).then(r => r.json()));
         }
-
         const results = await Promise.all(fetchPromises);
-        
         results.forEach(data => {
             if (data.vectors && data.vectors.length > 0) {
-                const v = data.vectors[Math.floor(Math.random() * data.vectors.length)];
-                picks.push(v);
+                picks.push(data.vectors[Math.floor(Math.random() * data.vectors.length)]);
             }
         });
-
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         if (picks.length === 0) return;
-
         const quadPicks = [...picks, ...picks, ...picks, ...picks];
         quadPicks.forEach(v => {
             if(!v) return;
@@ -203,12 +180,7 @@ async function fetchAndRenderOurPicks() {
             card.className = 'vector-card';
             card.style.cursor = 'pointer';
             card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
-            
-            card.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showDownloadPage(v);
-            };
+            card.onclick = (e) => { e.preventDefault(); showDownloadPage(v); };
             track.appendChild(card);
         });
         state.ourPicksOffset = picks.length * 90;
@@ -221,7 +193,6 @@ function openDetailPanel(v, cardEl) {
     state.openedVector = v;
     state.openedCardEl = cardEl;
     cardEl.classList.add('card-active');
-
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
     panel.className = 'detail-panel';
@@ -238,14 +209,12 @@ function openDetailPanel(v, cardEl) {
             </div>
         </div>
     `;
-
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
     const cols = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfter = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
     grid.insertBefore(panel, cards[insertAfter].nextSibling);
-
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -260,15 +229,12 @@ function closeDetailPanel() {
 function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
     if(!dp) return;
-    
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || '-';
     document.getElementById('dpKeywords').innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('');
-    
     document.getElementById('dpDownloadBtn').style.display = 'block';
     document.getElementById('dpCountdownBox').style.display = 'none';
-    
     document.getElementById('dpDownloadBtn').onclick = () => {
         document.getElementById('dpDownloadBtn').style.display = 'none';
         document.getElementById('dpCountdownBox').style.display = 'block';
@@ -276,12 +242,8 @@ function showDownloadPage(v) {
         document.getElementById('dpCountdown').textContent = c;
         if(state.countdownInterval) clearInterval(state.countdownInterval);
         state.countdownInterval = setInterval(() => {
-            c--;
-            document.getElementById('dpCountdown').textContent = c;
-            if (c <= 0) {
-                clearInterval(state.countdownInterval);
-                window.location.href = `/api/download?slug=${v.name}`;
-            }
+            c--; document.getElementById('dpCountdown').textContent = c;
+            if (c <= 0) { clearInterval(state.countdownInterval); window.location.href = `/api/download?slug=${v.name}`; }
         }, 1000);
     };
     dp.style.display = 'flex';
@@ -312,55 +274,33 @@ function scrollOurPicks(dir) {
 
 function setupDownloadPageHandlers() { 
     const dpClose = document.getElementById('dpClose');
-    if(dpClose) {
-        dpClose.onclick = () => { 
-            document.getElementById('downloadPage').style.display = 'none'; 
-            if(state.countdownInterval) clearInterval(state.countdownInterval); 
-        };
-    }
+    if(dpClose) dpClose.onclick = () => { 
+        document.getElementById('downloadPage').style.display = 'none'; 
+        if(state.countdownInterval) clearInterval(state.countdownInterval); 
+    };
 }
 
 function setupModalHandlers() { 
     document.querySelectorAll('.modal-trigger').forEach(b => {
         b.onclick = (e) => {
             e.preventDefault();
-            const modalType = b.dataset.modal;
-            const content = MODAL_CONTENTS[modalType];
+            const content = MODAL_CONTENTS[b.dataset.modal];
             if (content) {
                 document.getElementById('infoModalBody').innerHTML = content.content;
                 document.getElementById('infoModal').style.display = 'flex';
             }
         };
     });
-    const infoClose = document.getElementById('infoModalClose');
-    if(infoClose) {
-        infoClose.onclick = () => {
-            document.getElementById('infoModal').style.display = 'none';
-        };
-    }
-    window.onclick = (event) => {
-        const modal = document.getElementById('infoModal');
-        if (event.target == modal) modal.style.display = 'none';
-    };
+    document.getElementById('infoModalClose').onclick = () => { document.getElementById('infoModal').style.display = 'none'; };
+    window.onclick = (e) => { if (e.target == document.getElementById('infoModal')) document.getElementById('infoModal').style.display = 'none'; };
 }
 
 function setupEventListeners() { 
-    const searchBtn = document.getElementById('searchBtn');
-    if(searchBtn) {
-        searchBtn.onclick = () => { 
-            state.searchQuery = document.getElementById('searchInput').value; 
-            state.currentPage = 1; 
-            fetchVectors().then(() => {
-                setTimeout(() => fetchAndRenderOurPicks(), 300);
-            });
-        };
-    }
-    const searchInput = document.getElementById('searchInput');
-    if(searchInput) {
-        searchInput.onkeypress = (e) => {
-            if(e.key === 'Enter') document.getElementById('searchBtn').click();
-        };
-    }
+    document.getElementById('searchBtn').onclick = () => { 
+        state.searchQuery = document.getElementById('searchInput').value; 
+        state.currentPage = 1; fetchVectors();
+    };
+    document.getElementById('searchInput').onkeypress = (e) => { if(e.key === 'Enter') document.getElementById('searchBtn').click(); };
     document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
     document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
 }
@@ -371,8 +311,8 @@ function updatePagination() {
 }
 
 function showLoader(s) { 
-    const loader = document.getElementById('loader');
-    if(loader) loader.style.display = s ? 'flex' : 'none'; 
+    const l = document.getElementById('loader');
+    if(l) l.style.display = s ? 'flex' : 'none'; 
 }
 
 document.addEventListener('DOMContentLoaded', init);
