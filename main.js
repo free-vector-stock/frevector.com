@@ -1,6 +1,5 @@
 /**
  * frevector.com - Frontend Core Logic
- * Real-time Search, H1 SEO Titles, and Fixed Layout Handlers
  */
 
 const CATEGORIES = [
@@ -10,32 +9,63 @@ const CATEGORIES = [
     'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
+// Footer linklerine tıklandığında gösterilecek eksiksiz metinler
 const MODAL_CONTENTS = {
     about: { 
-        title: 'About Us', 
-        content: `<h2>About Us</h2>
-        <p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design. The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists.</p>
-        <p>Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process. Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control.</p>
-        <p>All files can be used in both personal and commercial projects. <strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>` 
+        title: 'ABOUT US', 
+        content: `<h2>ABOUT US</h2>
+        <p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
+        <p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
+        <p>Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
+        <p>Frevector.com includes the following content: Vector illustrations, Icon sets, Logo design elements, Graphic elements, Various design resources.</p>
+        <p>All files can be used in both personal and commercial projects. <strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>
+        <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>` 
     },
     privacy: { 
-        title: 'Privacy Policy', 
-        content: `<h2>Privacy Policy</h2>
-        <p>As Frevector.com, we prioritize user privacy. We collect minimal anonymous data (cookies, device info) to improve performance and user experience.</p>
-        <p>Personal data is only processed when voluntarily shared via email. We do not sell user data to third parties. Users can limit cookies through browser settings.</p>` 
+        title: 'PRIVACY POLICY', 
+        content: `<h2>PRIVACY POLICY</h2>
+        <p>As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>
+        <h3>1. Data Collected</h3>
+        <p>Anonymous data like cookies, browser/device info, IP address (for analytics), and interaction data may be collected automatically.</p>
+        <h3>2. Purposes of Data Use</h3>
+        <p>Data is used for improving site performance, enhancing user experience, security, and supporting the development process.</p>
+        <h3>3. Personal Data</h3>
+        <p>Personal data (name, email) is only processed when voluntarily shared (e.g., via email). Frevector does not sell user data to third parties.</p>
+        <h3>4. Cookie Policy</h3>
+        <p>Cookies may be used to support site functions. Users can limit or disable cookies through browser settings.</p>
+        <h3>5. Data Security</h3>
+        <p>Necessary technical measures are taken to protect data. However, complete security over the internet cannot be guaranteed.</p>` 
     },
     terms: { 
-        title: 'Terms of Service', 
-        content: `<h2>Terms of Service</h2>
-        <p><strong>1. Content Ownership:</strong> All graphic designs are original works prepared by Frevector artists.</p>
-        <p><strong>2. Right of Use:</strong> Downloaded files can be used in personal and commercial projects. You may edit the files.</p>
-        <p><strong>3. Prohibited Uses:</strong> Redistributing, uploading to other sites, or selling files is strictly prohibited.</p>` 
+        title: 'TERMS OF SERVICE', 
+        content: `<h2>TERMS OF SERVICE</h2>
+        <p>Every visitor using Frevector.com is deemed to have accepted the following terms.</p>
+        <h3>1. Content Ownership</h3>
+        <p>All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector.</p>
+        <h3>2. Right of Use</h3>
+        <p>Downloaded files can be used in personal and commercial projects. The user may edit the files for their own projects.</p>
+        <h3>3. Prohibited Uses</h3>
+        <p>Redistributing files, uploading to other sites, selling files digitally or physically, or sharing as an archive/package is strictly prohibited.</p>
+        <h3>4. Liability</h3>
+        <p>Frevector cannot be held responsible for any damages arising from the use of the content.</p>
+        <hr>
+        <h2>LICENSE DESCRIPTION</h2>
+        <p><strong>Usage Permission:</strong> Personal projects, Commercial projects, Editing allowed.</p>
+        <p><strong>Prohibitions:</strong> Sharing as-is, Redistribution, Selling, Bulk archives.</p>` 
     },
     contact: { 
-        title: 'Contact', 
-        content: `<h2>Contact</h2>
+        title: 'CONTACT & COPYRIGHT', 
+        content: `<h2>CONTACT</h2>
         <p>If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p>
-        <p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000; font-weight:bold;">hakankacar2014@gmail.com</a></p>` 
+        <p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000; font-weight:bold;">hakankacar2014@gmail.com</a></p>
+        <hr>
+        <h2>COPYRIGHT NOTICE</h2>
+        <p>If you believe any content infringes your copyright, please contact us with proof, the link to the content, and your contact information.</p>
+        <hr>
+        <h2>FREQUENTLY ASKED QUESTIONS</h2>
+        <p><strong>1. Are the files free?</strong> Yes, for personal and commercial projects.</p>
+        <p><strong>2. Can I sell the files?</strong> No, redistribution and selling are prohibited.</p>
+        <p><strong>3. Can I use for clients?</strong> Yes, but you cannot provide the file itself as a product.</p>` 
     }
 };
 
@@ -62,30 +92,34 @@ async function init() {
     setupModalHandlers();
     setupDownloadPageHandlers();
     setupOurPicksArrows();
-    
     await fetchVectors();
     setTimeout(() => fetchAndRenderOurPicks(), 300);
 }
 
-// SEO H1 Başlığı Oluşturucu
+// SEO H1 TITLE LOGIC
 function getH1Text(cat) {
     if (cat === 'all') return "Free Vectors, SVGs, Icons and Clipart";
     
-    // Özel kural: Animals -> Animal gibi tekilleştirme gerekirse burada yapılır
+    // Spesifik kategori isim düzeltmeleri
     let displayCat = cat;
-    if(cat === 'Animals') displayCat = 'Animal';
-    if(cat === 'The Arts') displayCat = 'Art';
-    if(cat === 'Backgrounds') displayCat = 'Background';
-
+    const specialCases = {
+        'Animals': 'Animal',
+        'The Arts': 'Art',
+        'Backgrounds': 'Background',
+        'Buildings': 'Building',
+        'Celebrities': 'Celebrity',
+        'Holidays': 'Holiday'
+    };
+    
+    if (specialCases[cat]) displayCat = specialCases[cat];
     return `Free ${displayCat} Vectors, SVGs, Icons and Clipart`;
 }
 
 function setupTypeFilters() {
-    const filters = document.querySelectorAll('.type-filter');
-    filters.forEach(btn => {
+    document.querySelectorAll('.type-filter').forEach(btn => {
         btn.onclick = (e) => {
             e.preventDefault();
-            filters.forEach(f => f.classList.remove('active'));
+            document.querySelectorAll('.type-filter').forEach(f => f.classList.remove('active'));
             btn.classList.add('active');
             state.selectedType = btn.dataset.type;
             state.currentPage = 1;
@@ -152,18 +186,14 @@ function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-
     if (state.vectors.length === 0) {
-        grid.innerHTML = '<p style="padding:20px; color:#999;">No results found for your search.</p>';
+        grid.innerHTML = '<p style="padding:20px; color:#999;">No results found.</p>';
         return;
     }
-
     state.vectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        // Sağ üst köşe etiketi (JPEG ise ekle)
         const typeBadge = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
-        
         card.innerHTML = `
             <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}">${typeBadge}</div>
             <div class="vc-info">
@@ -219,13 +249,10 @@ function closeDetailPanel() {
 
 function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
-    if(!dp) return;
-    
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || '-';
     document.getElementById('dpKeywords').innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('');
-    
     document.getElementById('dpDownloadBtn').style.display = 'block';
     document.getElementById('dpCountdownBox').style.display = 'none';
     
@@ -259,11 +286,9 @@ function setupModalHandlers() {
         };
     });
     document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none';
-    window.onclick = (e) => { if (e.target == document.getElementById('infoModal')) document.getElementById('infoModal').style.display = 'none'; };
 }
 
 function setupEventListeners() { 
-    // REAL-TIME SEARCH (Talimat gereği keywords odaklı)
     let timeout = null;
     const input = document.getElementById('searchInput');
     input.oninput = () => {
@@ -272,24 +297,16 @@ function setupEventListeners() {
             state.searchQuery = input.value.trim();
             state.currentPage = 1;
             fetchVectors();
-        }, 300); // Kullanıcı yazmayı bırakınca 300ms sonra ara
+        }, 300);
     };
-
-    document.getElementById('searchBtn').onclick = () => {
-        state.searchQuery = input.value.trim();
-        state.currentPage = 1;
-        fetchVectors();
-    };
-
     document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
     document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
 }
 
-// "Our Picks" ve Kaydırma Fonksiyonları (Budanmadı)
+// OUR PICKS SLIDER LOGIC
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
-    let picks = [];
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('page', '1');
@@ -297,12 +314,11 @@ async function fetchAndRenderOurPicks() {
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         const res = await fetch(url);
         const data = await res.json();
-        picks = data.vectors || [];
+        const picks = data.vectors || [];
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         if (picks.length === 0) return;
-        const triple = [...picks, ...picks, ...picks];
-        triple.forEach(v => {
+        [...picks, ...picks, ...picks].forEach(v => {
             const card = document.createElement('div');
             card.className = 'vector-card';
             card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
