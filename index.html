@@ -10,13 +10,54 @@
         html, body {
             margin: 0;
             padding: 0;
-            min-height: 100%;
+            height: 100%;
+            overflow-x: hidden;
         }
 
         /* Ana içerik alanının altına, footer'ın üzerine binmemesi için boşluk ekliyoruz */
         .main-container {
             padding-bottom: 120px; /* Sayfalama + Footer toplam yüksekliği kadar */
             display: flex;
+            height: calc(100vh - 120px); /* Ekran yüksekliğine göre sidebar'ı ayarlar */
+            align-items: stretch;
+        }
+
+        /* SIDEBAR VE KATEGORİ LİSTESİ DÜZENLEMESİ */
+        .sidebar {
+            width: 250px; /* Veya mevcut genişliğiniz */
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #eee;
+            background-color: #fff;
+            padding: 20px 0 0 0;
+        }
+
+        .sidebar-title {
+            padding: 0 20px 10px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #000;
+        }
+
+        .categories-list {
+            flex: 1; /* Sidebar içindeki tüm boşluğu kaplar */
+            overflow-y: auto; /* İçerik taşarsa kaydırma çubuğu çıkar */
+            padding: 0 10px 20px 20px;
+        }
+
+        /* Kaydırma çubuğu tasarımı (isteğe bağlı, daha zarif görünüm için) */
+        .categories-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .categories-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .categories-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+        .categories-list::-webkit-scrollbar-thumb:hover {
+            background: #888;
         }
 
         /* ALT SABİT ALAN (PAGINATION + FOOTER) */
@@ -25,11 +66,10 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            z-index: 999; /* Modal'dan (10000) daha düşük olmalı */
+            z-index: 999;
             background-color: #fff;
         }
 
-        /* Sayfalama - Beyaz zemin, ince ve derli toplu */
         .pagination-wrapper {
             padding: 8px 0;
             border-top: 1px solid #eee;
@@ -53,14 +93,13 @@
             font-size: 12px;
         }
 
-        /* SİYAH FOOTER - Yüksekliği üst bantla (60px) tam eşit */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 30px;
             background-color: #000;
-            height: 60px; /* Üst siyah logo bandı ile aynı */
+            height: 60px;
         }
 
         .copyright, .footer-link {
@@ -76,7 +115,6 @@
 
         .footer-link:hover { color: #fff; }
 
-        /* Üst logo bandı sabitliği için */
         .top-banner {
             height: 60px;
             background-color: #000;
@@ -84,7 +122,7 @@
             align-items: center;
         }
 
-        /* MODAL EN ÜSTTE GÖRÜNMESİ İÇİN EKLEMELER */
+        /* MODAL YAPISI */
         .info-modal {
             position: fixed;
             top: 0;
@@ -92,7 +130,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
-            z-index: 10000; /* Her şeyin en üstünde */
+            z-index: 10000;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -107,7 +145,6 @@
             position: relative;
             border-radius: 8px;
             overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .info-modal-close {
@@ -118,11 +155,7 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
-            color: #333;
         }
-
-        .info-modal-body h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .info-modal-body p { line-height: 1.6; color: #444; }
     </style>
 </head>
 <body>
