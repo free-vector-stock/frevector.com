@@ -357,29 +357,68 @@ function renderVectors() {
     });
 }
 
-// REVİZYON 3: Our Picks - VECTOR/JPEG etiketi eklendi, ok butonları ile kaydırma
-function renderOurPicks() {
+// GÜNCELLENEN BÖLÜM: Our Picks artık tüm sayfalardan rastgele çeker
+async function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    if (!track || !state.vectors.length) return;
+    if (!track) return;
     track.innerHTML = '';
     state.ourPicksOffset = 0;
-    
-    state.vectors.slice(0, 20).forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'vector-card';
-        // REVİZYON 3: VECTOR veya JPEG etiketi sağ üst köşede
-        const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
-        card.innerHTML = `
-            <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
-                ${typeLabel}
-            </div>
-        `;
-        card.onclick = () => openDetailPanel(v, card);
-        track.appendChild(card);
-    });
 
-    // Ok butonlarını güncelle
+    try {
+        // Mevcut kategorideki toplam sayfa sayısından rastgele bir sayfa seçiyoruz
+        // Not: Çeşitlilik için rastgele 2 farklı sayfa numarası üretiyoruz
+        const randomPage1 = Math.floor(Math.random() * state.totalPages) + 1;
+        const randomPage2 = Math.floor(Math.random() * state.totalPages) + 1;
+
+        const url1 = new URL('/api/vectors', window.location.origin);
+        url1.searchParams.set('page', randomPage1);
+        url1.searchParams.set('limit', '20');
+        if (state.selectedCategory !== 'all') url1.searchParams.set('category', state.selectedCategory);
+
+        const url2 = new URL('/api/vectors', window.location.origin);
+        url2.searchParams.set('page', randomPage2);
+        url2.searchParams.set('limit', '20');
+        if (state.selectedCategory !== 'all') url2.searchParams.set('category', state.selectedCategory);
+
+        const [res1, res2] = await Promise.all([fetch(url1), fetch(url2)]);
+        const data1 = await res1.json();
+        const data2 = await res2.json();
+
+        // İki sayfayı birleştir ve karıştır (shuffle)
+        let picks = [...(data1.vectors || []), ...(data2.vectors || [])];
+        picks = picks.sort(() => Math.random() - 0.5).slice(0, 20);
+
+        picks.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'vector-card';
+            const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+            card.innerHTML = `
+                <div class="vc-img-wrap">
+                    <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                    ${typeLabel}
+                </div>
+            `;
+            card.onclick = () => openDetailPanel(v, card);
+            track.appendChild(card);
+        });
+    } catch (err) {
+        console.error('Our Picks fetch error:', err);
+        // Hata durumunda en azından mevcut sayfadaki verileri gösterelim ki boş kalmasın
+        state.vectors.slice(0, 20).forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'vector-card';
+            const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+            card.innerHTML = `
+                <div class="vc-img-wrap">
+                    <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                    ${typeLabel}
+                </div>
+            `;
+            card.onclick = () => openDetailPanel(v, card);
+            track.appendChild(card);
+        });
+    }
+
     updateOurPicksArrows();
 }
 
