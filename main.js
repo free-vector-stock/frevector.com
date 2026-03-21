@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031430 - Final Randomization & Modal Fix
+ * v20260322 - Type Filter Integration & Randomization Fix
  */
 
 const CATEGORIES = [
@@ -34,6 +34,7 @@ const state = {
     currentPage: 1,
     totalPages: 1,
     selectedCategory: 'all',
+    selectedType: 'all', // YENİ: All, Vector, JPEG
     searchQuery: '',
     isLoading: false,
     openedVector: null,
@@ -46,16 +47,31 @@ const state = {
 
 async function init() {
     setupCategories();
+    setupTypeFilters(); // YENİ: Filtreleri hazırla
     setupEventListeners();
     setupModalHandlers();
     setupDownloadPageHandlers();
     setupOurPicksArrows();
     
-    // Önce ana verileri çekip toplam sayfa sayısını öğreniyoruz
     await fetchVectors();
-    
-    // Toplam sayfa sayısı artık elimizde olduğu için Our Picks'i gerçek rastgele verilerle doldurabiliriz
     setTimeout(() => fetchAndRenderOurPicks(), 300);
+}
+
+function setupTypeFilters() {
+    const filters = document.querySelectorAll('.type-filter');
+    filters.forEach(btn => {
+        btn.onclick = (e) => {
+            e.preventDefault();
+            filters.forEach(f => f.classList.remove('active'));
+            btn.classList.add('active');
+            state.selectedType = btn.dataset.type;
+            state.currentPage = 1;
+            closeDetailPanel();
+            fetchVectors().then(() => {
+                setTimeout(() => fetchAndRenderOurPicks(), 300);
+            });
+        };
+    });
 }
 
 function setupCategories() {
@@ -86,7 +102,6 @@ function selectCategory(cat) {
     closeDetailPanel();
     setupCategories();
     updateCategoryTitle();
-    // Kategori değişince veriyi çek ve ardından Our Picks'i yenile
     fetchVectors().then(() => {
         setTimeout(() => fetchAndRenderOurPicks(), 300);
     });
@@ -108,10 +123,15 @@ async function fetchVectors() {
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         
+        // YENİ: Type parametresini API'ye gönder
+        if (state.selectedType !== 'all') {
+            url.searchParams.set('type', state.selectedType);
+        }
+        
         const res = await fetch(url);
         const data = await res.json();
         state.vectors = data.vectors || [];
-        state.totalPages = data.totalPages || 1; // Toplam sayfa sayısı burada güncelleniyor
+        state.totalPages = data.totalPages || 1;
         renderVectors();
         updatePagination();
     } catch (err) { console.error(err); }
@@ -141,7 +161,6 @@ function renderVectors() {
     });
 }
 
-// BU FONKSİYON ARTIK TÜM VERİTABANINA YAYILAN 15 FARKLI SAYFADAN VERİ ÇEKER
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
@@ -153,12 +172,12 @@ async function fetchAndRenderOurPicks() {
     try {
         let fetchPromises = [];
         for (let i = 0; i < maxPicks; i++) {
-            // Her görsel için 1 ile toplam sayfa sayısı arasında tamamen rastgele bir sayfa seç
             const randomPage = Math.floor(Math.random() * totalPagesAvailable) + 1;
             const url = new URL('/api/vectors', window.location.origin);
             url.searchParams.set('page', randomPage);
             url.searchParams.set('limit', '5'); 
             if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+            if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
             
             fetchPromises.push(fetch(url).then(r => r.json()));
         }
@@ -167,13 +186,11 @@ async function fetchAndRenderOurPicks() {
         
         results.forEach(data => {
             if (data.vectors && data.vectors.length > 0) {
-                // Her gelen sayfadan rastgele 1 görsel al
                 const v = data.vectors[Math.floor(Math.random() * data.vectors.length)];
                 picks.push(v);
             }
         });
 
-        // Çıktıyı oluştur
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         if (picks.length === 0) return;
@@ -243,7 +260,6 @@ function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
     if(!dp) return;
     
-    // TÜM VERİLERİ (BAŞLIK, KEYWORD) EKSİKSİZ AKTAR
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || '-';
