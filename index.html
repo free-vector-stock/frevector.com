@@ -6,40 +6,43 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- ÜST VE ALT BANDI EŞİTLEYEN GÜNCEL CSS --- */
+        /* --- KESİN ÇÖZÜM CSS --- */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
         }
 
-        /* Üst banner yüksekliğini (header) baz alıyoruz - yaklaşık 50px-60px */
+        body {
+            display: flex;
+            flex-direction: column; /* Sayfayı dikey bloklara ayırır */
+        }
+
+        /* Üst Logo Bandı Yüksekliği */
         .top-banner {
             height: 60px;
+            background-color: #000;
             display: flex;
             align-items: center;
-            background-color: #000;
-        }
-
-        .main-container {
-            flex: 1 0 auto;
-            display: flex;
-            padding-bottom: 20px;
-        }
-
-        /* Alt sabitleyici alan */
-        .bottom-fixed-container {
             flex-shrink: 0;
-            width: 100%;
-            background-color: #000;
         }
 
-        /* Sayfalama - Beyaz alanda ve görsellere yakın */
+        /* Ana İçerik Alanı - Esnek yapı, boşluğu doldurur */
+        .main-container {
+            flex: 1 0 auto; /* İçerik az olsa bile alanı aşağı iter */
+            display: flex;
+        }
+
+        /* Alt Kısım - Sayfalamayı ve Footer'ı kapsayan sabit alan */
+        .bottom-fixed-area {
+            flex-shrink: 0; /* Aşağıda sabit kalmasını sağlar */
+            width: 100%;
+        }
+
+        /* Sayfalama Alanı */
         .pagination-wrapper {
             background-color: #fff;
-            padding: 10px 0;
+            padding: 15px 0;
             border-top: 1px solid #eee;
             text-align: center;
         }
@@ -55,20 +58,20 @@
             background-color: #1a1a1a;
             color: #fff;
             border: none;
-            padding: 5px 12px;
+            padding: 6px 14px;
             cursor: pointer;
             border-radius: 4px;
             font-size: 13px;
         }
 
-        /* SİYAH FOOTER - Yüksekliği tam olarak üst bant (60px) ile aynı yaptık */
+        /* SİYAH FOOTER - Yüksekliği üst bant (60px) ile BİREBİR AYNI */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 30px;
             background-color: #000;
-            height: 60px; /* Üst banner ile aynı yükseklik */
+            height: 60px; /* Üst bantla eşitlendi */
         }
 
         .copyright, .footer-link {
@@ -84,7 +87,6 @@
 
         .footer-link:hover { color: #fff; }
 
-        /* Diğer teknik ayarlar */
         .dp-countdown-box { text-align: center; margin-top: 20px; }
         .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
     </style>
@@ -126,7 +128,7 @@
         </main>
     </div>
 
-    <div class="bottom-fixed-container">
+    <div class="bottom-fixed-area">
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
