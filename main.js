@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031415 - Full Sync: Random Selections & Click Fix
+ * v2026031420 - Absolute Random Logic & Click Stability
  */
 
 const CATEGORIES = [
@@ -51,7 +51,8 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
     await fetchVectors();
-    await fetchAndRenderOurPicks(); 
+    // İlk açılışta veriler çekildikten sonra toplam sayfa sayısını bildiğimiz için Our Picks'i çağırıyoruz
+    setTimeout(() => fetchAndRenderOurPicks(), 500);
 }
 
 function setupCategories() {
@@ -83,7 +84,8 @@ function selectCategory(cat) {
     setupCategories();
     updateCategoryTitle();
     fetchVectors();
-    fetchAndRenderOurPicks(); 
+    // Kategori değişince Our Picks kısmını da sıfırla ve rastgele sayfa çek
+    setTimeout(() => fetchAndRenderOurPicks(), 500);
 }
 
 function updateCategoryTitle() {
@@ -135,42 +137,51 @@ function renderVectors() {
     });
 }
 
+// BU KISIM TAMAMEN YENİLENDİ - KESİN RASTGELELİK GETİRİR
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
+    
     try {
+        // Backend'in tüm sayfalarından karma çekmek için rastgele bir sayfa numarası seçiyoruz
+        const randomPage = Math.floor(Math.random() * state.totalPages) + 1;
+        
         const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('limit', '20');
-        // Rastgele getirmek için API'ye işaret gönderiyoruz (Backend'de shuffle/random yapılmalı)
-        url.searchParams.set('sort', 'random'); 
+        url.searchParams.set('page', randomPage); // Rastgele sayfa seçtik!
+        url.searchParams.set('limit', '15');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         
         const res = await fetch(url);
         const data = await res.json();
-        const picks = data.vectors || [];
+        let picks = data.vectors || [];
+        
+        // Gelen listeyi kendi içinde de karıştır (Shuffle)
+        picks = picks.sort(() => Math.random() - 0.5);
         
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         
         if (picks.length === 0) return;
 
-        // Tıklama özelliğini ekleyerek kartları oluştur
         const quadPicks = [...picks, ...picks, ...picks, ...picks];
         quadPicks.forEach(v => {
             const card = document.createElement('div');
             card.className = 'vector-card';
             card.style.cursor = 'pointer';
             card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
-            // Tıklayınca indirme sayfasını aç
-            card.addEventListener('click', (e) => {
+            
+            // TIKLAMA SORUNUNU ÇÖZEN KESİN YÖNTEM
+            card.onclick = (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 showDownloadPage(v);
-            });
+            };
+            
             track.appendChild(card);
         });
         state.ourPicksOffset = picks.length * 90;
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Our Picks Error:", err); }
 }
 
 function openDetailPanel(v, cardEl) {
@@ -216,6 +227,8 @@ function closeDetailPanel() {
 
 function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
+    if(!dp) return;
+    
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || '-';
@@ -229,6 +242,7 @@ function showDownloadPage(v) {
         document.getElementById('dpCountdownBox').style.display = 'block';
         let c = 4;
         document.getElementById('dpCountdown').textContent = c;
+        if(state.countdownInterval) clearInterval(state.countdownInterval);
         state.countdownInterval = setInterval(() => {
             c--;
             document.getElementById('dpCountdown').textContent = c;
@@ -267,7 +281,7 @@ function scrollOurPicks(dir) {
 function setupDownloadPageHandlers() { 
     document.getElementById('dpClose').onclick = () => { 
         document.getElementById('downloadPage').style.display = 'none'; 
-        clearInterval(state.countdownInterval); 
+        if(state.countdownInterval) clearInterval(state.countdownInterval); 
     }; 
 }
 
@@ -297,6 +311,7 @@ function setupEventListeners() {
         state.searchQuery = document.getElementById('searchInput').value; 
         state.currentPage = 1; 
         fetchVectors(); 
+        setTimeout(() => fetchAndRenderOurPicks(), 500);
     };
     document.getElementById('searchInput').onkeypress = (e) => {
         if(e.key === 'Enter') document.getElementById('searchBtn').click();
