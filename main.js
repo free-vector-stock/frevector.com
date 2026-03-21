@@ -151,7 +151,6 @@ const state = {
     countdownInterval: null,
     detailPanelOpen: false,
     downloadInProgress: false,
-    // REVİZYON 3: Our Picks kaydırma durumu
     ourPicksOffset: 0
 };
 
@@ -172,7 +171,6 @@ function setupCategories() {
     const isMobile = window.innerWidth <= 768;
 
     if (!isMobile) {
-        // Desktop: Keep the TYPE container
         const typeContainer = document.createElement('div');
         typeContainer.style.padding = '0 16px 8px';
         typeContainer.style.marginBottom = '8px';
@@ -210,7 +208,6 @@ function setupCategories() {
         
         list.appendChild(typeContainer);
     } else {
-        // Mobile: Add TYPE items directly to the list as tags
         const typeAll = document.createElement('a');
         typeAll.href = '#';
         typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
@@ -280,7 +277,6 @@ function updateCategoryTitle() {
     const el = document.getElementById('categoryTitle');
     if (!el) return;
     
-    // Generate H1 title based on selected category
     let h1Text = '';
     if (state.selectedCategory === 'all') {
         h1Text = 'Free Vectors, SVGs, Icons and Clipart';
@@ -314,7 +310,8 @@ async function fetchVectors() {
         state.total = data.total || 0;
 
         renderVectors();
-        renderOurPicks();
+        // Pagination bittiğinde ve görseller yüklendiğinde "Our Picks" kısmını kategori bazlı çek
+        await fetchAndRenderOurPicks(); 
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -357,33 +354,58 @@ function renderVectors() {
     });
 }
 
-// REVİZYON 3: Our Picks - VECTOR/JPEG etiketi eklendi, ok butonları ile kaydırma
-function renderOurPicks() {
+/**
+ * YENİ FONKSİYON: Our Picks için kategori bazlı 60 karışık görsel çeker
+ */
+async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    if (!track || !state.vectors.length) return;
-    track.innerHTML = '';
-    state.ourPicksOffset = 0;
-    
-    state.vectors.slice(0, 20).forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'vector-card';
-        // REVİZYON 3: VECTOR veya JPEG etiketi sağ üst köşede
-        const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
-        card.innerHTML = `
-            <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
-                ${typeLabel}
-            </div>
-        `;
-        card.onclick = () => openDetailPanel(v, card);
-        track.appendChild(card);
-    });
+    if (!track) return;
+    track.innerHTML = '<div style="padding:10px;">Loading selections...</div>';
 
-    // Ok butonlarını güncelle
-    updateOurPicksArrows();
+    try {
+        const url = new URL('/api/vectors', window.location.origin);
+        // İsteğe göre en az 60 görsel çekiyoruz
+        url.searchParams.set('limit', '100'); 
+        if (state.selectedCategory !== 'all') {
+            url.searchParams.set('category', state.selectedCategory);
+        }
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Picks fetch failed');
+        const data = await res.json();
+        let picks = data.vectors || [];
+
+        // JavaScript ile diziyi karıştır (Shuffle)
+        picks = picks.sort(() => Math.random() - 0.5);
+
+        // En fazla 60 adet görseli al
+        const finalPicks = picks.slice(0, 60);
+
+        track.innerHTML = '';
+        state.ourPicksOffset = 0;
+        track.style.transform = `translateX(0px)`;
+
+        finalPicks.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'vector-card';
+            const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+            card.innerHTML = `
+                <div class="vc-img-wrap">
+                    <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                    ${typeLabel}
+                </div>
+            `;
+            card.onclick = () => openDetailPanel(v, card);
+            track.appendChild(card);
+        });
+
+        updateOurPicksArrows();
+    } catch (err) {
+        console.error('Our Picks error:', err);
+        track.innerHTML = '';
+    }
 }
 
-// REVİZYON 3: Our Picks ok butonları kurulumu
 function setupOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
@@ -397,7 +419,7 @@ function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
 
-    const cardWidth = 100; // 90px card + 10px gap
+    const cardWidth = 100; 
     const visibleWidth = track.parentElement.offsetWidth;
     const totalWidth = track.scrollWidth;
     const maxOffset = Math.max(0, totalWidth - visibleWidth);
@@ -420,8 +442,8 @@ function updateOurPicksArrows() {
 
     prevBtn.style.opacity = state.ourPicksOffset <= 0 ? '0.3' : '1';
     prevBtn.style.cursor = state.ourPicksOffset <= 0 ? 'default' : 'pointer';
-    nextBtn.style.opacity = state.ourPicksOffset >= maxOffset ? '0.3' : '1';
-    nextBtn.style.cursor = state.ourPicksOffset >= maxOffset ? 'default' : 'pointer';
+    nextBtn.style.opacity = (state.ourPicksOffset >= maxOffset || maxOffset <= 0) ? '0.3' : '1';
+    nextBtn.style.cursor = (state.ourPicksOffset >= maxOffset || maxOffset <= 0) ? 'default' : 'pointer';
 }
 
 function openDetailPanel(v, cardEl) {
@@ -471,6 +493,13 @@ function openDetailPanel(v, cardEl) {
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
+    
+    // Eğer görsel Our Picks içindeyse index -1 gelir, o zaman scroll yaparak yukarı çıkaralım
+    if(index === -1) {
+        showDownloadPage(v);
+        return;
+    }
+
     const columns = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
     grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
@@ -498,7 +527,6 @@ function showDownloadPage(v) {
     document.getElementById('dpCategory').textContent = v.category;
     document.getElementById('dpFileSize').textContent = v.fileSize || 'N/A';
     
-    // Update file format in download page
     const dpFormatCell = document.getElementById('dpFileFormat');
     if (dpFormatCell) dpFormatCell.textContent = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
 
@@ -560,7 +588,6 @@ function setupModalHandlers() {
             document.getElementById('infoModal').style.display = 'none';
         };
     }
-    // Close modal on backdrop click
     const infoModal = document.getElementById('infoModal');
     if (infoModal) {
         infoModal.onclick = (e) => {
