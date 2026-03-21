@@ -6,86 +6,191 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* TÜM SORUNLARI ÇÖZEN ÖZEL CSS */
+        /* --- SİSTEM AYARLARI --- */
         html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
-            min-height: 100%;
+            overflow: hidden; /* Sayfa dışına taşmayı engeller */
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Ana içerik alanının altına, footer'ın üzerine binmemesi için boşluk ekliyoruz */
-        .main-container {
-            padding-bottom: 120px; /* Sayfalama + Footer toplam yüksekliği kadar */
+        body {
             display: flex;
+            flex-direction: column;
         }
 
-        /* ALT SABİT ALAN (PAGINATION + FOOTER) */
-        .fixed-bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 9999;
-            background-color: #fff;
+        /* --- ÜST BANT (LOGO) --- */
+        .top-banner {
+            height: 60px;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 1001;
         }
 
-        /* Sayfalama - Beyaz zemin, ince ve derli toplu */
-        .pagination-wrapper {
-            padding: 8px 0;
-            border-top: 1px solid #eee;
-            text-align: center;
+        .banner-logo {
+            height: 30px;
+            padding-left: 20px;
         }
 
-        .pagination-nav {
+        /* --- ARAMA BÖLÜMÜ --- */
+        .header {
+            flex-shrink: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+            padding: 10px 20px;
+        }
+
+        .header-center {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 10px;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* --- ANA İÇERİK ALANI --- */
+        .main-container {
+            display: flex;
+            flex: 1 1 auto;
+            align-items: stretch;
+            overflow: hidden; /* Alt kısımların kaymasını önler */
+        }
+
+        /* --- KATEGORİLER (SIDEBAR) --- */
+        .sidebar {
+            width: 220px;
+            background-color: #fff;
+            border-right: 1px solid #eee;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+            overflow-y: auto; /* İçerik taşarsa scroll çıkar */
+            scrollbar-width: thin;
+            scrollbar-color: #ccc transparent;
+        }
+
+        /* İnce Kaydırma Çubuğu (Chrome/Safari) */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background-color: #ddd; border-radius: 10px; }
+
+        .sidebar-title {
+            font-weight: 800;
+            font-size: 11px;
+            color: #999;
+            margin: 10px 15px 5px 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* KATEGORİ LİSTESİ - Sıkıştırılmış boşluklar */
+        .categories-list a {
+            display: block;
+            padding: 3px 15px; /* Dikey boşluk minimuma indirildi */
+            font-size: 13px;
+            color: #444;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            line-height: 1.3;
+        }
+
+        .categories-list a:hover {
+            background-color: #f5f5f5;
+            color: #000;
+        }
+
+        /* SEÇİLİ KATEGORİ (AKTİF) */
+        .categories-list a.active {
+            background-color: #000 !important;
+            color: #fff !important;
+            font-weight: bold;
+        }
+
+        /* GÖRSEL IZGARASI */
+        .content {
+            flex: 1;
+            padding: 20px;
+            background-color: #fff;
+            overflow-y: auto; /* Sadece görsellerin olduğu alan kayar */
+        }
+
+        /* --- ALT BÖLÜM (PAGINATION + FOOTER) --- */
+        .bottom-fixed-area {
+            flex-shrink: 0;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .pagination-wrapper {
+            padding: 12px 0;
+            text-align: center;
+            background: #fff;
         }
 
         .pag-btn {
             background-color: #000;
             color: #fff;
             border: none;
-            padding: 4px 10px;
+            padding: 6px 16px;
             cursor: pointer;
-            border-radius: 3px;
-            font-size: 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
         }
 
-        /* SİYAH FOOTER - Yüksekliği üst bantla (60px) tam eşit */
+        /* FOOTER - Kalın ve Büyük Fontlar */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 40px;
             background-color: #000;
-            height: 60px; /* Üst siyah logo bandı ile aynı */
+            height: 65px; /* Biraz daha geniş durması için artırıldı */
         }
 
-        .copyright, .footer-link {
-            color: #888;
-            text-decoration: none;
-            font-size: 11px;
+        .copyright {
+            color: #fff;
+            font-size: 16px; /* Font büyütüldü */
+            font-weight: 700; /* Font kalınlaştırıldı */
         }
 
         .footer-nav {
             display: flex;
-            gap: 15px;
+            gap: 30px;
         }
 
-        .footer-link:hover { color: #fff; }
+        .footer-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px; /* Font büyütüldü */
+            font-weight: 700; /* Font kalınlaştırıldı (Bold) */
+            transition: opacity 0.2s;
+        }
 
-        /* Üst logo bandı sabitliği için */
-        .top-banner {
-            height: 60px;
-            background-color: #000;
-            display: flex;
-            align-items: center;
+        .footer-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+
     <div class="top-banner">
         <a href="/" class="banner-logo-link">
             <img src="logo.svg" alt="Frevector" class="banner-logo">
@@ -95,77 +200,52 @@
     <header class="header">
         <div class="header-center">
             <div class="search-container">
-                <button class="search-icon-btn" id="searchBtn">
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="8" cy="8" r="6" stroke="#000" stroke-width="2"/><path d="M12.5 12.5L18 18" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
-                </button>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search vectors...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search 50,000+ free vectors...">
             </div>
-        </div>
-        <div class="header-right">
-            <select id="sortFilter" class="sort-filter">
-                <option value="">Upload date: Any time</option>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-            </select>
         </div>
     </header>
 
     <div class="main-container">
         <aside class="sidebar">
-            <div class="sidebar-title">CATEGORIES</div>
-            <nav class="categories-list" id="categoriesList"></nav>
+            <div class="sidebar-title">Categories</div>
+            <nav class="categories-list" id="categoriesList">
+                <a href="#" class="active">All Assets</a>
+                </nav>
         </aside>
 
         <main class="content">
-            <h1 id="categoryTitle" class="category-title">Vector</h1>
-            <div id="vectorsGrid" class="vectors-grid"></div>
+            <h1 id="categoryTitle" style="font-size: 22px; margin-bottom: 20px; font-weight: 600;">Free Vectors, SVGs, Icons and Clipart</h1>
+            <div id="vectorsGrid" class="vectors-grid">
+                </div>
         </main>
     </div>
 
-    <div class="fixed-bottom-bar">
+    <div class="bottom-fixed-area">
         <div class="pagination-wrapper">
-            <div class="pagination-nav">
-                <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" style="font-size: 13px; font-weight: bold; color: #333;">1</span>
-                <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span id="pageTotal" style="font-size: 13px; color: #666;">/ 1</span>
+            <div class="pagination-nav" style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                <button id="prevBtn" class="pag-btn">« Previous</button>
+                <span id="pageNumber" style="font-weight: 800; font-size: 15px;">1</span>
+                <button id="nextBtn" class="pag-btn">Next »</button>
+                <span id="pageTotal" style="color: #888; font-size: 14px;">/ 1</span>
             </div>
         </div>
 
         <footer class="footer">
             <span class="copyright">2026 &copy; frevector.com</span>
             <nav class="footer-nav">
-                <a href="#" class="footer-link modal-trigger" data-modal="about">About Us</a>
-                <a href="#" class="footer-link modal-trigger" data-modal="privacy">Privacy Policy</a>
-                <a href="#" class="footer-link modal-trigger" data-modal="terms">Terms of Service</a>
-                <a href="#" class="footer-link modal-trigger" data-modal="contact">Contact</a>
+                <a href="#" class="footer-link">About Us</a>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Contact</a>
             </nav>
         </footer>
     </div>
 
     <div id="downloadPage" class="download-page" style="display:none;">
-        <div class="download-page-header">
-            <span class="dp-site">frevector.com</span>
-            <button id="dpClose" class="dp-close">&#10005;</button>
         </div>
-        <div class="download-page-body">
-            <div class="dp-left"><img id="dpImage" src="" alt="" class="dp-image"></div>
-            <div class="dp-right">
-                <h2 id="dpTitle" class="dp-title"></h2>
-                <p id="dpDescription" class="dp-desc"></p>
-                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="infoModal" class="info-modal" style="display:none;">
-        <div class="info-modal-box">
-            <button class="info-modal-close" id="infoModalClose">&#10005;</button>
-            <div id="infoModalBody" class="info-modal-body"></div>
-        </div>
-    </div>
 
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-    <script src="main.js?v=2026031407"></script>
+    
+    <script src="main.js?v=20260321"></script>
 </body>
 </html>
