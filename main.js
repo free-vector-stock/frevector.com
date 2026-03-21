@@ -357,40 +357,49 @@ function renderVectors() {
     });
 }
 
-// GÜNCELLENEN BÖLÜM: Our Picks artık tüm sayfalardan rastgele çeker
+// GÜNCELLENEN BÖLÜM: Our Picks artık detay panelini açar ve daha fazla görselle sağa-sola yaslıdır.
 async function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
+    const container = document.querySelector('.our-picks-container');
     if (!track) return;
     track.innerHTML = '';
     state.ourPicksOffset = 0;
 
+    // Okları tam kenarlara yaslamak için stil güncellemesi
+    if (container) {
+        container.style.position = 'relative';
+        container.style.width = '100%';
+        container.style.padding = '0';
+    }
+
     try {
-        // Mevcut kategorideki toplam sayfa sayısından rastgele bir sayfa seçiyoruz
-        // Not: Çeşitlilik için rastgele 2 farklı sayfa numarası üretiyoruz
-        const randomPage1 = Math.floor(Math.random() * state.totalPages) + 1;
-        const randomPage2 = Math.floor(Math.random() * state.totalPages) + 1;
+        // Sonsuz döngü hissi ve çeşitlilik için rastgele 3 farklı sayfa numarası seçiyoruz
+        const randomPages = [];
+        for(let i=0; i<3; i++) {
+            randomPages.push(Math.floor(Math.random() * state.totalPages) + 1);
+        }
 
-        const url1 = new URL('/api/vectors', window.location.origin);
-        url1.searchParams.set('page', randomPage1);
-        url1.searchParams.set('limit', '20');
-        if (state.selectedCategory !== 'all') url1.searchParams.set('category', state.selectedCategory);
+        const fetchPromises = randomPages.map(pg => {
+            const url = new URL('/api/vectors', window.location.origin);
+            url.searchParams.set('page', pg);
+            url.searchParams.set('limit', '20');
+            if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+            return fetch(url).then(r => r.json());
+        });
 
-        const url2 = new URL('/api/vectors', window.location.origin);
-        url2.searchParams.set('page', randomPage2);
-        url2.searchParams.set('limit', '20');
-        if (state.selectedCategory !== 'all') url2.searchParams.set('category', state.selectedCategory);
-
-        const [res1, res2] = await Promise.all([fetch(url1), fetch(url2)]);
-        const data1 = await res1.json();
-        const data2 = await res2.json();
-
-        // İki sayfayı birleştir ve karıştır (shuffle)
-        let picks = [...(data1.vectors || []), ...(data2.vectors || [])];
-        picks = picks.sort(() => Math.random() - 0.5).slice(0, 20);
+        const results = await Promise.all(fetchPromises);
+        let picks = results.flatMap(data => data.vectors || []);
+        
+        // Verileri karıştır ve sayıyı 60'a çıkar (sonsuz kaydırma hissi için)
+        picks = picks.sort(() => Math.random() - 0.5).slice(0, 60);
 
         picks.forEach(v => {
             const card = document.createElement('div');
             card.className = 'vector-card';
+            // Sabit genişlik vererek kaydırma hesabını kolaylaştırıyoruz
+            card.style.minWidth = '100px'; 
+            card.style.flex = '0 0 auto';
+            
             const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
             card.innerHTML = `
                 <div class="vc-img-wrap">
@@ -398,35 +407,31 @@ async function renderOurPicks() {
                     ${typeLabel}
                 </div>
             `;
+            // Tıklayınca detay panelini açan fonksiyon (Ana grid ile aynı işleyiş)
             card.onclick = () => openDetailPanel(v, card);
             track.appendChild(card);
         });
     } catch (err) {
         console.error('Our Picks fetch error:', err);
-        // Hata durumunda en azından mevcut sayfadaki verileri gösterelim ki boş kalmasın
-        state.vectors.slice(0, 20).forEach(v => {
-            const card = document.createElement('div');
-            card.className = 'vector-card';
-            const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
-            card.innerHTML = `
-                <div class="vc-img-wrap">
-                    <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
-                    ${typeLabel}
-                </div>
-            `;
-            card.onclick = () => openDetailPanel(v, card);
-            track.appendChild(card);
-        });
     }
 
     updateOurPicksArrows();
 }
 
-// REVİZYON 3: Our Picks ok butonları kurulumu
+// REVİZYON 3: Our Picks ok butonları kurulumu ve yerleşimi
 function setupOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
     if (!prevBtn || !nextBtn) return;
+
+    // Okları sağa ve sola tam yasla (Absolute positioning)
+    prevBtn.style.position = 'absolute';
+    prevBtn.style.left = '0';
+    prevBtn.style.zIndex = '10';
+    
+    nextBtn.style.position = 'absolute';
+    nextBtn.style.right = '0';
+    nextBtn.style.zIndex = '10';
 
     prevBtn.onclick = () => scrollOurPicks(-1);
     nextBtn.onclick = () => scrollOurPicks(1);
@@ -436,7 +441,7 @@ function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
 
-    const cardWidth = 100; // 90px card + 10px gap
+    const cardWidth = 110; // 100px card + 10px gap
     const visibleWidth = track.parentElement.offsetWidth;
     const totalWidth = track.scrollWidth;
     const maxOffset = Math.max(0, totalWidth - visibleWidth);
@@ -511,8 +516,14 @@ function openDetailPanel(v, cardEl) {
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
     const columns = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
-    const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
-    grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
+    
+    // Eğer görsel Our Picks içinden tıklandıysa paneli ana gridin en başına aç
+    if (index === -1) {
+        grid.insertBefore(panel, grid.firstChild);
+    } else {
+        const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
+        grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
+    }
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
