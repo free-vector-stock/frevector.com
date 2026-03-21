@@ -46,7 +46,7 @@
             padding: 0 10px 20px 20px;
         }
 
-        /* GÖRSELLERİN BOYUTUNU ARTIRARAK BOŞLUĞU TAMAMEN KAPATAN GRID */
+        /* GÖRSELLERİ DEVLEŞTİRMEDEN BOŞLUĞU ALAN GRID */
         .content {
             flex: 1;
             padding: 20px;
@@ -55,9 +55,9 @@
 
         .vectors-grid {
             display: grid;
-            /* Boşluğu almak için sütun genişliğini artırdık */
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
+            /* Görselleri makul bir boyutta tutarken boşluğu dağıtmak için auto-fit kullanıldı */
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
             width: 100%;
         }
 
@@ -94,35 +94,37 @@
             font-size: 12px;
         }
 
-        /* SİYAH FOOTER DÜZENLEMELERİ */
+        /* SİYAH FOOTER - ORTALANMIŞ VE ALT ALTA YAPI */
         .footer {
             display: flex;
-            justify-content: flex-start; /* Tüm içeriği sola yaslar */
+            flex-direction: column; /* Üst üste gelmelerini sağlar */
+            justify-content: center;
             align-items: center;
-            padding: 0 20px;
+            padding: 10px 0;
             background-color: #000;
-            height: 60px;
-            gap: 40px; /* Copyright ile Linkler arasındaki boşluk */
+            height: 70px; /* İçerik alt alta olduğu için yüksekliği hafif artırdım */
+            gap: 8px; /* Yazı ve linkler arasındaki mesafe */
         }
 
-        /* Copyright */
+        /* Copyright Üstte */
         .copyright {
             color: #888;
             font-size: 12px;
-            white-space: nowrap;
+            text-align: center;
         }
 
-        /* Footer Navigasyonu */
+        /* Linkler Altta */
         .footer-nav {
             display: flex;
-            gap: 25px; /* Linklerin kendi arasındaki boşluk */
+            gap: 20px;
+            justify-content: center;
             align-items: center;
         }
 
         .footer-link {
             color: #888;
             text-decoration: none;
-            font-size: 14px; /* Font büyütüldü */
+            font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
         }
