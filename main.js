@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031405 - Full Feature Sync
+ * v2026031410 - Dynamic Our Picks & Working Footer Modals
  */
 
 const CATEGORIES = [
@@ -11,10 +11,22 @@ const CATEGORIES = [
 ];
 
 const MODAL_CONTENTS = {
-    about: { title: 'About Us', content: `<h2>About Us</h2><p>Frevector.com is an independent design platform providing original graphic resources.</p>` },
-    privacy: { title: 'Privacy Policy', content: `<h2>Privacy Policy</h2><p>We prioritize user privacy and use cookies for performance.</p>` },
-    terms: { title: 'Terms of Service', content: `<h2>Terms of Service</h2><p>All designs are original works. Redistribution is prohibited.</p>` },
-    contact: { title: 'Contact', content: `<h2>Contact</h2><p>Email: <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>` }
+    about: { 
+        title: 'About Us', 
+        content: `<h2>About Us</h2><p style="margin-top:15px; line-height:1.6;">Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design. All designs on the site are created exclusively by Frevector artists. All files can be used in both personal and commercial projects.</p>` 
+    },
+    privacy: { 
+        title: 'Privacy Policy', 
+        content: `<h2>Privacy Policy</h2><p style="margin-top:15px; line-height:1.6;">As Frevector.com, we prioritize user privacy. Cookies may be used on the site to support site functions, remember user preferences, and measure performance. We do not share your personal data with third parties.</p>` 
+    },
+    terms: { 
+        title: 'Terms of Service', 
+        content: `<h2>Terms of Service</h2><p style="margin-top:15px; line-height:1.6;">Every visitor using Frevector.com is deemed to have accepted the following terms. All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector. Redistribution is prohibited.</p>` 
+    },
+    contact: { 
+        title: 'Contact', 
+        content: `<h2>Contact</h2><p style="margin-top:15px; line-height:1.6;">If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p><p style="margin-top:10px;"><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000;">hakankacar2014@gmail.com</a></p>` 
+    }
 };
 
 const state = {
@@ -40,7 +52,7 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
     await fetchVectors();
-    await fetchAndRenderOurPicks();
+    await fetchAndRenderOurPicks(); // İlk açılışta yükle
 }
 
 function setupCategories() {
@@ -72,6 +84,7 @@ function selectCategory(cat) {
     setupCategories();
     updateCategoryTitle();
     fetchVectors();
+    fetchAndRenderOurPicks(); // Kategori değişince alt şeridi de güncelle!
 }
 
 function updateCategoryTitle() {
@@ -127,13 +140,23 @@ async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
     try {
-        const res = await fetch('/api/vectors?limit=15');
+        const url = new URL('/api/vectors', window.location.origin);
+        url.searchParams.set('limit', '15');
+        // Kategori seçiliyse alt şeridi de o kategoriye göre filtrele
+        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+        
+        const res = await fetch(url);
         const data = await res.json();
         const picks = data.vectors || [];
+        
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         
-        // 4x loop for seamless effect
+        if (picks.length === 0) {
+            track.innerHTML = '<p style="font-size:10px; color:#999; padding:20px;">No specific picks for this category.</p>';
+            return;
+        }
+
         const quadPicks = [...picks, ...picks, ...picks, ...picks];
         quadPicks.forEach(v => {
             const card = document.createElement('div');
@@ -223,6 +246,7 @@ function scrollOurPicks(dir) {
     if (state.isTransitioning) return;
     const track = document.getElementById('ourPicksTrack');
     const setWidth = state.originalPicksCount * 90;
+    if (setWidth === 0) return;
     state.isTransitioning = true;
     track.style.transition = 'transform 0.4s ease';
     state.ourPicksOffset += (dir * -270);
@@ -236,10 +260,55 @@ function scrollOurPicks(dir) {
     }, 400);
 }
 
-function setupDownloadPageHandlers() { document.getElementById('dpClose').onclick = () => { document.getElementById('downloadPage').style.display = 'none'; clearInterval(state.countdownInterval); }; }
-function setupModalHandlers() { document.querySelectorAll('.modal-trigger').forEach(b => b.onclick = () => { const c = MODAL_CONTENTS[b.dataset.modal]; document.getElementById('infoModalBody').innerHTML = c.content; document.getElementById('infoModal').style.display = 'flex'; }); document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none'; }
-function setupEventListeners() { document.getElementById('searchBtn').onclick = () => { state.searchQuery = document.getElementById('searchInput').value; state.currentPage = 1; fetchVectors(); }; document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; }
-function updatePagination() { document.getElementById('pageNumber').textContent = state.currentPage; document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`; }
+function setupDownloadPageHandlers() { 
+    document.getElementById('dpClose').onclick = () => { 
+        document.getElementById('downloadPage').style.display = 'none'; 
+        clearInterval(state.countdownInterval); 
+    }; 
+}
+
+function setupModalHandlers() { 
+    // Tüm modal tetikleyicilerini bul ve olay ekle
+    document.querySelectorAll('.modal-trigger').forEach(b => {
+        b.onclick = (e) => {
+            e.preventDefault();
+            const modalType = b.dataset.modal;
+            const content = MODAL_CONTENTS[modalType];
+            if (content) {
+                document.getElementById('infoModalBody').innerHTML = content.content;
+                document.getElementById('infoModal').style.display = 'flex';
+            }
+        };
+    });
+    
+    document.getElementById('infoModalClose').onclick = () => {
+        document.getElementById('infoModal').style.display = 'none';
+    };
+    
+    // Dışarı tıklayınca kapatma
+    window.onclick = (event) => {
+        const modal = document.getElementById('infoModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+}
+
+function setupEventListeners() { 
+    document.getElementById('searchBtn').onclick = () => { 
+        state.searchQuery = document.getElementById('searchInput').value; 
+        state.currentPage = 1; 
+        fetchVectors(); 
+    }; 
+    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
+    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
+}
+
+function updatePagination() { 
+    document.getElementById('pageNumber').textContent = state.currentPage; 
+    document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`; 
+}
+
 function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
 
 document.addEventListener('DOMContentLoaded', init);
