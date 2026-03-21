@@ -356,7 +356,7 @@ function renderVectors() {
 }
 
 /**
- * Our Picks için kesin çözüm: Üçlü Set Mantığı
+ * Our Picks için 10'lu Set Mantığı - Boşluğu teknik olarak imkansız kılar.
  */
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
@@ -365,7 +365,7 @@ async function fetchAndRenderOurPicks() {
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('limit', '40'); // Daha geniş bir havuz
+        url.searchParams.set('limit', '40');
         if (state.selectedCategory !== 'all') {
             url.searchParams.set('category', state.selectedCategory);
         }
@@ -376,7 +376,7 @@ async function fetchAndRenderOurPicks() {
         let picks = data.vectors || [];
 
         picks = picks.sort(() => Math.random() - 0.5);
-        const finalPicks = picks.slice(0, 30); // 30 orijinal görsel
+        const finalPicks = picks.slice(0, 30); 
         state.originalPicksCount = finalPicks.length;
 
         track.innerHTML = '';
@@ -398,14 +398,16 @@ async function fetchAndRenderOurPicks() {
             return card;
         };
 
-        // ÜÇLÜ SET: [SET 1] [SET 2 (ANA)] [SET 3]
-        // Ortadaki set üzerinde gezerken ne sola ne sağa boşluk çıkamaz.
-        const tripleSet = [...finalPicks, ...finalPicks, ...finalPicks];
-        tripleSet.forEach(v => track.appendChild(createCard(v)));
+        // 10 KATLI SET: Boşluk kalması imkansızdır.
+        const multiSet = [];
+        for (let i = 0; i < 10; i++) {
+            multiSet.push(...finalPicks);
+        }
+        multiSet.forEach(v => track.appendChild(createCard(v)));
 
-        // Başlangıç noktasını ortadaki setin başına alıyoruz
-        const cardWidth = 90; // Gap dahil yaklaşık genişlik
-        state.ourPicksOffset = state.originalPicksCount * cardWidth;
+        // Başlangıç noktasını 5. setin başına alıyoruz (Merkez)
+        const cardWidth = 90; 
+        state.ourPicksOffset = (state.originalPicksCount * 5) * cardWidth;
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
 
         updateOurPicksArrows();
@@ -444,13 +446,12 @@ function scrollOurPicks(direction) {
     setTimeout(() => {
         track.style.transition = 'none';
         
-        // EĞER ÇOK SAĞA GİTTİYSEK (3. setin içine girdiysek)
-        if (state.ourPicksOffset >= originalContentWidth * 2) {
-            state.ourPicksOffset -= originalContentWidth;
+        // Sınır kontrolü ve merkeze ışınlama
+        if (state.ourPicksOffset >= originalContentWidth * 8) {
+            state.ourPicksOffset -= originalContentWidth * 3;
         } 
-        // EĞER ÇOK SOLA GİTTİYSEK (1. setin içine girdiysek)
-        else if (state.ourPicksOffset < originalContentWidth) {
-            state.ourPicksOffset += originalContentWidth;
+        else if (state.ourPicksOffset <= originalContentWidth * 2) {
+            state.ourPicksOffset += originalContentWidth * 3;
         }
         
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
