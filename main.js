@@ -1,10 +1,7 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031402 - Fixed: Click events, titles, and keywords display
+ * v2026031405 - Full Feature Sync
  */
-
-const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
-const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'vector eps', 'svg'];
 
 const CATEGORIES = [
     'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
@@ -14,29 +11,16 @@ const CATEGORIES = [
 ];
 
 const MODAL_CONTENTS = {
-    about: {
-        title: 'About Us',
-        content: `<h2>About Us</h2><p>Frevector.com is an independent design platform providing original graphic resources.</p>`
-    },
-    privacy: {
-        title: 'Privacy Policy',
-        content: `<h2>Privacy Policy</h2><p>We prioritize user privacy and use cookies for performance.</p>`
-    },
-    terms: {
-        title: 'Terms of Service',
-        content: `<h2>Terms of Service</h2><p>All designs are original works. Redistribution is prohibited.</p>`
-    },
-    contact: {
-        title: 'Contact',
-        content: `<h2>Contact</h2><p>Email: <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>`
-    }
+    about: { title: 'About Us', content: `<h2>About Us</h2><p>Frevector.com is an independent design platform providing original graphic resources.</p>` },
+    privacy: { title: 'Privacy Policy', content: `<h2>Privacy Policy</h2><p>We prioritize user privacy and use cookies for performance.</p>` },
+    terms: { title: 'Terms of Service', content: `<h2>Terms of Service</h2><p>All designs are original works. Redistribution is prohibited.</p>` },
+    contact: { title: 'Contact', content: `<h2>Contact</h2><p>Email: <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>` }
 };
 
 const state = {
     vectors: [],
     currentPage: 1,
     totalPages: 1,
-    total: 0,
     selectedCategory: 'all',
     selectedType: 'all',
     searchQuery: '',
@@ -56,24 +40,13 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
     await fetchVectors();
+    await fetchAndRenderOurPicks();
 }
 
 function setupCategories() {
     const list = document.getElementById('categoriesList');
     if (!list) return;
     list.innerHTML = '';
-
-    const typeContainer = document.createElement('div');
-    typeContainer.className = 'type-filter-container';
-    ['all', 'vector', 'jpeg'].forEach(t => {
-        const a = document.createElement('a');
-        a.href = '#';
-        a.className = 'category-item' + (state.selectedType === t ? ' active' : '');
-        a.textContent = t.toUpperCase();
-        a.onclick = (e) => { e.preventDefault(); state.selectedType = t; state.currentPage = 1; setupCategories(); fetchVectors(); };
-        typeContainer.appendChild(a);
-    });
-    list.appendChild(typeContainer);
 
     const allLink = document.createElement('a');
     allLink.href = '#';
@@ -97,7 +70,13 @@ function selectCategory(cat) {
     state.currentPage = 1;
     closeDetailPanel();
     setupCategories();
+    updateCategoryTitle();
     fetchVectors();
+}
+
+function updateCategoryTitle() {
+    const el = document.getElementById('categoryTitle');
+    if (el) el.textContent = state.selectedCategory === 'all' ? 'Free Vectors' : `Free ${state.selectedCategory} Vectors`;
 }
 
 async function fetchVectors() {
@@ -107,8 +86,8 @@ async function fetchVectors() {
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('page', state.currentPage);
+        url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         
         const res = await fetch(url);
@@ -116,7 +95,6 @@ async function fetchVectors() {
         state.vectors = data.vectors || [];
         state.totalPages = data.totalPages || 1;
         renderVectors();
-        await fetchAndRenderOurPicks();
         updatePagination();
     } catch (err) { console.error(err); }
     finally { state.isLoading = false; showLoader(false); }
@@ -155,12 +133,13 @@ async function fetchAndRenderOurPicks() {
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         
+        // 4x loop for seamless effect
         const quadPicks = [...picks, ...picks, ...picks, ...picks];
         quadPicks.forEach(v => {
             const card = document.createElement('div');
             card.className = 'vector-card';
             card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
-            card.onclick = () => openDetailPanel(v, card);
+            card.onclick = () => showDownloadPage(v);
             track.appendChild(card);
         });
         state.ourPicksOffset = picks.length * 90;
@@ -182,7 +161,6 @@ function openDetailPanel(v, cardEl) {
             <div class="detail-left"><img class="detail-img" src="${v.thumbnail}"></div>
             <div class="detail-right">
                 <h2 class="detail-title">${v.title}</h2>
-                <p class="detail-desc">${v.description || ""}</p>
                 <div class="detail-keywords">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
                 <div style="margin-top:20px; display:flex; gap:10px;">
                     <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
@@ -195,8 +173,6 @@ function openDetailPanel(v, cardEl) {
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
-    if(index === -1) { showDownloadPage(v); return; }
-
     const cols = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfter = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
     grid.insertBefore(panel, cards[insertAfter].nextSibling);
@@ -216,8 +192,12 @@ function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
+    document.getElementById('dpCategory').textContent = v.category || '-';
+    document.getElementById('dpKeywords').innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('');
+    
     document.getElementById('dpDownloadBtn').style.display = 'block';
     document.getElementById('dpCountdownBox').style.display = 'none';
+    
     document.getElementById('dpDownloadBtn').onclick = () => {
         document.getElementById('dpDownloadBtn').style.display = 'none';
         document.getElementById('dpCountdownBox').style.display = 'block';
@@ -225,7 +205,10 @@ function showDownloadPage(v) {
         state.countdownInterval = setInterval(() => {
             c--;
             document.getElementById('dpCountdown').textContent = c;
-            if (c <= 0) { clearInterval(state.countdownInterval); window.location.href = `/api/download?slug=${v.name}`; }
+            if (c <= 0) {
+                clearInterval(state.countdownInterval);
+                window.location.href = `/api/download?slug=${v.name}`;
+            }
         }, 1000);
     };
     dp.style.display = 'flex';
