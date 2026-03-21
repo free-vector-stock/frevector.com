@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031420 - Absolute Random Logic & Click Stability
+ * v2026031425 - Multi-Page Random Picker & Interaction Fix
  */
 
 const CATEGORIES = [
@@ -51,8 +51,8 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
     await fetchVectors();
-    // İlk açılışta veriler çekildikten sonra toplam sayfa sayısını bildiğimiz için Our Picks'i çağırıyoruz
-    setTimeout(() => fetchAndRenderOurPicks(), 500);
+    // Sayfa verileri yüklendikten sonra Our Picks başlasın
+    setTimeout(() => fetchAndRenderOurPicks(), 600);
 }
 
 function setupCategories() {
@@ -84,8 +84,7 @@ function selectCategory(cat) {
     setupCategories();
     updateCategoryTitle();
     fetchVectors();
-    // Kategori değişince Our Picks kısmını da sıfırla ve rastgele sayfa çek
-    setTimeout(() => fetchAndRenderOurPicks(), 500);
+    setTimeout(() => fetchAndRenderOurPicks(), 600);
 }
 
 function updateCategoryTitle() {
@@ -137,27 +136,43 @@ function renderVectors() {
     });
 }
 
-// BU KISIM TAMAMEN YENİLENDİ - KESİN RASTGELELİK GETİRİR
+// YENİ MANTIK: HER SAYFADAN RASTGELE GÖRSEL TOPLAYAN SİSTEM
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
     
+    let picks = [];
+    const maxPicks = 15; // Toplamda kaç görsel gösterilecek
+    const totalPages = state.totalPages || 1;
+
     try {
-        // Backend'in tüm sayfalarından karma çekmek için rastgele bir sayfa numarası seçiyoruz
-        const randomPage = Math.floor(Math.random() * state.totalPages) + 1;
+        // 15 adet rastgele sayfa numarası belirle
+        let targetPages = [];
+        for(let i=0; i < maxPicks; i++) {
+            const randPage = Math.floor(Math.random() * totalPages) + 1;
+            targetPages.push(randPage);
+        }
+
+        // Her bir sayfa için paralel istek gönder
+        const requests = targetPages.map(p => {
+            const url = new URL('/api/vectors', window.location.origin);
+            url.searchParams.set('page', p);
+            url.searchParams.set('limit', '5'); // Her sayfadan sadece küçük bir grup iste
+            if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+            return fetch(url).then(r => r.json());
+        });
+
+        const results = await Promise.all(requests);
         
-        const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('page', randomPage); // Rastgele sayfa seçtik!
-        url.searchParams.set('limit', '15');
-        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        
-        const res = await fetch(url);
-        const data = await res.json();
-        let picks = data.vectors || [];
-        
-        // Gelen listeyi kendi içinde de karıştır (Shuffle)
-        picks = picks.sort(() => Math.random() - 0.5);
-        
+        results.forEach(data => {
+            if (data.vectors && data.vectors.length > 0) {
+                // Her gelen sayfadan sadece 1 tane rastgele görsel seç ve ekle
+                const oneVector = data.vectors[Math.floor(Math.random() * data.vectors.length)];
+                picks.push(oneVector);
+            }
+        });
+
+        // Ekrana basma işlemi
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
         
@@ -165,12 +180,12 @@ async function fetchAndRenderOurPicks() {
 
         const quadPicks = [...picks, ...picks, ...picks, ...picks];
         quadPicks.forEach(v => {
+            if(!v) return;
             const card = document.createElement('div');
             card.className = 'vector-card';
             card.style.cursor = 'pointer';
             card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
             
-            // TIKLAMA SORUNUNU ÇÖZEN KESİN YÖNTEM
             card.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -279,10 +294,13 @@ function scrollOurPicks(dir) {
 }
 
 function setupDownloadPageHandlers() { 
-    document.getElementById('dpClose').onclick = () => { 
-        document.getElementById('downloadPage').style.display = 'none'; 
-        if(state.countdownInterval) clearInterval(state.countdownInterval); 
-    }; 
+    const dpClose = document.getElementById('dpClose');
+    if(dpClose) {
+        dpClose.onclick = () => { 
+            document.getElementById('downloadPage').style.display = 'none'; 
+            if(state.countdownInterval) clearInterval(state.countdownInterval); 
+        };
+    }
 }
 
 function setupModalHandlers() { 
@@ -297,9 +315,12 @@ function setupModalHandlers() {
             }
         };
     });
-    document.getElementById('infoModalClose').onclick = () => {
-        document.getElementById('infoModal').style.display = 'none';
-    };
+    const infoClose = document.getElementById('infoModalClose');
+    if(infoClose) {
+        infoClose.onclick = () => {
+            document.getElementById('infoModal').style.display = 'none';
+        };
+    }
     window.onclick = (event) => {
         const modal = document.getElementById('infoModal');
         if (event.target == modal) modal.style.display = 'none';
@@ -307,15 +328,21 @@ function setupModalHandlers() {
 }
 
 function setupEventListeners() { 
-    document.getElementById('searchBtn').onclick = () => { 
-        state.searchQuery = document.getElementById('searchInput').value; 
-        state.currentPage = 1; 
-        fetchVectors(); 
-        setTimeout(() => fetchAndRenderOurPicks(), 500);
-    };
-    document.getElementById('searchInput').onkeypress = (e) => {
-        if(e.key === 'Enter') document.getElementById('searchBtn').click();
-    };
+    const searchBtn = document.getElementById('searchBtn');
+    if(searchBtn) {
+        searchBtn.onclick = () => { 
+            state.searchQuery = document.getElementById('searchInput').value; 
+            state.currentPage = 1; 
+            fetchVectors(); 
+            setTimeout(() => fetchAndRenderOurPicks(), 600);
+        };
+    }
+    const searchInput = document.getElementById('searchInput');
+    if(searchInput) {
+        searchInput.onkeypress = (e) => {
+            if(e.key === 'Enter') document.getElementById('searchBtn').click();
+        };
+    }
     document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
     document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
 }
@@ -325,6 +352,9 @@ function updatePagination() {
     document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`; 
 }
 
-function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
+function showLoader(s) { 
+    const loader = document.getElementById('loader');
+    if(loader) loader.style.display = s ? 'flex' : 'none'; 
+}
 
 document.addEventListener('DOMContentLoaded', init);
