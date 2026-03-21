@@ -356,7 +356,7 @@ function renderVectors() {
 }
 
 /**
- * Our Picks için kusursuz sonsuz döngü
+ * Our Picks için kesin çözüm: Üçlü Set Mantığı
  */
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
@@ -365,7 +365,7 @@ async function fetchAndRenderOurPicks() {
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('limit', '100'); 
+        url.searchParams.set('limit', '40'); // Daha geniş bir havuz
         if (state.selectedCategory !== 'all') {
             url.searchParams.set('category', state.selectedCategory);
         }
@@ -376,7 +376,7 @@ async function fetchAndRenderOurPicks() {
         let picks = data.vectors || [];
 
         picks = picks.sort(() => Math.random() - 0.5);
-        const finalPicks = picks.slice(0, 60);
+        const finalPicks = picks.slice(0, 30); // 30 orijinal görsel
         state.originalPicksCount = finalPicks.length;
 
         track.innerHTML = '';
@@ -398,12 +398,15 @@ async function fetchAndRenderOurPicks() {
             return card;
         };
 
-        // Orijinal Görseller
-        finalPicks.forEach(v => track.appendChild(createCard(v)));
+        // ÜÇLÜ SET: [SET 1] [SET 2 (ANA)] [SET 3]
+        // Ortadaki set üzerinde gezerken ne sola ne sağa boşluk çıkamaz.
+        const tripleSet = [...finalPicks, ...finalPicks, ...finalPicks];
+        tripleSet.forEach(v => track.appendChild(createCard(v)));
 
-        // KUSURSUZ DÖNGÜ İÇİN EKLEME: Ekranı dolduracak kadar (en az 20 adet) görseli sona kopyala
-        const clones = finalPicks.slice(0, 20);
-        clones.forEach(v => track.appendChild(createCard(v)));
+        // Başlangıç noktasını ortadaki setin başına alıyoruz
+        const cardWidth = 90; // Gap dahil yaklaşık genişlik
+        state.ourPicksOffset = state.originalPicksCount * cardWidth;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
 
         updateOurPicksArrows();
     } catch (err) {
@@ -426,50 +429,33 @@ function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
 
-    const cardWidth = 100; 
+    const cardWidth = 90; 
     const visibleWidth = track.parentElement.offsetWidth;
-    // Orijinal içerik bittiği an ışınlanma yapılacak sınır
     const originalContentWidth = state.originalPicksCount * cardWidth;
 
-    const step = Math.floor(visibleWidth / cardWidth) * cardWidth;
+    const step = Math.floor(visibleWidth / cardWidth) * cardWidth || cardWidth;
     let newOffset = state.ourPicksOffset + (direction * step);
 
     state.isTransitioning = true;
     track.style.transition = 'transform 0.4s ease';
-    
-    // İleri giderken sona yaklaştıysak
-    if (direction === 1 && newOffset >= originalContentWidth) {
-        state.ourPicksOffset = newOffset;
-        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-        
-        setTimeout(() => {
-            track.style.transition = 'none';
-            // Aradaki farkı koruyarak başa ışınla (seamless teleport)
-            state.ourPicksOffset = newOffset - originalContentWidth;
-            track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-            state.isTransitioning = false;
-        }, 400);
-    } 
-    // Geri giderken başa yaklaştıysak
-    else if (direction === -1 && newOffset < 0) {
-        // Önce sessizce sona ışınla
+    state.ourPicksOffset = newOffset;
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+
+    setTimeout(() => {
         track.style.transition = 'none';
-        state.ourPicksOffset = originalContentWidth + state.ourPicksOffset;
-        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
         
-        // Sonra animasyonla bir adım geri kaydır
-        setTimeout(() => {
-            track.style.transition = 'transform 0.4s ease';
-            state.ourPicksOffset -= step;
-            track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-            state.isTransitioning = false;
-        }, 10);
-    }
-    else {
-        state.ourPicksOffset = newOffset;
+        // EĞER ÇOK SAĞA GİTTİYSEK (3. setin içine girdiysek)
+        if (state.ourPicksOffset >= originalContentWidth * 2) {
+            state.ourPicksOffset -= originalContentWidth;
+        } 
+        // EĞER ÇOK SOLA GİTTİYSEK (1. setin içine girdiysek)
+        else if (state.ourPicksOffset < originalContentWidth) {
+            state.ourPicksOffset += originalContentWidth;
+        }
+        
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-        setTimeout(() => { state.isTransitioning = false; }, 400);
-    }
+        state.isTransitioning = false;
+    }, 400);
 }
 
 function updateOurPicksArrows() {
