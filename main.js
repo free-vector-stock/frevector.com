@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031408 - Fixed: Absolute visual separation for Pagination and Our Picks
+ * v2026031409 - Fixed: Locked Pagination above Our Picks and Our Picks above Footer
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -161,31 +161,27 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
 
-    // KRİTİK DÜZELTME: Pagination ve Our Picks alanlarını birbirinden zorla ayırır
-    const style = document.createElement('style');
-    style.innerHTML = `
-        .pagination { 
-            position: relative !important; 
-            z-index: 10 !important; 
-            margin-bottom: 50px !important; 
-            display: flex !important; 
-            justify-content: center !important;
-            clear: both !important;
-        }
-        .our-picks-section { 
-            position: relative !important; 
-            z-index: 5 !important; 
-            display: block !important; 
-            clear: both !important; 
-            padding-top: 20px !important;
-            margin-top: 40px !important;
-            border-top: 1px solid #f0f0f0 !important;
-        }
-        #ourPicksTrack {
-            pointer-events: auto !important; /* Tıklanabilirliği garanti eder */
-        }
-    `;
-    document.head.appendChild(style);
+    // PAGINATION VE OUR PICKS YERLEŞİMİNİ SABİTLEME
+    const pagination = document.querySelector('.pagination');
+    const ourPicks = document.querySelector('.our-picks-section');
+    const footer = document.querySelector('footer');
+
+    if (pagination && ourPicks && footer) {
+        // Pagination'ı Our Picks'in üzerine al ve yer aç
+        pagination.style.position = 'relative';
+        pagination.style.display = 'flex';
+        pagination.style.justifyContent = 'center';
+        pagination.style.margin = '40px 0 20px 0';
+        pagination.style.clear = 'both';
+        ourPicks.parentNode.insertBefore(pagination, ourPicks);
+
+        // Our Picks'i Footer'ın üzerine sabitle
+        ourPicks.style.position = 'relative';
+        ourPicks.style.margin = '20px 0 40px 0';
+        ourPicks.style.padding = '20px 0';
+        ourPicks.style.clear = 'both';
+        footer.parentNode.insertBefore(ourPicks, footer);
+    }
 
     await fetchVectors();
 }
