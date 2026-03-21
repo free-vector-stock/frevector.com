@@ -6,76 +6,77 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- DİKKAT: BU BLOK GÜNCELLENDİ --- */
-        
-        /* 1. Alttaki boşluğu önlemek için ana container'ı tam boy yapıyoruz */
+        /* Sayfa yapısını düzelten ve boşlukları yok eden CSS */
         html, body {
             height: 100%;
             margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
         }
 
         .main-container {
-            flex: 1 0 auto; /* İçerik az olsa bile ana içerik alanını uzatır */
-            padding-bottom: 110px; /* Footer ve pagination'ın üzerine gelmemesi için boşluk */
-        }
-
-        /* 2. Siyah banner ve içindekileri en alta sabitleyen container */
-        .bottom-fixed-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #000; /* Siyah arka plan */
-            color: #fff; /* Beyaz metin */
+            flex: 1 0 auto;
             display: flex;
-            flex-direction: column;
-            z-items: 1000; /* Diğer içeriklerin üzerinde kalması için */
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.2); /* Hafif bir gölge */
+            padding-bottom: 20px; /* Görsellerin alt banda çok yapışmaması için */
         }
 
-        /* 3. Sayfalama (Pagination) - Siyah banner'ın hemen üzerinde, ortalı */
+        /* Alt kısım - Sayfalama ve Footer'ı bir arada tutan alan */
+        .bottom-fixed-container {
+            flex-shrink: 0;
+            width: 100%;
+            background-color: #000;
+        }
+
+        /* Sayfalama Alanı - Beyaz arka plan, görsellere yakın */
         .pagination-wrapper {
-            background-color: transparent; /* Container siyah olduğu için şeffaf */
-            padding: 10px 0;
+            background-color: #fff;
+            padding: 15px 0;
+            border-top: 1px solid #eee;
             text-align: center;
-            border-bottom: 1px solid #333; /* Footer ilepagination arasında ince bir çizgi */
         }
 
         .pagination-nav {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .pag-btn {
-            background-color: #333;
+            background-color: #1a1a1a;
             color: #fff;
-            border: 1px solid #444;
-            padding: 5px 10px;
+            border: none;
+            padding: 6px 14px;
             cursor: pointer;
             border-radius: 4px;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        .pag-btn:hover {
+            background-color: #333;
         }
 
         .page-num, .page-total {
-            color: #fff;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
         }
 
-        /* 4. Siyah Footer (Logo ve Linkler) - En alt katman */
+        /* Siyah Footer - En altta ince ve şık */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 30px;
+            padding: 12px 30px;
             background-color: #000;
         }
 
         .copyright, .footer-link {
-            color: #fff;
+            color: #999;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .footer-nav {
@@ -83,10 +84,12 @@
             gap: 20px;
         }
 
-        /* --- DİĞER CSS AYARLARI (DEĞİŞMEDİ) --- */
+        .footer-link:hover {
+            color: #fff;
+        }
+
         .dp-countdown-box { text-align: center; margin-top: 20px; }
         .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
-        
     </style>
 </head>
 <body>
@@ -127,7 +130,6 @@
     </div>
 
     <div class="bottom-fixed-container">
-        
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
