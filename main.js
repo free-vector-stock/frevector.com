@@ -356,7 +356,7 @@ function renderVectors() {
 }
 
 /**
- * Our Picks için 10'lu Set Mantığı - Boşluğu teknik olarak imkansız kılar.
+ * Our Picks için HARD-RESET mantığı: Boşluk kalması İMKANSIZ.
  */
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
@@ -365,7 +365,7 @@ async function fetchAndRenderOurPicks() {
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('limit', '40');
+        url.searchParams.set('limit', '30'); 
         if (state.selectedCategory !== 'all') {
             url.searchParams.set('category', state.selectedCategory);
         }
@@ -374,10 +374,7 @@ async function fetchAndRenderOurPicks() {
         if (!res.ok) throw new Error('Picks fetch failed');
         const data = await res.json();
         let picks = data.vectors || [];
-
         picks = picks.sort(() => Math.random() - 0.5);
-        const finalPicks = picks.slice(0, 30); 
-        state.originalPicksCount = finalPicks.length;
 
         track.innerHTML = '';
         state.ourPicksOffset = 0;
@@ -398,19 +395,16 @@ async function fetchAndRenderOurPicks() {
             return card;
         };
 
-        // 10 KATLI SET: Boşluk kalması imkansızdır.
-        const multiSet = [];
-        for (let i = 0; i < 10; i++) {
-            multiSet.push(...finalPicks);
-        }
-        multiSet.forEach(v => track.appendChild(createCard(v)));
+        // GÖRSELLERİ 4 KEZ TEKRARLA (Burası kritik, 4 kez ekleyince boşluk kalmıyor)
+        const totalItems = [...picks, ...picks, ...picks, ...picks];
+        totalItems.forEach(v => track.appendChild(createCard(v)));
 
-        // Başlangıç noktasını 5. setin başına alıyoruz (Merkez)
-        const cardWidth = 90; 
-        state.ourPicksOffset = (state.originalPicksCount * 5) * cardWidth;
+        // İlk setin bittiği yere gelince (görsel olarak fark edilmeden) başa atacak.
+        const singleSetWidth = picks.length * 90; // 80px + 10px gap
+        state.ourPicksOffset = singleSetWidth; 
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-
-        updateOurPicksArrows();
+        
+        state.originalPicksCount = picks.length;
     } catch (err) {
         console.error('Our Picks error:', err);
         track.innerHTML = '';
@@ -431,42 +425,25 @@ function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
 
-    const cardWidth = 90; 
-    const visibleWidth = track.parentElement.offsetWidth;
-    const originalContentWidth = state.originalPicksCount * cardWidth;
-
-    const step = Math.floor(visibleWidth / cardWidth) * cardWidth || cardWidth;
-    let newOffset = state.ourPicksOffset + (direction * step);
+    const singleSetWidth = state.originalPicksCount * 90;
+    const scrollAmount = 270; // 3 görsel birden kaysın
 
     state.isTransitioning = true;
-    track.style.transition = 'transform 0.4s ease';
-    state.ourPicksOffset = newOffset;
+    track.style.transition = 'transform 0.4s ease-in-out';
+    state.ourPicksOffset += (direction * -scrollAmount);
     track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
 
     setTimeout(() => {
         track.style.transition = 'none';
-        
-        // Sınır kontrolü ve merkeze ışınlama
-        if (state.ourPicksOffset >= originalContentWidth * 8) {
-            state.ourPicksOffset -= originalContentWidth * 3;
-        } 
-        else if (state.ourPicksOffset <= originalContentWidth * 2) {
-            state.ourPicksOffset += originalContentWidth * 3;
+        // Sonsuz döngü kontrolü: Eğer çok sağa veya çok sola giderse merkeze çek
+        if (state.ourPicksOffset >= (singleSetWidth * 2)) {
+            state.ourPicksOffset -= singleSetWidth;
+        } else if (state.ourPicksOffset <= (singleSetWidth * 0.5)) {
+            state.ourPicksOffset += singleSetWidth;
         }
-        
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
         state.isTransitioning = false;
     }, 400);
-}
-
-function updateOurPicksArrows() {
-    const prevBtn = document.getElementById('ourPicksPrev');
-    const nextBtn = document.getElementById('ourPicksNext');
-    if (!prevBtn || !nextBtn) return;
-    prevBtn.style.opacity = '1';
-    nextBtn.style.opacity = '1';
-    prevBtn.style.cursor = 'pointer';
-    nextBtn.style.cursor = 'pointer';
 }
 
 function openDetailPanel(v, cardEl) {
