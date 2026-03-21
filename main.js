@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing, infinite loop
+ * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing, seamless infinite loop
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -152,7 +152,8 @@ const state = {
     detailPanelOpen: false,
     downloadInProgress: false,
     ourPicksOffset: 0,
-    isTransitioning: false
+    isTransitioning: false,
+    originalPicksCount: 0
 };
 
 async function init() {
@@ -355,7 +356,7 @@ function renderVectors() {
 }
 
 /**
- * Our Picks için sonsuz döngü destekli render
+ * Our Picks için kusursuz sonsuz döngü
  */
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
@@ -376,13 +377,13 @@ async function fetchAndRenderOurPicks() {
 
         picks = picks.sort(() => Math.random() - 0.5);
         const finalPicks = picks.slice(0, 60);
+        state.originalPicksCount = finalPicks.length;
 
         track.innerHTML = '';
         state.ourPicksOffset = 0;
         track.style.transition = 'none';
         track.style.transform = `translateX(0px)`;
 
-        // Kartları oluştur
         const createCard = (v) => {
             const card = document.createElement('div');
             card.className = 'vector-card';
@@ -397,11 +398,11 @@ async function fetchAndRenderOurPicks() {
             return card;
         };
 
-        // Orijinal 60 görsel
+        // Orijinal Görseller
         finalPicks.forEach(v => track.appendChild(createCard(v)));
 
-        // SONSUZ DÖNGÜ İÇİN CLONE: İlk 10 görseli sona ekle
-        const clones = finalPicks.slice(0, 10);
+        // KUSURSUZ DÖNGÜ İÇİN EKLEME: Ekranı dolduracak kadar (en az 20 adet) görseli sona kopyala
+        const clones = finalPicks.slice(0, 20);
         clones.forEach(v => track.appendChild(createCard(v)));
 
         updateOurPicksArrows();
@@ -427,38 +428,39 @@ function scrollOurPicks(direction) {
 
     const cardWidth = 100; 
     const visibleWidth = track.parentElement.offsetWidth;
-    const totalWidth = track.scrollWidth;
-    // Orijinal görsellerin bittiği yer (clone'lardan öncesi)
-    const originalContentWidth = totalWidth - (10 * cardWidth); 
-    const maxOffset = originalContentWidth - visibleWidth;
+    // Orijinal içerik bittiği an ışınlanma yapılacak sınır
+    const originalContentWidth = state.originalPicksCount * cardWidth;
 
     const step = Math.floor(visibleWidth / cardWidth) * cardWidth;
     let newOffset = state.ourPicksOffset + (direction * step);
 
-    track.style.transition = 'transform 0.4s ease';
     state.isTransitioning = true;
-
-    // SONA GELDİĞİNDE BAŞA ATLATMA MANTIĞI
-    if (newOffset > maxOffset && direction === 1) {
+    track.style.transition = 'transform 0.4s ease';
+    
+    // İleri giderken sona yaklaştıysak
+    if (direction === 1 && newOffset >= originalContentWidth) {
         state.ourPicksOffset = newOffset;
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
         
         setTimeout(() => {
             track.style.transition = 'none';
-            state.ourPicksOffset = 0;
-            track.style.transform = `translateX(0px)`;
+            // Aradaki farkı koruyarak başa ışınla (seamless teleport)
+            state.ourPicksOffset = newOffset - originalContentWidth;
+            track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
             state.isTransitioning = false;
         }, 400);
     } 
-    // BAŞTAYKEN GERİ GİDERSE SONA ATLATMA
-    else if (newOffset < 0 && direction === -1) {
+    // Geri giderken başa yaklaştıysak
+    else if (direction === -1 && newOffset < 0) {
+        // Önce sessizce sona ışınla
         track.style.transition = 'none';
-        state.ourPicksOffset = maxOffset;
+        state.ourPicksOffset = originalContentWidth + state.ourPicksOffset;
         track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
         
+        // Sonra animasyonla bir adım geri kaydır
         setTimeout(() => {
             track.style.transition = 'transform 0.4s ease';
-            state.ourPicksOffset = maxOffset - step;
+            state.ourPicksOffset -= step;
             track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
             state.isTransitioning = false;
         }, 10);
@@ -474,7 +476,6 @@ function updateOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
     if (!prevBtn || !nextBtn) return;
-    // Sonsuz döngü olduğu için butonlar her zaman aktif görünebilir
     prevBtn.style.opacity = '1';
     nextBtn.style.opacity = '1';
     prevBtn.style.cursor = 'pointer';
