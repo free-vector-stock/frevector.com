@@ -6,125 +6,130 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* TÜM BOŞLUKLARI VE HİZALAMALARI ZORLAYARAK ÇÖZEN CSS */
+        /* TÜM SORUNLARI ÇÖZEN ÖZEL CSS */
         html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            height: 100% !important;
-            width: 100% !important;
-            overflow-x: hidden !important;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
         }
 
-        /* Ana konteynerin sağdaki boşluğu bırakmamasını sağlıyoruz */
+        /* Ana içerik alanı */
         .main-container {
-            padding-bottom: 130px !important;
-            display: flex !important;
-            width: 100% !important;
-            height: calc(100vh - 120px) !important;
-            align-items: stretch !important;
-            box-sizing: border-box !important;
+            padding-bottom: 120px;
+            display: flex;
+            height: calc(100vh - 120px);
+            align-items: stretch;
         }
 
-        /* SIDEBAR GENİŞLİĞİ SABİT */
+        /* SIDEBAR VE KATEGORİ LİSTESİ */
         .sidebar {
-            width: 250px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            border-right: 1px solid #eee !important;
-            background-color: #fff !important;
-            padding: 20px 0 0 0 !important;
-            flex-shrink: 0 !important;
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #eee;
+            background-color: #fff;
+            padding: 20px 0 0 0;
+            flex-shrink: 0;
         }
 
         .sidebar-title {
-            padding: 0 20px 10px 20px !important;
-            font-weight: bold !important;
-            font-size: 14px !important;
+            padding: 0 20px 10px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #000;
         }
 
         .categories-list {
-            flex: 1 !important;
-            overflow-y: auto !important;
-            padding: 0 10px 20px 20px !important;
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 10px 20px 20px;
         }
 
-        /* BOŞLUĞU YOK EDEN CONTENT VE GRID - ZORLAYICI AYARLAR */
+        /* GÖRSELLERİ DEVLEŞTİRMEDEN BOŞLUĞU ALAN GRID */
         .content {
-            flex: 1 !important; 
-            padding: 20px !important;
-            overflow-y: auto !important;
-            width: auto !important;
-            min-width: 0 !important; /* Esnemeyi sağlar */
-            box-sizing: border-box !important;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .vectors-grid {
-            display: grid !important;
-            /* 'auto-fit' sağdaki boşluğu görsellere dağıtır */
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
-            gap: 20px !important;
-            width: 100% !important;
-            justify-content: stretch !important;
+            display: grid;
+            /* Görselleri makul bir boyutta tutarken boşluğu dağıtmak için auto-fit kullanıldı */
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 100%;
         }
 
-        /* ALT SABİT ALAN */
+        /* ALT SABİT ALAN (PAGINATION + FOOTER) */
         .fixed-bottom-bar {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            z-index: 999 !important;
-            background-color: #fff !important;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            background-color: #fff;
         }
 
         .pagination-wrapper {
-            padding: 8px 0 !important;
-            border-top: 1px solid #eee !important;
-            text-align: center !important;
+            padding: 8px 0;
+            border-top: 1px solid #eee;
+            text-align: center;
         }
 
         .pagination-nav {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            gap: 10px !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* FOOTER - TAM ORTALI, ÜST ÜSTE VE SİYAH */
+        .pag-btn {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        /* SİYAH FOOTER - ORTALANMIŞ VE ALT ALTA YAPI */
         .footer {
-            display: flex !important;
-            flex-direction: column !important; /* Telif üstte, linkler altta */
-            justify-content: center !important;
-            align-items: center !important;
-            padding: 15px 0 !important;
-            background-color: #000 !important;
-            height: 90px !important;
-            gap: 10px !important;
-            width: 100% !important;
+            display: flex;
+            flex-direction: column; /* Üst üste gelmelerini sağlar */
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            background-color: #000;
+            height: 70px; /* İçerik alt alta olduğu için yüksekliği hafif artırdım */
+            gap: 8px; /* Yazı ve linkler arasındaki mesafe */
         }
 
+        /* Copyright Üstte */
         .copyright {
-            color: #888 !important;
-            font-size: 11px !important;
-            text-align: center !important;
-            display: block !important;
+            color: #888;
+            font-size: 12px;
+            text-align: center;
         }
 
+        /* Linkler Altta */
         .footer-nav {
-            display: flex !important;
-            gap: 25px !important;
-            justify-content: center !important;
-            align-items: center !important;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
         }
 
         .footer-link {
-            color: #888 !important;
-            text-decoration: none !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
+            color: #888;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
         }
 
-        .footer-link:hover { color: #fff !important; }
+        .footer-link:hover { color: #fff; }
 
         .top-banner {
             height: 60px;
@@ -133,7 +138,7 @@
             align-items: center;
         }
 
-        /* MODAL YAPISI (BOZULMADI) */
+        /* MODAL YAPISI */
         .info-modal {
             position: fixed;
             top: 0;
@@ -145,6 +150,27 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .info-modal-box {
+            background-color: #fff;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            padding: 40px;
+            position: relative;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .info-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
         }
     </style>
 </head>
