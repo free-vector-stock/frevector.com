@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v20260322 - Footer Fixed & Type Filter Integration
+ * v20260322 - Scrolling Fixed & Type Filter Integration
  */
 
 const CATEGORIES = [
@@ -140,7 +140,7 @@ function renderVectors() {
     grid.innerHTML = '';
 
     if (state.vectors.length === 0) {
-        grid.innerHTML = '<p style="padding:20px; color:#999;">No items found in this category.</p>';
+        grid.innerHTML = '<p style="padding:20px; color:#999;">No items found.</p>';
         return;
     }
 
