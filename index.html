@@ -15,7 +15,7 @@
             width: 100%;
         }
 
-        /* Ana konteyner tüm genişliği kullanmalı */
+        /* Ana konteyner tüm genişliği kullanmalı ve boşluk bırakmamalı */
         .main-container {
             padding-bottom: 120px;
             display: flex;
@@ -49,22 +49,23 @@
             padding: 0 10px 20px 20px;
         }
 
-        /* BOŞLUĞU YOK EDEN CONTENT VE GRID AYARI */
+        /* SAĞDAKİ BOŞLUĞU BİTİREN CONTENT VE GRID AYARI */
         .content {
-            flex: 1; /* Sidebar dışındaki tüm alanı kaplamaya zorlar */
+            flex: 1; 
             padding: 20px;
             overflow-y: auto;
-            width: calc(100% - 250px); /* Sidebar genişliğini çıkararak tam sığdırır */
+            display: flex;
+            flex-direction: column;
+            width: 100%;
             box-sizing: border-box;
         }
 
         .vectors-grid {
             display: grid;
-            /* 'auto-fill' yerine 'auto-fit' kullanarak sağdaki boşluğu görsellerin genişliğine paylaştırır */
+            /* auto-fit ve 1fr kullanarak sağdaki boşluğu görsellere paylaştırır, boşluk kalmaz */
             grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 20px;
             width: 100%;
-            justify-items: stretch;
         }
 
         /* ALT SABİT ALAN (PAGINATION + FOOTER) */
@@ -100,27 +101,27 @@
             font-size: 12px;
         }
 
-        /* FOOTER - ÜST ÜSTE VE TAM ORTALI */
+        /* FOOTER - TAM ORTALI VE ÜST ÜSTE YAPI */
         .footer {
             display: flex;
-            flex-direction: column; /* Alt alta dizilim */
+            flex-direction: column; /* Yazı üstte, linkler altta */
             justify-content: center;
             align-items: center;
-            padding: 12px 0;
+            padding: 10px 0;
             background-color: #000;
-            height: 80px;
-            gap: 8px; /* Yazı ve linkler arasındaki boşluk */
+            height: 70px;
+            gap: 5px;
         }
 
         .copyright {
             color: #888;
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
         }
 
         .footer-nav {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             justify-content: center;
             align-items: center;
         }
@@ -128,7 +129,7 @@
         .footer-link {
             color: #888;
             text-decoration: none;
-            font-size: 14px; /* Font büyütüldü */
+            font-size: 13px;
             font-weight: 500;
         }
 
