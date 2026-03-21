@@ -6,24 +6,26 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* TÜM SORUNLARI ÇÖZEN ÖZEL CSS */
+        /* TÜM BOŞLUKLARI VE HİZALAMALARI ÇÖZEN KESİN CSS */
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
             overflow-x: hidden;
+            width: 100%;
         }
 
-        /* Ana içerik alanı - Boşluğu kapatmak için genişliği %100 yapıyoruz */
+        /* Ana konteyner tüm genişliği kullanmalı */
         .main-container {
             padding-bottom: 120px;
             display: flex;
             width: 100%;
             height: calc(100vh - 120px);
             align-items: stretch;
+            box-sizing: border-box;
         }
 
-        /* SIDEBAR */
+        /* SIDEBAR AYARLARI */
         .sidebar {
             width: 250px;
             display: flex;
@@ -47,20 +49,22 @@
             padding: 0 10px 20px 20px;
         }
 
-        /* CONTENT - Sağdaki boşluğu bitiren ana ayar */
+        /* BOŞLUĞU YOK EDEN CONTENT VE GRID AYARI */
         .content {
-            flex-grow: 1; /* Mevcut tüm boşluğu doldurur */
+            flex: 1; /* Sidebar dışındaki tüm alanı kaplamaya zorlar */
             padding: 20px;
             overflow-y: auto;
-            width: 100%;
+            width: calc(100% - 250px); /* Sidebar genişliğini çıkararak tam sığdırır */
+            box-sizing: border-box;
         }
 
         .vectors-grid {
             display: grid;
-            /* Auto-fill yerine auto-fit kullanarak sağdaki boşluğu görseller arasına dağıtıyoruz */
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            /* 'auto-fill' yerine 'auto-fit' kullanarak sağdaki boşluğu görsellerin genişliğine paylaştırır */
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 20px;
             width: 100%;
+            justify-items: stretch;
         }
 
         /* ALT SABİT ALAN (PAGINATION + FOOTER) */
@@ -96,16 +100,16 @@
             font-size: 12px;
         }
 
-        /* SİYAH FOOTER - ALT ALTA VE ORTALI */
+        /* FOOTER - ÜST ÜSTE VE TAM ORTALI */
         .footer {
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Alt alta dizilim */
             justify-content: center;
             align-items: center;
-            padding: 15px 0;
+            padding: 12px 0;
             background-color: #000;
             height: 80px;
-            gap: 10px;
+            gap: 8px; /* Yazı ve linkler arasındaki boşluk */
         }
 
         .copyright {
@@ -124,9 +128,8 @@
         .footer-link {
             color: #888;
             text-decoration: none;
-            font-size: 13px;
+            font-size: 14px; /* Font büyütüldü */
             font-weight: 500;
-            white-space: nowrap;
         }
 
         .footer-link:hover { color: #fff; }
