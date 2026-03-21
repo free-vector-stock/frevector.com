@@ -13,13 +13,9 @@
         .our-picks-section {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Başlığı ve içeriği ortalar */
+            align-items: center; 
             width: 100%;
             padding: 20px 0;
-        }
-
-        .our-picks-header {
-            display: contents; /* Header içindeki elemanları ana flex yapısına dahil eder */
         }
 
         .our-picks-label {
@@ -36,7 +32,7 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 1200px; /* Sayfa genişliğine göre limitlenebilir */
+            max-width: 1200px;
             gap: 10px;
         }
 
@@ -50,11 +46,11 @@
         .our-picks-track {
             display: flex;
             gap: 10px;
-            justify-content: center;
+            justify-content: flex-start;
             transition: transform 0.3s ease;
+            width: 100%;
         }
 
-        /* Ok Butonlarının Stil ve Konumu */
         .our-picks-arrow {
             background: #f0f0f0;
             border: 1px solid #ddd;
@@ -126,15 +122,11 @@
 
         <section class="our-picks-section" id="ourPicksSection">
             <div class="our-picks-label">Our selections for you</div>
-            
             <div class="our-picks-content-wrapper">
                 <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
-                
                 <div class="our-picks-track-wrap">
-                    <div class="our-picks-track" id="ourPicksTrack">
-                        </div>
+                    <div class="our-picks-track" id="ourPicksTrack"></div>
                 </div>
-
                 <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
             </div>
         </section>
@@ -188,7 +180,6 @@
     </div>
 
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-
     <script src="main.js?v=2026031407"></script>
 </body>
 </html>
