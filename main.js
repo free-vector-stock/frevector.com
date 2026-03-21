@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing
+ * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing, infinite loop
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -151,7 +151,8 @@ const state = {
     countdownInterval: null,
     detailPanelOpen: false,
     downloadInProgress: false,
-    ourPicksOffset: 0
+    ourPicksOffset: 0,
+    isTransitioning: false
 };
 
 async function init() {
@@ -310,7 +311,6 @@ async function fetchVectors() {
         state.total = data.total || 0;
 
         renderVectors();
-        // Pagination bittiğinde ve görseller yüklendiğinde "Our Picks" kısmını kategori bazlı çek
         await fetchAndRenderOurPicks(); 
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -355,7 +355,7 @@ function renderVectors() {
 }
 
 /**
- * YENİ FONKSİYON: Our Picks için kategori bazlı 60 karışık görsel çeker
+ * Our Picks için sonsuz döngü destekli render
  */
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
@@ -364,7 +364,6 @@ async function fetchAndRenderOurPicks() {
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
-        // İsteğe göre en az 60 görsel çekiyoruz
         url.searchParams.set('limit', '100'); 
         if (state.selectedCategory !== 'all') {
             url.searchParams.set('category', state.selectedCategory);
@@ -375,17 +374,16 @@ async function fetchAndRenderOurPicks() {
         const data = await res.json();
         let picks = data.vectors || [];
 
-        // JavaScript ile diziyi karıştır (Shuffle)
         picks = picks.sort(() => Math.random() - 0.5);
-
-        // En fazla 60 adet görseli al
         const finalPicks = picks.slice(0, 60);
 
         track.innerHTML = '';
         state.ourPicksOffset = 0;
+        track.style.transition = 'none';
         track.style.transform = `translateX(0px)`;
 
-        finalPicks.forEach(v => {
+        // Kartları oluştur
+        const createCard = (v) => {
             const card = document.createElement('div');
             card.className = 'vector-card';
             const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
@@ -396,8 +394,15 @@ async function fetchAndRenderOurPicks() {
                 </div>
             `;
             card.onclick = () => openDetailPanel(v, card);
-            track.appendChild(card);
-        });
+            return card;
+        };
+
+        // Orijinal 60 görsel
+        finalPicks.forEach(v => track.appendChild(createCard(v)));
+
+        // SONSUZ DÖNGÜ İÇİN CLONE: İlk 10 görseli sona ekle
+        const clones = finalPicks.slice(0, 10);
+        clones.forEach(v => track.appendChild(createCard(v)));
 
         updateOurPicksArrows();
     } catch (err) {
@@ -416,34 +421,64 @@ function setupOurPicksArrows() {
 }
 
 function scrollOurPicks(direction) {
+    if (state.isTransitioning) return;
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
 
     const cardWidth = 100; 
     const visibleWidth = track.parentElement.offsetWidth;
     const totalWidth = track.scrollWidth;
-    const maxOffset = Math.max(0, totalWidth - visibleWidth);
-    const step = Math.floor(visibleWidth / cardWidth) * cardWidth;
+    // Orijinal görsellerin bittiği yer (clone'lardan öncesi)
+    const originalContentWidth = totalWidth - (10 * cardWidth); 
+    const maxOffset = originalContentWidth - visibleWidth;
 
-    state.ourPicksOffset = Math.max(0, Math.min(maxOffset, state.ourPicksOffset + direction * step));
-    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-    updateOurPicksArrows();
+    const step = Math.floor(visibleWidth / cardWidth) * cardWidth;
+    let newOffset = state.ourPicksOffset + (direction * step);
+
+    track.style.transition = 'transform 0.4s ease';
+    state.isTransitioning = true;
+
+    // SONA GELDİĞİNDE BAŞA ATLATMA MANTIĞI
+    if (newOffset > maxOffset && direction === 1) {
+        state.ourPicksOffset = newOffset;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+        
+        setTimeout(() => {
+            track.style.transition = 'none';
+            state.ourPicksOffset = 0;
+            track.style.transform = `translateX(0px)`;
+            state.isTransitioning = false;
+        }, 400);
+    } 
+    // BAŞTAYKEN GERİ GİDERSE SONA ATLATMA
+    else if (newOffset < 0 && direction === -1) {
+        track.style.transition = 'none';
+        state.ourPicksOffset = maxOffset;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+        
+        setTimeout(() => {
+            track.style.transition = 'transform 0.4s ease';
+            state.ourPicksOffset = maxOffset - step;
+            track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+            state.isTransitioning = false;
+        }, 10);
+    }
+    else {
+        state.ourPicksOffset = newOffset;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+        setTimeout(() => { state.isTransitioning = false; }, 400);
+    }
 }
 
 function updateOurPicksArrows() {
-    const track = document.getElementById('ourPicksTrack');
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
-    if (!track || !prevBtn || !nextBtn) return;
-
-    const visibleWidth = track.parentElement ? track.parentElement.offsetWidth : 0;
-    const totalWidth = track.scrollWidth;
-    const maxOffset = Math.max(0, totalWidth - visibleWidth);
-
-    prevBtn.style.opacity = state.ourPicksOffset <= 0 ? '0.3' : '1';
-    prevBtn.style.cursor = state.ourPicksOffset <= 0 ? 'default' : 'pointer';
-    nextBtn.style.opacity = (state.ourPicksOffset >= maxOffset || maxOffset <= 0) ? '0.3' : '1';
-    nextBtn.style.cursor = (state.ourPicksOffset >= maxOffset || maxOffset <= 0) ? 'default' : 'pointer';
+    if (!prevBtn || !nextBtn) return;
+    // Sonsuz döngü olduğu için butonlar her zaman aktif görünebilir
+    prevBtn.style.opacity = '1';
+    nextBtn.style.opacity = '1';
+    prevBtn.style.cursor = 'pointer';
+    nextBtn.style.cursor = 'pointer';
 }
 
 function openDetailPanel(v, cardEl) {
@@ -494,7 +529,6 @@ function openDetailPanel(v, cardEl) {
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
     
-    // Eğer görsel Our Picks içindeyse index -1 gelir, o zaman scroll yaparak yukarı çıkaralım
     if(index === -1) {
         showDownloadPage(v);
         return;
