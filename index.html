@@ -14,22 +14,23 @@
             overflow-x: hidden;
         }
 
-        /* Ana içerik alanının altına, footer'ın üzerine binmemesi için boşluk ekliyoruz */
+        /* Ana içerik alanı */
         .main-container {
-            padding-bottom: 120px; /* Sayfalama + Footer toplam yüksekliği kadar */
+            padding-bottom: 120px;
             display: flex;
-            height: calc(100vh - 120px); /* Ekran yüksekliğine göre sidebar'ı ayarlar */
+            height: calc(100vh - 120px);
             align-items: stretch;
         }
 
-        /* SIDEBAR VE KATEGORİ LİSTESİ DÜZENLEMESİ */
+        /* SIDEBAR VE KATEGORİ LİSTESİ */
         .sidebar {
-            width: 250px; /* Veya mevcut genişliğiniz */
+            width: 250px;
             display: flex;
             flex-direction: column;
             border-right: 1px solid #eee;
             background-color: #fff;
             padding: 20px 0 0 0;
+            flex-shrink: 0;
         }
 
         .sidebar-title {
@@ -40,24 +41,24 @@
         }
 
         .categories-list {
-            flex: 1; /* Sidebar içindeki tüm boşluğu kaplar */
-            overflow-y: auto; /* İçerik taşarsa kaydırma çubuğu çıkar */
+            flex: 1;
+            overflow-y: auto;
             padding: 0 10px 20px 20px;
         }
 
-        /* Kaydırma çubuğu tasarımı (isteğe bağlı, daha zarif görünüm için) */
-        .categories-list::-webkit-scrollbar {
-            width: 5px;
+        /* GÖRSELLERİN BOYUTUNU ARTIRARAK BOŞLUĞU ALAN GRID AYARI */
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
         }
-        .categories-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .categories-list::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 10px;
-        }
-        .categories-list::-webkit-scrollbar-thumb:hover {
-            background: #888;
+
+        .vectors-grid {
+            display: grid;
+            /* Görsellerin boyutunu artırmak için min değeri yükselttik (250px yapıldı) */
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
         }
 
         /* ALT SABİT ALAN (PAGINATION + FOOTER) */
@@ -93,24 +94,38 @@
             font-size: 12px;
         }
 
+        /* SİYAH FOOTER DÜZENLEMELERİ */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 20px; /* Kenar boşlukları */
             background-color: #000;
             height: 60px;
         }
 
-        .copyright, .footer-link {
+        /* Copyright - En Sola Yasla */
+        .copyright {
             color: #888;
-            text-decoration: none;
-            font-size: 11px;
+            font-size: 12px;
+            text-align: left;
+            flex: 1;
         }
 
+        /* Footer Linkleri - Sola Yasla ve Font Büyüt */
         .footer-nav {
             display: flex;
-            gap: 15px;
+            gap: 20px;
+            justify-content: flex-start;
+            flex: 2;
+        }
+
+        .footer-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 14px; /* Font büyütüldü */
+            font-weight: 500;
+            white-space: nowrap;
         }
 
         .footer-link:hover { color: #fff; }
@@ -155,6 +170,21 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
+        }
+
+        /* MOBİL GÖRÜNÜM İÇİN AYNI KALMASINI SAĞLAYAN AYARLAR */
+        @media (max-width: 768px) {
+            .footer {
+                padding: 0 10px;
+                flex-direction: row; /* Yan yana kalmaya devam etsin */
+                justify-content: space-between;
+            }
+            .footer-nav {
+                gap: 10px;
+            }
+            .footer-link {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
