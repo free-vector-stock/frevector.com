@@ -14,15 +14,16 @@
             overflow-x: hidden;
         }
 
-        /* Ana içerik alanı */
+        /* Ana içerik alanı - Boşluğu kapatmak için genişliği %100 yapıyoruz */
         .main-container {
             padding-bottom: 120px;
             display: flex;
+            width: 100%;
             height: calc(100vh - 120px);
             align-items: stretch;
         }
 
-        /* SIDEBAR VE KATEGORİ LİSTESİ */
+        /* SIDEBAR */
         .sidebar {
             width: 250px;
             display: flex;
@@ -46,17 +47,18 @@
             padding: 0 10px 20px 20px;
         }
 
-        /* GÖRSELLERİ DEVLEŞTİRMEDEN BOŞLUĞU ALAN GRID */
+        /* CONTENT - Sağdaki boşluğu bitiren ana ayar */
         .content {
-            flex: 1;
+            flex-grow: 1; /* Mevcut tüm boşluğu doldurur */
             padding: 20px;
             overflow-y: auto;
+            width: 100%;
         }
 
         .vectors-grid {
             display: grid;
-            /* Görselleri makul bir boyutta tutarken boşluğu dağıtmak için auto-fit kullanıldı */
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            /* Auto-fill yerine auto-fit kullanarak sağdaki boşluğu görseller arasına dağıtıyoruz */
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
             width: 100%;
         }
@@ -94,29 +96,27 @@
             font-size: 12px;
         }
 
-        /* SİYAH FOOTER - ORTALANMIŞ VE ALT ALTA YAPI */
+        /* SİYAH FOOTER - ALT ALTA VE ORTALI */
         .footer {
             display: flex;
-            flex-direction: column; /* Üst üste gelmelerini sağlar */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 10px 0;
+            padding: 15px 0;
             background-color: #000;
-            height: 70px; /* İçerik alt alta olduğu için yüksekliği hafif artırdım */
-            gap: 8px; /* Yazı ve linkler arasındaki mesafe */
+            height: 80px;
+            gap: 10px;
         }
 
-        /* Copyright Üstte */
         .copyright {
             color: #888;
             font-size: 12px;
             text-align: center;
         }
 
-        /* Linkler Altta */
         .footer-nav {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             justify-content: center;
             align-items: center;
         }
