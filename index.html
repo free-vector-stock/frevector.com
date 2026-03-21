@@ -6,32 +6,78 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* TÜM SORUNLARI ÇÖZEN ÖZEL CSS */
+        /* --- KATEGORİ PANELİNİ AŞAĞI KADAR UZATAN KESİN ÇÖZÜM --- */
         html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
-            min-height: 100%;
+            overflow-x: hidden;
         }
 
-        /* Ana içerik alanının altına, footer'ın üzerine binmemesi için boşluk ekliyoruz */
-        .main-container {
-            padding-bottom: 120px; /* Sayfalama + Footer toplam yüksekliği kadar */
+        body {
             display: flex;
+            flex-direction: column;
         }
 
-        /* ALT SABİT ALAN (PAGINATION + FOOTER) */
-        .fixed-bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 9999;
+        /* Üst Logo Bandı */
+        .top-banner {
+            height: 60px;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* Header (Arama Çubuğu Kısmı) */
+        .header {
+            flex-shrink: 0;
+        }
+
+        /* ANA TAŞIYICI - Flex ile boyu tam doldurur */
+        .main-container {
+            display: flex;
+            flex: 1 0 auto; /* Orta alanın boşluğu doldurmasını sağlar */
+            align-items: stretch; /* İçindeki sidebar ve content'i boydan boya uzatır */
+            position: relative;
+        }
+
+        /* SIDEBAR (Kategoriler) - Footer'a kadar uzanan kısım */
+        .sidebar {
+            width: 200px; /* Sabit genişlik */
+            background-color: #fff;
+            border-right: 1px solid #eee;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%; /* İçinde bulunduğu main-container boyuna eşitlenir */
+        }
+
+        .sidebar-title {
+            font-weight: bold;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        /* İçerik Alanı (Görseller) */
+        .content {
+            flex: 1;
+            padding: 20px;
             background-color: #fff;
         }
 
-        /* Sayfalama - Beyaz zemin, ince ve derli toplu */
+        /* ALT SABİT ALAN */
+        .bottom-fixed-area {
+            flex-shrink: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Sayfalama */
         .pagination-wrapper {
-            padding: 8px 0;
+            background-color: #fff;
+            padding: 15px 0;
             border-top: 1px solid #eee;
             text-align: center;
         }
@@ -40,49 +86,44 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .pag-btn {
             background-color: #000;
             color: #fff;
             border: none;
-            padding: 4px 10px;
+            padding: 6px 14px;
             cursor: pointer;
-            border-radius: 3px;
-            font-size: 12px;
+            border-radius: 4px;
+            font-size: 13px;
         }
 
-        /* SİYAH FOOTER - Yüksekliği üst bantla (60px) tam eşit */
+        /* SİYAH FOOTER - Üst bantla (60px) tam eşit */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 30px;
             background-color: #000;
-            height: 60px; /* Üst siyah logo bandı ile aynı */
+            height: 60px;
         }
 
         .copyright, .footer-link {
-            color: #888;
+            color: #999;
             text-decoration: none;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         .footer-nav {
             display: flex;
-            gap: 15px;
+            gap: 20px;
         }
 
         .footer-link:hover { color: #fff; }
 
-        /* Üst logo bandı sabitliği için */
-        .top-banner {
-            height: 60px;
-            background-color: #000;
-            display: flex;
-            align-items: center;
-        }
+        .dp-countdown-box { text-align: center; margin-top: 20px; }
+        .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -122,13 +163,13 @@
         </main>
     </div>
 
-    <div class="fixed-bottom-bar">
+    <div class="bottom-fixed-area">
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" style="font-size: 13px; font-weight: bold; color: #333;">1</span>
+                <span id="pageNumber" style="font-weight: bold;">1</span>
                 <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span id="pageTotal" style="font-size: 13px; color: #666;">/ 1</span>
+                <span id="pageTotal">/ 1</span>
             </div>
         </div>
 
