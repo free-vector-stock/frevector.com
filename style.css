@@ -242,7 +242,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .our-picks-track { 
     display: flex; 
     gap: 10px; 
-    transition: transform 0.3s ease; 
+    /* Transition JS tarafından yönetiliyor, çakışma olmaması için burayı boş bırakıyoruz */
 }
 
 .our-picks-track .vector-card { 
@@ -400,7 +400,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         order: 6; /* Alt bölüm 6. sırada */
     }
     .our-picks-section { order: 1; padding: 12px 0; margin-left: 0; }
-    .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; }bel { font-size: 9px; }
+    .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; }
     .our-picks-nav { gap: 6px; }
     .our-picks-arrow { width: 28px; height: 28px; font-size: 16px; }
     .our-picks-track-wrap { padding: 0 16px; }
