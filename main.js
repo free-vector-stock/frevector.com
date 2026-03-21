@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031405 - Revisions: Clean start, fixed Our Picks alignment & footer visibility
+ * v2026031406 - Fixed: Z-index overlap between pagination and Our Picks
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -160,8 +160,22 @@ async function init() {
     setupModalHandlers();
     setupDownloadPageHandlers();
     setupOurPicksArrows();
-    
-    // Footer'ın kaybolmaması için CSS düzeltmesi
+
+    // Pagination ve Our Picks çakışmasını önleyen yerleşim ayarları
+    const pagination = document.querySelector('.pagination');
+    if (pagination) {
+        pagination.style.position = 'relative';
+        pagination.style.zIndex = '1';
+        pagination.style.marginBottom = '20px';
+    }
+
+    const ourPicksSection = document.querySelector('.our-picks-section');
+    if (ourPicksSection) {
+        ourPicksSection.style.position = 'relative';
+        ourPicksSection.style.zIndex = '2';
+        ourPicksSection.style.clear = 'both';
+    }
+
     const footer = document.querySelector('footer');
     if (footer) {
         footer.style.position = 'relative';
@@ -364,17 +378,18 @@ function renderOurPicks() {
     state.ourPicksOffset = 0;
     track.style.transform = `translateX(0px)`;
     
-    // Görünürlük ve hizalama ayarları
+    // Oklar ve görsellerin çakışmaması için container ayarları
     container.style.position = 'relative';
-    container.style.padding = '0 45px'; // Oklar için kenarlarda boşluk
+    container.style.padding = '0 50px'; 
     container.style.overflow = 'hidden';
+    container.style.zIndex = '5'; // Pagination'ın üstünde kalması için
 
     state.vectors.slice(0, 20).forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         card.style.flex = '0 0 auto';
-        card.style.width = '90px';
-        card.style.marginRight = '10px';
+        card.style.width = '100px'; // Biraz daha genişletildi
+        card.style.marginRight = '12px';
 
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
         card.innerHTML = `
@@ -395,13 +410,13 @@ function setupOurPicksArrows() {
     const nextBtn = document.getElementById('ourPicksNext');
     if (!prevBtn || !nextBtn) return;
 
-    // Okları kenarlara sabitleyen stil
     const btnStyle = {
         position: 'absolute', top: '50%', transform: 'translateY(-50%)',
-        zIndex: '10', cursor: 'pointer', display: 'flex', alignItems: 'center'
+        zIndex: '10', cursor: 'pointer', display: 'flex', alignItems: 'center',
+        padding: '10px', background: 'rgba(255,255,255,0.8)', borderRadius: '50%'
     };
-    Object.assign(prevBtn.style, btnStyle, { left: '5px' });
-    Object.assign(nextBtn.style, btnStyle, { right: '5px' });
+    Object.assign(prevBtn.style, btnStyle, { left: '0px' });
+    Object.assign(nextBtn.style, btnStyle, { right: '0px' });
 
     prevBtn.onclick = () => scrollOurPicks(-1);
     nextBtn.onclick = () => scrollOurPicks(1);
@@ -413,11 +428,11 @@ function scrollOurPicks(direction) {
     if (!track || !container) return;
 
     const visibleWidth = container.offsetWidth;
-    const scrollStep = visibleWidth * 0.6;
+    const scrollStep = visibleWidth * 0.7;
     const maxOffset = track.scrollWidth - visibleWidth;
 
     state.ourPicksOffset = Math.max(0, Math.min(maxOffset, state.ourPicksOffset + direction * scrollStep));
-    track.style.transition = 'transform 0.4s ease-in-out';
+    track.style.transition = 'transform 0.5s ease-in-out';
     track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
     updateOurPicksArrows();
 }
@@ -429,8 +444,8 @@ function updateOurPicksArrows() {
     if (!track || !prevBtn || !nextBtn) return;
 
     const maxOffset = track.scrollWidth - track.parentElement.offsetWidth;
-    prevBtn.style.opacity = state.ourPicksOffset <= 0 ? '0.2' : '1';
-    nextBtn.style.opacity = state.ourPicksOffset >= maxOffset - 5 ? '0.2' : '1';
+    prevBtn.style.visibility = state.ourPicksOffset <= 5 ? 'hidden' : 'visible';
+    nextBtn.style.visibility = state.ourPicksOffset >= maxOffset - 5 ? 'hidden' : 'visible';
 }
 
 function openDetailPanel(v, cardEl) {
