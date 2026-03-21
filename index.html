@@ -6,12 +6,13 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- GÜNCEL VE KESİN ÇÖZÜM CSS --- */
+        /* --- TÜM TASARIM AYARLARI --- */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Sayfa kaydırmasını kapatıyoruz */
+            overflow: hidden; /* Sayfa genelinde kaydırmayı kapatıyoruz */
+            font-family: sans-serif;
         }
 
         body {
@@ -19,7 +20,7 @@
             flex-direction: column;
         }
 
-        /* Üst Logo Bandı Yüksekliği */
+        /* Üst Logo Bandı */
         .top-banner {
             height: 60px;
             background-color: #000;
@@ -29,67 +30,85 @@
             z-index: 1001;
         }
 
-        /* Header (Arama Çubuğu Kısmı) */
+        .banner-logo { height: 30px; padding-left: 20px; }
+
+        /* Header (Arama Çubuğu) */
         .header {
             flex-shrink: 0;
             z-index: 1000;
+            border-bottom: 1px solid #eee;
+            background: #fff;
         }
 
-        /* ANA TAŞIYICI - Flex ile boyu tam doldurur ve kaydırılabilir yapar */
+        /* ANA TAŞIYICI */
         .main-container {
             display: flex;
-            flex: 1 1 auto; /* Orta alanın boşluğu doldurmasını sağlar */
-            align-items: stretch; /* İçindeki sidebar ve content'i boydan boya uzatır */
+            flex: 1 1 auto;
+            align-items: stretch;
             position: relative;
-            overflow: hidden; /* Bu alanda kaydırma istemiyoruz */
+            overflow: hidden;
         }
 
-        /* SIDEBAR (Kategoriler) - Tam boy, Footer'a kadar uzanan kısım */
+        /* SIDEBAR (Kategoriler) - Scroll ve Dar Boşluklar */
         .sidebar {
-            width: 200px; /* Sabit genişlik */
+            width: 200px;
             background-color: #fff;
             border-right: 1px solid #eee;
-            padding: 15px 10px; /* İç boşluğu daralttık */
+            padding: 15px 5px;
             display: flex;
             flex-direction: column;
             height: 100%;
-            overflow-y: auto; /* Kategoriler çoksa kendi içinde kaydırılabilir */
             flex-shrink: 0;
+            /* Kaydırma Çubuğu Ayarları */
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ccc transparent;
         }
+
+        /* Chrome/Safari İnce Scrollbar */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
 
         .sidebar-title {
             font-weight: bold;
-            font-size: 11px; /* Fontu biraz küçülttük */
-            color: #666; /* Daha hafif bir renk */
-            margin-bottom: 10px; /* Başlık ile liste arası boşluk */
-            letter-spacing: 0.5px;
+            font-size: 11px;
+            color: #888;
+            margin: 0 10px 10px 10px;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-        /* Kategoriler Listesi - Ara boşlukları daraltıldı */
-        .categories-list a, .categories-list .category-item {
+        /* Kategori Linkleri ve Aktif Durumu */
+        .categories-list a {
             display: block;
-            padding: 2px 5px; /* Kategori öğelerinin dikey boşluğunu minimize ettik */
+            padding: 4px 12px;
             font-size: 13px;
             color: #333;
             text-decoration: none;
-            margin-bottom: 1px; /* Öğeler arası boşluk */
+            margin-bottom: 1px;
+            transition: all 0.2s;
         }
 
-        .categories-list a:hover {
-            color: #000;
-            background-color: #f9f9f9;
+        .categories-list a:hover { background-color: #f5f5f5; }
+
+        /* SEÇİLEN KATEGORİ: Siyah Arka Plan + Beyaz Yazı */
+        .categories-list a.active {
+            background-color: #000 !important;
+            color: #fff !important;
+            font-weight: bold;
+            border-radius: 4px;
         }
 
-        /* İçerik Alanı (Görseller) - Kaydırılabilir olan alan */
+        /* İÇERİK ALANI */
         .content {
             flex: 1;
             padding: 20px;
             background-color: #fff;
-            overflow-y: auto; /* Görseller burada kaydırılır */
+            overflow-y: auto; /* Görseller burada kayar */
         }
 
-        /* ALT SABİT ALAN - EKRANIN EN ALTINA SABİTLENDİ */
+        /* ALT SABİT ALAN */
         .bottom-fixed-area {
             flex-shrink: 0;
             width: 100%;
@@ -98,55 +117,36 @@
             border-top: 1px solid #eee;
         }
 
-        /* Sayfalama */
-        .pagination-wrapper {
-            padding: 10px 0;
-            text-align: center;
-        }
-
-        .pagination-nav {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pag-btn {
-            background-color: #1a1a1a;
-            color: #fff;
-            border: none;
-            padding: 5px 12px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-
-        /* SİYAH FOOTER - Üst bantla (60px) tam eşit ve sabit */
+        .pagination-wrapper { padding: 10px 0; text-align: center; }
+        
+        /* FOOTER - Büyük Font Ayarı */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 30px;
             background-color: #000;
-            height: 60px; /* Üst bantla eşitlendi */
+            height: 60px;
         }
 
-        .copyright, .footer-link {
+        .copyright {
+            color: #ccc;
+            font-size: 14px; /* Büyütüldü */
+        }
+
+        .footer-nav { display: flex; gap: 20px; }
+        
+        .footer-link {
             color: #ccc;
             text-decoration: none;
-            font-size: 12px;
-        }
-
-        .footer-nav {
-            display: flex;
-            gap: 20px;
+            font-size: 14px; /* Büyütüldü */
         }
 
         .footer-link:hover { color: #fff; }
 
-        /* Diğer teknik ayarlar */
-        .dp-countdown-box { text-align: center; margin-top: 20px; }
-        .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
+        /* Detay Sayfası & Diğerleri */
+        .detail-keywords { display: flex; flex-wrap: wrap; gap: 5px; margin: 15px 0; }
+        .keyword-tag { background: #f0f0f0; padding: 4px 8px; border-radius: 3px; font-size: 11px; color: #666; }
     </style>
 </head>
 <body>
@@ -177,7 +177,8 @@
     <div class="main-container">
         <aside class="sidebar">
             <div class="sidebar-title">CATEGORIES</div>
-            <nav class="categories-list" id="categoriesList"></nav>
+            <nav class="categories-list" id="categoriesList">
+                </nav>
         </aside>
 
         <main class="content">
@@ -192,7 +193,7 @@
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
                 <span id="pageNumber" style="font-weight: bold; font-size: 14px;">1</span>
                 <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span id="pageTotal" style="color: #666;">/ 1</span>
+                <span id="pageTotal" style="color: #666; font-size: 14px;">/ 1</span>
             </div>
         </div>
 
@@ -216,32 +217,14 @@
             <div class="dp-left"><img id="dpImage" src="" alt="" class="dp-image"></div>
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
-                <p id="dpDescription" class="dp-desc"></p>
                 <div id="dpKeywords" class="detail-keywords"></div>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
-                    <tr><td class="dt-label">FILE SIZE</td><td id="dpFileSize" class="dt-value">-</td></tr>
-                </table>
                 <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
-                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
-                    <p>Your download will start in</p>
-                    <div id="dpCountdown" class="dp-countdown-num">4</div>
-                </div>
             </div>
         </div>
     </div>
 
-    <div id="infoModal" class="info-modal" style="display:none;">
-        <div class="info-modal-box">
-            <button class="info-modal-close" id="infoModalClose">&#10005;</button>
-            <div id="infoModalBody" class="info-modal-body"></div>
-        </div>
-    </div>
-
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-    <script src="main.js?v=2026031407"></script>
+    
+    <script src="main.js?v=20260321"></script>
 </body>
 </html>
