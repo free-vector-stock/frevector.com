@@ -6,147 +6,83 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- TÜM TASARIM AYARLARI --- */
+        /* TÜM SORUNLARI ÇÖZEN ÖZEL CSS */
         html, body {
-            height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Sayfa genelinde kaydırmayı kapatıyoruz */
-            font-family: sans-serif;
+            min-height: 100%;
         }
 
-        body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Üst Logo Bandı */
-        .top-banner {
-            height: 60px;
-            background-color: #000;
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-            z-index: 1001;
-        }
-
-        .banner-logo { height: 30px; padding-left: 20px; }
-
-        /* Header (Arama Çubuğu) */
-        .header {
-            flex-shrink: 0;
-            z-index: 1000;
-            border-bottom: 1px solid #eee;
-            background: #fff;
-        }
-
-        /* ANA TAŞIYICI */
+        /* Ana içerik alanının altına, footer'ın üzerine binmemesi için boşluk ekliyoruz */
         .main-container {
+            padding-bottom: 120px; /* Sayfalama + Footer toplam yüksekliği kadar */
             display: flex;
-            flex: 1 1 auto;
-            align-items: stretch;
-            position: relative;
-            overflow: hidden;
         }
 
-        /* SIDEBAR (Kategoriler) - Scroll ve Dar Boşluklar */
-        .sidebar {
-            width: 200px;
-            background-color: #fff;
-            border-right: 1px solid #eee;
-            padding: 15px 5px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            flex-shrink: 0;
-            /* Kaydırma Çubuğu Ayarları */
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #ccc transparent;
-        }
-
-        /* Chrome/Safari İnce Scrollbar */
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
-
-        .sidebar-title {
-            font-weight: bold;
-            font-size: 11px;
-            color: #888;
-            margin: 0 10px 10px 10px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* Kategori Linkleri ve Aktif Durumu */
-        .categories-list a {
-            display: block;
-            padding: 4px 12px;
-            font-size: 13px;
-            color: #333;
-            text-decoration: none;
-            margin-bottom: 1px;
-            transition: all 0.2s;
-        }
-
-        .categories-list a:hover { background-color: #f5f5f5; }
-
-        /* SEÇİLEN KATEGORİ: Siyah Arka Plan + Beyaz Yazı */
-        .categories-list a.active {
-            background-color: #000 !important;
-            color: #fff !important;
-            font-weight: bold;
-            border-radius: 4px;
-        }
-
-        /* İÇERİK ALANI */
-        .content {
-            flex: 1;
-            padding: 20px;
-            background-color: #fff;
-            overflow-y: auto; /* Görseller burada kayar */
-        }
-
-        /* ALT SABİT ALAN */
-        .bottom-fixed-area {
-            flex-shrink: 0;
+        /* ALT SABİT ALAN (PAGINATION + FOOTER) */
+        .fixed-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            z-index: 1000;
+            z-index: 9999;
             background-color: #fff;
-            border-top: 1px solid #eee;
         }
 
-        .pagination-wrapper { padding: 10px 0; text-align: center; }
-        
-        /* FOOTER - Büyük Font Ayarı */
+        /* Sayfalama - Beyaz zemin, ince ve derli toplu */
+        .pagination-wrapper {
+            padding: 8px 0;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .pagination-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pag-btn {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        /* SİYAH FOOTER - Yüksekliği üst bantla (60px) tam eşit */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 30px;
             background-color: #000;
-            height: 60px;
+            height: 60px; /* Üst siyah logo bandı ile aynı */
         }
 
-        .copyright {
-            color: #ccc;
-            font-size: 14px; /* Büyütüldü */
-        }
-
-        .footer-nav { display: flex; gap: 20px; }
-        
-        .footer-link {
-            color: #ccc;
+        .copyright, .footer-link {
+            color: #888;
             text-decoration: none;
-            font-size: 14px; /* Büyütüldü */
+            font-size: 11px;
+        }
+
+        .footer-nav {
+            display: flex;
+            gap: 15px;
         }
 
         .footer-link:hover { color: #fff; }
 
-        /* Detay Sayfası & Diğerleri */
-        .detail-keywords { display: flex; flex-wrap: wrap; gap: 5px; margin: 15px 0; }
-        .keyword-tag { background: #f0f0f0; padding: 4px 8px; border-radius: 3px; font-size: 11px; color: #666; }
+        /* Üst logo bandı sabitliği için */
+        .top-banner {
+            height: 60px;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -177,8 +113,7 @@
     <div class="main-container">
         <aside class="sidebar">
             <div class="sidebar-title">CATEGORIES</div>
-            <nav class="categories-list" id="categoriesList">
-                </nav>
+            <nav class="categories-list" id="categoriesList"></nav>
         </aside>
 
         <main class="content">
@@ -187,13 +122,13 @@
         </main>
     </div>
 
-    <div class="bottom-fixed-area">
+    <div class="fixed-bottom-bar">
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" style="font-weight: bold; font-size: 14px;">1</span>
+                <span id="pageNumber" style="font-size: 13px; font-weight: bold; color: #333;">1</span>
                 <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span id="pageTotal" style="color: #666; font-size: 14px;">/ 1</span>
+                <span id="pageTotal" style="font-size: 13px; color: #666;">/ 1</span>
             </div>
         </div>
 
@@ -217,14 +152,20 @@
             <div class="dp-left"><img id="dpImage" src="" alt="" class="dp-image"></div>
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
-                <div id="dpKeywords" class="detail-keywords"></div>
+                <p id="dpDescription" class="dp-desc"></p>
                 <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
             </div>
         </div>
     </div>
 
+    <div id="infoModal" class="info-modal" style="display:none;">
+        <div class="info-modal-box">
+            <button class="info-modal-close" id="infoModalClose">&#10005;</button>
+            <div id="infoModalBody" class="info-modal-body"></div>
+        </div>
+    </div>
+
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-    
-    <script src="main.js?v=20260321"></script>
+    <script src="main.js?v=2026031407"></script>
 </body>
 </html>
