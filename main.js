@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031403 - Revisions: Visual alignment for "Our Picks", Fixed Footer Visibility
+ * v2026031404 - Fixed: Our Picks visibility, edge-to-edge layout, persistent footer
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -54,12 +54,12 @@ async function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
     
-    // Footer'ın görünürlüğünü garantiye al
+    // Footer ve genel yerleşim düzeltmesi
     const footer = document.querySelector('footer');
     if (footer) {
         footer.style.position = 'relative';
         footer.style.zIndex = '1000';
-        footer.style.marginTop = '50px';
+        footer.style.clear = 'both';
     }
     
     await fetchVectors();
@@ -172,14 +172,19 @@ async function renderOurPicks() {
     state.ourPicksOffset = 0;
     track.style.transform = `translateX(0px)`;
     
-    // Konteynırı ve track'i görsellere göre tam genişlikte ayarla
-    container.style.display = 'flex';
-    container.style.alignItems = 'center';
-    container.style.padding = '0 50px'; // Oklar için yer ayır
+    // Görünürlük için kritik CSS ayarları
     container.style.position = 'relative';
+    container.style.overflow = 'hidden';
+    container.style.display = 'block';
+    container.style.margin = '0 50px'; // Oklar için dış boşluk
+    container.style.minHeight = '120px';
+
+    track.style.display = 'flex';
+    track.style.width = 'max-content';
+    track.style.visibility = 'visible';
 
     try {
-        const res = await fetch(`/api/vectors?page=1&limit=50`);
+        const res = await fetch(`/api/vectors?page=1&limit=40`);
         const data = await res.json();
         let picks = (data.vectors || []).sort(() => Math.random() - 0.5);
         
@@ -187,9 +192,11 @@ async function renderOurPicks() {
             const card = document.createElement('div');
             card.className = 'vector-card';
             card.style.minWidth = '110px';
-            card.style.margin = '0 5px';
+            card.style.width = '110px';
+            card.style.marginRight = '10px';
+            card.style.flex = '0 0 auto';
             const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
-            card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" loading="lazy">${typeLabel}</div>`;
+            card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" style="display:block; width:100%;" loading="lazy">${typeLabel}</div>`;
             card.onclick = () => openDetailPanel(v, card);
             track.appendChild(card);
         });
@@ -204,12 +211,15 @@ function setupOurPicksArrows() {
 
     const btnStyle = {
         position: 'absolute', top: '50%', transform: 'translateY(-50%)',
-        zIndex: '10', backgroundColor: '#fff', borderRadius: '50%',
-        width: '40px', height: '40px', boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+        zIndex: '1100', backgroundColor: '#fff', borderRadius: '50%',
+        width: '40px', height: '40px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+        border: '1px solid #eee'
     };
-    Object.assign(prevBtn.style, btnStyle, { left: '0px' });
-    Object.assign(nextBtn.style, btnStyle, { right: '0px' });
+    
+    // Okları kapsayıcının en dışına (sol ve sağ) sabitle
+    Object.assign(prevBtn.style, btnStyle, { left: '5px' });
+    Object.assign(nextBtn.style, btnStyle, { right: '5px' });
 
     prevBtn.onclick = () => scrollOurPicks(-1);
     nextBtn.onclick = () => scrollOurPicks(1);
@@ -217,10 +227,11 @@ function setupOurPicksArrows() {
 
 function scrollOurPicks(dir) {
     const track = document.getElementById('ourPicksTrack');
-    const step = 400;
-    const max = track.scrollWidth - track.parentElement.offsetWidth + 100;
+    const container = track.parentElement;
+    const step = container.offsetWidth * 0.7;
+    const max = track.scrollWidth - container.offsetWidth;
     state.ourPicksOffset = Math.max(0, Math.min(max, state.ourPicksOffset + (dir * step)));
-    track.style.transition = 'transform 0.4s ease';
+    track.style.transition = 'transform 0.5s ease-in-out';
     track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
     updateOurPicksArrows();
 }
@@ -229,10 +240,12 @@ function updateOurPicksArrows() {
     const track = document.getElementById('ourPicksTrack');
     const prev = document.getElementById('ourPicksPrev');
     const next = document.getElementById('ourPicksNext');
-    if (!track || !prev || !next) return;
-    const max = track.scrollWidth - track.parentElement.offsetWidth;
-    prev.style.visibility = state.ourPicksOffset <= 0 ? 'hidden' : 'visible';
-    next.style.visibility = state.ourPicksOffset >= max ? 'hidden' : 'visible';
+    const container = track.parentElement;
+    if (!track || !prev || !next || !container) return;
+    
+    const max = track.scrollWidth - container.offsetWidth;
+    prev.style.display = state.ourPicksOffset <= 5 ? 'none' : 'flex';
+    next.style.display = state.ourPicksOffset >= max - 5 ? 'none' : 'flex';
 }
 
 function openDetailPanel(v, cardEl) {
