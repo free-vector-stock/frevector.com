@@ -10,28 +10,36 @@
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* SAYFA YAPISI - KÖKTEN ÇÖZÜM */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Tüm sayfanın kaymasını engelle */
+}
+
 body { 
     font-family: var(--font); 
     background: var(--white); 
-    overflow: hidden; /* Sayfanın tamamının kaymasını engelle, sadece orta alanı kaydıracağız */
-    height: 100vh; 
+    display: flex;
+    flex-direction: column; /* İçeriği yukarıdan aşağıya diz */
 }
 
-/* Layout Components */
-.top-banner { background: var(--black); padding: 10px; display: flex; justify-content: center; position: fixed; top: 0; width: 100%; height: 52px; z-index: 1100; }
+/* Üst Sabit Alanlar */
+.top-banner { background: var(--black); padding: 10px; display: flex; justify-content: center; height: 52px; flex-shrink: 0; z-index: 1100; }
 .banner-logo { height: 32px; }
-.header { position: fixed; top: 52px; width: 100%; height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; z-index: 1000; gap: 10px; }
+
+.header { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; flex-shrink: 0; z-index: 1000; gap: 10px; }
 .header-center { flex: 1; display: flex; justify-content: center; }
 .search-container { max-width: 600px; width: 100%; display: flex; border: 1px solid var(--border); padding: 5px 10px; border-radius: 3px; }
 .search-input { border: none; outline: none; width: 100%; font-size: 14px; }
 .search-icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-/* Ana Taşıyıcı: Üst ve Alt sabit alanlar arasında kalan alan */
+/* ORTA ALAN: Üst ve Alt panel arasında kalan tüm boşluğu doldurur */
 .main-container { 
     display: flex; 
-    position: fixed; 
-    top: 104px; 
-    bottom: 240px; /* Alttaki sabit bölümlerin toplam yüksekliği kadar boşluk bırak */
+    flex: 1; /* Kalan tüm boşluğu bu alan kaplar */
+    overflow: hidden; /* İçindeki sidebar ve content kendi başlarına kayacak */
     width: 100%; 
 }
 
@@ -41,6 +49,7 @@ body {
     overflow-y: auto; 
     padding: 10px 0; 
     background: #fff; 
+    flex-shrink: 0;
 }
 .sidebar-title { padding: 0 16px 5px; font-size: 11px; font-weight: bold; color: #333; text-transform: uppercase; }
 .category-item { display: block; padding: 6px 16px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; transition: 0.2s; }
@@ -50,7 +59,7 @@ body {
 .content { 
     flex: 1; 
     padding: 20px; 
-    overflow-y: auto; /* Sadece görsellerin olduğu bu alan kaydırılabilir olacak */
+    overflow-y: auto; /* SADECE BURASI KAYDIRILABİLİR */
     background: #fff; 
 }
 .category-title { font-size: 20px; margin-bottom: 20px; font-weight: 500; }
@@ -80,12 +89,10 @@ body {
 .download-btn { background: #000; color: #fff; border: none; padding: 12px 25px; cursor: pointer; border-radius: 4px; font-weight: bold; }
 .detail-close-btn { background: none; border: 1px solid #ccc; padding: 12px 25px; cursor: pointer; border-radius: 4px; }
 
-/* Bottom Area: EKRANIN ALTINA SABİTLENDİ */
+/* ALT SABİT ALAN: ASLA YERİNDEN OYNAMAZ */
 .bottom-fixed-container { 
-    position: fixed; 
-    bottom: 0; 
+    flex-shrink: 0; /* Küçülmesini engelle */
     width: 100%; 
-    height: 240px; /* Pagination + Picks + Footer toplam yüksekliği */
     background: white; 
     border-top: 1px solid var(--border); 
     z-index: 1001; 
@@ -94,16 +101,16 @@ body {
 .pag-btn { background: none; border: 1px solid #ddd; padding: 5px 15px; cursor: pointer; border-radius: 3px; font-size: 12px; }
 .page-num { font-weight: bold; padding: 0 10px; font-size: 13px; }
 
-.our-picks-section { padding: 10px 0; text-align: center; }
+.our-picks-section { padding: 10px 0; text-align: center; background: #fff; }
 .our-picks-label { font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; color: #999; }
 .our-picks-content-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 20px; }
 .our-picks-track-wrap { overflow: hidden; width: 100%; max-width: 1200px; }
-.our-picks-track { display: flex; gap: 10px; }
+.our-picks-track { display: flex; gap: 10px; transition: transform 0.4s ease; }
 .our-picks-track .vector-card { width: 80px; min-width: 80px; }
 .our-picks-track .vc-info { display: none; }
 .our-picks-arrow { background: white; border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; z-index: 1002; position: relative; }
+.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; }
 .footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; }
 
 /* Modals & Full Overlay */
@@ -112,7 +119,7 @@ body {
 .info-modal-close { position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; }
 
 .download-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: none; flex-direction: column; }
-.download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
 .dp-site { font-weight: bold; font-size: 18px; }
 .dp-close { background: none; border: none; font-size: 24px; cursor: pointer; }
 .download-page-body { flex: 1; display: flex; padding: 40px; gap: 40px; max-width: 1200px; margin: 0 auto; width: 100%; overflow-y: auto; }
@@ -131,9 +138,11 @@ body {
 @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 
 @media (max-width: 768px) {
-    .main-container { flex-direction: column; position: static; height: auto; }
-    .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; height: auto; padding: 5px; }
+    body { overflow-y: auto; height: auto; }
+    .main-container { flex-direction: column; height: auto; overflow: visible; }
+    .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; height: auto; padding: 5px; flex-shrink: 0; }
     .sidebar-title { display: none; }
-    .bottom-fixed-container { position: static; height: auto; }
+    .content { overflow-y: visible; }
+    .bottom-fixed-container { position: static; flex-shrink: 0; }
     .download-page-body { flex-direction: column; padding: 20px; }
 }
