@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v20260322 - Type Filter Integration & Randomization Fix
+ * v20260322 - Footer Fixed & Type Filter Integration
  */
 
 const CATEGORIES = [
@@ -34,7 +34,7 @@ const state = {
     currentPage: 1,
     totalPages: 1,
     selectedCategory: 'all',
-    selectedType: 'all', // YENİ: All, Vector, JPEG
+    selectedType: 'all',
     searchQuery: '',
     isLoading: false,
     openedVector: null,
@@ -47,7 +47,7 @@ const state = {
 
 async function init() {
     setupCategories();
-    setupTypeFilters(); // YENİ: Filtreleri hazırla
+    setupTypeFilters();
     setupEventListeners();
     setupModalHandlers();
     setupDownloadPageHandlers();
@@ -122,11 +122,7 @@ async function fetchVectors() {
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
-        
-        // YENİ: Type parametresini API'ye gönder
-        if (state.selectedType !== 'all') {
-            url.searchParams.set('type', state.selectedType);
-        }
+        if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
         
         const res = await fetch(url);
         const data = await res.json();
@@ -142,6 +138,11 @@ function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
     if (!grid) return;
     grid.innerHTML = '';
+
+    if (state.vectors.length === 0) {
+        grid.innerHTML = '<p style="padding:20px; color:#999;">No items found in this category.</p>';
+        return;
+    }
 
     state.vectors.forEach(v => {
         const card = document.createElement('div');
