@@ -241,14 +241,15 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 
 .our-picks-track { 
     display: flex; 
-    gap: 10px; 
-    /* Transition JS (main.js) tarafından yönetilir, seamless döngü için burada sabit kural olmamalıdır */
+    gap: 10px; /* JS HESABI İÇİN BU SABİT KALMALI */
 }
 
+/* ÖNEMLİ: Boşlukları JS ile eşitlemek için margin-right ekliyoruz */
 .our-picks-track .vector-card { 
     width: 80px; 
     min-width: 80px; 
-    flex-shrink: 0; 
+    flex-shrink: 0;
+    margin-right: 0px; 
 }
 
 .our-picks-track .vector-card .vc-img-wrap { 
