@@ -45,7 +45,7 @@ body { font-family: var(--font); background: var(--white); overflow: hidden; hei
 .vc-description { font-size: 11px; font-weight: bold; color: #222; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vc-keywords { font-size: 10px; color: var(--gray-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Detail Panel (Grid-in) */
+/* Detail Panel */
 .detail-panel { grid-column: 1 / -1; background: var(--gray-light); padding: 25px; border-radius: 4px; margin: 10px 0; display: flex; gap: 25px; border: 1px solid var(--border); }
 .detail-inner { display: flex; gap: 25px; width: 100%; }
 .detail-left { flex: 0 0 300px; }
@@ -53,8 +53,7 @@ body { font-family: var(--font); background: var(--white); overflow: hidden; hei
 .detail-right { flex: 1; }
 .detail-title { font-size: 22px; margin-bottom: 15px; }
 .kw-tag { display: inline-block; background: #e0e0e0; padding: 4px 8px; margin: 2px; border-radius: 3px; font-size: 11px; color: #444; }
-.download-btn { background: #000; color: #fff; border: none; padding: 12px 25px; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.2s; }
-.download-btn:hover { background: #333; }
+.download-btn { background: #000; color: #fff; border: none; padding: 12px 25px; cursor: pointer; border-radius: 4px; font-weight: bold; }
 .detail-close-btn { background: none; border: 1px solid #ccc; padding: 12px 25px; cursor: pointer; border-radius: 4px; }
 
 /* Bottom Area (Fixed) */
@@ -72,37 +71,20 @@ body { font-family: var(--font); background: var(--white); overflow: hidden; hei
 .our-picks-track .vc-info { display: none; }
 .our-picks-arrow { background: white; border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-/* Download Page Overlay */
-.download-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: flex; flex-direction: column; }
-.download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.dp-site { font-weight: bold; font-size: 18px; }
-.dp-close { background: none; border: none; font-size: 24px; cursor: pointer; }
-.download-page-body { flex: 1; display: flex; padding: 40px; gap: 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
-.dp-left { flex: 1; }
-.dp-image { width: 100%; border-radius: 8px; border: 1px solid var(--border); }
-.dp-right { flex: 1; }
-.dp-title { font-size: 28px; margin-bottom: 20px; }
-.detail-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-.detail-table td { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-.dt-label { color: #999; width: 150px; }
-.dp-countdown-box { text-align: center; padding: 20px; background: #f9f9f9; border-radius: 8px; margin-top: 20px; }
-.dp-countdown-num { font-size: 48px; font-weight: bold; color: #000; }
+/* Modals & Footer */
+.info-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:3000; display:none; justify-content:center; align-items:center; }
+.info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:600px; width:90%; position:relative; }
+.info-modal-close { position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; }
+.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; }
+.footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; }
 
-/* Modals & Loader */
-.info-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:3000; display:flex; justify-content:center; align-items:center; }
-.info-modal-box { background:#fff; padding:30px; border-radius:8px; max-width:600px; width:90%; position:relative; max-height: 80vh; overflow-y: auto; }
-.info-modal-close { position:absolute; top:15px; right:15px; background:none; border:none; font-size:20px; cursor:pointer; }
+/* Loader */
 .loader-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:4000; display:flex; justify-content:center; align-items:center; }
 .spinner { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #000; border-radius:50%; animation:spin 1s linear infinite; }
 @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 
-.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; }
-.footer-link { color: #ccc; text-decoration: none; margin-left: 15px; }
-
 @media (max-width: 768px) {
     .main-container { flex-direction: column; position: static; height: auto; }
-    .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; }
     .bottom-fixed-container { position: static; height: auto; }
-    .download-page-body { flex-direction: column; padding: 20px; }
-    .detail-panel { flex-direction: column; }
 }
