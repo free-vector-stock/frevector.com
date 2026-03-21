@@ -9,32 +9,26 @@
         .dp-countdown-box { text-align: center; margin-top: 20px; }
         .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
 
-        /* Yerleşim Düzenlemeleri */
-        .bottom-layout-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            margin-top: 40px;
-        }
-
+        /* "Our Selections For You" Ortalama ve Ok Düzenlemeleri */
         .our-picks-section {
             display: flex;
             flex-direction: column;
-            align-items: center; 
+            align-items: center; /* Başlığı ve içeriği ortalar */
             width: 100%;
-            padding: 30px 0;
-            background: #fafafa;
-            border-top: 1px solid #eee;
+            padding: 20px 0;
+        }
+
+        .our-picks-header {
+            display: contents; /* Header içindeki elemanları ana flex yapısına dahil eder */
         }
 
         .our-picks-label {
             text-align: center;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: bold;
             text-transform: uppercase;
             font-size: 14px;
-            color: #666;
         }
 
         .our-picks-content-wrapper {
@@ -42,48 +36,44 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 1200px;
-            gap: 15px;
+            max-width: 1200px; /* Sayfa genişliğine göre limitlenebilir */
+            gap: 10px;
         }
 
         .our-picks-track-wrap {
             flex: 1;
             overflow: hidden;
             display: flex;
+            justify-content: center;
         }
 
         .our-picks-track {
             display: flex;
-            gap: 15px;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 10px;
+            justify-content: center;
+            transition: transform 0.3s ease;
         }
 
+        /* Ok Butonlarının Stil ve Konumu */
         .our-picks-arrow {
-            background: #fff;
+            background: #f0f0f0;
             border: 1px solid #ddd;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 24px;
+            font-size: 20px;
             color: #333;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
             z-index: 10;
         }
 
         .our-picks-arrow:hover {
-            background: #f8f8f8;
-            transform: scale(1.05);
-        }
-
-        .pagination-wrapper {
-            padding: 20px 0;
-            display: flex;
-            justify-content: center;
-            background: #fff;
+            background: #e0e0e0;
+            color: #000;
         }
     </style>
 </head>
@@ -124,7 +114,22 @@
         </main>
     </div>
 
-    <div class="bottom-layout-container">
+    <div class="bottom-fixed-container">
+        <section class="our-picks-section" id="ourPicksSection">
+            <div class="our-picks-label">Our selections for you</div>
+            
+            <div class="our-picks-content-wrapper">
+                <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
+                
+                <div class="our-picks-track-wrap">
+                    <div class="our-picks-track" id="ourPicksTrack">
+                        </div>
+                </div>
+
+                <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
+            </div>
+        </section>
+
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
@@ -133,17 +138,6 @@
                 <span class="page-total" id="pageTotal">/ 1</span>
             </div>
         </div>
-
-        <section class="our-picks-section" id="ourPicksSection">
-            <div class="our-picks-label">Our selections for you</div>
-            <div class="our-picks-content-wrapper">
-                <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
-                <div class="our-picks-track-wrap">
-                    <div class="our-picks-track" id="ourPicksTrack"></div>
-                </div>
-                <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
-            </div>
-        </section>
 
         <footer class="footer">
             <span class="copyright">2026 &copy; frevector.com</span>
@@ -194,6 +188,7 @@
     </div>
 
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-    <script src="main.js?v=2026031408"></script>
+
+    <script src="main.js?v=2026031407"></script>
 </body>
 </html>
