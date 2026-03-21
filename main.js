@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031425 - Multi-Page Random Picker & Interaction Fix
+ * v2026031430 - Final Randomization & Modal Fix
  */
 
 const CATEGORIES = [
@@ -50,9 +50,12 @@ async function init() {
     setupModalHandlers();
     setupDownloadPageHandlers();
     setupOurPicksArrows();
+    
+    // Önce ana verileri çekip toplam sayfa sayısını öğreniyoruz
     await fetchVectors();
-    // Sayfa verileri yüklendikten sonra Our Picks başlasın
-    setTimeout(() => fetchAndRenderOurPicks(), 600);
+    
+    // Toplam sayfa sayısı artık elimizde olduğu için Our Picks'i gerçek rastgele verilerle doldurabiliriz
+    setTimeout(() => fetchAndRenderOurPicks(), 300);
 }
 
 function setupCategories() {
@@ -83,8 +86,10 @@ function selectCategory(cat) {
     closeDetailPanel();
     setupCategories();
     updateCategoryTitle();
-    fetchVectors();
-    setTimeout(() => fetchAndRenderOurPicks(), 600);
+    // Kategori değişince veriyi çek ve ardından Our Picks'i yenile
+    fetchVectors().then(() => {
+        setTimeout(() => fetchAndRenderOurPicks(), 300);
+    });
 }
 
 function updateCategoryTitle() {
@@ -106,7 +111,7 @@ async function fetchVectors() {
         const res = await fetch(url);
         const data = await res.json();
         state.vectors = data.vectors || [];
-        state.totalPages = data.totalPages || 1;
+        state.totalPages = data.totalPages || 1; // Toplam sayfa sayısı burada güncelleniyor
         renderVectors();
         updatePagination();
     } catch (err) { console.error(err); }
@@ -136,46 +141,41 @@ function renderVectors() {
     });
 }
 
-// YENİ MANTIK: HER SAYFADAN RASTGELE GÖRSEL TOPLAYAN SİSTEM
+// BU FONKSİYON ARTIK TÜM VERİTABANINA YAYILAN 15 FARKLI SAYFADAN VERİ ÇEKER
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
     
     let picks = [];
-    const maxPicks = 15; // Toplamda kaç görsel gösterilecek
-    const totalPages = state.totalPages || 1;
+    const maxPicks = 15;
+    const totalPagesAvailable = state.totalPages || 1;
 
     try {
-        // 15 adet rastgele sayfa numarası belirle
-        let targetPages = [];
-        for(let i=0; i < maxPicks; i++) {
-            const randPage = Math.floor(Math.random() * totalPages) + 1;
-            targetPages.push(randPage);
+        let fetchPromises = [];
+        for (let i = 0; i < maxPicks; i++) {
+            // Her görsel için 1 ile toplam sayfa sayısı arasında tamamen rastgele bir sayfa seç
+            const randomPage = Math.floor(Math.random() * totalPagesAvailable) + 1;
+            const url = new URL('/api/vectors', window.location.origin);
+            url.searchParams.set('page', randomPage);
+            url.searchParams.set('limit', '5'); 
+            if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+            
+            fetchPromises.push(fetch(url).then(r => r.json()));
         }
 
-        // Her bir sayfa için paralel istek gönder
-        const requests = targetPages.map(p => {
-            const url = new URL('/api/vectors', window.location.origin);
-            url.searchParams.set('page', p);
-            url.searchParams.set('limit', '5'); // Her sayfadan sadece küçük bir grup iste
-            if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-            return fetch(url).then(r => r.json());
-        });
-
-        const results = await Promise.all(requests);
+        const results = await Promise.all(fetchPromises);
         
         results.forEach(data => {
             if (data.vectors && data.vectors.length > 0) {
-                // Her gelen sayfadan sadece 1 tane rastgele görsel seç ve ekle
-                const oneVector = data.vectors[Math.floor(Math.random() * data.vectors.length)];
-                picks.push(oneVector);
+                // Her gelen sayfadan rastgele 1 görsel al
+                const v = data.vectors[Math.floor(Math.random() * data.vectors.length)];
+                picks.push(v);
             }
         });
 
-        // Ekrana basma işlemi
+        // Çıktıyı oluştur
         track.innerHTML = '';
         state.originalPicksCount = picks.length;
-        
         if (picks.length === 0) return;
 
         const quadPicks = [...picks, ...picks, ...picks, ...picks];
@@ -191,7 +191,6 @@ async function fetchAndRenderOurPicks() {
                 e.stopPropagation();
                 showDownloadPage(v);
             };
-            
             track.appendChild(card);
         });
         state.ourPicksOffset = picks.length * 90;
@@ -244,6 +243,7 @@ function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
     if(!dp) return;
     
+    // TÜM VERİLERİ (BAŞLIK, KEYWORD) EKSİKSİZ AKTAR
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || '-';
@@ -333,8 +333,9 @@ function setupEventListeners() {
         searchBtn.onclick = () => { 
             state.searchQuery = document.getElementById('searchInput').value; 
             state.currentPage = 1; 
-            fetchVectors(); 
-            setTimeout(() => fetchAndRenderOurPicks(), 600);
+            fetchVectors().then(() => {
+                setTimeout(() => fetchAndRenderOurPicks(), 300);
+            });
         };
     }
     const searchInput = document.getElementById('searchInput');
