@@ -6,12 +6,12 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* --- KATEGORİ PANELİNİ AŞAĞI KADAR UZATAN KESİN ÇÖZÜM --- */
+        /* --- GÜNCEL VE KESİN ÇÖZÜM CSS --- */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            overflow: hidden; /* Sayfa kaydırmasını kapatıyoruz */
         }
 
         body {
@@ -19,66 +19,88 @@
             flex-direction: column;
         }
 
-        /* Üst Logo Bandı */
+        /* Üst Logo Bandı Yüksekliği */
         .top-banner {
             height: 60px;
             background-color: #000;
             display: flex;
             align-items: center;
             flex-shrink: 0;
+            z-index: 1001;
         }
 
         /* Header (Arama Çubuğu Kısmı) */
         .header {
             flex-shrink: 0;
+            z-index: 1000;
         }
 
-        /* ANA TAŞIYICI - Flex ile boyu tam doldurur */
+        /* ANA TAŞIYICI - Flex ile boyu tam doldurur ve kaydırılabilir yapar */
         .main-container {
             display: flex;
-            flex: 1 0 auto; /* Orta alanın boşluğu doldurmasını sağlar */
+            flex: 1 1 auto; /* Orta alanın boşluğu doldurmasını sağlar */
             align-items: stretch; /* İçindeki sidebar ve content'i boydan boya uzatır */
             position: relative;
+            overflow: hidden; /* Bu alanda kaydırma istemiyoruz */
         }
 
-        /* SIDEBAR (Kategoriler) - Footer'a kadar uzanan kısım */
+        /* SIDEBAR (Kategoriler) - Tam boy, Footer'a kadar uzanan kısım */
         .sidebar {
             width: 200px; /* Sabit genişlik */
             background-color: #fff;
             border-right: 1px solid #eee;
-            padding: 20px;
+            padding: 15px 10px; /* İç boşluğu daralttık */
             display: flex;
             flex-direction: column;
-            min-height: 100%; /* İçinde bulunduğu main-container boyuna eşitlenir */
+            height: 100%;
+            overflow-y: auto; /* Kategoriler çoksa kendi içinde kaydırılabilir */
+            flex-shrink: 0;
         }
 
         .sidebar-title {
             font-weight: bold;
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
+            font-size: 11px; /* Fontu biraz küçülttük */
+            color: #666; /* Daha hafif bir renk */
+            margin-bottom: 10px; /* Başlık ile liste arası boşluk */
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
-        /* İçerik Alanı (Görseller) */
+        /* Kategoriler Listesi - Ara boşlukları daraltıldı */
+        .categories-list a, .categories-list .category-item {
+            display: block;
+            padding: 2px 5px; /* Kategori öğelerinin dikey boşluğunu minimize ettik */
+            font-size: 13px;
+            color: #333;
+            text-decoration: none;
+            margin-bottom: 1px; /* Öğeler arası boşluk */
+        }
+
+        .categories-list a:hover {
+            color: #000;
+            background-color: #f9f9f9;
+        }
+
+        /* İçerik Alanı (Görseller) - Kaydırılabilir olan alan */
         .content {
             flex: 1;
             padding: 20px;
             background-color: #fff;
+            overflow-y: auto; /* Görseller burada kaydırılır */
         }
 
-        /* ALT SABİT ALAN */
+        /* ALT SABİT ALAN - EKRANIN EN ALTINA SABİTLENDİ */
         .bottom-fixed-area {
             flex-shrink: 0;
             width: 100%;
             z-index: 1000;
+            background-color: #fff;
+            border-top: 1px solid #eee;
         }
 
         /* Sayfalama */
         .pagination-wrapper {
-            background-color: #fff;
-            padding: 15px 0;
-            border-top: 1px solid #eee;
+            padding: 10px 0;
             text-align: center;
         }
 
@@ -90,27 +112,27 @@
         }
 
         .pag-btn {
-            background-color: #000;
+            background-color: #1a1a1a;
             color: #fff;
             border: none;
-            padding: 6px 14px;
+            padding: 5px 12px;
             cursor: pointer;
             border-radius: 4px;
             font-size: 13px;
         }
 
-        /* SİYAH FOOTER - Üst bantla (60px) tam eşit */
+        /* SİYAH FOOTER - Üst bantla (60px) tam eşit ve sabit */
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 30px;
             background-color: #000;
-            height: 60px;
+            height: 60px; /* Üst bantla eşitlendi */
         }
 
         .copyright, .footer-link {
-            color: #999;
+            color: #ccc;
             text-decoration: none;
             font-size: 12px;
         }
@@ -122,6 +144,7 @@
 
         .footer-link:hover { color: #fff; }
 
+        /* Diğer teknik ayarlar */
         .dp-countdown-box { text-align: center; margin-top: 20px; }
         .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
     </style>
@@ -167,9 +190,9 @@
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" style="font-weight: bold;">1</span>
+                <span id="pageNumber" style="font-weight: bold; font-size: 14px;">1</span>
                 <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span id="pageTotal">/ 1</span>
+                <span id="pageTotal" style="color: #666;">/ 1</span>
             </div>
         </div>
 
@@ -194,7 +217,19 @@
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
                 <p id="dpDescription" class="dp-desc"></p>
+                <div id="dpKeywords" class="detail-keywords"></div>
+                <table class="detail-table">
+                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG</td></tr>
+                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
+                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
+                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
+                    <tr><td class="dt-label">FILE SIZE</td><td id="dpFileSize" class="dt-value">-</td></tr>
+                </table>
                 <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
+                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
+                    <p>Your download will start in</p>
+                    <div id="dpCountdown" class="dp-countdown-num">4</div>
+                </div>
             </div>
         </div>
     </div>
