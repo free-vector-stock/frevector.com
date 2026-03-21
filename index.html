@@ -6,8 +6,83 @@
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .dp-countdown-box { text-align: center; margin-top: 20px; }
-        .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
+        /* TÜM SORUNLARI ÇÖZEN ÖZEL CSS */
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        /* Ana içerik alanının altına, footer'ın üzerine binmemesi için boşluk ekliyoruz */
+        .main-container {
+            padding-bottom: 120px; /* Sayfalama + Footer toplam yüksekliği kadar */
+            display: flex;
+        }
+
+        /* ALT SABİT ALAN (PAGINATION + FOOTER) */
+        .fixed-bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            background-color: #fff;
+        }
+
+        /* Sayfalama - Beyaz zemin, ince ve derli toplu */
+        .pagination-wrapper {
+            padding: 8px 0;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .pagination-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pag-btn {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        /* SİYAH FOOTER - Yüksekliği üst bantla (60px) tam eşit */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            background-color: #000;
+            height: 60px; /* Üst siyah logo bandı ile aynı */
+        }
+
+        .copyright, .footer-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 11px;
+        }
+
+        .footer-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .footer-link:hover { color: #fff; }
+
+        /* Üst logo bandı sabitliği için */
+        .top-banner {
+            height: 60px;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -47,14 +122,13 @@
         </main>
     </div>
 
-    <div class="bottom-fixed-container">
-        
+    <div class="fixed-bottom-bar">
         <div class="pagination-wrapper">
             <div class="pagination-nav">
                 <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" class="page-num">1</span>
+                <span id="pageNumber" style="font-size: 13px; font-weight: bold; color: #333;">1</span>
                 <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span class="page-total" id="pageTotal">/ 1</span>
+                <span id="pageTotal" style="font-size: 13px; color: #666;">/ 1</span>
             </div>
         </div>
 
@@ -75,26 +149,11 @@
             <button id="dpClose" class="dp-close">&#10005;</button>
         </div>
         <div class="download-page-body">
-            <div class="dp-left">
-                <img id="dpImage" src="" alt="" class="dp-image">
-            </div>
+            <div class="dp-left"><img id="dpImage" src="" alt="" class="dp-image"></div>
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
                 <p id="dpDescription" class="dp-desc"></p>
-                <div id="dpKeywords" class="detail-keywords"></div>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
-                    <tr><td class="dt-label">FILE SIZE</td><td id="dpFileSize" class="dt-value">-</td></tr>
-                </table>
                 <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
-                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
-                    <p>Your download will start in</p>
-                    <div id="dpCountdown" class="dp-countdown-num">4</div>
-                    <p>High-speed secure download from frevector.com</p>
-                </div>
             </div>
         </div>
     </div>
@@ -107,7 +166,6 @@
     </div>
 
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-
     <script src="main.js?v=2026031407"></script>
 </body>
 </html>
