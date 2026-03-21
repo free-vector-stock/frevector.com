@@ -32,7 +32,7 @@ body { font-family: var(--font); background: var(--white); overflow: hidden; hei
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
 /* Vector Card Styles */
-.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; transition: 0.2s; }
+.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; transition: 0.2s; position: relative; }
 .vector-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
 .vector-card.card-active { border: 2px solid var(--black); }
 .vc-img-wrap { aspect-ratio: 1; overflow: hidden; position: relative; background: var(--gray-light); }
@@ -72,14 +72,14 @@ body { font-family: var(--font); background: var(--white); overflow: hidden; hei
 
 /* Modals & Full Overlay */
 .info-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; justify-content:center; align-items:center; }
-.info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:600px; width:90%; position:relative; }
+.info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:600px; width:90%; position:relative; overflow-y: auto; max-height: 90vh; }
 .info-modal-close { position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; }
 
 .download-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: none; flex-direction: column; }
 .download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .dp-site { font-weight: bold; font-size: 18px; }
 .dp-close { background: none; border: none; font-size: 24px; cursor: pointer; }
-.download-page-body { flex: 1; display: flex; padding: 40px; gap: 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
+.download-page-body { flex: 1; display: flex; padding: 40px; gap: 40px; max-width: 1200px; margin: 0 auto; width: 100%; overflow-y: auto; }
 .dp-left { flex: 1; }
 .dp-image { width: 100%; border-radius: 8px; border: 1px solid var(--border); }
 .dp-right { flex: 1; }
