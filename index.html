@@ -5,77 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Frevector - Free Vector, SVG & EPS Downloads</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .dp-countdown-box { text-align: center; margin-top: 20px; }
-        .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
-
-        /* "Our Selections For You" Ortalama ve Ok Düzenlemeleri */
-        .our-picks-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Başlığı ve içeriği ortalar */
-            width: 100%;
-            padding: 20px 0;
-        }
-
-        .our-picks-header {
-            display: contents; /* Header içindeki elemanları ana flex yapısına dahil eder */
-        }
-
-        .our-picks-label {
-            text-align: center;
-            width: 100%;
-            margin-bottom: 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 14px;
-        }
-
-        .our-picks-content-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 1200px; /* Sayfa genişliğine göre limitlenebilir */
-            gap: 10px;
-        }
-
-        .our-picks-track-wrap {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-        }
-
-        .our-picks-track {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            transition: transform 0.3s ease;
-        }
-
-        /* Ok Butonlarının Stil ve Konumu */
-        .our-picks-arrow {
-            background: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            color: #333;
-            transition: all 0.2s ease;
-            z-index: 10;
-        }
-
-        .our-picks-arrow:hover {
-            background: #e0e0e0;
-            color: #000;
-        }
-    </style>
 </head>
 <body>
     <div class="top-banner">
@@ -109,7 +38,7 @@
         </aside>
 
         <main class="content">
-            <h1 id="categoryTitle" class="category-title">Vector</h1>
+            <h1 id="categoryTitle" class="category-title">Free Vectors</h1>
             <div id="vectorsGrid" class="vectors-grid"></div>
         </main>
     </div>
@@ -126,15 +55,11 @@
 
         <section class="our-picks-section" id="ourPicksSection">
             <div class="our-picks-label">Our selections for you</div>
-            
             <div class="our-picks-content-wrapper">
                 <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
-                
                 <div class="our-picks-track-wrap">
-                    <div class="our-picks-track" id="ourPicksTrack">
-                        </div>
+                    <div class="our-picks-track" id="ourPicksTrack"></div>
                 </div>
-
                 <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
             </div>
         </section>
@@ -164,17 +89,15 @@
                 <p id="dpDescription" class="dp-desc"></p>
                 <div id="dpKeywords" class="detail-keywords"></div>
                 <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG</td></tr>
+                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG / VECTOR</td></tr>
                     <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
-                    <tr><td class="dt-label">FILE SIZE</td><td id="dpFileSize" class="dt-value">-</td></tr>
+                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
                 </table>
-                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
+                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD NOW</button>
                 <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
                     <p>Your download will start in</p>
                     <div id="dpCountdown" class="dp-countdown-num">4</div>
-                    <p>High-speed secure download from frevector.com</p>
+                    <p>High-speed secure download</p>
                 </div>
             </div>
         </div>
@@ -189,6 +112,6 @@
 
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
 
-    <script src="main.js?v=2026031407"></script>
+    <script src="main.js"></script>
 </body>
 </html>
