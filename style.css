@@ -22,15 +22,7 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .header { height: auto; min-height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 10px 20px; flex-shrink: 0; z-index: 1000; gap: 10px; flex-wrap: wrap; }
 .header-center { flex: 1; display: flex; justify-content: flex-start; min-width: 250px; }
 
-.search-container { 
-    width: 100%; 
-    display: flex; 
-    border: 1px solid var(--border); 
-    padding: 5px 15px; 
-    border-radius: 4px; 
-    background: #fff;
-    align-items: center;
-}
+.search-container { width: 100%; display: flex; border: 1px solid var(--border); padding: 5px 15px; border-radius: 4px; background: #fff; align-items: center; }
 .search-input { border: none; outline: none; width: 100%; font-size: 14px; padding: 5px 0; }
 .search-icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; margin-right: 10px; padding: 0; }
 
@@ -72,15 +64,20 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .our-picks-track .vector-card { width: 80px; min-width: 80px; }
 .our-picks-track .vc-info { display: none; }
 
-.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; flex-wrap: wrap; gap: 10px; }
-.footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; }
+/* Footer */
+.footer { background: #000; color: #fff; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; flex-wrap: wrap; gap: 10px; }
+.footer-left { color: #888; }
+.footer-right { display: flex; gap: 15px; }
+.footer-link { color: #ccc; text-decoration: none; cursor: pointer; }
+.footer-link:hover { color: #fff; }
 
 /* Modals */
 .info-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; justify-content:center; align-items:center; }
-.info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:700px; width:90%; max-height: 85vh; overflow-y: auto; position: relative; }
+.info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:700px; width:90%; max-height: 85vh; overflow-y: auto; position: relative; color: #333; }
 .info-modal-close { position:absolute; top:15px; right:15px; background:none; border:none; font-size:24px; cursor:pointer; }
-.info-modal-body h2 { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-.info-modal-body p { margin-bottom: 12px; line-height: 1.6; color: #444; }
+.info-modal-body h2 { margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; font-size: 18px; }
+.info-modal-body p { margin-bottom: 12px; line-height: 1.6; color: #444; font-size: 14px; }
+.info-modal-body a { color: #000; font-weight: bold; text-decoration: underline; }
 
 /* Detail Panel */
 .detail-panel { grid-column: 1 / -1; background: var(--gray-light); padding: 25px; border-radius: 4px; margin: 10px 0; display: flex; gap: 25px; border: 1px solid var(--border); }
@@ -91,89 +88,41 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .kw-tag { display: inline-block; background: #e0e0e0; padding: 4px 8px; margin: 2px; border-radius: 3px; font-size: 11px; }
 
 /* Download Page */
-.download-page { position: fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:2000; display:none; flex-direction:column; }
-.download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-.download-page-body { flex:1; display:flex; padding:40px; gap:40px; max-width:1200px; margin:0 auto; overflow-y:auto; }
+.download-page { position: fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:2000; display:none; flex-direction:column; overflow-y: auto; }
+.download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: white; position: sticky; top: 0; z-index: 10; }
+.download-page-body { flex:1; display:flex; padding:40px; gap:40px; max-width:1200px; margin:0 auto; }
+.dp-left { flex: 1; }
+.dp-right { flex: 1; display: flex; flex-direction: column; gap: 20px; }
 .dp-image { width:100%; border-radius:8px; border:1px solid var(--border); object-fit: contain; background: #f9f9f9; }
-.download-btn { background:#000; color:#fff; border:none; padding:12px 25px; cursor:pointer; font-weight:bold; }
+.dp-title { font-size: 28px; font-weight: 700; }
+.download-btn { background:#000; color:#fff; border:none; padding:15px 30px; cursor:pointer; font-weight:bold; border-radius: 4px; font-size: 16px; }
 
 .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 4000; display: flex; justify-content: center; align-items: center; }
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* MOBİL TASARIM — REFERANS GÖRSELE BİREBİR UYGULAMA */
+/* MOBİL TASARIM */
 @media (max-width: 768px) {
     html, body { overflow-y: auto !important; height: auto !important; }
-
     .top-banner { height: 60px !important; padding: 12px 16px !important; justify-content: flex-start !important; }
-    .banner-logo { height: 32px !important; }
-
-    .header { flex-direction: column !important; padding: 12px !important; border-bottom: none !important; }
+    .header { flex-direction: column !important; padding: 12px !important; }
     .header-center { width: 100% !important; order: 1; }
     .header-right { width: 100% !important; order: 2; margin-top: 8px; display: flex; justify-content: center; }
-
-    .search-container { height: 46px !important; border-radius: 8px !important; border: 1px solid #ddd !important; }
-    .sort-filter { width: auto !important; min-width: 200px; border: 1px solid #ccc !important; padding: 10px 12px !important; border-radius: 6px !important; background: #fff !important; }
-
     .main-container { display: flex !important; flex-direction: column !important; height: auto !important; overflow: visible !important; }
-    
-    /* KATEGORİ KONTEYNER (INSTAGRAM CHIP YAPISI) */
-    .sidebar { 
-        width: 100% !important; 
-        border-right: none !important; 
-        border-bottom: 1px solid var(--border) !important; 
-        padding: 10px 12px !important;
-        height: auto !important;
-        overflow: visible !important;
-        background: #fff !important;
-        order: 3;
-    }
+    .sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; padding: 10px 12px !important; height: auto !important; order: 3; }
     .sidebar-title { display: none !important; }
-    #categoriesList { 
-        display: flex !important; 
-        flex-wrap: wrap !important; 
-        flex-direction: row !important;
-        gap: 8px !important; 
-    }
-    .category-item { 
-        display: inline-block !important;
-        background: #000 !important;
-        color: #fff !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        padding: 6px 14px !important;
-        border-radius: 20px !important; /* TAM OVAL */
-        white-space: nowrap !important;
-        width: auto !important;
-        border: none !important;
-    }
-    .category-item.active { background: #000 !important; border: 2px solid #555 !important; }
-
-    /* İÇERİK ALANI */
-    .content { padding: 12px !important; width: 100% !important; order: 4; overflow: visible !important; }
-    .category-title-h1 { font-size: 17px !important; font-weight: 600 !important; margin: 12px 0 !important; text-align: left !important; }
-
-    /* GÖRSELLER (TEK SÜTUN VE DEV BOYUT) */
+    #categoriesList { display: flex !important; flex-wrap: wrap !important; flex-direction: row !important; gap: 8px !important; }
+    .category-item { background: #000 !important; color: #fff !important; font-size: 13px !important; padding: 6px 14px !important; border-radius: 20px !important; width: auto !important; }
+    .content { padding: 12px !important; width: 100% !important; order: 4; }
     .vectors-grid { display: flex !important; flex-direction: column !important; gap: 20px !important; }
     .vector-card { width: 100% !important; border-radius: 10px !important; }
-    .vc-img-wrap { aspect-ratio: auto !important; height: auto !important; }
-    .vc-img { width: 100% !important; height: auto !important; min-height: 250px; }
-    
-    /* GÖRSEL ETİKETİ (SAĞ ÜST VECTOR BADGE) */
-    .vc-type-badge.vector { background: #15803d !important; top: 10px !important; right: 10px !important; padding: 4px 8px !important; border-radius: 4px !important; }
-
-    .vc-info { padding: 12px !important; }
-    .vc-description { font-size: 14px !important; white-space: nowrap !important; text-overflow: ellipsis !important; }
-    .vc-keywords { color: #777 !important; font-size: 12px !important; }
-
-    /* PAGINATION */
     .bottom-fixed-container { position: relative !important; order: 5; }
-    .pagination-wrapper { flex-direction: column !important; gap: 10px !important; padding: 20px !important; }
-    .pagination-wrapper #nextBtn { order: 1; width: 100%; padding: 12px !important; background: #000; color: #fff; }
-    .pagination-wrapper .pag-info { order: 2; font-weight: 600; font-size: 14px; }
-    .pagination-wrapper #prevBtn { order: 3; }
-
-    /* FOOTER */
     .footer { flex-direction: column !important; text-align: center !important; padding: 30px 20px !important; }
-    .footer-link { margin: 8px 0 !important; display: block; font-size: 13px; }
+    .footer-right { flex-direction: column; gap: 10px; width: 100%; }
+
+    /* MOBİL İNDİRME SAYFASI DÜZENLEME */
+    .download-page-body { flex-direction: column !important; padding: 20px !important; gap: 20px !important; }
+    .dp-image { min-height: 200px !important; height: auto !important; }
+    .dp-title { font-size: 20px !important; }
+    .download-btn { width: 100% !important; padding: 18px !important; }
 }
