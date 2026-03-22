@@ -32,20 +32,22 @@
         </div>
     </header>
 
-    <div class="category-bar-container">
-        <div class="category-title">Free Backgrounds Vectors, SVGs, Icons And Clipart</div>
-        <div class="category-bar" id="categoryBar">
-            </div>
-    </div>
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="category-title">Categories</div>
+            <ul class="category-list" id="categoryList">
+                </ul>
+        </aside>
 
-    <main class="content">
-        <div class="vector-grid" id="vectorGrid"></div>
-        <div class="pagination">
-            <button id="prevBtn" class="page-btn">Previous</button>
-            <div class="page-info"><span id="pageNumber">1</span> <span id="pageTotal">/ 1</span></div>
-            <button id="nextBtn" class="page-btn">Next</button>
-        </div>
-    </main>
+        <main class="content">
+            <div class="vector-grid" id="vectorGrid"></div>
+            <div class="pagination">
+                <button id="prevBtn" class="page-btn">Previous</button>
+                <div class="page-info"><span id="pageNumber">1</span> <span id="pageTotal">/ 1</span></div>
+                <button id="nextBtn" class="page-btn">Next</button>
+            </div>
+        </main>
+    </div>
 
     <footer class="footer">
         <div class="footer-links">
@@ -68,16 +70,14 @@
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
                 <div id="dpKeywords" class="detail-keywords"></div>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG / VECTOR</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
+                <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr><td style="padding:10px 0; border-bottom:1px solid #eee; color:#888;">FORMAT</td><td id="dpFormat" style="text-align:right; font-weight:600;">EPS / JPG</td></tr>
+                    <tr><td style="padding:10px 0; border-bottom:1px solid #eee; color:#888;">CATEGORY</td><td id="dpCategory" style="text-align:right; font-weight:600;">-</td></tr>
                 </table>
                 <button id="dpDownloadBtn" class="download-btn">DOWNLOAD NOW</button>
-                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
+                <div id="dpCountdownBox" style="display:none; text-align:center; padding:20px; background:#f9f9f9; margin-top:10px;">
                     <p>Your download will start in</p>
-                    <div id="dpCountdown" class="dp-countdown-num">4</div>
-                    <p>High-speed secure download</p>
+                    <div id="dpCountdown" style="font-size:40px; font-weight:800; color:#000;">4</div>
                 </div>
             </div>
         </div>
