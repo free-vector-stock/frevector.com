@@ -35,64 +35,21 @@ const CATEGORY_H1_MAP = {
     'Icon': 'Free Icon Vectors, SVGs, Icons and Clipart'
 };
 
-const MODAL_CONTENTS = {
-    about: { title: 'ABOUT US', content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform providing original vector resources.</p>` },
-    privacy: { title: 'PRIVACY POLICY', content: `<h2>PRIVACY POLICY</h2><p>Your privacy is important to us.</p>` },
-    terms: { title: 'TERMS OF SERVICE', content: `<h2>TERMS OF SERVICE</h2><p>Usage terms of Frevector graphics.</p>` },
-    contact: { title: 'CONTACT', content: `<h2>CONTACT</h2><p>Email: hakankacar2014@gmail.com</p>` }
-};
-
 const state = {
     vectors: [], currentPage: 1, totalPages: 1, 
     selectedCategory: 'all', selectedType: 'all', searchQuery: '',
-    isLoading: false, picksTrackOffset: 0, picksItemWidth: 175
+    isLoading: false, picksOffset: 0, itemWidth: 175
 };
 
 async function init() {
     setupCategories();
-    setupTypeFilters();
     setupEventListeners();
-    setupModalHandlers();
+    setupTypeFilters();
     await fetchVectors();
-    fetchAndRenderOurPicks(); // İlk açılışta seçkileri getir
+    fetchAndRenderOurPicks();
 }
 
-function setupTypeFilters() {
-    document.querySelectorAll('.type-filter').forEach(btn => {
-        btn.onclick = (e) => {
-            e.preventDefault();
-            document.querySelectorAll('.type-filter').forEach(f => f.classList.remove('active'));
-            btn.classList.add('active');
-            state.selectedType = btn.dataset.type;
-            state.currentPage = 1;
-            fetchVectors();
-        };
-    });
-}
-
-function setupCategories() {
-    const list = document.getElementById('categoriesList');
-    list.innerHTML = '';
-    const cats = ['all', ...Object.keys(CATEGORY_H1_MAP)];
-    cats.forEach(cat => {
-        const a = document.createElement('a');
-        a.className = 'category-item' + (state.selectedCategory === cat ? ' active' : '');
-        a.textContent = cat === 'all' ? 'All' : cat;
-        a.onclick = (e) => {
-            e.preventDefault();
-            state.selectedCategory = cat;
-            state.currentPage = 1;
-            // H1 Güncelleme (Kural 32)
-            const h1Title = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : CATEGORY_H1_MAP[cat];
-            document.getElementById('categoryTitle').textContent = h1Title;
-            setupCategories();
-            fetchVectors();
-            fetchAndRenderOurPicks(); // Kategoriye göre seçkileri yenile
-        };
-        list.appendChild(a);
-    });
-}
-
+// ARAMA SİSTEMİ (Kural 31 - Real Time & Keyword Based)
 async function fetchVectors() {
     if (state.isLoading) return;
     state.isLoading = true; showLoader(true);
@@ -117,26 +74,29 @@ function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
     grid.innerHTML = '';
     state.vectors.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'vector-card';
-        
-        // JPEG/VECTOR Tespiti (Kural 29 & 30)
-        const isJpeg = v.name.toLowerCase().includes('-jpeg-');
-        const badgeText = isJpeg ? 'JPEG' : 'VECTOR';
-
-        card.innerHTML = `
-            <div class="vc-img-wrap">
-                <div class="vc-type-badge">${badgeText}</div>
-                <img class="vc-img" src="${v.thumbnail}" alt="${v.title}">
-            </div>
-            <div class="vc-info"><div class="vc-description">${v.title}</div></div>
-        `;
-        card.onclick = () => showDetailPanel(v, card);
+        const card = createVectorCard(v);
+        card.onclick = () => showDetailPanel(v, card, grid);
         grid.appendChild(card);
     });
 }
 
-function showDetailPanel(v, cardElement) {
+function createVectorCard(v) {
+    const isJpeg = v.name.toLowerCase().includes('-jpeg-');
+    const badge = isJpeg ? 'JPEG' : 'VECTOR';
+    const card = document.createElement('div');
+    card.className = 'vector-card';
+    card.innerHTML = `
+        <div class="vc-img-wrap">
+            <div class="vc-type-badge">${badge}</div>
+            <img class="vc-img" src="${v.thumbnail}" alt="${v.title}">
+        </div>
+        <div class="vc-info"><div class="vc-description">${v.title}</div></div>
+    `;
+    return card;
+}
+
+// DETAY PANELİ (Kural 18 & 25 & 26 Çözümü)
+function showDetailPanel(v, cardElement, container) {
     document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('card-active'));
     const existing = document.querySelector('.detail-panel');
     if (existing) existing.remove();
@@ -152,7 +112,15 @@ function showDetailPanel(v, cardElement) {
             <button class="download-btn-short" id="startDL">DOWNLOAD PAGE</button>
         </div>
     `;
-    cardElement.after(panel);
+    
+    // Eğer Selection kısmından tıklandıysa ana gridin en üstüne çık veya oraya odaklan
+    if (container.id === 'ourPicksTrack') {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        const mainGrid = document.getElementById('vectorsGrid');
+        mainGrid.prepend(panel);
+    } else {
+        cardElement.after(panel);
+    }
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     document.getElementById('startDL').onclick = () => runDownloadProcess(v);
 }
@@ -160,7 +128,7 @@ function showDetailPanel(v, cardElement) {
 function runDownloadProcess(v) {
     const overlay = document.getElementById('downloadOverlay');
     const counterEl = document.getElementById('dlCounter');
-    document.getElementById('dlPreviewArea').innerHTML = `<img src="${v.thumbnail}" style="max-height:120px;"><h3>${v.title}</h3>`;
+    document.getElementById('dlPreviewArea').innerHTML = `<img src="${v.thumbnail}" style="max-height:100px;"><h3>${v.title}</h3>`;
     overlay.style.display = 'flex';
     let count = 4;
     counterEl.textContent = count;
@@ -176,72 +144,69 @@ function runDownloadProcess(v) {
     document.getElementById('closeDL').onclick = () => { clearInterval(itv); overlay.style.display = 'none'; };
 }
 
-// Our Selections - Infinite Loop & Random (Kural 26)
+// Our Selections Infinite (Kural 26)
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    const catParam = state.selectedCategory !== 'all' ? `&category=${state.selectedCategory}` : '';
-    const res = await fetch(`/api/vectors?limit=15&page=1${catParam}`); // Sayfa 1'den karışık veri alınır
+    const res = await fetch(`/api/vectors?limit=15&category=${state.selectedCategory === 'all' ? '' : state.selectedCategory}`);
     const data = await res.json();
     const items = data.vectors || [];
     
     track.innerHTML = '';
-    // Sonsuz döngü için listenin başına ve sonuna klonlar ekliyoruz
-    const fullList = [...items, ...items.slice(0, 6)]; 
-    
+    const fullList = [...items, ...items.slice(0, 6)]; // Klonlama
     fullList.forEach(v => {
-        const isJpeg = v.name.toLowerCase().includes('-jpeg-');
-        const badge = isJpeg ? 'JPEG' : 'VECTOR';
-        const div = document.createElement('div');
-        div.className = 'vector-card';
-        div.style.minWidth = '160px';
-        div.innerHTML = `
-            <div class="vc-img-wrap" style="height:120px;">
-                <div class="vc-type-badge">${badge}</div>
-                <img class="vc-img" src="${v.thumbnail}">
-            </div>`;
-        div.onclick = () => { window.scrollTo({top:0, behavior:'smooth'}); showDetailPanel(v, div); };
-        track.appendChild(div);
+        const card = createVectorCard(v);
+        card.style.minWidth = '160px';
+        // Selection içindekine tıklandığında "saçmasapan" açılmaması için:
+        card.onclick = () => showDetailPanel(v, card, track);
+        track.appendChild(card);
     });
 
-    // Ok Kontrolleri
     document.getElementById('ourPicksNext').onclick = () => {
-        state.picksTrackOffset -= state.picksItemWidth;
-        if (Math.abs(state.picksTrackOffset) >= (items.length * state.picksItemWidth)) {
-            state.picksTrackOffset = 0; // Başa sar
-        }
-        track.style.transform = `translateX(${state.picksTrackOffset}px)`;
+        state.picksOffset -= state.itemWidth;
+        if (Math.abs(state.picksOffset) >= (items.length * state.itemWidth)) state.picksOffset = 0;
+        track.style.transform = `translateX(${state.picksOffset}px)`;
     };
     document.getElementById('ourPicksPrev').onclick = () => {
-        if (state.picksTrackOffset >= 0) {
-            state.picksTrackOffset = -(items.length - 1) * state.picksItemWidth;
-        } else {
-            state.picksTrackOffset += state.picksItemWidth;
-        }
-        track.style.transform = `translateX(${state.picksTrackOffset}px)`;
+        state.picksOffset = (state.picksOffset >= 0) ? -(items.length - 1) * state.itemWidth : state.picksOffset + state.itemWidth;
+        track.style.transform = `translateX(${state.picksOffset}px)`;
     };
 }
 
 function setupEventListeners() {
-    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
-    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
-    
     let timer;
     document.getElementById('searchInput').oninput = (e) => {
         state.searchQuery = e.target.value; state.currentPage = 1;
-        clearTimeout(timer); timer = setTimeout(fetchVectors, 400);
+        clearTimeout(timer); timer = setTimeout(fetchVectors, 300); // Real-time
     };
+    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
 }
 
-function setupModalHandlers() {
-    document.querySelectorAll('.modal-trigger').forEach(b => {
-        b.onclick = (e) => {
+function setupCategories() {
+    const list = document.getElementById('categoriesList');
+    list.innerHTML = '';
+    ['all', ...Object.keys(CATEGORY_H1_MAP)].forEach(cat => {
+        const a = document.createElement('a');
+        a.className = 'category-item' + (state.selectedCategory === cat ? ' active' : '');
+        a.textContent = cat;
+        a.onclick = (e) => {
+            e.preventDefault(); state.selectedCategory = cat; state.currentPage = 1;
+            document.getElementById('categoryTitle').textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : CATEGORY_H1_MAP[cat];
+            setupCategories(); fetchVectors(); fetchAndRenderOurPicks();
+        };
+        list.appendChild(a);
+    });
+}
+
+function setupTypeFilters() {
+    document.querySelectorAll('.type-filter').forEach(btn => {
+        btn.onclick = (e) => {
             e.preventDefault();
-            const m = MODAL_CONTENTS[b.dataset.modal];
-            document.getElementById('infoModalBody').innerHTML = m.content;
-            document.getElementById('infoModal').style.display = 'flex';
+            document.querySelectorAll('.type-filter').forEach(f => f.classList.remove('active'));
+            btn.classList.add('active');
+            state.selectedType = btn.dataset.type; state.currentPage = 1; fetchVectors();
         };
     });
-    document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none';
 }
 
 function updatePagination() {
