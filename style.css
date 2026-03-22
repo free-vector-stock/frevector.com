@@ -1,16 +1,16 @@
 :root {
-    --black: #000000; --white: #ffffff; --gray-light: #f5f5f5; --border: #e8e8e8; --font: 'Inter', sans-serif;
+    --black: #000000; --white: #ffffff; --gray-light: #f5f5f5; --border: #e8e8e8; 
+    --font: 'Inter', sans-serif;
 }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: var(--font); background: var(--white); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-/* HEADER & BANNER */
+/* HEADER & SEARCH */
 .top-banner { background: var(--black); height: 52px; display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .banner-logo { height: 32px; }
 .header { height: 64px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 20px; }
-.header-center { flex: 1; display: flex; justify-content: center; }
-/* Kural 31: Arama kutusu uzun olacak */
-.search-container { width: 100%; max-width: 100%; display: flex; border: 1px solid var(--border); border-radius: 6px; padding: 8px 15px; background: #fff; }
+.header-center { flex: 1; display: flex; justify-content: flex-start; }
+.search-container { width: 100%; display: flex; border: 1px solid var(--border); border-radius: 6px; padding: 8px 15px; background: #fff; }
 .search-input { border: none; outline: none; width: 100%; font-family: var(--font); font-size: 15px; }
 .search-icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; margin-right: 10px; }
 
@@ -25,70 +25,42 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 
 /* GRID & CARDS */
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; position: relative; transition: border 0.2s; }
+.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; position: relative; }
 .vector-card.card-active { border: 2px solid #000; }
-.vc-img-wrap { width: 100%; position: relative; background: var(--gray-light); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.vc-img { width: 100%; height: auto; display: block; object-fit: contain; max-width: 100%; }
+.vc-img-wrap { width: 100%; background: var(--gray-light); display: flex; align-items: center; justify-content: center; position: relative; }
+.vc-img { width: 100%; height: auto; object-fit: contain; }
 .vc-type-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 3px 6px; border-radius: 3px; font-weight: 800; z-index: 5; }
-.vc-info { padding: 10px; border-top: 1px solid var(--border); }
-.vc-description { font-size: 12px; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* DETAY PANELI */
-.detail-panel { grid-column: 1 / -1; background: #fff; border: 1px solid #000; padding: 20px; margin: 10px 0; border-radius: 4px; display: flex; gap: 20px; }
-.dp-left img { width: 150px; height: auto; border: 1px solid var(--border); border-radius: 4px; }
+/* DETAIL PANEL */
+.detail-panel { grid-column: 1 / -1; background: #fff; border: 1px solid #000; padding: 20px; margin: 10px 0; display: flex; gap: 20px; }
+.dp-left img { width: 150px; border-radius: 4px; object-fit: contain; }
 .dp-info { flex: 1; }
-.dp-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
 .dp-kw { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
 .kw-tag { background: #eee; padding: 4px 8px; font-size: 10px; font-weight: 600; border-radius: 3px; }
 .download-btn-short { background: #000; color: #fff; border: none; padding: 10px 20px; cursor: pointer; font-weight: 800; font-size: 12px; border-radius: 4px; }
 
-/* DOWNLOAD PAGE OVERLAY */
-.download-page-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; overflow-y: auto; }
-.dl-page-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-.dl-page-header { margin-bottom: 30px; }
-.dl-back-btn { background: none; border: none; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-.dl-page-content { display: flex; gap: 50px; align-items: flex-start; }
-.dl-page-preview { flex: 1; background: var(--gray-light); border-radius: 8px; padding: 20px; display: flex; justify-content: center; }
-.dl-page-preview img { width: 100% !important; max-width: 100%; height: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 4px; }
-.dl-page-details { flex: 1; }
-.dl-page-details h2 { font-size: 28px; font-weight: 800; margin-bottom: 20px; }
-.dl-meta-info { margin-bottom: 30px; font-size: 15px; color: #555; }
-.dl-meta-info p { margin-bottom: 10px; }
-.final-download-btn { background: #000; color: #fff; border: none; padding: 18px 40px; font-size: 16px; font-weight: 800; border-radius: 6px; cursor: pointer; width: 100%; }
-.dl-timer-box { text-align: center; margin-top: 20px; }
-.countdown-num { font-size: 60px; font-weight: 800; margin: 10px 0; }
-
-/* OUR SELECTIONS */
+/* OUR SELECTIONS (Oklar SVG ile Modernleştirildi) */
 .our-picks-section { padding: 15px 0; border-top: 1px solid var(--border); background: #fff; }
 .our-picks-label { font-size: 11px; font-weight: 800; text-transform: uppercase; text-align: center; margin-bottom: 10px; }
 .our-picks-content-wrapper { display: flex; align-items: center; padding: 0 40px; }
 .our-picks-track-wrap { overflow: hidden; width: 100%; }
-.our-picks-track { display: flex; gap: 10px; transition: transform 0.4s ease-out; }
-.our-picks-track .vector-card { width: 120px !important; flex-shrink: 0; border: none; }
-.our-picks-track .vc-img-wrap { aspect-ratio: 1/1; height: 120px; }
-.our-picks-track .vc-info { display: none; }
-.our-picks-arrow { background: none; border: none; cursor: pointer; color: #000; padding: 5px; z-index: 5; }
+.our-picks-track { display: flex; gap: 10px; }
+.our-picks-arrow { background: none; border: none; cursor: pointer; color: #000; display: flex !important; visibility: visible !important; }
 
 /* FOOTER & PAGINATION */
 .pagination-wrapper-centered { display: flex; justify-content: center; padding: 15px 0; border-top: 1px solid var(--border); }
-.pagination-nav { display: flex; align-items: center; gap: 10px; }
-.pag-btn { background: #fff; border: 1px solid #ddd; padding: 6px 14px; cursor: pointer; border-radius: 4px; font-weight: 600; }
-.page-num { font-weight: 800; background: #000; color: #fff; padding: 4px 10px; border-radius: 4px; }
 .footer { background: #000; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
-.footer-link { color: #fff; text-decoration: none; margin-left: 15px; cursor: pointer; }
+.footer-link { color: #fff; text-decoration: none; margin-left: 15px; }
 
-/* MODAL */
-.info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; display: flex; justify-content: center; align-items: center; }
-.info-modal-box { background: #fff; padding: 40px; border-radius: 8px; width: 90%; max-width: 700px; position: relative; max-height: 80vh; overflow-y: auto; }
-.info-modal-close { position: absolute; top: 15px; right: 15px; border: none; background: none; font-size: 20px; cursor: pointer; }
-
-/* MOBILE */
+/* MOBİL GÖRÜNÜM (ZORUNLU DİKEY AKIŞ) */
 @media (max-width: 768px) {
     body { overflow-y: auto; height: auto; }
     .main-container { flex-direction: column; }
-    .sidebar { width: 100%; display: flex; flex-wrap: wrap; padding: 10px; border-right: none; }
-    .category-item { background: #000; color: #fff; border-radius: 20px; margin: 4px; padding: 6px 12px; }
-    .dl-page-content { flex-direction: column; }
-    /* Mobilde görselin dev gibi görünmemesi için kısıtlama */
-    .dl-page-preview img { max-width: 100%; height: auto; }
+    .sidebar { width: 100%; border-right: none; height: auto; overflow: visible; display: block; padding: 10px; }
+    .categories-list { display: flex; flex-direction: column; width: 100%; gap: 2px; }
+    .category-item { background: #f5f5f5; border-radius: 4px; margin-bottom: 2px; }
+    .vectors-grid { grid-template-columns: 1fr; } /* Tek sütun */
+    .vc-img { width: 100%; height: auto; }
+    .header { flex-direction: column; height: auto; padding: 10px; }
+    .header-center, .header-right { width: 100%; }
 }
