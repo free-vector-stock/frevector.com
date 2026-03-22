@@ -40,13 +40,6 @@
 
         <main class="content">
             <h1 id="categoryTitle" class="category-title-h1">Free Vectors, SVGs, Icons and Clipart</h1>
-            
-            <div class="type-filters" style="margin-bottom: 20px; display: flex; gap: 10px;">
-                <button class="type-filter active" data-type="all" style="padding: 8px 16px; border: 1px solid #000; background: #000; color: #fff; cursor: pointer; border-radius: 4px; font-size: 13px;">All Assets</button>
-                <button class="type-filter" data-type="vector" style="padding: 8px 16px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px; font-size: 13px;">Vector</button>
-                <button class="type-filter" data-type="jpeg" style="padding: 8px 16px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 4px; font-size: 13px;">JPEG</button>
-            </div>
-
             <div id="vectorsGrid" class="vectors-grid">
                 </div>
         </main>
@@ -63,6 +56,7 @@
         </div>
 
         <div class="our-picks-section">
+            <div class="our-picks-header">OUR PICKS</div>
             <div class="our-picks-content-wrapper">
                 <button id="ourPicksPrev" class="our-picks-arrow">‹</button>
                 <div class="our-picks-track-wrap">
@@ -78,7 +72,7 @@
             <div class="footer-right">
                 <a class="footer-link modal-trigger" data-modal="about">About Us</a>
                 <a class="footer-link modal-trigger" data-modal="privacy">Privacy Policy</a>
-                <a class="footer-link modal-trigger" data-modal="terms">Terms & Service</a>
+                <a class="footer-link modal-trigger" data-modal="terms">Terms of Service</a>
                 <a class="footer-link modal-trigger" data-modal="contact">Contact</a>
             </div>
         </footer>
@@ -96,17 +90,12 @@
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
                 <div id="dpKeywords" class="detail-keywords"></div>
-                
                 <table class="detail-table">
-                    <tr><td class="dt-label">File Format</td><td id="dpFileFormat" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">Category</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">Resolution</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">License</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
-                    <tr><td class="dt-label">File Size</td><td id="dpFileSize" class="dt-value">Fast Download</td></tr>
+                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG / VECTOR</td></tr>
+                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
+                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
                 </table>
-
                 <button id="dpDownloadBtn" class="download-btn">DOWNLOAD NOW</button>
-                
                 <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
                     <p>Your download will start in</p>
                     <div id="dpCountdown" class="dp-countdown-num">4</div>
@@ -119,7 +108,8 @@
     <div id="infoModal" class="info-modal" style="display:none;">
         <div class="info-modal-box">
             <button class="info-modal-close" id="infoModalClose">&#10005;</button>
-            <div id="infoModalBody" class="info-modal-body"></div>
+            <div id="infoModalBody" class="info-modal-body">
+                </div>
         </div>
     </div>
 
