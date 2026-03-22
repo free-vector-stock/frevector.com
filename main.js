@@ -9,7 +9,6 @@ const CATEGORIES = [
     'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
-// Footer içerikleri - Tam ve Eksiksiz
 const MODAL_CONTENTS = {
     about: { 
         title: 'ABOUT US', 
@@ -109,9 +108,6 @@ function selectCategory(cat) {
     setupCategories();
     document.getElementById('categoryTitle').textContent = getH1Text(cat);
     fetchVectors();
-    if(window.innerWidth <= 480) {
-        document.getElementById('categoryTitle').scrollIntoView({behavior: 'smooth'});
-    }
 }
 
 async function fetchVectors() {
