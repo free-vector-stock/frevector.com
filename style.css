@@ -11,18 +11,18 @@
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body { height: 100%; margin: 0; overflow: hidden; }
+html, body { height: 100%; margin: 0; }
 
-body { font-family: var(--font); background: var(--white); display: flex; flex-direction: column; }
+body { font-family: var(--font); background: var(--white); display: flex; flex-direction: column; min-height: 100vh; }
 
 /* Layout Components */
 .top-banner { background: var(--black); padding: 10px; display: flex; justify-content: center; height: 52px; flex-shrink: 0; z-index: 1100; }
 .banner-logo { height: 32px; }
 
-.header { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; flex-shrink: 0; z-index: 1000; gap: 10px; }
-.header-center { flex: 1; display: flex; justify-content: flex-start; }
+.header { height: auto; min-height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 10px 20px; flex-shrink: 0; z-index: 1000; gap: 10px; flex-wrap: wrap; }
+.header-center { flex: 1; display: flex; justify-content: flex-start; min-width: 250px; }
 
-/* ARAMA ÇUBUĞU - KIRMIZI ALAN DÜZELTMESİ (TAM GENİŞLİK) */
+/* ARAMA ÇUBUĞU - TAM GENİŞLİK */
 .search-container { 
     width: 100%; 
     display: flex; 
@@ -49,7 +49,7 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
-/* Vector Cards & Gerçek Kadraj (contain) */
+/* Vector Cards & Frame (contain) */
 .vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; position: relative; }
 .vc-img-wrap { aspect-ratio: 1; overflow: hidden; position: relative; background: var(--gray-light); display: flex; align-items: center; justify-content: center; }
 .vc-img { width: 100%; height: 100%; object-fit: contain; background: #f9f9f9; }
@@ -68,7 +68,7 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .our-picks-section { padding: 10px 0; text-align: center; }
 .our-picks-content-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; padding: 0 40px; }
 
-/* SAĞ OK VE SOL OK GÖRÜNÜRLÜK DÜZELTMESİ */
+/* OK GÖRÜNÜRLÜĞÜ */
 .our-picks-arrow {
     width: 30px;
     height: 30px;
@@ -83,14 +83,13 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
     font-size: 20px;
     flex-shrink: 0;
 }
-.our-picks-arrow:hover { background: #f0f0f0; }
 
 .our-picks-track-wrap { overflow: hidden; width: 100%; max-width: 1200px; }
 .our-picks-track { display: flex; gap: 10px; }
 .our-picks-track .vector-card { width: 80px; min-width: 80px; }
 .our-picks-track .vc-info { display: none; }
 
-.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; }
+.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; flex-wrap: wrap; gap: 10px; }
 .footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; }
 
 /* Modals */
@@ -120,10 +119,56 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* Mobile Adjustments */
+/* MOBİL GÖRÜNÜM ZORUNLU DÜZENLEME (VERTICAL FLOW) */
 @media (max-width: 768px) {
-    body { overflow-y: auto; height: auto; }
-    .main-container { flex-direction: column; overflow: visible; }
-    .sidebar { width: 100%; display: flex; overflow-x: auto; height: auto; }
-    .download-page-body { flex-direction: column; }
+    html, body { overflow: auto; height: auto; }
+    
+    .header { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
+    .header-center { width: 100%; min-width: auto; }
+    .header-right { width: 100%; }
+    .sort-filter { width: 100%; height: 40px; }
+
+    .main-container { flex-direction: column; overflow: visible; height: auto; }
+    
+    /* Yan menü kaldırıldı, içerik üste alındı */
+    .sidebar { 
+        width: 100%; 
+        border-right: none; 
+        border-bottom: 1px solid var(--border); 
+        padding: 10px 15px;
+        order: 1; /* Arama kutusundan sonra gelecek */
+    }
+    .sidebar-title { display: none; } /* Kategori başlığı mobilde yer kaplamasın */
+    #categoriesList { 
+        display: flex; 
+        flex-direction: column; /* Tek sütun liste */
+        gap: 2px;
+    }
+    .category-item { 
+        padding: 12px 10px; 
+        border-bottom: 1px solid #f0f0f0; 
+        font-size: 14px;
+    }
+
+    .content { order: 2; padding: 15px; width: 100%; overflow: visible; }
+    .category-title-h1 { font-size: 18px; margin-bottom: 15px; }
+
+    /* Görseller tek sütun ve büyük */
+    .vectors-grid { 
+        grid-template-columns: 1fr; 
+        gap: 20px; 
+    }
+    .vector-card { width: 100%; }
+    .vc-img-wrap { aspect-ratio: auto; min-height: 250px; }
+    .vc-info { padding: 12px; }
+    .vc-description { font-size: 14px; white-space: normal; }
+
+    /* Detay paneli mobil uyumu */
+    .detail-panel { flex-direction: column; padding: 15px; gap: 15px; }
+    .detail-inner { flex-direction: column; gap: 15px; }
+    .detail-left { flex: auto; width: 100%; }
+    
+    .download-page-body { flex-direction: column; padding: 20px; }
+    .footer { flex-direction: column; text-align: center; align-items: center; }
+    .footer-link { margin: 5px 0; }
 }
