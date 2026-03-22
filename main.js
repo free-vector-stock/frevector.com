@@ -1,5 +1,5 @@
 /**
- * frevector.com - Frontend Core Logic
+ * frevector.com - Frontend Core Logic (No-Backend Version)
  */
 
 const CATEGORIES = [
@@ -12,54 +12,19 @@ const CATEGORIES = [
 const MODAL_CONTENTS = {
     about: { 
         title: 'ABOUT US', 
-        content: `<h2>ABOUT US</h2>
-        <p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
-        <p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
-        <p>Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
-        <p>Frevector.com includes the following content:</p>
-        <ul>
-            <li>Vector illustrations</li>
-            <li>Icon sets</li>
-            <li>Logo design elements</li>
-            <li>Graphic elements</li>
-            <li>Various design resources</li>
-        </ul>
-        <p>All files can be used in both personal and commercial projects.</p>
-        <p><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>
-        <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>` 
+        content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p><p>All designs on the site are created exclusively by Frevector artists. Each work is built from scratch and undergoes an original production process.</p><ul><li>Vector illustrations</li><li>Icon sets</li><li>Logo design elements</li><li>Graphic elements</li><li>Various design resources</li></ul><p>All files can be used in both personal and commercial projects.</p><p><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>` 
     },
     privacy: { 
         title: 'PRIVACY POLICY', 
-        content: `<h2>PRIVACY POLICY</h2>
-        <p>As Frevector.com, we prioritize the privacy and security of our visitors. This policy explains the types of information we collect and how we use it.</p>
-        <p><strong>1. Log Files:</strong> Like many websites, Frevector uses log files for analytical purposes. This includes IP addresses, browser types, and date/time stamps.</p>
-        <p><strong>2. Cookies:</strong> We use cookies to improve user experience, remember your preferences, and analyze site traffic.</p>
-        <p><strong>3. Data Security:</strong> We implement various security measures to maintain the safety of your personal information when you access our site.</p>` 
+        content: `<h2>PRIVACY POLICY</h2><p>As Frevector.com, we prioritize the privacy and security of our visitors. This policy explains the types of information we collect and how we use it.</p><p><strong>1. Log Files:</strong> Frevector uses log files for analytical purposes. This includes IP addresses, browser types, and date/time stamps.</p><p><strong>2. Cookies:</strong> We use cookies to improve user experience and analyze site traffic.</p>` 
     },
     terms: { 
         title: 'TERMS OF SERVICE', 
-        content: `<h2>TERMS OF SERVICE & LICENSE</h2>
-        <p>By using Frevector.com, you agree to the following terms:</p>
-        <p><strong>1. Usage License:</strong> You can use the designs for personal or commercial purposes (advertisements, social media, websites, print media, etc.).</p>
-        <p><strong>2. Prohibited Uses:</strong>
-        <ul>
-            <li>Redistribution or Selling</li>
-            <li>Presenting as a resource on other sites</li>
-            <li>Sharing within bulk content archives</li>
-        </ul></p>
-        <p><strong>3. COPYRIGHT NOTICE:</strong> Frevector values original production and respects copyrights. The content on the site has been prepared by Frevector artists. If you believe any content infringes your copyright, please contact us at <strong>hakankacar2014@gmail.com</strong>.</p>
-        <hr>
-        <h2>FREQUENTLY ASKED QUESTIONS</h2>
-        <p><strong>1. Are the files free?</strong> Yes. Files can be used for free in personal and commercial projects.</p>
-        <p><strong>2. Can I sell the files?</strong> No. Selling or redistributing the files is prohibited.</p>
-        <p><strong>3. Can I use the files for my clients?</strong> Yes, but the file itself cannot be provided as a separate product.</p>` 
+        content: `<h2>TERMS OF SERVICE & LICENSE</h2><p><strong>1. Usage License:</strong> You can use the designs for personal or commercial purposes (advertisements, social media, websites, print media, etc.).</p><p><strong>2. Prohibited Uses:</strong> Redistribution or Selling, Presenting as a resource on other sites, Sharing within bulk content archives.</p><h2>COPYRIGHT NOTICE</h2><p>The content has been prepared by Frevector artists. If you believe any content infringes your copyright, please contact us at <strong>hakankacar2014@gmail.com</strong>.</p><h2>FAQ</h2><p><strong>1. Are the files free?</strong> Yes. <strong>2. Can I sell the files?</strong> No. <strong>3. Can I use for clients?</strong> Yes.</p>` 
     },
     contact: { 
         title: 'CONTACT', 
-        content: `<h2>CONTACT US</h2>
-        <p>If you have any questions, suggestions, or feedback regarding Frevector.com, please get in touch with us.</p>
-        <p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>
-        <p>Frevector prioritizes clear and transparent communication with its users. We typically respond within 24-48 hours.</p>` 
+        content: `<h2>CONTACT US</h2><p>If you have any questions, suggestions, or feedback, please get in touch with us.</p><p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>` 
     }
 };
 
@@ -84,11 +49,7 @@ async function init() {
     setupModalHandlers();
     setupDownloadPageHandlers();
     await fetchVectors();
-    // Initialize slider with delay to ensure data is ready
-    setTimeout(() => {
-        fetchAndRenderOurPicks();
-        setupOurPicksArrows();
-    }, 300);
+    setupOurPicksArrows();
 }
 
 function setupCategories() {
@@ -114,11 +75,8 @@ function selectCategory(cat) {
     state.currentPage = 1;
     closeDetailPanel();
     setupCategories();
-    const titleH1 = document.getElementById('categoryTitle');
-    if(titleH1) titleH1.textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors`;
+    document.getElementById('categoryTitle').textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors`;
     fetchVectors();
-    // Refresh slider images based on category
-    fetchAndRenderOurPicks();
 }
 
 async function fetchVectors() {
@@ -126,35 +84,30 @@ async function fetchVectors() {
     state.isLoading = true;
     showLoader(true);
     try {
-        const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('page', state.currentPage);
-        url.searchParams.set('limit', '24');
-        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
-        if (state.sortOrder) url.searchParams.set('sort', state.sortOrder);
-
+        // BURASI ÖNEMLİ: Kendi API URL'ini veya JSON yolunu buraya yazmalısın.
+        const url = `/api/vectors?page=${state.currentPage}&category=${state.selectedCategory}&search=${state.searchQuery}&sort=${state.sortOrder}`;
         const res = await fetch(url);
         const data = await res.json();
         state.vectors = data.vectors || [];
         state.totalPages = data.totalPages || 1;
         renderVectors();
         updatePagination();
-    } catch (err) { console.error("Fetch error:", err); }
+        fillOurPicksFromState(); // Slider'ı mevcut verilerle doldur
+    } catch (err) { console.error(err); }
     finally { state.isLoading = false; showLoader(false); }
 }
 
 function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
-    if (!grid) return;
     grid.innerHTML = '';
     state.vectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         card.innerHTML = `
-            <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}" loading="lazy"></div>
+            <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}"></div>
             <div class="vc-info">
-                <div class="vc-description">${v.title || "Untitled Design"}</div>
-                <div class="vc-keywords">${(v.keywords || []).slice(0, 3).join(', ')}</div>
+                <div class="vc-description">${v.title}</div>
+                <div class="vc-keywords">${(v.keywords || []).slice(0,3).join(', ')}</div>
             </div>
         `;
         card.onclick = () => openDetailPanel(v, card);
@@ -162,43 +115,83 @@ function renderVectors() {
     });
 }
 
+function fillOurPicksFromState() {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track || state.vectors.length === 0) return;
+
+    // Mevcut vektörlerden 60 adetlik kopya oluştur (Sonsuz döngü ve doluluk için)
+    let picks = [];
+    while (picks.length < 60) {
+        picks = [...picks, ...state.vectors];
+    }
+    picks = picks.slice(0, 60);
+
+    // Sonsuz döngü için veriyi 3 katına çıkar
+    const tripled = [...picks, ...picks, ...picks];
+    track.innerHTML = '';
+    tripled.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'our-picks-item';
+        div.innerHTML = `<img src="${v.thumbnail}" alt="${v.title}">`;
+        div.onclick = () => showDownloadPage(v);
+        track.appendChild(div);
+    });
+
+    const setWidth = picks.length * 270;
+    state.ourPicksOffset = setWidth;
+    track.style.transition = 'none';
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+}
+
+function scrollOurPicks(dir) {
+    if (state.isTransitioning) return;
+    state.isTransitioning = true;
+    const track = document.getElementById('ourPicksTrack');
+    const itemsCount = track.querySelectorAll('.our-picks-item').length / 3;
+    const itemWidth = 270;
+    const setWidth = itemsCount * itemWidth;
+
+    track.style.transition = 'transform 0.4s ease';
+    state.ourPicksOffset += (dir * -itemWidth);
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+
+    setTimeout(() => {
+        track.style.transition = 'none';
+        if (state.ourPicksOffset >= (setWidth * 2)) state.ourPicksOffset -= setWidth;
+        if (state.ourPicksOffset <= (setWidth * 0.5)) state.ourPicksOffset += setWidth;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+        state.isTransitioning = false;
+    }, 400);
+}
+
 function openDetailPanel(v, cardEl) {
     closeDetailPanel();
     state.openedVector = v;
     state.openedCardEl = cardEl;
     cardEl.classList.add('card-active');
-    
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
     panel.className = 'detail-panel';
     panel.innerHTML = `
         <div class="detail-inner">
-            <div class="detail-left"><img class="detail-img" src="${v.thumbnail}" alt="${v.title}"></div>
+            <div class="detail-left"><img class="detail-img" src="${v.thumbnail}"></div>
             <div class="detail-right">
                 <h2 class="detail-title">${v.title}</h2>
-                <div class="detail-keywords">
-                    ${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}
-                </div>
+                <div class="detail-keywords">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
                 <div class="detail-actions">
                     <button class="download-btn" id="mainDownloadBtn">DOWNLOAD PAGE</button>
-                    <button class="close-panel-btn" id="mainCloseBtn">Close</button>
+                    <button class="close-panel-btn" onclick="closeDetailPanel()">Close</button>
                 </div>
             </div>
         </div>
     `;
-
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.querySelectorAll('.vector-card'));
     const index = cards.indexOf(cardEl);
-    let cols = 6;
-    if (window.innerWidth <= 1200) cols = 4;
-    if (window.innerWidth <= 768) cols = 1;
-    const rowEndIndex = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
-    grid.insertBefore(panel, cards[rowEndIndex].nextSibling);
-    
+    let cols = window.innerWidth > 1200 ? 6 : (window.innerWidth > 768 ? 4 : 1);
+    const rowEnd = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
+    grid.insertBefore(panel, cards[rowEnd].nextSibling);
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
-    document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
-    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function showDownloadPage(v) {
@@ -206,14 +199,11 @@ function showDownloadPage(v) {
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || "General";
-    
     const kwBox = document.getElementById('dpKeywords');
     kwBox.innerHTML = '';
     (v.keywords || []).forEach(k => {
         const span = document.createElement('span');
-        span.className = 'kw-tag';
-        span.textContent = k;
-        kwBox.appendChild(span);
+        span.className = 'kw-tag'; span.textContent = k; kwBox.appendChild(span);
     });
 
     const dBtn = document.getElementById('dpDownloadBtn');
@@ -222,143 +212,63 @@ function showDownloadPage(v) {
 
     dBtn.style.display = 'block';
     cBox.style.display = 'none';
-
     dBtn.onclick = () => {
         dBtn.style.display = 'none';
         cBox.style.display = 'block';
         let count = 4;
         cNum.textContent = count;
         state.countdownInterval = setInterval(() => {
-            count--;
-            cNum.textContent = count;
+            count--; cNum.textContent = count;
             if (count <= 0) {
                 clearInterval(state.countdownInterval);
                 window.location.href = `/api/download?slug=${v.name}`;
             }
         }, 1000);
     };
-
     dp.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
 function setupModalHandlers() {
-    const triggers = document.querySelectorAll('.modal-trigger');
-    const modal = document.getElementById('infoModal');
-    const body = document.getElementById('infoModalBody');
-    const close = document.getElementById('infoModalClose');
-
-    triggers.forEach(trigger => {
-        trigger.onclick = (e) => {
-            e.preventDefault();
-            const type = trigger.dataset.modal;
-            if (MODAL_CONTENTS[type]) {
-                body.innerHTML = MODAL_CONTENTS[type].content;
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
+    document.querySelectorAll('.modal-trigger').forEach(trigger => {
+        trigger.onclick = () => {
+            const m = MODAL_CONTENTS[trigger.dataset.modal];
+            document.getElementById('infoModalBody').innerHTML = m.content;
+            document.getElementById('infoModal').style.display = 'flex';
         };
     });
-
-    if(close) close.onclick = () => {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    };
+    document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none';
 }
-
-async function fetchAndRenderOurPicks() {
-    const track = document.getElementById('ourPicksTrack');
-    if (!track) return;
-    try {
-        const url = `/api/our-picks?category=${state.selectedCategory}&limit=60`;
-        const res = await fetch(url);
-        const picks = await res.json();
-        
-        // Infinite Loop için datayı 3 katına çıkarıyoruz
-        const tripled = [...picks, ...picks, ...picks];
-        track.innerHTML = '';
-        tripled.forEach(v => {
-            const div = document.createElement('div');
-            div.className = 'our-picks-item';
-            div.innerHTML = `<img src="${v.thumbnail}" alt="${v.title}" onclick="showDownloadPageFromPicks('${v.name}')">`;
-            track.appendChild(div);
-        });
-        
-        const setWidth = picks.length * 270;
-        state.ourPicksOffset = setWidth;
-        track.style.transition = 'none';
-        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-    } catch (e) { console.error(e); }
-}
-
-function scrollOurPicks(dir) {
-    if (state.isTransitioning) return;
-    state.isTransitioning = true;
-    const track = document.getElementById('ourPicksTrack');
-    const itemsCount = track.querySelectorAll('.our-picks-item').length / 3;
-    const setWidth = itemsCount * 270;
-
-    track.style.transition = 'transform 0.4s ease';
-    state.ourPicksOffset += (dir * -270);
-    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-
-    setTimeout(() => {
-        track.style.transition = 'none';
-        // Reset position for infinity effect
-        if (state.ourPicksOffset >= (setWidth * 2)) state.ourPicksOffset -= setWidth;
-        if (state.ourPicksOffset <= (setWidth * 0.5)) state.ourPicksOffset += setWidth;
-        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-        state.isTransitioning = false;
-    }, 400);
-}
-
-window.showDownloadPageFromPicks = async (slug) => {
-    try {
-        const res = await fetch(`/api/vector-detail?slug=${slug}`);
-        const v = await res.json();
-        showDownloadPage(v);
-    } catch (e) { console.error(e); }
-};
 
 function setupOurPicksArrows() {
-    const prev = document.getElementById('ourPicksPrev');
-    const next = document.getElementById('ourPicksNext');
-    if(prev) prev.onclick = () => scrollOurPicks(-1);
-    if(next) next.onclick = () => scrollOurPicks(1);
+    document.getElementById('ourPicksPrev').onclick = () => scrollOurPicks(-1);
+    document.getElementById('ourPicksNext').onclick = () => scrollOurPicks(1);
+}
+
+function setupDownloadPageHandlers() {
+    document.getElementById('dpClose').onclick = () => {
+        document.getElementById('downloadPage').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        if(state.countdownInterval) clearInterval(state.countdownInterval);
+    };
 }
 
 function setupEventListeners() {
-    const input = document.getElementById('searchInput');
-    if(input) input.oninput = () => { state.searchQuery = input.value.trim(); state.currentPage = 1; fetchVectors(); };
-    const sort = document.getElementById('sortFilter');
-    if(sort) sort.onchange = () => { state.sortOrder = sort.value; state.currentPage = 1; fetchVectors(); };
-    const prev = document.getElementById('prevBtn');
-    if(prev) prev.onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
-    const next = document.getElementById('nextBtn');
-    if(next) next.onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
+    document.getElementById('searchInput').oninput = (e) => { state.searchQuery = e.target.value; fetchVectors(); };
+    document.getElementById('sortFilter').onchange = (e) => { state.sortOrder = e.target.value; fetchVectors(); };
+    document.getElementById('prevBtn').onclick = () => { if(state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+    document.getElementById('nextBtn').onclick = () => { if(state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
 }
 
-function setupDownloadPageHandlers() { 
-    const closeBtn = document.getElementById('dpClose');
-    if(closeBtn) closeBtn.onclick = () => { 
-        document.getElementById('downloadPage').style.display = 'none'; 
-        document.body.style.overflow = 'auto';
-        if(state.countdownInterval) clearInterval(state.countdownInterval); 
-    };
+function updatePagination() {
+    document.getElementById('pageNumber').textContent = state.currentPage;
+    document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`;
 }
 
-function updatePagination() { 
-    const pNum = document.getElementById('pageNumber');
-    const pTot = document.getElementById('pageTotal');
-    if(pNum) pNum.textContent = state.currentPage; 
-    if(pTot) pTot.textContent = `/ ${state.totalPages}`; 
-}
-
-function showLoader(s) { const l = document.getElementById('loader'); if(l) l.style.display = s ? 'flex' : 'none'; }
+function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
 function closeDetailPanel() { 
-    const p = document.getElementById('detailPanel'); 
-    if (p) p.remove(); 
-    if (state.openedCardEl) state.openedCardEl.classList.remove('card-active'); 
+    const p = document.getElementById('detailPanel'); if(p) p.remove();
+    if(state.openedCardEl) state.openedCardEl.classList.remove('card-active');
 }
 
 document.addEventListener('DOMContentLoaded', init);
