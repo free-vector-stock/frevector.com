@@ -101,57 +101,69 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* TELEFON GÖRÜNÜMÜ - TAM DİKEY AKIŞ */
+/* MOBİL GÖRÜNÜM AYARLARI */
 @media (max-width: 480px) {
     html, body { overflow-y: auto !important; height: auto !important; }
     
-    .header { flex-direction: column !important; align-items: stretch !important; padding: 15px !important; height: auto !important; }
-    .header-center { width: 100% !important; order: 1; }
-    .header-right { width: 100% !important; order: 2; margin-top: 10px; }
-    .sort-filter { width: 100% !important; height: 45px; }
-
-    .main-container { flex-direction: column !important; height: auto !important; overflow: visible !important; }
+    .header { padding: 10px !important; }
     
-    /* Yan Menü Dikey Liste Haline Geldi ve Arama Altına Taşındı */
+    /* Ana Taşıyıcı Dikey Akış */
+    .main-container { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        height: auto !important; 
+        overflow: visible !important; 
+    }
+    
+    /* Kategoriler: Yatay Kaydırılabilir Şerit (Görseldeki Gibi) */
     .sidebar { 
         width: 100% !important; 
         border-right: none !important; 
         border-bottom: 1px solid var(--border) !important; 
-        padding: 0 !important;
-        order: 3; 
+        padding: 5px 0 !important;
         height: auto !important;
-        overflow: visible !important;
-        background: #fafafa !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        background: #fff !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch;
     }
     .sidebar-title { display: none !important; }
-    #categoriesList { display: flex !important; flex-direction: column !important; }
-    .category-item { 
-        padding: 15px 20px !important; 
-        border-bottom: 1px solid #eee !important; 
-        font-size: 15px !important;
-        width: 100% !important;
-        display: block !important;
+    #categoriesList { 
+        display: inline-flex !important; 
+        flex-direction: row !important; 
+        padding: 0 10px !important;
     }
+    .category-item { 
+        display: inline-block !important;
+        padding: 8px 15px !important; 
+        margin: 5px 2px !important;
+        border: 1px solid #eee !important;
+        border-radius: 20px !important;
+        font-size: 13px !important;
+        background: #f9f9f9;
+    }
+    .category-item.active { background: #000 !important; color: #fff !important; border-color: #000 !important; }
 
-    /* Görseller Alt Alta ve Tam Genişlik */
-    .content { order: 4; padding: 15px !important; width: 100% !important; overflow: visible !important; }
-    .category-title-h1 { font-size: 18px; margin-bottom: 20px; text-align: center; }
+    /* İçerik Alanı */
+    .content { 
+        padding: 15px !important; 
+        width: 100% !important; 
+        height: auto !important;
+        overflow: visible !important; 
+    }
+    
+    /* Görseller: Tam Genişlik ve Tek Sütun */
     .vectors-grid { 
         display: flex !important;
         flex-direction: column !important;
-        gap: 25px !important; 
+        gap: 20px !important; 
     }
-    .vector-card { width: 100% !important; border: 1px solid #ddd !important; }
-    .vc-img-wrap { aspect-ratio: 1 !important; }
-    .vc-info { padding: 15px !important; }
-    .vc-description { font-size: 15px !important; white-space: normal !important; }
+    .vector-card { width: 100% !important; }
+    .vc-info { padding: 12px !important; }
+    .vc-description { font-size: 14px !important; white-space: normal !important; }
 
-    /* Detay Paneli Düzenlemesi */
-    .detail-panel { flex-direction: column !important; padding: 15px !important; }
-    .detail-inner { flex-direction: column !important; gap: 15px !important; }
-    .detail-left { width: 100% !important; flex: none !important; }
-    
-    .download-page-body { flex-direction: column !important; padding: 20px !important; }
-    .footer { flex-direction: column !important; text-align: center !important; gap: 15px !important; padding: 30px 20px !important; }
-    .footer-link { margin: 10px 0 !important; display: block; font-size: 13px; }
+    .bottom-fixed-container { position: relative !important; }
+    .footer { flex-direction: column !important; text-align: center !important; gap: 15px !important; }
+    .footer-link { margin: 5px 0 !important; display: block; }
 }
