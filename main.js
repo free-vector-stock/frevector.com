@@ -1,52 +1,12 @@
 /**
- * frevector.com - Core Script (KAYIPSIZ TAM BİRLEŞMİŞ HAL)
+ * frevector.com - Core Script
  */
 
 const MODAL_DATA = {
-    about: {
-        content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p><p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p><p>Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p><p>Frevector.com includes: Vector illustrations, Icon sets, Logo design elements, Graphic elements, Various design resources.</p><p>All files can be used in both personal and commercial projects.</p><p><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>`
-    },
-    privacy: {
-        content: `<h2>PRIVACY POLICY</h2><p>As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p><h3>1. Data Collected</h3><p>When you visit the site, certain anonymous data may be collected automatically: Cookies, Browser and device information, IP address, Page visit and interaction data.</p><h3>2. Purposes of Data Use</h3><p>The collected data may be used for: Improving site performance, Enhancing user experience, Ensuring security.</p><h3>3. Personal Data</h3><p>Personal data is only processed when voluntarily shared via emails. Frevector does not sell user data to third parties.</p>`
-    },
-    terms: {
-        content: `<h2>TERMS OF SERVICE</h2><p>Every visitor using Frevector.com is deemed to have accepted the following terms.</p><h3>1. Content Ownership</h3><p>All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector.</p><h3>2. Right of Use</h3><p>Downloaded files can be used in personal and commercial projects. The user may edit the files for their own projects.</p><h3>3. Prohibited Uses</h3><p>Redistributing files, Selling, Uploading to other sites, Sharing as an archive or collection is strictly prohibited.</p>`
-    },
-    contact: {
-        content: `<h2>CONTACT</h2><p>If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p><p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p><p>Frevector prioritizes clear and transparent communication with its users.</p>`
-    }
-};
-
-const CATEGORY_H1_MAP = {
-    'Abstract': 'Free Abstract Vectors, SVGs, Icons and Clipart',
-    'Animals': 'Free Animal Vectors, SVGs, Icons and Clipart',
-    'The Arts': 'Free Art Vectors, SVGs, Icons and Clipart',
-    'Backgrounds': 'Free Background Vectors, SVGs, Icons and Clipart',
-    'Fashion': 'Free Fashion Vectors, SVGs, Icons and Clipart',
-    'Buildings': 'Free Building Vectors, SVGs, Icons and Clipart',
-    'Business': 'Free Business Vectors, SVGs, Icons and Clipart',
-    'Education': 'Free Education Vectors, SVGs, Icons and Clipart',
-    'Food': 'Free Food Vectors, SVGs, Icons and Clipart',
-    'Drink': 'Free Drink Vectors, SVGs, Icons and Clipart',
-    'Medical': 'Free Medical Vectors, SVGs, Icons and Clipart',
-    'Holidays': 'Free Holiday Vectors, SVGs, Icons and Clipart',
-    'Industrial': 'Free Industrial Vectors, SVGs, Icons and Clipart',
-    'Interiors': 'Free Interior Vectors, SVGs, Icons and Clipart',
-    'Miscellaneous': 'Free Miscellaneous Vectors, SVGs, Icons and Clipart',
-    'Nature': 'Free Nature Vectors, SVGs, Icons and Clipart',
-    'Objects': 'Free Object Vectors, SVGs, Icons and Clipart',
-    'Outdoor': 'Free Outdoor Vectors, SVGs, Icons and Clipart',
-    'People': 'Free People Vectors, SVGs, Icons and Clipart',
-    'Religion': 'Free Religion Vectors, SVGs, Icons and Clipart',
-    'Science': 'Free Science Vectors, SVGs, Icons and Clipart',
-    'Symbols': 'Free Symbol Vectors, SVGs, Icons and Clipart',
-    'Sports': 'Free Sports Vectors, SVGs, Icons and Clipart',
-    'Technology': 'Free Technology Vectors, SVGs, Icons and Clipart',
-    'Transportation': 'Free Transportation Vectors, SVGs, Icons and Clipart',
-    'Vintage': 'Free Vintage Vectors, SVGs, Icons and Clipart',
-    'Logo': 'Free Logo Vectors, SVGs, Icons and Clipart',
-    'Font': 'Free Font Vectors, SVGs, Icons and Clipart',
-    'Icon': 'Free Icon Vectors, SVGs, Icons and Clipart'
+    about: { content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design...</p>` },
+    privacy: { content: `<h2>PRIVACY POLICY</h2><p>Your privacy is important to us. All assets are served securely...</p>` },
+    terms: { content: `<h2>TERMS OF SERVICE</h2><p>Our resources are free for personal and commercial use with attribution...</p>` },
+    contact: { content: `<h2>CONTACT</h2><p>For inquiries: info@frevector.com</p>` }
 };
 
 const state = {
@@ -61,7 +21,7 @@ async function init() {
     setupTypeFilters();
     setupFooterModals();
     await fetchVectors();
-    fetchAndRenderOurPicks();
+    fetchOurPicks();
 }
 
 async function fetchVectors() {
@@ -84,18 +44,6 @@ async function fetchVectors() {
         updateH1();
     } catch (err) { console.error(err); }
     finally { state.isLoading = false; showLoader(false); }
-}
-
-function updateH1() {
-    const h1 = document.getElementById('categoryTitle');
-    if (!h1) return;
-    if (state.searchQuery) {
-        h1.textContent = `Search results for: "${state.searchQuery}"`;
-    } else if (state.selectedCategory !== 'all') {
-        h1.textContent = CATEGORY_H1_MAP[state.selectedCategory] || "Free Vectors, SVGs, Icons and Clipart";
-    } else {
-        h1.textContent = "Free Vectors, SVGs, Icons and Clipart";
-    }
 }
 
 function renderVectors() {
@@ -136,23 +84,16 @@ function showDetailPanel(v, cardElement, container) {
         <div class="dp-info">
             <h2 class="dp-title">${v.title}</h2>
             <div class="dp-kw">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
-            <button class="download-btn-short" id="openDLPageTrigger">DOWNLOAD PAGE</button>
+            <button class="download-btn-short" id="openDLPage">DOWNLOAD PAGE</button>
         </div>
     `;
     
-    if (container.id === 'ourPicksTrack') {
-        window.scrollTo({top: 0, behavior: 'smooth'});
-        document.getElementById('vectorsGrid').prepend(panel);
-    } else {
-        cardElement.after(panel);
-    }
+    cardElement.after(panel);
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
-    // BUTON TETİKLEYİCİ
-    document.getElementById('openDLPageTrigger').onclick = () => openDownloadPage(v);
+    document.getElementById('openDLPage').onclick = () => openDownloadPage(v);
 }
 
-// 25. MADDE: İNDİRME SAYFASI VE GERİ SAYIM
+// DOWNLOAD PAGE FONKSİYONU (Ayrı sayfa akışı)
 function openDownloadPage(v) {
     const overlay = document.getElementById('downloadPageOverlay');
     const img = document.getElementById('dlPreviewImg');
@@ -160,7 +101,7 @@ function openDownloadPage(v) {
     const format = document.getElementById('dlPageFormat');
     const finalBtn = document.getElementById('finalDownloadBtn');
     const timerBox = document.getElementById('dlTimerBox');
-    const countdownNum = document.getElementById('countdownNum');
+    const countdown = document.getElementById('countdownNum');
 
     img.src = v.thumbnail;
     title.textContent = v.title;
@@ -175,13 +116,13 @@ function openDownloadPage(v) {
         finalBtn.style.display = 'none';
         timerBox.style.display = 'block';
         let count = 4;
-        countdownNum.textContent = count;
+        countdown.textContent = count;
 
-        const interval = setInterval(() => {
+        const itv = setInterval(() => {
             count--;
-            countdownNum.textContent = count;
+            countdown.textContent = count;
             if (count <= 0) {
-                clearInterval(interval);
+                clearInterval(itv);
                 window.location.href = `/api/download?slug=${v.name}`;
                 setTimeout(() => {
                     overlay.style.display = 'none';
@@ -189,12 +130,6 @@ function openDownloadPage(v) {
                 }, 1000);
             }
         }, 1000);
-
-        document.getElementById('closeDLPage').onclick = () => {
-            clearInterval(interval);
-            overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        };
     };
 
     document.getElementById('closeDLPage').onclick = () => {
@@ -203,18 +138,17 @@ function openDownloadPage(v) {
     };
 }
 
-async function fetchAndRenderOurPicks() {
+async function fetchOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    if (!track) return;
-    const res = await fetch(`/api/vectors?limit=20`);
+    const res = await fetch(`/api/vectors?limit=15`);
     const data = await res.json();
     const items = data.vectors || [];
     
+    const extended = [...items, ...items, ...items];
     track.innerHTML = '';
-    const extendedItems = [...items, ...items, ...items];
-    extendedItems.forEach(v => {
+    extended.forEach(v => {
         const card = createVectorCard(v);
-        card.onclick = () => showDetailPanel(v, card, track);
+        card.onclick = () => openDownloadPage(v);
         track.appendChild(card);
     });
 
@@ -226,11 +160,7 @@ async function fetchAndRenderOurPicks() {
         track.style.transition = "transform 0.4s ease";
         track.style.transform = `translateX(${state.picksOffset}px)`;
         if (Math.abs(state.picksOffset) >= (items.length * 2 * state.pickItemWidth)) {
-            setTimeout(() => {
-                track.style.transition = "none";
-                state.picksOffset = -(items.length * state.pickItemWidth);
-                track.style.transform = `translateX(${state.picksOffset}px)`;
-            }, 400);
+            setTimeout(() => { track.style.transition = "none"; state.picksOffset = -(items.length * state.pickItemWidth); track.style.transform = `translateX(${state.picksOffset}px)`; }, 400);
         }
     };
 
@@ -239,11 +169,7 @@ async function fetchAndRenderOurPicks() {
         track.style.transition = "transform 0.4s ease";
         track.style.transform = `translateX(${state.picksOffset}px)`;
         if (state.picksOffset >= 0) {
-            setTimeout(() => {
-                track.style.transition = "none";
-                state.picksOffset = -(items.length * state.pickItemWidth);
-                track.style.transform = `translateX(${state.picksOffset}px)`;
-            }, 400);
+            setTimeout(() => { track.style.transition = "none"; state.picksOffset = -(items.length * state.pickItemWidth); track.style.transform = `translateX(${state.picksOffset}px)`; }, 400);
         }
     };
 }
@@ -252,20 +178,21 @@ function setupFooterModals() {
     const modal = document.getElementById('infoModal');
     const body = document.getElementById('infoModalBody');
     document.querySelectorAll('.modal-trigger').forEach(link => {
-        link.onclick = (e) => {
-            e.preventDefault();
-            const type = link.getAttribute('data-modal');
-            if (MODAL_DATA[type]) {
-                body.innerHTML = MODAL_DATA[type].content;
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
+        link.onclick = () => {
+            body.innerHTML = MODAL_DATA[link.dataset.modal].content;
+            modal.style.display = 'flex';
         };
     });
-    document.getElementById('infoModalClose').onclick = () => {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    };
+    document.getElementById('infoModalClose').onclick = () => modal.style.display = 'none';
+}
+
+function updateH1() {
+    const h1 = document.getElementById('categoryTitle');
+    if (state.selectedCategory === 'all') {
+        h1.textContent = "Free Vectors, SVGs, Icons and Clipart";
+    } else {
+        h1.textContent = `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
+    }
 }
 
 function setupEventListeners() {
@@ -277,22 +204,19 @@ function setupEventListeners() {
     document.getElementById('sortFilter').onchange = (e) => {
         state.sortOrder = e.target.value; state.currentPage = 1; fetchVectors();
     };
-    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); window.scrollTo(0,0); } };
-    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); window.scrollTo(0,0); } };
+    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
 }
 
 function setupCategories() {
     const list = document.getElementById('categoriesList');
-    if (!list) return;
     list.innerHTML = '';
-    ['all', ...Object.keys(CATEGORY_H1_MAP)].forEach(cat => {
+    const cats = ['all', 'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Food', 'Logo'];
+    cats.forEach(cat => {
         const a = document.createElement('a');
         a.className = 'category-item' + (state.selectedCategory === cat ? ' active' : '');
         a.textContent = cat;
-        a.onclick = (e) => {
-            e.preventDefault(); state.selectedCategory = cat; state.currentPage = 1;
-            setupCategories(); fetchVectors();
-        };
+        a.onclick = () => { state.selectedCategory = cat; state.currentPage = 1; setupCategories(); fetchVectors(); };
         list.appendChild(a);
     });
 }
