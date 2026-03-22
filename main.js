@@ -14,8 +14,10 @@ const MODAL_CONTENTS = {
         title: 'ABOUT US', 
         content: `<h2>ABOUT US</h2>
         <p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
-        <p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms.</p>
-        <p>Each work is built from scratch and undergoes an original production process. All files can be used in both personal and commercial projects. Our only rule: Files cannot be redistributed or sold as-is.</p>` 
+        <p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
+        <p>Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
+        <p>Frevector.com includes the following content: Vector illustrations, Icon sets, Logo design elements, Graphic elements, Various design resources.</p>
+        <p>All files can be used in both personal and commercial projects. Our only rule: Files cannot be redistributed or sold as-is.</p>` 
     },
     privacy: { 
         title: 'PRIVACY POLICY', 
@@ -108,6 +110,9 @@ function selectCategory(cat) {
     setupCategories();
     document.getElementById('categoryTitle').textContent = getH1Text(cat);
     fetchVectors();
+    if(window.innerWidth <= 480) {
+        document.getElementById('categoryTitle').scrollIntoView({behavior: 'smooth'});
+    }
 }
 
 async function fetchVectors() {
