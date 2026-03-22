@@ -20,11 +20,11 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .banner-logo { height: 32px; }
 
 .header { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; flex-shrink: 0; z-index: 1000; gap: 15px; }
-.header-center { flex: 1; display: flex; justify-content: flex-start; } /* Arama çubuğunu sola yasladık ve genişlettik */
+.header-center { flex: 1; display: flex; justify-content: flex-start; }
 
-/* ARAMA ÇUBUĞU UZATMA REZİVESİ */
+/* ARAMA ÇUBUĞU GÜNCELLEMESİ */
 .search-container { 
-    width: 100%; /* Konteynırı tam genişlik yaptık */
+    width: 100%; 
     display: flex; 
     border: 1px solid var(--border); 
     padding: 5px 10px; 
@@ -74,6 +74,22 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 
 .our-picks-section { padding: 10px 0; text-align: center; }
 .our-picks-content-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+/* OK GÖRSELLERİ GÜNCELLEMESİ */
+.our-picks-arrow {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+    cursor: pointer;
+    text-indent: -9999px; /* Varsayılan karakteri gizler */
+}
+#ourPicksPrev { background-image: url('sol-ok.png'); }
+#ourPicksNext { background-image: url('sag-ok.png'); }
+
 .our-picks-track-wrap { overflow: hidden; width: 100%; max-width: 1200px; }
 .our-picks-track { display: flex; gap: 10px; }
 .our-picks-track .vector-card { width: 80px; min-width: 80px; }
