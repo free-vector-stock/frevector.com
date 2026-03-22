@@ -9,7 +9,7 @@ const CATEGORIES = [
     'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
-// Footer link içerikleri
+// Footer içerikleri
 const MODAL_CONTENTS = {
     about: { 
         title: 'ABOUT US', 
@@ -145,6 +145,10 @@ function selectCategory(cat) {
     setupCategories();
     document.getElementById('categoryTitle').textContent = getH1Text(cat);
     fetchVectors().then(() => fetchAndRenderOurPicks());
+    // Mobilde bir kategori seçildiğinde sayfayı yukarı kaydır
+    if(window.innerWidth <= 768) {
+        document.getElementById('categoryTitle').scrollIntoView({behavior: 'smooth'});
+    }
 }
 
 async function fetchVectors() {
@@ -216,9 +220,12 @@ function openDetailPanel(v, cardEl) {
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
+    
+    // Mobilde sütun sayısı 1 olduğu için panel her zaman kartın altına gelir
     const cols = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfter = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
     grid.insertBefore(panel, cards[insertAfter].nextSibling);
+    
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -267,22 +274,27 @@ function setupModalHandlers() {
             }
         };
     });
-    document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none';
+    const closeBtn = document.getElementById('infoModalClose');
+    if(closeBtn) closeBtn.onclick = () => document.getElementById('infoModal').style.display = 'none';
 }
 
 function setupEventListeners() { 
     let timeout = null;
     const input = document.getElementById('searchInput');
-    input.oninput = () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            state.searchQuery = input.value.trim();
-            state.currentPage = 1;
-            fetchVectors();
-        }, 300);
-    };
-    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
-    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
+    if(input) {
+        input.oninput = () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                state.searchQuery = input.value.trim();
+                state.currentPage = 1;
+                fetchVectors();
+            }, 300);
+        };
+    }
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    if(prev) prev.onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
+    if(next) next.onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
 }
 
 async function fetchAndRenderOurPicks() {
@@ -345,10 +357,15 @@ function setupDownloadPageHandlers() {
 }
 
 function updatePagination() { 
-    document.getElementById('pageNumber').textContent = state.currentPage; 
-    document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`; 
+    const pNum = document.getElementById('pageNumber');
+    const pTot = document.getElementById('pageTotal');
+    if(pNum) pNum.textContent = state.currentPage; 
+    if(pTot) pTot.textContent = `/ ${state.totalPages}`; 
 }
 
-function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
+function showLoader(s) { 
+    const l = document.getElementById('loader');
+    if(l) l.style.display = s ? 'flex' : 'none'; 
+}
 
 document.addEventListener('DOMContentLoaded', init);
