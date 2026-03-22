@@ -170,7 +170,7 @@ async function fetchVectors() {
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         
-        // ARAMA DUYARLILIĞI: Arama terimini küçük harfe çevirerek gönderiyoruz (Case-insensitive support)
+        // Arama duyarlılığı (Case-insensitive)
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery.toLowerCase());
         
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
