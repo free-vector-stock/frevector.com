@@ -33,77 +33,68 @@
 
     <div class="main-container">
         <aside class="sidebar">
-            <div class="sidebar-title">TYPE</div>
-            <div id="typeList">
-                <a href="#" class="category-item active" data-type="all">All</a>
-                <a href="#" class="category-item" data-type="vector">Vector</a>
-                <a href="#" class="category-item" data-type="jpeg">Jpeg</a>
-            </div>
-            <div style="height: 20px;"></div>
-            <div class="sidebar-title">CATEGORIES</div>
-            <div id="categoriesList"></div>
+            <h3 class="sidebar-title">CATEGORIES</h3>
+            <div id="categoriesList">
+                </div>
         </aside>
 
         <main class="content">
-            <h1 id="categoryTitle" class="category-title-h1">Free Vectors, SVGs, Icons and Clipart</h1>
-            <div id="vectorsGrid" class="vectors-grid"></div>
+            <h1 class="category-title-h1" id="pageTitleDisplay">Free Backgrounds Vectors, SVGs, Icons And Clipart</h1>
+            <div id="vectorsGrid" class="vectors-grid">
+                </div>
+
+            <div class="pagination">
+                <button id="prevBtn" class="page-btn">PREVIOUS</button>
+                <div class="page-info">
+                    <span id="pageNumber">1</span>
+                    <span id="pageTotal">/ 1</span>
+                </div>
+                <button id="nextBtn" class="page-btn">NEXT</button>
+            </div>
         </main>
     </div>
 
-    <div class="bottom-fixed-container">
-        <div class="pagination-wrapper">
-            <button id="prevBtn" class="pag-btn">Prev</button>
-            <div class="pag-info">
-                <span id="pageNumber">1</span>
-                <span id="pageTotal">/ 1</span>
-            </div>
-            <button id="nextBtn" class="pag-btn">Next</button>
-        </div>
-
-        <div class="our-picks-section">
-            <div class="our-picks-header">Our selections for you</div>
-            <div class="our-picks-content-wrapper">
-                <button id="ourPicksPrev" class="our-picks-arrow">‹</button>
-                <div class="our-picks-track-wrap">
-                    <div id="ourPicksTrack" class="our-picks-track"></div>
+    <div id="downloadPage" class="download-page" style="display:none;">
+        <div class="download-page-box">
+            <button class="dp-close" id="dpClose">&#10005;</button>
+            <div class="download-page-body">
+                <div class="dp-left">
+                    <img id="dpImage" src="" alt="Frevector Download" class="dp-image">
                 </div>
-                <button id="ourPicksNext" class="our-picks-arrow">›</button>
-            </div>
-        </div>
+                <div class="dp-right">
+                    <h2 id="dpTitle" class="dp-title"></h2>
+                    <div id="dpKeywords" class="detail-keywords"></div>
+                    
+                    <table class="detail-table">
+                        <tr>
+                            <td class="dt-label">FILE FORMAT</td>
+                            <td id="dpFileFormat" class="dt-value">EPS, SVG, JPEG</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-label">CATEGORY</td>
+                            <td id="dpCategory" class="dt-value">-</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-label">RESOLUTION</td>
+                            <td class="dt-value">High Quality / Fully Scalable</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-label">LICENSE</td>
+                            <td class="dt-value">Free for Personal & Commercial Use</td>
+                        </tr>
+                        <tr>
+                            <td class="dt-label">FILE SIZE</td>
+                            <td id="dpFileSize" class="dt-value">Auto detect</td>
+                        </tr>
+                    </table>
 
-        <footer class="footer">
-            <div class="footer-left">2026 &copy; frevector.com</div>
-            <div class="footer-right">
-                <a class="footer-link modal-trigger" data-modal="about">About Us</a>
-                <a class="footer-link modal-trigger" data-modal="privacy">Privacy Policy</a>
-                <a class="footer-link modal-trigger" data-modal="terms">Terms of Service</a>
-                <a class="footer-link modal-trigger" data-modal="contact">Contact</a>
-            </div>
-        </footer>
-    </div>
-
-    <div id="downloadPage" class="download-page">
-        <div class="download-page-header">
-            <img src="logo.svg" style="height:24px;" alt="Frevector">
-            <button id="dpClose" style="background:none; border:none; font-size:24px; cursor:pointer;">&#10005;</button>
-        </div>
-        <div class="download-page-body">
-            <div class="dp-left">
-                <img id="dpImage" src="" alt="" class="dp-image">
-            </div>
-            <div class="dp-right">
-                <h2 id="dpTitle" class="dp-title"></h2>
-                <div id="dpKeywords" class="detail-keywords"></div>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG / VECTOR</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
-                </table>
-                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD NOW</button>
-                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
-                    <p>Your download will start in</p>
-                    <div id="dpCountdown" class="dp-countdown-num">4</div>
-                    <p>High-speed secure download</p>
+                    <button id="dpDownloadBtn" class="download-btn">DOWNLOAD NOW</button>
+                    
+                    <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
+                        <p>Your download will start in</p>
+                        <div id="dpCountdown" class="dp-countdown-num">4</div>
+                        <p>High-speed secure download</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -115,6 +106,18 @@
             <div id="infoModalBody" class="info-modal-body"></div>
         </div>
     </div>
+
+    <footer class="footer">
+        <div class="footer-left">
+            2026 &copy; frevector.com
+        </div>
+        <div class="footer-right">
+            <a href="#" onclick="showInfo('about')">About Us</a>
+            <a href="#" onclick="showInfo('privacy')">Privacy Policy</a>
+            <a href="#" onclick="showInfo('terms')">Terms of Service</a>
+            <a href="#" onclick="showInfo('contact')">Contact</a>
+        </div>
+    </footer>
 
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
 
