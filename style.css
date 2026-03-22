@@ -35,24 +35,17 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
-/* Vector Card & JPEG Badge (TALİMAT 8) */
-.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; transition: transform 0.2s; position: relative; }
+/* Vector Card */
+.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
 .vector-card:hover { border-color: #aaa; }
 .card-active { border: 2px solid #000 !important; }
-
-.vc-img-wrap { aspect-ratio: 1; overflow: hidden; background: #f9f9f9; display: flex; align-items: center; justify-content: center; position: relative; }
+.vc-img-wrap { aspect-ratio: 1; overflow: hidden; background: #f9f9f9; display: flex; align-items: center; justify-content: center; }
 .vc-img { width: 100%; height: 100%; object-fit: contain; }
-
-.vc-type-badge-jpeg { 
-    position: absolute; top: 8px; right: 8px; background: #2563eb; color: #fff; 
-    font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 3px; z-index: 10;
-}
-
 .vc-info { padding: 8px; }
 .vc-description { font-size: 11px; font-weight: bold; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vc-keywords { font-size: 10px; color: var(--gray-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Detail Panel Styles */
+/* Detail Panel */
 .detail-panel { grid-column: 1 / -1; background: var(--gray-light); padding: 25px; border-radius: 4px; border: 1px solid var(--border); margin: 10px 0; }
 .detail-inner { display: flex; gap: 25px; width: 100%; }
 .detail-left { flex: 0 0 300px; }
@@ -64,37 +57,54 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .detail-actions { display: flex; gap: 10px; }
 .close-panel-btn { background: #ddd; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
 
-/* Download Page & Table (TALİMAT 14) */
+/* Bottom Area (Pagination + Our Picks + Footer) */
+.bottom-fixed-container { background: #fff; border-top: 1px solid var(--border); padding-top: 10px; flex-shrink: 0; }
+
+.pagination-wrapper { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 10px 0; margin-bottom: 10px; }
+.pag-btn { background: #fff; border: 1px solid var(--border); padding: 5px 15px; cursor: pointer; border-radius: 4px; font-size: 13px; }
+.pag-info { font-size: 13px; font-weight: bold; }
+
+.our-picks-section { padding: 15px 25px; background: #fff; border-top: 1px solid var(--border); }
+.our-picks-header { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #000; text-align: left; }
+.our-picks-content-wrapper { position: relative; display: flex; align-items: center; gap: 10px; }
+.our-picks-track-wrap { flex: 1; overflow: hidden; }
+.our-picks-track { display: flex; gap: 15px; transition: transform 0.4s ease; }
+.our-picks-item { flex: 0 0 255px; aspect-ratio: 1.5; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; }
+.our-picks-item img { width: 100%; height: 100%; object-fit: cover; }
+.our-picks-arrow { background: #000; color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; z-index: 10; flex-shrink: 0; }
+
+.footer { background: #000; color: #fff; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+.footer-link { color: #ccc; text-decoration: none; cursor: pointer; margin-left: 15px; }
+.footer-link:hover { color: #fff; }
+
+/* Download Page */
 .download-page { position: fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:2000; display:none; flex-direction:column; }
 .download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .download-page-body { flex:1; display:flex; padding:40px; gap:40px; overflow-y: auto; max-width:1200px; margin:0 auto; width: 100%; }
 .dp-left, .dp-right { flex: 1; }
 .dp-image { width:100%; border-radius:8px; border:1px solid var(--border); }
 .dp-title { font-size: 24px; margin-bottom: 20px; }
+.detail-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+.detail-table td { padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+.dt-label { font-weight: bold; color: #666; width: 120px; }
+.download-btn { background: #000; color: #fff; border: none; padding: 15px 30px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; width: 100%; }
+.dp-countdown-box { text-align: center; background: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 10px; }
+.dp-countdown-num { font-size: 32px; font-weight: bold; color: #000; }
 
-.detail-table { width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #eee; }
-.detail-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-.dt-label { font-weight: bold; color: #666; background: #fafafa; width: 150px; }
-.dt-value { color: #000; }
-
-.download-btn { background: #000; color: #fff; border: none; padding: 15px 30px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px; width: 100%; transition: background 0.2s; }
-.download-btn:hover { background: #333; }
-
-.dp-countdown-box { text-align: center; background: #f0fdf4; padding: 20px; border-radius: 8px; border: 1px solid #bbf7d0; margin-top: 10px; }
-.dp-countdown-num { font-size: 36px; font-weight: bold; color: #166534; margin: 10px 0; }
-
-/* Footer & Other */
-.bottom-fixed-container { background: #fff; border-top: 1px solid var(--border); padding-top: 10px; flex-shrink: 0; }
-.footer { background: #000; color: #fff; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
-.footer-link { color: #ccc; text-decoration: none; cursor: pointer; margin-left: 15px; }
-.footer-link:hover { color: #fff; }
+/* Info Modal (Center Screen) */
+.info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 3000; }
+.info-modal-box { background: #fff; width: 90%; max-width: 600px; max-height: 80vh; border-radius: 8px; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.info-modal-close { position: absolute; top: 15px; right: 15px; background: #f0f0f0; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 10; }
+.info-modal-body { padding: 40px; overflow-y: auto; line-height: 1.6; color: #333; }
+.info-modal-body h2 { margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+.info-modal-body p { margin-bottom: 15px; }
 
 /* Loader */
 .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 3000; }
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* MOBİL GÖRÜNÜM (TAMAMEN KORUNDU) */
+/* MOBILE RESPONSIVE (PRESERVED & IMPROVED) */
 @media (max-width: 768px) {
     .main-container { flex-direction: column !important; height: auto !important; overflow: visible !important; }
     .sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; padding: 10px 12px !important; height: auto !important; order: 3; }
@@ -103,9 +113,10 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
     .category-item { background: #000 !important; color: #fff !important; font-size: 13px !important; padding: 6px 14px !important; border-radius: 20px !important; width: auto !important; }
     .content { padding: 12px !important; width: 100% !important; order: 4; }
     .vectors-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 20px !important; }
-    .vector-card { width: 100% !important; }
+    .vector-card { width: 100% !important; border-radius: 10px !important; }
     .bottom-fixed-container { position: relative !important; order: 5; }
-    .footer { flex-direction: column !important; text-align: center !important; }
-    .download-page-body { flex-direction: column !important; padding: 20px !important; gap: 20px; }
-    .dp-left, .dp-right { width: 100%; }
+    .footer { flex-direction: column !important; text-align: center !important; padding: 30px 20px !important; }
+    .footer-right { flex-direction: column; gap: 10px; width: 100%; }
+    .footer-link { margin: 0 !important; }
+    .our-picks-item { flex: 0 0 200px; }
 }
