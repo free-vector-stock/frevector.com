@@ -9,7 +9,7 @@ const CATEGORIES = [
     'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
-// Footer içerikleri - Tam Liste ve İçerik Korundu
+// Footer contents for Modal
 const MODAL_CONTENTS = {
     about: { 
         title: 'ABOUT US', 
@@ -35,7 +35,7 @@ const MODAL_CONTENTS = {
         <p><strong>Cookies and Web Beacons:</strong> Like any other website, Frevector.com uses "cookies". These cookies are used to store information including visitors' preferences, and the pages on the website that the visitor accessed or visited.</p>` 
     },
     terms: { 
-        title: 'TERMS & LICENSE', 
+        title: 'TERMS & SERVICE', 
         content: `<h2>TERMS OF SERVICE & LICENSE</h2>
         <p>By accessing Frevector.com, you agree to comply with these terms of service and license conditions.</p>
         <p><strong>1. License Grant:</strong> We grant you a non-exclusive, non-transferable license to use the graphic resources for both personal and commercial purposes.</p>
@@ -51,7 +51,7 @@ const MODAL_CONTENTS = {
         title: 'CONTACT', 
         content: `<h2>CONTACT US</h2>
         <p>If you have any questions, suggestions, or feedback, please feel free to contact us.</p>
-        <p><strong>Email:</strong> hakankacar2014@gmail.com</p>
+        <p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>
         <p>We typically respond to all inquiries within 24-48 hours.</p>` 
     }
 };
@@ -61,7 +61,6 @@ const state = {
     currentPage: 1,
     totalPages: 1,
     selectedCategory: 'all',
-    selectedType: 'all', // vector veya jpeg
     searchQuery: '',
     sortOrder: '',
     isLoading: false,
@@ -74,37 +73,15 @@ const state = {
 
 async function init() {
     setupCategories();
-    setupTypeFilters();
     setupEventListeners();
     setupModalHandlers();
     setupDownloadPageHandlers();
     await fetchVectors();
+    // Added delay for slider initialization
     setTimeout(() => {
         fetchAndRenderOurPicks();
         setupOurPicksArrows();
     }, 300);
-}
-
-// TALİMAT 7: Vector / JPEG Filtreleme
-function setupTypeFilters() {
-    document.querySelectorAll('.type-filter').forEach(btn => {
-        btn.onclick = (e) => {
-            e.preventDefault();
-            document.querySelectorAll('.type-filter').forEach(f => {
-                f.style.background = "#fff";
-                f.style.color = "#000";
-                f.style.borderColor = "#ddd";
-            });
-            btn.style.background = "#000";
-            btn.style.color = "#fff";
-            btn.style.borderColor = "#000";
-            
-            state.selectedType = btn.dataset.type;
-            state.currentPage = 1;
-            closeDetailPanel();
-            fetchVectors();
-        };
-    });
 }
 
 function setupCategories() {
@@ -131,7 +108,7 @@ function selectCategory(cat) {
     closeDetailPanel();
     setupCategories();
     const titleH1 = document.getElementById('categoryTitle');
-    if(titleH1) titleH1.textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors & JPEGs`;
+    if(titleH1) titleH1.textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors`;
     fetchVectors();
 }
 
@@ -146,7 +123,6 @@ async function fetchVectors() {
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         if (state.sortOrder) url.searchParams.set('sort', state.sortOrder);
-        if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
 
         const res = await fetch(url);
         const data = await res.json();
@@ -163,15 +139,10 @@ function renderVectors() {
     if (!grid) return;
     grid.innerHTML = '';
     state.vectors.forEach(v => {
-        // TALİMAT 8 & 10: JPEG İfadesi Kontrolü ve Etiketleme
-        const isJpeg = v.name.toLowerCase().includes('jpeg');
         const card = document.createElement('div');
         card.className = 'vector-card';
         card.innerHTML = `
-            <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${v.title}" loading="lazy">
-                ${isJpeg ? '<span class="vc-type-badge-jpeg">JPEG</span>' : ''}
-            </div>
+            <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}" loading="lazy"></div>
             <div class="vc-info">
                 <div class="vc-description">${v.title || "Untitled Design"}</div>
                 <div class="vc-keywords">${(v.keywords || []).slice(0, 3).join(', ')}</div>
@@ -188,11 +159,6 @@ function openDetailPanel(v, cardEl) {
     state.openedCardEl = cardEl;
     cardEl.classList.add('card-active');
     
-    // TALİMAT 13: Keyword Otomatik Ekleme
-    const isJpeg = v.name.toLowerCase().includes('jpeg');
-    const prefix = isJpeg ? ["free jpeg", "free", "fre", "jpeg"] : ["free vector", "free svg", "free svg icon", "free eps", "free jpeg", "free", "fre", "vector eps", "svg", "jpeg"];
-    const combinedKeywords = [...new Set([...prefix, ...(v.keywords || [])])];
-
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
     panel.className = 'detail-panel';
@@ -204,7 +170,7 @@ function openDetailPanel(v, cardEl) {
             <div class="detail-right">
                 <h2 class="detail-title">${v.title}</h2>
                 <div class="detail-keywords">
-                    ${combinedKeywords.map(k => `<span class="kw-tag">${k}</span>`).join('')}
+                    ${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}
                 </div>
                 <div class="detail-actions">
                     <button class="download-btn" id="mainDownloadBtn">DOWNLOAD PAGE</button>
@@ -230,20 +196,13 @@ function openDetailPanel(v, cardEl) {
 
 function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
-    const isJpeg = v.name.toLowerCase().includes('jpeg');
-    
-    // Bilgileri doldur
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || "General";
-    document.getElementById('dpFileFormat').textContent = isJpeg ? "JPEG" : "EPS, SVG, JPEG";
     
     const kwBox = document.getElementById('dpKeywords');
     kwBox.innerHTML = '';
-    const isJpegKw = v.name.toLowerCase().includes('jpeg');
-    const prefix = isJpegKw ? ["free jpeg", "free", "fre", "jpeg"] : ["free vector", "free svg", "free svg icon", "free eps", "free jpeg", "free", "fre", "vector eps", "svg", "jpeg"];
-    const combined = [...new Set([...prefix, ...(v.keywords || [])])];
-    combined.forEach(k => {
+    (v.keywords || []).forEach(k => {
         const span = document.createElement('span');
         span.className = 'kw-tag';
         span.textContent = k;
@@ -276,27 +235,32 @@ function showDownloadPage(v) {
     document.body.style.overflow = 'hidden';
 }
 
-// DİĞER FONKSİYONLAR (Budanmadan Korundu)
-function setupModalHandlers() { 
-    document.querySelectorAll('.modal-trigger').forEach(trigger => {
+// Modal handler for footer links
+function setupModalHandlers() {
+    const triggers = document.querySelectorAll('.modal-trigger');
+    const modal = document.getElementById('infoModal');
+    const body = document.getElementById('infoModalBody');
+    const close = document.getElementById('infoModalClose');
+
+    triggers.forEach(trigger => {
         trigger.onclick = (e) => {
             e.preventDefault();
-            const content = MODAL_CONTENTS[trigger.dataset.modal];
-            if (content) {
-                document.getElementById('infoModalBody').innerHTML = content.content;
-                document.getElementById('infoModal').style.display = 'flex';
+            const type = trigger.dataset.modal;
+            if (MODAL_CONTENTS[type]) {
+                body.innerHTML = MODAL_CONTENTS[type].content;
+                modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
             }
         };
     });
-    const close = document.getElementById('infoModalClose');
+
     if(close) close.onclick = () => {
-        document.getElementById('infoModal').style.display = 'none';
+        modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     };
 }
 
-function setupEventListeners() { 
+function setupEventListeners() {
     const input = document.getElementById('searchInput');
     if(input) input.oninput = () => { state.searchQuery = input.value.trim(); state.currentPage = 1; fetchVectors(); };
     const sort = document.getElementById('sortFilter');
