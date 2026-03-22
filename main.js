@@ -1,5 +1,5 @@
 /**
- * frevector.com - Core Script Revized (Final Version)
+ * frevector.com - Core Script (KAYIPSIZ TAM BİRLEŞMİŞ HAL)
  */
 
 const MODAL_DATA = {
@@ -81,16 +81,14 @@ async function fetchVectors() {
         state.totalPages = data.totalPages || 1;
         renderVectors();
         updatePagination();
-        updateH1(); // 32. MADDE: Her fetch işleminde H1'i kontrol et
+        updateH1();
     } catch (err) { console.error(err); }
     finally { state.isLoading = false; showLoader(false); }
 }
 
-// 32. MADDE: H1 BAŞLIĞI GÜNCELLEME SİSTEMİ
 function updateH1() {
     const h1 = document.getElementById('categoryTitle');
     if (!h1) return;
-
     if (state.searchQuery) {
         h1.textContent = `Search results for: "${state.searchQuery}"`;
     } else if (state.selectedCategory !== 'all') {
@@ -111,7 +109,6 @@ function renderVectors() {
 }
 
 function createVectorCard(v) {
-    // 29-30. MADDE: İsimlendirmeye göre Badge
     const isJpeg = v.name.toLowerCase().includes('-jpeg-');
     const badge = isJpeg ? 'JPEG' : 'VECTOR';
     const card = document.createElement('div');
@@ -139,55 +136,52 @@ function showDetailPanel(v, cardElement, container) {
         <div class="dp-info">
             <h2 class="dp-title">${v.title}</h2>
             <div class="dp-kw">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
-            <button class="download-btn-short" id="openDLPage">DOWNLOAD PAGE</button>
+            <button class="download-btn-short" id="openDLPageTrigger">DOWNLOAD PAGE</button>
         </div>
     `;
     
     if (container.id === 'ourPicksTrack') {
         window.scrollTo({top: 0, behavior: 'smooth'});
-        const mainGrid = document.getElementById('vectorsGrid');
-        mainGrid.prepend(panel);
+        document.getElementById('vectorsGrid').prepend(panel);
     } else {
         cardElement.after(panel);
     }
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     
-    // 25. MADDE: Download Page Butonu aksiyonu
-    document.getElementById('openDLPage').onclick = () => openDownloadPage(v);
+    // BUTON TETİKLEYİCİ
+    document.getElementById('openDLPageTrigger').onclick = () => openDownloadPage(v);
 }
 
-// 25. MADDE: AYRI SAYFA GÖRÜNÜMÜ VE GERİ SAYIM
+// 25. MADDE: İNDİRME SAYFASI VE GERİ SAYIM
 function openDownloadPage(v) {
     const overlay = document.getElementById('downloadPageOverlay');
-    if (!overlay) return;
-
-    // Overlay içeriğini doldur
-    document.getElementById('dlPreviewImg').src = v.thumbnail;
-    document.getElementById('dlPageTitle').textContent = v.title;
-    document.getElementById('dlPageFormat').textContent = v.name.toLowerCase().includes('-jpeg-') ? 'JPEG' : 'VECTOR (SVG/EPS)';
-    
-    overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-
+    const img = document.getElementById('dlPreviewImg');
+    const title = document.getElementById('dlPageTitle');
+    const format = document.getElementById('dlPageFormat');
     const finalBtn = document.getElementById('finalDownloadBtn');
     const timerBox = document.getElementById('dlTimerBox');
-    const countdown = document.getElementById('countdownNum');
+    const countdownNum = document.getElementById('countdownNum');
 
-    // Reset view
+    img.src = v.thumbnail;
+    title.textContent = v.title;
+    format.textContent = v.name.toLowerCase().includes('-jpeg-') ? 'JPEG' : 'VECTOR (SVG/EPS)';
+    
+    overlay.style.display = 'block';
     finalBtn.style.display = 'block';
     timerBox.style.display = 'none';
+    document.body.style.overflow = 'hidden';
 
     finalBtn.onclick = () => {
         finalBtn.style.display = 'none';
         timerBox.style.display = 'block';
         let count = 4;
-        countdown.textContent = count;
+        countdownNum.textContent = count;
 
-        const itv = setInterval(() => {
+        const interval = setInterval(() => {
             count--;
-            countdown.textContent = count;
+            countdownNum.textContent = count;
             if (count <= 0) {
-                clearInterval(itv);
+                clearInterval(interval);
                 window.location.href = `/api/download?slug=${v.name}`;
                 setTimeout(() => {
                     overlay.style.display = 'none';
@@ -195,6 +189,12 @@ function openDownloadPage(v) {
                 }, 1000);
             }
         }, 1000);
+
+        document.getElementById('closeDLPage').onclick = () => {
+            clearInterval(interval);
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
     };
 
     document.getElementById('closeDLPage').onclick = () => {
@@ -225,7 +225,6 @@ async function fetchAndRenderOurPicks() {
         state.picksOffset -= state.pickItemWidth;
         track.style.transition = "transform 0.4s ease";
         track.style.transform = `translateX(${state.picksOffset}px)`;
-        
         if (Math.abs(state.picksOffset) >= (items.length * 2 * state.pickItemWidth)) {
             setTimeout(() => {
                 track.style.transition = "none";
@@ -239,7 +238,6 @@ async function fetchAndRenderOurPicks() {
         state.picksOffset += state.pickItemWidth;
         track.style.transition = "transform 0.4s ease";
         track.style.transform = `translateX(${state.picksOffset}px)`;
-
         if (state.picksOffset >= 0) {
             setTimeout(() => {
                 track.style.transition = "none";
@@ -253,8 +251,6 @@ async function fetchAndRenderOurPicks() {
 function setupFooterModals() {
     const modal = document.getElementById('infoModal');
     const body = document.getElementById('infoModalBody');
-    const close = document.getElementById('infoModalClose');
-
     document.querySelectorAll('.modal-trigger').forEach(link => {
         link.onclick = (e) => {
             e.preventDefault();
@@ -266,9 +262,10 @@ function setupFooterModals() {
             }
         };
     });
-
-    close.onclick = () => { modal.style.display = 'none'; document.body.style.overflow = 'auto'; };
-    modal.onclick = (e) => { if (e.target === modal) close.onclick(); };
+    document.getElementById('infoModalClose').onclick = () => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    };
 }
 
 function setupEventListeners() {
