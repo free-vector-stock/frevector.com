@@ -1,5 +1,5 @@
 /**
- * frevector.com - Core Script
+ * frevector.com - Core Script (Revised)
  */
 
 const MODAL_DATA = {
@@ -30,15 +30,24 @@ async function fetchVectors() {
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('page', state.currentPage);
+        
+        // Kategori filtresi
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+        
+        // Tip filtresi (Vector/JPEG)
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
+        
+        // Arama sorgusu (Keywords bazlı API'den çekilir)
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
+        
+        // Sıralama
         if (state.sortOrder) url.searchParams.set('sort', state.sortOrder);
         
         const res = await fetch(url);
         const data = await res.json();
         state.vectors = data.vectors || [];
         state.totalPages = data.totalPages || 1;
+        
         renderVectors();
         updatePagination();
         updateH1();
@@ -57,8 +66,10 @@ function renderVectors() {
 }
 
 function createVectorCard(v) {
+    // Kural 29-30: Dosya isminde '-jpeg-' varsa JPEG, yoksa VECTOR
     const isJpeg = v.name.toLowerCase().includes('-jpeg-');
     const badge = isJpeg ? 'JPEG' : 'VECTOR';
+    
     const card = document.createElement('div');
     card.className = 'vector-card';
     card.innerHTML = `
@@ -93,18 +104,22 @@ function showDetailPanel(v, cardElement, container) {
     document.getElementById('openDLPage').onclick = () => openDownloadPage(v);
 }
 
-// DOWNLOAD PAGE FONKSİYONU (Ayrı sayfa akışı)
 function openDownloadPage(v) {
     const overlay = document.getElementById('downloadPageOverlay');
     const img = document.getElementById('dlPreviewImg');
     const title = document.getElementById('dlPageTitle');
     const format = document.getElementById('dlPageFormat');
+    const kwContainer = document.getElementById('dlKeywords');
     const finalBtn = document.getElementById('finalDownloadBtn');
     const timerBox = document.getElementById('dlTimerBox');
     const countdown = document.getElementById('countdownNum');
 
     img.src = v.thumbnail;
     title.textContent = v.title;
+    
+    // Download sayfasında anahtar kelimeler (Görseldeki talimat üzerine)
+    kwContainer.innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('');
+    
     format.textContent = v.name.toLowerCase().includes('-jpeg-') ? 'JPEG' : 'VECTOR (SVG/EPS)';
     
     overlay.style.display = 'block';
@@ -144,6 +159,7 @@ async function fetchOurPicks() {
     const data = await res.json();
     const items = data.vectors || [];
     
+    // Sonsuz döngü hissi için 3 set
     const extended = [...items, ...items, ...items];
     track.innerHTML = '';
     extended.forEach(v => {
@@ -197,10 +213,14 @@ function updateH1() {
 
 function setupEventListeners() {
     let timer;
+    // Kural 31: Real-time search (Keywords bazlı)
     document.getElementById('searchInput').oninput = (e) => {
-        state.searchQuery = e.target.value; state.currentPage = 1;
-        clearTimeout(timer); timer = setTimeout(fetchVectors, 300);
+        state.searchQuery = e.target.value; 
+        state.currentPage = 1;
+        clearTimeout(timer); 
+        timer = setTimeout(fetchVectors, 300); // 300ms gecikme ile otomatik tetikleme
     };
+    
     document.getElementById('sortFilter').onchange = (e) => {
         state.sortOrder = e.target.value; state.currentPage = 1; fetchVectors();
     };
