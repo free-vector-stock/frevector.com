@@ -7,7 +7,6 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .top-banner { background: var(--black); height: 52px; display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .banner-logo { height: 32px; }
 
-/* Arama Çubuğu Uzatıldı (Kural 31) */
 .header { height: 64px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 20px; }
 .header-center { flex: 1; display: flex; justify-content: center; }
 .search-container { width: 100%; max-width: 100%; display: flex; border: 1px solid var(--border); border-radius: 6px; padding: 8px 15px; background: #fff; }
@@ -28,13 +27,15 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .vector-card.card-active { border: 2px solid #000; }
 .vc-img-wrap { width: 100%; position: relative; background: var(--gray-light); display: flex; align-items: center; justify-content: center; }
 .vc-img { width: 100%; height: auto; display: block; object-fit: contain; }
-
 .vc-type-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 3px 6px; border-radius: 3px; font-weight: 800; z-index: 5; }
 
 .vc-info { padding: 10px; border-top: 1px solid var(--border); }
 .vc-description { font-size: 12px; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Detay Paneli */
+/* Our Picks Özel (Yazısız Görünüm) */
+.our-picks-track .vc-info { display: none !important; }
+.our-picks-track .vector-card { border: none; background: none; }
+
 .detail-panel { grid-column: 1 / -1; background: #fff; border: 1px solid #000; padding: 20px; margin: 10px 0; border-radius: 4px; display: flex; gap: 20px; }
 .dp-left img { width: 200px; height: auto; border: 1px solid var(--border); border-radius: 4px; }
 .dp-info { flex: 1; }
@@ -59,16 +60,26 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .footer-link { color: #fff; text-decoration: none; margin-left: 15px; }
 
 .info-modal, .download-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; display: flex; justify-content: center; align-items: center; }
-.info-modal-box, .download-box { background: #fff; padding: 30px; border-radius: 8px; width: 90%; max-width: 600px; position: relative; text-align: center; }
+.info-modal-box { background: #fff; padding: 40px; border-radius: 8px; width: 90%; max-width: 800px; position: relative; text-align: left; max-height: 85vh; overflow-y: auto; }
+.info-modal-body h2 { margin: 20px 0 10px; font-size: 20px; font-weight: 800; border-bottom: 2px solid #000; padding-bottom: 5px; }
+.info-modal-body h3 { margin: 15px 0 10px; font-size: 16px; font-weight: 700; }
+.info-modal-body p { margin-bottom: 12px; line-height: 1.6; font-size: 14px; }
+.info-modal-body ul { margin: 10px 0 15px 20px; }
+.info-modal-body li { margin-bottom: 5px; font-size: 14px; }
+.info-modal-body a { color: #000; font-weight: 700; }
+
+.download-box { background: #fff; padding: 30px; border-radius: 8px; width: 90%; max-width: 600px; position: relative; text-align: center; }
 .dl-number { font-size: 60px; font-weight: 900; margin: 20px 0; }
-.info-modal-close, .close-download { position: absolute; top: 15px; right: 15px; border: none; background: none; font-size: 24px; cursor: pointer; }
+.info-modal-close, .close-download { position: absolute; top: 15px; right: 15px; border: none; background: none; font-size: 24px; cursor: pointer; z-index: 5001; }
 
 @media (max-width: 768px) {
     .header { flex-direction: column; height: auto; padding: 10px; }
     .main-container { flex-direction: column; overflow: visible; }
     .sidebar { width: 100%; display: flex; flex-wrap: wrap; padding: 10px; border-bottom: 1px solid var(--border); }
     .sidebar-title { display: none; }
-    .category-item { background: #000; color: #fff; border-radius: 20px; margin: 2px; }
+    .category-item { background: #000; color: #fff; border-radius: 20px; margin: 2px; font-size: 12px; padding: 6px 12px; }
+    .footer { flex-direction: column; gap: 10px; text-align: center; }
+    .footer-link { margin: 0 7px; }
     .detail-panel { flex-direction: column; }
     .dp-left img { width: 100%; }
 }
