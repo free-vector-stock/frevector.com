@@ -100,7 +100,6 @@ async function init() {
 function getH1Text(cat) {
     if (cat === 'all') return "Free Vectors, SVGs, Icons and Clipart";
     
-    // Spesifik kategori isim düzeltmeleri
     let displayCat = cat;
     const specialCases = {
         'Animals': 'Animal',
@@ -169,10 +168,7 @@ async function fetchVectors() {
         url.searchParams.set('page', state.currentPage);
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        
-        // Arama duyarlılığı (Case-insensitive)
-        if (state.searchQuery) url.searchParams.set('search', state.searchQuery.toLowerCase());
-        
+        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
         
         const res = await fetch(url);
