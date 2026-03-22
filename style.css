@@ -38,18 +38,18 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .header-right { flex-shrink: 0; }
 .sort-filter { padding: 5px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; outline: none; }
 
-.main-container { display: flex; flex: 1; overflow: hidden; width: 100%; }
+.main-container { display: flex; flex: 1; width: 100%; }
 .sidebar { width: 160px; border-right: 1px solid var(--border); overflow-y: auto; padding: 10px 0; background: #fff; flex-shrink: 0; }
 .sidebar-title { padding: 0 16px 5px; font-size: 11px; font-weight: bold; color: #333; text-transform: uppercase; }
 .category-item { display: block; padding: 6px 16px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; }
 .category-item.active { background: var(--black); color: var(--white); font-weight: 500; }
 
-.content { flex: 1; padding: 20px; overflow-y: auto; background: #fff; }
+.content { flex: 1; padding: 20px; background: #fff; }
 .category-title-h1 { font-size: 22px; margin-bottom: 20px; font-weight: 700; color: var(--black); }
 
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 
-/* Vector Cards & Frame (contain) */
+/* Vector Cards */
 .vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; position: relative; }
 .vc-img-wrap { aspect-ratio: 1; overflow: hidden; position: relative; background: var(--gray-light); display: flex; align-items: center; justify-content: center; }
 .vc-img { width: 100%; height: 100%; object-fit: contain; background: #f9f9f9; }
@@ -68,21 +68,8 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .our-picks-section { padding: 10px 0; text-align: center; }
 .our-picks-content-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; padding: 0 40px; }
 
-/* OK GÖRÜNÜRLÜĞÜ */
-.our-picks-arrow {
-    width: 30px;
-    height: 30px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    background: #fff;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    z-index: 50;
-    font-size: 20px;
-    flex-shrink: 0;
-}
+/* Ok Görünürlüğü */
+.our-picks-arrow { width: 30px; height: 30px; border: 1px solid #ccc; cursor: pointer; background: #fff; display: flex !important; align-items: center; justify-content: center; border-radius: 50%; z-index: 50; font-size: 20px; flex-shrink: 0; }
 
 .our-picks-track-wrap { overflow: hidden; width: 100%; max-width: 1200px; }
 .our-picks-track { display: flex; gap: 10px; }
@@ -96,8 +83,6 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .info-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; justify-content:center; align-items:center; }
 .info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:700px; width:90%; max-height: 85vh; overflow-y: auto; position: relative; }
 .info-modal-close { position:absolute; top:15px; right:15px; background:none; border:none; font-size:24px; cursor:pointer; }
-.info-modal-body h2 { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-.info-modal-body p { margin-bottom: 12px; line-height: 1.6; color: #444; }
 
 /* Detail Grid Panel */
 .detail-panel { grid-column: 1 / -1; background: var(--gray-light); padding: 25px; border-radius: 4px; margin: 10px 0; display: flex; gap: 25px; border: 1px solid var(--border); }
@@ -119,56 +104,62 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* MOBİL GÖRÜNÜM ZORUNLU DÜZENLEME (VERTICAL FLOW) */
+/* MOBİL GÖRÜNÜM ZORUNLU DÜZENLEME (TAM DİKEY AKIŞ) */
 @media (max-width: 768px) {
-    html, body { overflow: auto; height: auto; }
+    html, body { overflow-y: auto !important; height: auto !important; }
     
-    .header { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
-    .header-center { width: 100%; min-width: auto; }
-    .header-right { width: 100%; }
-    .sort-filter { width: 100%; height: 40px; }
+    .header { flex-direction: column !important; align-items: stretch !important; gap: 15px; padding: 15px; height: auto !important; }
+    .header-center { width: 100% !important; order: 1; }
+    .header-right { width: 100% !important; order: 2; }
+    .sort-filter { width: 100% !important; height: 45px; }
 
-    .main-container { flex-direction: column; overflow: visible; height: auto; }
+    .main-container { flex-direction: column !important; height: auto !important; overflow: visible !important; }
     
-    /* Yan menü kaldırıldı, içerik üste alındı */
+    /* Yan Menü Mobilde Tamamen Liste Haline Getirildi ve Üste Alındı */
     .sidebar { 
-        width: 100%; 
-        border-right: none; 
-        border-bottom: 1px solid var(--border); 
-        padding: 10px 15px;
-        order: 1; /* Arama kutusundan sonra gelecek */
+        width: 100% !important; 
+        border-right: none !important; 
+        border-bottom: 1px solid var(--border) !important; 
+        padding: 0 !important;
+        order: 3; /* Kategoriler 3. sırada */
+        height: auto !important;
+        overflow: visible !important;
     }
-    .sidebar-title { display: none; } /* Kategori başlığı mobilde yer kaplamasın */
+    .sidebar-title { display: none !important; }
+    
     #categoriesList { 
-        display: flex; 
-        flex-direction: column; /* Tek sütun liste */
-        gap: 2px;
+        display: flex !important; 
+        flex-direction: column !important; /* Kategoriler alt alta */
+        width: 100% !important;
     }
     .category-item { 
-        padding: 12px 10px; 
-        border-bottom: 1px solid #f0f0f0; 
-        font-size: 14px;
+        padding: 15px 20px !important; 
+        border-bottom: 1px solid #f0f0f0 !important; 
+        font-size: 15px !important;
+        width: 100% !important;
+        display: block !important;
+        text-align: left !important;
     }
 
-    .content { order: 2; padding: 15px; width: 100%; overflow: visible; }
-    .category-title-h1 { font-size: 18px; margin-bottom: 15px; }
+    .content { order: 4; padding: 15px !important; width: 100% !important; overflow: visible !important; }
+    .category-title-h1 { font-size: 18px; margin-bottom: 20px; }
 
-    /* Görseller tek sütun ve büyük */
+    /* Görseller Tek Sütun ve Devasa */
     .vectors-grid { 
-        grid-template-columns: 1fr; 
-        gap: 20px; 
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 25px !important; 
     }
-    .vector-card { width: 100%; }
-    .vc-img-wrap { aspect-ratio: auto; min-height: 250px; }
-    .vc-info { padding: 12px; }
-    .vc-description { font-size: 14px; white-space: normal; }
+    .vector-card { width: 100% !important; }
+    .vc-img-wrap { aspect-ratio: 1 !important; height: auto !important; }
+    .vc-info { padding: 15px !important; }
+    .vc-description { font-size: 14px !important; white-space: normal !important; }
 
-    /* Detay paneli mobil uyumu */
-    .detail-panel { flex-direction: column; padding: 15px; gap: 15px; }
-    .detail-inner { flex-direction: column; gap: 15px; }
-    .detail-left { flex: auto; width: 100%; }
-    
+    /* Detay ve Alt Bölümler */
+    .detail-panel { flex-direction: column; padding: 15px; }
+    .detail-inner { flex-direction: column; }
+    .detail-left { width: 100%; }
     .download-page-body { flex-direction: column; padding: 20px; }
-    .footer { flex-direction: column; text-align: center; align-items: center; }
-    .footer-link { margin: 5px 0; }
+    .footer { flex-direction: column; text-align: center; gap: 15px; }
+    .footer-link { margin: 5px 0; display: block; }
 }
