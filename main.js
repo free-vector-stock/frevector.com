@@ -12,41 +12,19 @@ const CATEGORIES = [
 const MODAL_CONTENTS = {
     about: { 
         title: 'ABOUT US', 
-        content: `<h2>ABOUT US</h2>
-        <p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
-        <p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
-        <p>Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
-        <p>Frevector.com includes the following content:</p>
-        <ul>
-            <li>Vector illustrations</li>
-            <li>Icon sets</li>
-            <li>Logo design elements</li>
-            <li>Graphic elements</li>
-        </ul>`
+        content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p><p>All designs on the site are created exclusively by Frevector artists.</p>`
     },
     privacy: {
         title: 'PRIVACY POLICY',
-        content: `<h2>PRIVACY POLICY</h2>
-        <p>At Frevector, we care about your privacy. This policy explains how we handle your information.</p>
-        <p><b>Data Collection:</b> We do not collect personal identification information unless you voluntarily provide it. We use cookies only for basic site functionality and analytics to improve user experience.</p>
-        <p><b>Usage:</b> Any information provided is used solely for service delivery and platform communication. We never sell or share your data with third parties for marketing purposes.</p>`
+        content: `<h2>PRIVACY POLICY</h2><p>At Frevector, we care about your privacy. We do not collect personal identification information unless you voluntarily provide it.</p>`
     },
     terms: {
         title: 'TERMS OF SERVICE',
-        content: `<h2>TERMS OF SERVICE</h2>
-        <p>By using Frevector.com, you agree to these terms:</p>
-        <ul>
-            <li>All content is provided "as is" for personal and commercial use under our license.</li>
-            <li>You may not redistribute or sell our original files on other stock platforms.</li>
-            <li>Attribution is not required but always appreciated.</li>
-        </ul>`
+        content: `<h2>TERMS OF SERVICE</h2><p>By using Frevector.com, you agree that you may not redistribute or sell our original files on other stock platforms.</p>`
     },
     contact: {
         title: 'CONTACT US',
-        content: `<h2>CONTACT US</h2>
-        <p>If you have any questions, suggestions, or business inquiries, feel free to reach out to us.</p>
-        <p><b>Email:</b> info@frevector.com</p>
-        <p>Our team usually responds within 24-48 hours.</p>`
+        content: `<h2>CONTACT US</h2><p>If you have any questions, feel free to reach out to us at: <b>info@frevector.com</b></p>`
     }
 };
 
@@ -69,31 +47,31 @@ async function init() {
 }
 
 function renderCategories() {
-    const bar = document.getElementById('categoryBar');
-    bar.innerHTML = '';
+    const list = document.getElementById('categoryList');
+    list.innerHTML = '';
     
-    const allBtn = document.createElement('button');
-    allBtn.className = `cat-btn ${state.selectedCategory === '' ? 'active' : ''}`;
-    allBtn.textContent = 'All Categories';
-    allBtn.onclick = () => {
+    const allLi = document.createElement('li');
+    allLi.className = `cat-item ${state.selectedCategory === '' ? 'active' : ''}`;
+    allLi.textContent = 'All Categories';
+    allLi.onclick = () => {
         state.selectedCategory = '';
         state.currentPage = 1;
         renderCategories();
         fetchVectors();
     };
-    bar.appendChild(allBtn);
+    list.appendChild(allLi);
 
     CATEGORIES.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `cat-btn ${state.selectedCategory === cat ? 'active' : ''}`;
-        btn.textContent = cat;
-        btn.onclick = () => {
+        const li = document.createElement('li');
+        li.className = `cat-item ${state.selectedCategory === cat ? 'active' : ''}`;
+        li.textContent = cat;
+        li.onclick = () => {
             state.selectedCategory = cat;
             state.currentPage = 1;
             renderCategories();
             fetchVectors();
         };
-        bar.appendChild(btn);
+        list.appendChild(li);
     });
 }
 
@@ -127,21 +105,12 @@ function renderGrid() {
     const grid = document.getElementById('vectorGrid');
     grid.innerHTML = '';
 
-    if (state.allVectors.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 50px;">No results found.</div>';
-        return;
-    }
-
     state.allVectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         card.innerHTML = `
-            <div class="card-img-container">
-                <img src="${v.thumbnail}" alt="${v.title}" class="card-img" loading="lazy">
-            </div>
-            <div class="card-info">
-                <div class="card-title">${v.title}</div>
-            </div>
+            <div class="card-img-container"><img src="${v.thumbnail}" alt="${v.title}" class="card-img" loading="lazy"></div>
+            <div class="card-info"><div class="card-title">${v.title}</div></div>
         `;
         card.onclick = () => openDownloadPage(v);
         grid.appendChild(card);
@@ -178,7 +147,6 @@ function openDownloadPage(v) {
         cdBox.style.display = 'block';
         let count = 4;
         cdNum.textContent = count;
-        
         state.countdownInterval = setInterval(() => {
             count--;
             cdNum.textContent = count;
@@ -213,9 +181,7 @@ function setupFooterModals() {
             }
         };
     });
-
     closeBtn.onclick = () => modal.style.display = 'none';
-    window.onclick = (e) => { if(e.target == modal) modal.style.display = 'none'; };
 }
 
 function setupEventListeners() {
@@ -224,9 +190,7 @@ function setupEventListeners() {
         state.searchQuery = e.target.value.toLowerCase().trim();
         state.currentPage = 1;
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            fetchVectors();
-        }, 300);
+        searchTimeout = setTimeout(() => fetchVectors(), 300);
     };
     document.getElementById('sortFilter').onchange = (e) => { state.sortOrder = e.target.value; fetchVectors(); };
     document.getElementById('prevBtn').onclick = () => { if(state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
