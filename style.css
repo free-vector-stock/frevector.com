@@ -40,7 +40,7 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .main-container { display: flex; flex: 1; width: 100%; overflow: hidden; }
 .sidebar { width: 160px; border-right: 1px solid var(--border); overflow-y: auto; padding: 10px 0; background: #fff; flex-shrink: 0; }
 .sidebar-title { padding: 0 16px 5px; font-size: 11px; font-weight: bold; color: #333; text-transform: uppercase; }
-.category-item { display: block; padding: 6px 16px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; }
+.category-item { display: block; padding: 6px 16px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; border-bottom: 1px solid transparent; }
 .category-item.active { background: var(--black); color: var(--white); font-weight: 500; }
 
 .content { flex: 1; padding: 20px; overflow-y: auto; background: #fff; }
@@ -101,69 +101,66 @@ body { font-family: var(--font); background: var(--white); display: flex; flex-d
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* MOBİL GÖRÜNÜM AYARLARI */
+/* MOBİL GÖRÜNÜM - KESİN DİKEY AKIŞ */
 @media (max-width: 480px) {
     html, body { overflow-y: auto !important; height: auto !important; }
     
-    .header { padding: 10px !important; }
-    
-    /* Ana Taşıyıcı Dikey Akış */
+    .top-banner { position: relative !important; }
+    .header { flex-direction: column !important; padding: 10px !important; }
+    .header-center { width: 100% !important; order: 1; }
+    .header-right { width: 100% !important; order: 2; margin-top: 5px; }
+    .sort-filter { width: 100% !important; }
+
+    /* Yan Menüyü İptal Et, Dikey Kategori Listesi Yap */
     .main-container { 
-        display: flex !important; 
-        flex-direction: column !important; 
+        display: block !important; 
         height: auto !important; 
         overflow: visible !important; 
     }
     
-    /* Kategoriler: Yatay Kaydırılabilir Şerit (Görseldeki Gibi) */
     .sidebar { 
         width: 100% !important; 
         border-right: none !important; 
         border-bottom: 1px solid var(--border) !important; 
-        padding: 5px 0 !important;
         height: auto !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        background: #fff !important;
-        white-space: nowrap !important;
-        -webkit-overflow-scrolling: touch;
+        overflow: visible !important;
+        padding: 0 !important;
     }
     .sidebar-title { display: none !important; }
-    #categoriesList { 
-        display: inline-flex !important; 
-        flex-direction: row !important; 
-        padding: 0 10px !important;
-    }
+    #categoriesList { display: block !important; }
     .category-item { 
-        display: inline-block !important;
-        padding: 8px 15px !important; 
-        margin: 5px 2px !important;
-        border: 1px solid #eee !important;
-        border-radius: 20px !important;
-        font-size: 13px !important;
-        background: #f9f9f9;
+        padding: 14px 20px !important; 
+        border-bottom: 1px solid #f0f0f0 !important; 
+        font-size: 15px !important; 
+        width: 100% !important;
     }
-    .category-item.active { background: #000 !important; color: #fff !important; border-color: #000 !important; }
 
-    /* İçerik Alanı */
     .content { 
         padding: 15px !important; 
         width: 100% !important; 
         height: auto !important;
         overflow: visible !important; 
     }
+    .category-title-h1 { font-size: 18px; margin-bottom: 15px; text-align: center; }
     
-    /* Görseller: Tam Genişlik ve Tek Sütun */
+    /* Görseller: Tek Sütun ve Tam Genişlik */
     .vectors-grid { 
         display: flex !important;
         flex-direction: column !important;
         gap: 20px !important; 
     }
     .vector-card { width: 100% !important; }
+    .vc-img-wrap { aspect-ratio: 1 !important; }
     .vc-info { padding: 12px !important; }
     .vc-description { font-size: 14px !important; white-space: normal !important; }
 
-    .bottom-fixed-container { position: relative !important; }
-    .footer { flex-direction: column !important; text-align: center !important; gap: 15px !important; }
-    .footer-link { margin: 5px 0 !important; display: block; }
+    /* Footer ve Alt Bölüm */
+    .bottom-fixed-container { position: relative !important; border-top: 10px solid #f5f5f5; }
+    .footer { flex-direction: column !important; text-align: center !important; gap: 15px !important; padding: 30px 20px !important; }
+    .footer-link { margin: 5px 0 !important; display: block; font-size: 13px; }
+
+    /* Detail Panel (Mobil Uyumluluk) */
+    .detail-panel { flex-direction: column !important; padding: 15px !important; }
+    .detail-inner { flex-direction: column !important; gap: 15px !important; }
+    .detail-left { flex: none !important; width: 100% !important; }
 }
