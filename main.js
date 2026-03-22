@@ -169,7 +169,10 @@ async function fetchVectors() {
         url.searchParams.set('page', state.currentPage);
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
+        
+        // ARAMA DUYARLILIĞI: Arama terimini küçük harfe çevirerek gönderiyoruz (Case-insensitive support)
+        if (state.searchQuery) url.searchParams.set('search', state.searchQuery.toLowerCase());
+        
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
         
         const res = await fetch(url);
