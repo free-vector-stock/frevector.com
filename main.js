@@ -1,5 +1,5 @@
 /**
- * frevector.com - Frontend Core Logic (No-Backend Version)
+ * frevector.com - Frontend Core Logic
  */
 
 const CATEGORIES = [
@@ -135,7 +135,7 @@ async function fetchVectors() {
     state.isLoading = true;
     showLoader(true);
     try {
-        const url = `/api/vectors?page=${state.currentPage}&category=${state.selectedCategory}&type=${state.selectedType}&search=${state.searchQuery}&sort=${state.sortOrder}`;
+        const url = `/api/vectors?page=${state.currentPage}&category=${state.selectedCategory}&type=${state.selectedType}&search=${encodeURIComponent(state.searchQuery)}&sort=${state.sortOrder}`;
         const res = await fetch(url);
         const data = await res.json();
         state.vectors = data.vectors || [];
@@ -180,7 +180,7 @@ function fillOurPicksFromState() {
         div.onclick = () => showDownloadPage(v);
         track.appendChild(div);
     });
-    const itemWidth = 195; // 180px + 15px gap
+    const itemWidth = 195; 
     const setWidth = picks.length * itemWidth;
     state.ourPicksOffset = setWidth;
     track.style.transition = 'none';
@@ -298,7 +298,15 @@ function setupDownloadPageHandlers() {
 }
 
 function setupEventListeners() {
-    document.getElementById('searchInput').oninput = (e) => { state.searchQuery = e.target.value; fetchVectors(); };
+    let searchTimeout;
+    document.getElementById('searchInput').oninput = (e) => { 
+        state.searchQuery = e.target.value.toLowerCase().trim();
+        state.currentPage = 1;
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetchVectors();
+        }, 300);
+    };
     document.getElementById('sortFilter').onchange = (e) => { state.sortOrder = e.target.value; fetchVectors(); };
     document.getElementById('prevBtn').onclick = () => { if(state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
     document.getElementById('nextBtn').onclick = () => { if(state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
