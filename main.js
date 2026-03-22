@@ -236,9 +236,17 @@ function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
-    document.getElementById('dpKeywords').innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('') + `<span class="kw-tag" style="background:#15803d; color:white;">VECTOR</span>`;
+    
+    // Teknik detayları doldur
+    document.getElementById('dpCategory').textContent = v.category || 'General';
+    document.getElementById('dpFileFormat').textContent = v.isJpegOnly ? 'JPEG' : 'EPS / SVG / JPEG';
+
+    document.getElementById('dpKeywords').innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('') + 
+        (v.isJpegOnly ? `<span class="kw-tag" style="background:#1d4ed8; color:white;">PHOTO</span>` : `<span class="kw-tag" style="background:#15803d; color:white;">VECTOR</span>`);
+    
     document.getElementById('dpDownloadBtn').style.display = 'block';
     document.getElementById('dpCountdownBox').style.display = 'none';
+    
     document.getElementById('dpDownloadBtn').onclick = () => {
         document.getElementById('dpDownloadBtn').style.display = 'none';
         document.getElementById('dpCountdownBox').style.display = 'block';
