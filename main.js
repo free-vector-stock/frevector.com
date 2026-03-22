@@ -153,13 +153,8 @@ function renderVectors() {
     state.vectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        // Dinamik Etiket Belirleme (Vector veya JPEG)
-        const fileType = v.type ? v.type.toUpperCase() : 'VECTOR';
         card.innerHTML = `
-            <div class="vc-img-wrap">
-                <div class="card-type-badge">${fileType}</div>
-                <img class="vc-img" src="${v.thumbnail}" alt="${v.title}">
-            </div>
+            <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}"></div>
             <div class="vc-info">
                 <div class="vc-description">${v.title}</div>
                 <div class="vc-keywords">${(v.keywords || []).slice(0,3).join(', ')}</div>
@@ -181,12 +176,7 @@ function fillOurPicksFromState() {
     tripled.forEach(v => {
         const div = document.createElement('div');
         div.className = 'our-picks-item';
-        // Our Picks bölümündeki görsellere de etiket eklendi
-        const fileType = v.type ? v.type.toUpperCase() : 'VECTOR';
-        div.innerHTML = `
-            <div class="card-type-badge" style="font-size:8px; padding:2px 5px;">${fileType}</div>
-            <img src="${v.thumbnail}" alt="${v.title}">
-        `;
+        div.innerHTML = `<img src="${v.thumbnail}" alt="${v.title}">`;
         div.onclick = () => showDownloadPage(v);
         track.appendChild(div);
     });
@@ -233,7 +223,7 @@ function openDetailPanel(v, cardEl) {
                 <h2 class="detail-title">${v.title}</h2>
                 <div class="detail-keywords">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
                 <div class="detail-actions">
-                    <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
+                    <button class="download-btn" id="mainDownloadBtn">DOWNLOAD PAGE</button>
                     <button class="close-panel-btn" onclick="closeDetailPanel()">Close</button>
                 </div>
             </div>
@@ -242,7 +232,6 @@ function openDetailPanel(v, cardEl) {
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.querySelectorAll('.vector-card'));
     const index = cards.indexOf(cardEl);
-    // Dinamik sütun hesaplama (Masaüstü/Tablet/Mobil)
     let cols = window.innerWidth > 1200 ? 6 : (window.innerWidth > 768 ? 4 : 1);
     const rowEnd = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
     grid.insertBefore(panel, cards[rowEnd].nextSibling);
