@@ -42,7 +42,6 @@
                 <a href="#" class="category-item type-filter" data-type="vector">Vector</a>
                 <a href="#" class="category-item type-filter" data-type="jpeg">JPEG</a>
             </nav>
-            
             <div class="sidebar-title" style="margin-top: 15px;">CATEGORIES</div>
             <nav class="categories-list" id="categoriesList"></nav>
         </aside>
@@ -66,14 +65,14 @@
         <section class="our-picks-section" id="ourPicksSection">
             <div class="our-picks-label">Our selections for you</div>
             <div class="our-picks-content-wrapper">
-                <button class="our-picks-arrow custom-arrow-btn" id="ourPicksPrev" title="Previous">
-                    <img src="functions/sol-ok.png" alt="Prev">
+                <button class="our-picks-arrow custom-arrow-btn" id="ourPicksPrev">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
                 <div class="our-picks-track-wrap">
                     <div class="our-picks-track" id="ourPicksTrack"></div>
                 </div>
-                <button class="our-picks-arrow custom-arrow-btn" id="ourPicksNext" title="Next">
-                    <img src="functions/sag-ok.png" alt="Next">
+                <button class="our-picks-arrow custom-arrow-btn" id="ourPicksNext">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </button>
             </div>
         </section>
@@ -87,33 +86,6 @@
                 <a href="#" class="footer-link modal-trigger" data-modal="contact">Contact</a>
             </nav>
         </footer>
-    </div>
-
-    <div id="downloadPage" class="download-page" style="display:none;">
-        <div class="download-page-header">
-            <span class="dp-site">frevector.com</span>
-            <button id="dpClose" class="dp-close">&#10005;</button>
-        </div>
-        <div class="download-page-body">
-            <div class="dp-left">
-                <img id="dpImage" src="" alt="" class="dp-image">
-            </div>
-            <div class="dp-right">
-                <h2 id="dpTitle" class="dp-title"></h2>
-                <div id="dpKeywords" class="detail-keywords"></div>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG / VECTOR</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
-                </table>
-                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
-                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
-                    <p>Your download will start in</p>
-                    <div id="dpCountdown" class="dp-countdown-num">4</div>
-                    <p>High-speed secure download</p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div id="infoModal" class="info-modal" style="display:none;">
