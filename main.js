@@ -10,22 +10,10 @@ const CATEGORIES = [
 ];
 
 const MODAL_CONTENTS = {
-    about: { 
-        title: 'ABOUT US', 
-        content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p><p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists.</p>` 
-    },
-    privacy: { 
-        title: 'PRIVACY POLICY', 
-        content: `<h2>PRIVACY POLICY</h2><p>As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>` 
-    },
-    terms: { 
-        title: 'TERMS OF SERVICE', 
-        content: `<h2>TERMS OF SERVICE</h2><p>Every visitor using Frevector.com is deemed to have accepted the following terms.</p>` 
-    },
-    contact: { 
-        title: 'CONTACT & COPYRIGHT', 
-        content: `<h2>CONTACT</h2><p>If you have any questions, feedback or copyright issues regarding Frevector.com, please get in touch.</p><p><strong>Email:</strong> hakankacar2014@gmail.com</p>` 
-    }
+    about: { title: 'ABOUT US', content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p><p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists.</p>` },
+    privacy: { title: 'PRIVACY POLICY', content: `<h2>PRIVACY POLICY</h2><p>As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>` },
+    terms: { title: 'TERMS OF SERVICE', content: `<h2>TERMS OF SERVICE</h2><p>Every visitor using Frevector.com is deemed to have accepted the following terms.</p>` },
+    contact: { title: 'CONTACT & COPYRIGHT', content: `<h2>CONTACT</h2><p>If you have any questions, feedback or copyright issues regarding Frevector.com, please get in touch.</p><p><strong>Email:</strong> hakankacar2014@gmail.com</p>` }
 };
 
 const state = {
@@ -36,9 +24,7 @@ const state = {
     selectedType: 'all',
     searchQuery: '',
     isLoading: false,
-    countdownInterval: null,
-    ourPicksOffset: 0,
-    originalPicksCount: 0
+    ourPicksOffset: 0
 };
 
 async function init() {
@@ -46,10 +32,9 @@ async function init() {
     setupTypeFilters();
     setupEventListeners();
     setupModalHandlers();
-    setupDownloadPageHandlers();
     setupOurPicksArrows();
     await fetchVectors();
-    setTimeout(() => fetchAndRenderOurPicks(), 300);
+    fetchAndRenderOurPicks();
 }
 
 function setupTypeFilters() {
@@ -69,29 +54,22 @@ function setupCategories() {
     const list = document.getElementById('categoriesList');
     if (!list) return;
     list.innerHTML = '';
-    const allLink = document.createElement('a');
-    allLink.href = '#';
-    allLink.className = 'category-item' + (state.selectedCategory === 'all' ? ' active' : '');
-    allLink.textContent = 'All';
-    allLink.onclick = (e) => { e.preventDefault(); selectCategory('all'); };
-    list.appendChild(allLink);
-
-    CATEGORIES.forEach(cat => {
+    
+    const cats = ['all', ...CATEGORIES];
+    cats.forEach(cat => {
         const a = document.createElement('a');
-        a.href = '#';
         a.className = 'category-item' + (state.selectedCategory === cat ? ' active' : '');
-        a.textContent = cat;
-        a.onclick = (e) => { e.preventDefault(); selectCategory(cat); };
+        a.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+        a.onclick = (e) => {
+            e.preventDefault();
+            state.selectedCategory = cat;
+            state.currentPage = 1;
+            document.getElementById('categoryTitle').textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors`;
+            setupCategories();
+            fetchVectors();
+        };
         list.appendChild(a);
     });
-}
-
-function selectCategory(cat) {
-    state.selectedCategory = cat;
-    state.currentPage = 1;
-    setupCategories();
-    document.getElementById('categoryTitle').textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors`;
-    fetchVectors();
 }
 
 async function fetchVectors() {
@@ -102,8 +80,8 @@ async function fetchVectors() {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('page', state.currentPage);
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
+        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         
         const res = await fetch(url);
         const data = await res.json();
@@ -119,110 +97,130 @@ function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
     grid.innerHTML = '';
     state.vectors.forEach(v => {
-        const typeLabel = (v.type || 'vector').toUpperCase();
         const card = document.createElement('div');
         card.className = 'vector-card';
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <div class="vc-type-badge">${typeLabel}</div>
+                <div class="vc-type-badge">${(v.type || 'vector').toUpperCase()}</div>
                 <img class="vc-img" src="${v.thumbnail}" alt="${v.title}">
             </div>
             <div class="vc-info">
                 <div class="vc-description">${v.title || "Untitled"}</div>
-                <div class="vc-keywords">${(v.keywords || []).slice(0, 3).join(', ')}</div>
             </div>
         `;
-        card.onclick = () => showDownloadPage(v);
+        card.onclick = () => showDetailPanel(v, card);
         grid.appendChild(card);
     });
 }
 
-function showDownloadPage(v) {
-    const dp = document.getElementById('downloadPage');
-    document.getElementById('dpImage').src = v.thumbnail;
-    document.getElementById('dpTitle').textContent = v.title;
-    document.getElementById('dpCategory').textContent = v.category || '-';
-    document.getElementById('dpFileFormat').textContent = (v.type || 'vector').toUpperCase();
-    document.getElementById('dpKeywords').innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join(' ');
-    document.getElementById('dpDownloadBtn').style.display = 'block';
-    document.getElementById('dpCountdownBox').style.display = 'none';
-    
-    document.getElementById('dpDownloadBtn').onclick = () => {
-        document.getElementById('dpDownloadBtn').style.display = 'none';
-        document.getElementById('dpCountdownBox').style.display = 'block';
-        let c = 4;
-        document.getElementById('dpCountdown').textContent = c;
-        state.countdownInterval = setInterval(() => {
-            c--;
-            document.getElementById('dpCountdown').textContent = c;
-            if (c <= 0) { 
-                clearInterval(state.countdownInterval); 
-                window.location.href = `/api/download?slug=${v.name}`; 
+function showDetailPanel(v, cardElement) {
+    // Önceki aktif kartları ve panelleri temizle
+    document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('card-active'));
+    const existing = document.querySelector('.detail-panel');
+    if (existing) existing.remove();
+
+    cardElement.classList.add('card-active');
+
+    const panel = document.createElement('div');
+    panel.className = 'detail-panel';
+    panel.innerHTML = `
+        <div class="dp-left">
+            <img src="${v.thumbnail}" class="dp-thumb">
+        </div>
+        <div class="dp-info">
+            <h2 class="dp-title">${v.title}</h2>
+            <div class="dp-meta-row"><strong>Format:</strong> ${(v.type || 'vector').toUpperCase()}</div>
+            <div class="dp-meta-row"><strong>Category:</strong> ${v.category || '-'}</div>
+            <div class="dp-meta-row"><strong>License:</strong> Free for Personal & Commercial Use</div>
+            <div class="dp-kw-container">
+                ${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}
+            </div>
+            <button class="download-btn-short" id="dlTrigger">DOWNLOAD</button>
+            <div id="dlWait" style="display:none; margin-top:15px; font-weight:800;">Your download starts in <span id="timer">4</span>s...</div>
+        </div>
+    `;
+
+    // Paneli kartın bulunduğu satırın sonuna ekle
+    cardElement.after(panel);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    document.getElementById('dlTrigger').onclick = () => {
+        const btn = document.getElementById('dlTrigger');
+        const wait = document.getElementById('dlWait');
+        btn.style.display = 'none';
+        wait.style.display = 'block';
+        let count = 4;
+        const interval = setInterval(() => {
+            count--;
+            document.getElementById('timer').textContent = count;
+            if (count <= 0) {
+                clearInterval(interval);
+                window.location.href = `/api/download?slug=${v.name}`;
+                wait.innerHTML = "Download started!";
             }
         }, 1000);
     };
-    dp.style.display = 'flex';
 }
 
-function setupModalHandlers() { 
+async function fetchAndRenderOurPicks() {
+    const track = document.getElementById('ourPicksTrack');
+    const res = await fetch('/api/vectors?limit=12');
+    const data = await res.json();
+    const picks = data.vectors || [];
+    track.innerHTML = '';
+    picks.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'vector-card';
+        div.style.minWidth = '160px';
+        div.innerHTML = `
+            <div class="vc-img-wrap" style="aspect-ratio: 1; height:120px;">
+                <div class="vc-type-badge">${(v.type || 'vector').toUpperCase()}</div>
+                <img class="vc-img" src="${v.thumbnail}">
+            </div>`;
+        div.onclick = () => showDetailPanel(v, div);
+        track.appendChild(div);
+    });
+}
+
+function setupOurPicksArrows() {
+    document.getElementById('ourPicksNext').onclick = () => {
+        state.ourPicksOffset -= 220;
+        document.getElementById('ourPicksTrack').style.transform = `translateX(${state.ourPicksOffset}px)`;
+    };
+    document.getElementById('ourPicksPrev').onclick = () => {
+        state.ourPicksOffset = Math.min(0, state.ourPicksOffset + 220);
+        document.getElementById('ourPicksTrack').style.transform = `translateX(${state.ourPicksOffset}px)`;
+    };
+}
+
+function setupEventListeners() {
+    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
+    
+    let st;
+    document.getElementById('searchInput').oninput = (e) => {
+        state.searchQuery = e.target.value;
+        state.currentPage = 1;
+        clearTimeout(st);
+        st = setTimeout(fetchVectors, 400);
+    };
+}
+
+function setupModalHandlers() {
     document.querySelectorAll('.modal-trigger').forEach(b => {
         b.onclick = (e) => {
             e.preventDefault();
-            const modalData = MODAL_CONTENTS[b.dataset.modal];
-            if (modalData) {
-                document.getElementById('infoModalBody').innerHTML = modalData.content;
-                document.getElementById('infoModal').style.display = 'flex';
-            }
+            const m = MODAL_CONTENTS[b.dataset.modal];
+            document.getElementById('infoModalBody').innerHTML = m.content;
+            document.getElementById('infoModal').style.display = 'flex';
         };
     });
     document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none';
 }
 
-function setupOurPicksArrows() {
-    document.getElementById('ourPicksPrev').onclick = () => scrollOurPicks(-1);
-    document.getElementById('ourPicksNext').onclick = () => scrollOurPicks(1);
-}
-
-async function fetchAndRenderOurPicks() {
-    const track = document.getElementById('ourPicksTrack');
-    const res = await fetch('/api/vectors?page=1&limit=15');
-    const data = await res.json();
-    const picks = data.vectors || [];
-    track.innerHTML = '';
-    state.originalPicksCount = picks.length;
-    [...picks, ...picks].forEach(v => {
-        const typeLabel = (v.type || 'vector').toUpperCase();
-        const card = document.createElement('div');
-        card.className = 'vector-card';
-        card.style.minWidth = '180px';
-        card.innerHTML = `
-            <div class="vc-img-wrap">
-                <div class="vc-type-badge">${typeLabel}</div>
-                <img class="vc-img" src="${v.thumbnail}">
-            </div>`;
-        card.onclick = () => showDownloadPage(v);
-        track.appendChild(card);
-    });
-}
-
-function scrollOurPicks(dir) {
-    const track = document.getElementById('ourPicksTrack');
-    state.ourPicksOffset += (dir * -200);
-    track.style.transform = `translateX(${state.ourPicksOffset}px)`;
-}
-
-function setupEventListeners() { 
-    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
-    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
-}
-
-function setupDownloadPageHandlers() { 
-    document.getElementById('dpClose').onclick = () => { document.getElementById('downloadPage').style.display = 'none'; clearInterval(state.countdownInterval); };
-}
-
-function updatePagination() { 
-    document.getElementById('pageNumber').textContent = state.currentPage; 
-    document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`; 
+function updatePagination() {
+    document.getElementById('pageNumber').textContent = state.currentPage;
+    document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`;
 }
 
 function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
