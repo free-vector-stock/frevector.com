@@ -14,7 +14,7 @@ body { font-family: sans-serif; background: var(--white); display: flex; flex-di
 
 .main-container { display: flex; flex: 1; overflow: hidden; }
 .sidebar { width: 180px; border-right: 1px solid var(--border); padding: 15px 0; overflow-y: auto; }
-.sidebar-title { padding: 0 15px 10px; font-weight: bold; font-size: 14px; }
+.sidebar-title { padding: 0 15px 10px; font-weight: bold; font-size: 14px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
 .category-item { display: block; padding: 8px 15px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; }
 .category-item.active { background: #000; color: #fff; }
 
@@ -44,21 +44,25 @@ body { font-family: sans-serif; background: var(--white); display: flex; flex-di
 .our-picks-content-wrapper { display: flex; align-items: center; gap: 10px; }
 .our-picks-track-wrap { flex: 1; overflow: hidden; }
 .our-picks-track { display: flex; gap: 15px; }
-.our-picks-item { flex: 0 0 255px; aspect-ratio: 1.5; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; }
-.our-picks-item img { width: 100%; height: 100%; object-fit: cover; }
+/* SLIDER GÖRSEL BOYUTU KÜÇÜLTÜLDÜ (180px) */
+.our-picks-item { flex: 0 0 180px; aspect-ratio: 1.2; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; }
+.our-picks-item img { width: 100%; height: 100%; object-fit: contain; background: #f9f9f9; }
 .our-picks-arrow { background: #000; color: #fff; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
 
 .footer { background: #000; color: #fff; padding: 20px; display: flex; justify-content: space-between; font-size: 12px; }
 .footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; }
 
 .download-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: none; flex-direction: column; }
-.download-page-body { display: flex; padding: 40px; gap: 40px; max-width: 1200px; margin: 0 auto; }
+.download-page-body { display: flex; padding: 40px; gap: 40px; max-width: 1200px; margin: 0 auto; overflow-y: auto; }
 .dp-image { width: 100%; max-width: 500px; border-radius: 8px; border: 1px solid var(--border); }
 .download-btn { background: #000; color: #fff; border: none; padding: 15px; width: 100%; cursor: pointer; font-weight: bold; }
 
 .info-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 3000; }
-.info-modal-box { background: #fff; width: 90%; max-width: 600px; padding: 30px; border-radius: 8px; position: relative; max-height: 80vh; overflow-y: auto; }
+.info-modal-box { background: #fff; width: 90%; max-width: 600px; padding: 30px; border-radius: 8px; position: relative; max-height: 80vh; overflow-y: auto; line-height: 1.6; }
 .info-modal-close { position: absolute; top: 10px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; }
+.info-modal-body h2 { margin: 15px 0 10px; font-size: 18px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+.info-modal-body p { margin-bottom: 10px; }
+.info-modal-body ul { margin-left: 20px; margin-bottom: 10px; }
 
 .loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; z-index:4000; }
 .spinner { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #000; border-radius:50%; animation:spin 1s linear infinite; }
@@ -66,10 +70,11 @@ body { font-family: sans-serif; background: var(--white); display: flex; flex-di
 
 @media (max-width: 768px) {
     .main-container { flex-direction: column; overflow: visible; }
-    .sidebar { width: 100%; order: 1; }
-    .content { order: 2; }
+    .sidebar { width: 100%; order: 3; border-right: none; border-top: 1px solid var(--border); }
+    .content { order: 1; padding: 10px; }
     .vectors-grid { grid-template-columns: 1fr; }
     .detail-inner { flex-direction: column; }
     .detail-img { width: 100%; }
     .footer { flex-direction: column; gap: 10px; text-align: center; }
+    .download-page-body { flex-direction: column; padding: 20px; }
 }
