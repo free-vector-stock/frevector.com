@@ -1,5 +1,5 @@
 /**
- * frevector.com - Frontend Core Logic
+ * frevector.com - Frontend Logic
  */
 
 const CATEGORIES = [
@@ -11,32 +11,20 @@ const CATEGORIES = [
 
 const MODAL_CONTENTS = {
     about: { 
-        title: 'ABOUT US', 
-        content: `<h2>ABOUT US</h2>
-        <p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
-        <p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
-        <p>All files can be used in both personal and commercial projects. <strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>` 
+        title: 'About Us', 
+        content: `<h2>About Us</h2><p style="margin-top:15px; line-height:1.6;">Frevector.com is a specialized digital archive offering high-quality, original vector assets for designers, illustrators, and creators worldwide. Our mission is to provide a seamless creative workflow by offering free access to professionally crafted SVG and EPS files. Every piece in our collection is meticulously designed to meet modern industry standards, ensuring full scalability and easy customization for both personal and commercial projects.</p>` 
     },
     privacy: { 
-        title: 'PRIVACY POLICY', 
-        content: `<h2>PRIVACY POLICY</h2>
-        <p>As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>
-        <h3>1. Data Collected</h3>
-        <p>Anonymous data like cookies, browser/device info, and interaction data may be collected automatically for analytics.</p>` 
+        title: 'Privacy Policy', 
+        content: `<h2>Privacy Policy</h2><p style="margin-top:15px; line-height:1.6;">At Frevector.com, your privacy is our priority. We only collect minimal data necessary for site performance and user experience improvements. We use industry-standard encryption to protect your information and do not sell or share your data with third-party advertisers. Cookies are utilized only to remember your preferences and provide analytical insights to help us serve you better.</p>` 
     },
     terms: { 
-        title: 'TERMS OF SERVICE', 
-        content: `<h2>TERMS OF SERVICE</h2>
-        <p>Every visitor using Frevector.com is deemed to have accepted the following terms.</p>
-        <h3>1. Content Ownership</h3>
-        <p>All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector.</p>
-        <p><strong>Prohibitions:</strong> Sharing as-is, Redistribution, Selling, Bulk archives.</p>` 
+        title: 'Terms of Service', 
+        content: `<h2>Terms of Service</h2><p style="margin-top:15px; line-height:1.6;">By using Frevector.com, you agree to our terms. All assets provided are free for use in personal and commercial projects. However, redistribution, sub-licensing, or selling our original files as your own is strictly prohibited. While we strive for the highest quality, Frevector.com is not liable for any damages resulting from the use of our downloaded files.</p>` 
     },
     contact: { 
-        title: 'CONTACT & COPYRIGHT', 
-        content: `<h2>CONTACT</h2>
-        <p>If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p>
-        <p><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000; font-weight:bold;">hakankacar2014@gmail.com</a></p>` 
+        title: 'Contact', 
+        content: `<h2>Contact</h2><p style="margin-top:15px; line-height:1.6;">Have questions, feedback, or a custom request? We would love to hear from you. Our team is dedicated to supporting the creative community.</p><p style="margin-top:15px;"><strong>Official Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000; font-weight:bold;">hakankacar2014@gmail.com</a></p><p style="margin-top:5px;">Response time is typically within 24-48 hours.</p>` 
     }
 };
 
@@ -49,6 +37,7 @@ const state = {
     searchQuery: '',
     isLoading: false,
     openedVector: null,
+    openedCardEl: null,
     countdownInterval: null,
     ourPicksOffset: 0,
     isTransitioning: false,
@@ -62,19 +51,22 @@ async function init() {
     setupModalHandlers();
     setupDownloadPageHandlers();
     setupOurPicksArrows();
+    
     await fetchVectors();
     setTimeout(() => fetchAndRenderOurPicks(), 300);
 }
 
 function setupTypeFilters() {
-    document.querySelectorAll('.type-filter').forEach(btn => {
+    const filters = document.querySelectorAll('.type-filter');
+    filters.forEach(btn => {
         btn.onclick = (e) => {
             e.preventDefault();
-            document.querySelectorAll('.type-filter').forEach(f => f.classList.remove('active'));
+            filters.forEach(f => f.classList.remove('active'));
             btn.classList.add('active');
             state.selectedType = btn.dataset.type;
             state.currentPage = 1;
-            fetchVectors().then(() => fetchAndRenderOurPicks());
+            closeDetailPanel();
+            fetchVectors().then(() => { setTimeout(() => fetchAndRenderOurPicks(), 300); });
         };
     });
 }
@@ -89,7 +81,6 @@ function setupCategories() {
     allLink.textContent = 'All Categories';
     allLink.onclick = (e) => { e.preventDefault(); selectCategory('all'); };
     list.appendChild(allLink);
-
     CATEGORIES.forEach(cat => {
         const a = document.createElement('a');
         a.href = '#';
@@ -103,9 +94,15 @@ function setupCategories() {
 function selectCategory(cat) {
     state.selectedCategory = cat;
     state.currentPage = 1;
+    closeDetailPanel();
     setupCategories();
-    document.getElementById('categoryTitle').textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors`;
-    fetchVectors().then(() => fetchAndRenderOurPicks());
+    updateCategoryTitle();
+    fetchVectors().then(() => { setTimeout(() => fetchAndRenderOurPicks(), 300); });
+}
+
+function updateCategoryTitle() {
+    const el = document.getElementById('categoryTitle');
+    if (el) el.textContent = state.selectedCategory === 'all' ? 'Free Vectors' : `Free ${state.selectedCategory} Vectors`;
 }
 
 async function fetchVectors() {
@@ -115,6 +112,7 @@ async function fetchVectors() {
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('page', state.currentPage);
+        url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
@@ -130,24 +128,107 @@ async function fetchVectors() {
 
 function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
+    if (!grid) return;
     grid.innerHTML = '';
+    if (state.vectors.length === 0) {
+        grid.innerHTML = '<p style="padding:20px; color:#999;">No items found in this category.</p>';
+        return;
+    }
     state.vectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
+        const typeBadge = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
         card.innerHTML = `
-            <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}"></div>
+            <div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}">${typeBadge}</div>
             <div class="vc-info">
                 <div class="vc-description">${v.title || "Untitled"}</div>
                 <div class="vc-keywords">${(v.keywords || []).slice(0, 3).join(', ')}</div>
             </div>
         `;
-        card.onclick = () => showDownloadPage(v);
+        card.onclick = () => openDetailPanel(v, card);
         grid.appendChild(card);
     });
 }
 
+async function fetchAndRenderOurPicks() {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track) return;
+    let picks = [];
+    const maxPicks = 15;
+    try {
+        let fetchPromises = [];
+        for (let i = 0; i < maxPicks; i++) {
+            const randomPage = Math.floor(Math.random() * (state.totalPages || 1)) + 1;
+            const url = new URL('/api/vectors', window.location.origin);
+            url.searchParams.set('page', randomPage);
+            url.searchParams.set('limit', '5'); 
+            fetchPromises.push(fetch(url).then(r => r.json()));
+        }
+        const results = await Promise.all(fetchPromises);
+        results.forEach(data => {
+            if (data.vectors && data.vectors.length > 0) {
+                picks.push(data.vectors[Math.floor(Math.random() * data.vectors.length)]);
+            }
+        });
+        track.innerHTML = '';
+        state.originalPicksCount = picks.length;
+        if (picks.length === 0) return;
+        const quadPicks = [...picks, ...picks, ...picks, ...picks];
+        quadPicks.forEach(v => {
+            if(!v) return;
+            const card = document.createElement('div');
+            card.className = 'vector-card';
+            card.style.cursor = 'pointer';
+            card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
+            card.onclick = (e) => { e.preventDefault(); showDownloadPage(v); };
+            track.appendChild(card);
+        });
+        state.ourPicksOffset = picks.length * 90;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+    } catch (err) { console.error("Our Picks Error:", err); }
+}
+
+function openDetailPanel(v, cardEl) {
+    closeDetailPanel();
+    state.openedVector = v;
+    state.openedCardEl = cardEl;
+    cardEl.classList.add('card-active');
+    const panel = document.createElement('div');
+    panel.id = 'detailPanel';
+    panel.className = 'detail-panel';
+    panel.innerHTML = `
+        <div class="detail-inner">
+            <div class="detail-left"><img class="detail-img" src="${v.thumbnail}"></div>
+            <div class="detail-right">
+                <h2 class="detail-title">${v.title}</h2>
+                <div class="detail-keywords">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
+                    <button class="detail-close-btn" id="mainCloseBtn">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+    const grid = document.getElementById('vectorsGrid');
+    const cards = Array.from(grid.children);
+    const index = cards.indexOf(cardEl);
+    const cols = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
+    const insertAfter = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
+    grid.insertBefore(panel, cards[insertAfter].nextSibling);
+    document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
+    document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function closeDetailPanel() {
+    const p = document.getElementById('detailPanel');
+    if (p) p.remove();
+    if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
+}
+
 function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
+    if(!dp) return;
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpCategory').textContent = v.category || '-';
@@ -159,27 +240,13 @@ function showDownloadPage(v) {
         document.getElementById('dpCountdownBox').style.display = 'block';
         let c = 4;
         document.getElementById('dpCountdown').textContent = c;
+        if(state.countdownInterval) clearInterval(state.countdownInterval);
         state.countdownInterval = setInterval(() => {
-            c--;
-            document.getElementById('dpCountdown').textContent = c;
+            c--; document.getElementById('dpCountdown').textContent = c;
             if (c <= 0) { clearInterval(state.countdownInterval); window.location.href = `/api/download?slug=${v.name}`; }
         }, 1000);
     };
     dp.style.display = 'flex';
-}
-
-function setupModalHandlers() { 
-    document.querySelectorAll('.modal-trigger').forEach(b => {
-        b.onclick = (e) => {
-            e.preventDefault();
-            const modalData = MODAL_CONTENTS[b.dataset.modal];
-            if (modalData) {
-                document.getElementById('infoModalBody').innerHTML = modalData.content;
-                document.getElementById('infoModal').style.display = 'flex';
-            }
-        };
-    });
-    document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none';
 }
 
 function setupOurPicksArrows() {
@@ -187,31 +254,14 @@ function setupOurPicksArrows() {
     document.getElementById('ourPicksNext').onclick = () => scrollOurPicks(1);
 }
 
-async function fetchAndRenderOurPicks() {
-    const track = document.getElementById('ourPicksTrack');
-    const res = await fetch('/api/vectors?page=1&limit=15');
-    const data = await res.json();
-    const picks = data.vectors || [];
-    track.innerHTML = '';
-    state.originalPicksCount = picks.length;
-    [...picks, ...picks, ...picks].forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'vector-card';
-        card.innerHTML = `<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}"></div>`;
-        card.onclick = () => showDownloadPage(v);
-        track.appendChild(card);
-    });
-    state.ourPicksOffset = picks.length * 100;
-    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-}
-
 function scrollOurPicks(dir) {
     if (state.isTransitioning) return;
     const track = document.getElementById('ourPicksTrack');
-    const setWidth = state.originalPicksCount * 100;
+    const setWidth = state.originalPicksCount * 90;
+    if (setWidth === 0) return;
     state.isTransitioning = true;
     track.style.transition = 'transform 0.4s ease';
-    state.ourPicksOffset += (dir * -300);
+    state.ourPicksOffset += (dir * -270);
     track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
     setTimeout(() => {
         track.style.transition = 'none';
@@ -222,13 +272,37 @@ function scrollOurPicks(dir) {
     }, 400);
 }
 
-function setupEventListeners() { 
-    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
-    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
+function setupDownloadPageHandlers() { 
+    const dpClose = document.getElementById('dpClose');
+    if(dpClose) dpClose.onclick = () => { 
+        document.getElementById('downloadPage').style.display = 'none'; 
+        if(state.countdownInterval) clearInterval(state.countdownInterval); 
+    };
 }
 
-function setupDownloadPageHandlers() { 
-    document.getElementById('dpClose').onclick = () => { document.getElementById('downloadPage').style.display = 'none'; clearInterval(state.countdownInterval); };
+function setupModalHandlers() { 
+    document.querySelectorAll('.modal-trigger').forEach(b => {
+        b.onclick = (e) => {
+            e.preventDefault();
+            const content = MODAL_CONTENTS[b.dataset.modal];
+            if (content) {
+                document.getElementById('infoModalBody').innerHTML = content.content;
+                document.getElementById('infoModal').style.display = 'flex';
+            }
+        };
+    });
+    document.getElementById('infoModalClose').onclick = () => { document.getElementById('infoModal').style.display = 'none'; };
+    window.onclick = (e) => { if (e.target == document.getElementById('infoModal')) document.getElementById('infoModal').style.display = 'none'; };
+}
+
+function setupEventListeners() { 
+    document.getElementById('searchBtn').onclick = () => { 
+        state.searchQuery = document.getElementById('searchInput').value; 
+        state.currentPage = 1; fetchVectors();
+    };
+    document.getElementById('searchInput').onkeypress = (e) => { if(e.key === 'Enter') document.getElementById('searchBtn').click(); };
+    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } }; 
+    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
 }
 
 function updatePagination() { 
@@ -236,6 +310,9 @@ function updatePagination() {
     document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`; 
 }
 
-function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
+function showLoader(s) { 
+    const l = document.getElementById('loader');
+    if(l) l.style.display = s ? 'flex' : 'none'; 
+}
 
 document.addEventListener('DOMContentLoaded', init);
