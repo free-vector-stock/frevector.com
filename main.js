@@ -10,14 +10,15 @@ const CATEGORIES = [
 ];
 
 const MODAL_CONTENTS = {
-    about: { title: 'ABOUT US', content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform... (İçerik Korundu)</p>` },
-    privacy: { title: 'PRIVACY POLICY', content: `<h2>PRIVACY POLICY</h2><p>As Frevector.com... (İçerik Korundu)</p>` },
-    terms: { title: 'TERMS OF SERVICE', content: `<h2>TERMS OF SERVICE</h2><p>Terms... (İçerik Korundu)</p>` },
-    contact: { title: 'CONTACT & COPYRIGHT', content: `<h2>CONTACT</h2><p>Email: hakankacar2014@gmail.com</p>` }
+    about: { title: 'ABOUT US', content: `<h2>ABOUT US</h2><p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p><p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists.</p>` },
+    privacy: { title: 'PRIVACY POLICY', content: `<h2>PRIVACY POLICY</h2><p>As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>` },
+    terms: { title: 'TERMS OF SERVICE', content: `<h2>TERMS OF SERVICE</h2><p>Every visitor using Frevector.com is deemed to have accepted the following terms.</p>` },
+    contact: { title: 'CONTACT & COPYRIGHT', content: `<h2>CONTACT</h2><p>If you have any questions or copyright issues regarding Frevector.com, please get in touch.</p><p><strong>Email:</strong> hakankacar2014@gmail.com</p>` }
 };
 
 const state = {
-    vectors: [], currentPage: 1, totalPages: 1, selectedCategory: 'all', selectedType: 'all', searchQuery: '', isLoading: false, ourPicksOffset: 0
+    vectors: [], currentPage: 1, totalPages: 1, selectedCategory: 'all', selectedType: 'all', searchQuery: '', isLoading: false,
+    ourPicksOffset: 0, picksCount: 0
 };
 
 async function init() {
@@ -47,11 +48,10 @@ function setupCategories() {
     const list = document.getElementById('categoriesList');
     if (!list) return;
     list.innerHTML = '';
-    
     ['all', ...CATEGORIES].forEach(cat => {
         const a = document.createElement('a');
         a.className = 'category-item' + (state.selectedCategory === cat ? ' active' : '');
-        a.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+        a.textContent = cat;
         a.onclick = (e) => {
             e.preventDefault();
             state.selectedCategory = cat;
@@ -59,7 +59,7 @@ function setupCategories() {
             document.getElementById('categoryTitle').textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : `Free ${cat} Vectors`;
             setupCategories();
             fetchVectors();
-            fetchAndRenderOurPicks(); // Kategori değişince Selection kısmı da değişir
+            fetchAndRenderOurPicks(); // Alttaki seçkileri kategoriye göre yenile
         };
         list.appendChild(a);
     });
@@ -118,13 +118,11 @@ function showDetailPanel(v, cardElement) {
             <div class="dp-meta-row"><strong>Format:</strong> ${(v.type || 'vector').toUpperCase()}</div>
             <div class="dp-meta-row"><strong>Category:</strong> ${v.category || '-'}</div>
             <div class="dp-kw-container">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
-            <button class="download-btn-short" id="goToDL">DOWNLOAD</button>
+            <button class="download-btn-short" id="goToDL">DOWNLOAD PAGE</button>
         </div>
     `;
     cardElement.after(panel);
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    // DOWNLOAD butonuna basıldığında yeni indirme sayfasını aç
     document.getElementById('goToDL').onclick = () => openDownloadPage(v);
 }
 
@@ -132,11 +130,8 @@ function openDownloadPage(v) {
     const overlay = document.getElementById('downloadOverlay');
     const counter = document.getElementById('dlCounter');
     const preview = document.getElementById('dlPreviewArea');
-    
     preview.innerHTML = `<img src="${v.thumbnail}" style="max-height:150px; margin-bottom:20px; object-fit:contain;"><h3>${v.title}</h3>`;
     overlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-
     let count = 4;
     counter.textContent = count;
     const interval = setInterval(() => {
@@ -145,55 +140,48 @@ function openDownloadPage(v) {
         if (count <= 0) {
             clearInterval(interval);
             window.location.href = `/api/download?slug=${v.name}`;
-            counter.textContent = "OK!";
-            setTimeout(() => { overlay.style.display = 'none'; document.body.style.overflow = 'auto'; }, 1500);
+            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
         }
     }, 1000);
-    
-    document.getElementById('closeDL').onclick = () => {
-        clearInterval(interval);
-        overlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    };
+    document.getElementById('closeDL').onclick = () => { clearInterval(interval); overlay.style.display = 'none'; };
 }
 
-// Our Selections For You - Rastgele ve Boşluksuz Seçim
+// Our Selections - Sonsuz Döngü & Karışık Getirme
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    const categoryQuery = state.selectedCategory !== 'all' ? `&category=${state.selectedCategory}` : '';
-    // Karışık görsel gelmesi için rastgele bir sayfa parametresi ekliyoruz
-    const randomPage = Math.floor(Math.random() * 5) + 1;
-    const res = await fetch(`/api/vectors?limit=15&page=${randomPage}${categoryQuery}`);
+    const cat = state.selectedCategory !== 'all' ? `&category=${state.selectedCategory}` : '';
+    const randomPage = Math.floor(Math.random() * 3) + 1;
+    const res = await fetch(`/api/vectors?limit=12&page=${randomPage}${cat}`);
     const data = await res.json();
     const picks = data.vectors || [];
     
+    // Sonsuz döngü için listenin sonuna ilk birkaç elemanı kopyalıyoruz
     track.innerHTML = '';
-    picks.forEach(v => {
+    const allPicks = [...picks, ...picks.slice(0, 6)]; 
+    state.picksCount = picks.length;
+
+    allPicks.forEach(v => {
         const div = document.createElement('div');
         div.className = 'vector-card';
         div.style.minWidth = '160px';
-        div.innerHTML = `
-            <div class="vc-img-wrap" style="aspect-ratio: 1; height:120px;">
-                <div class="vc-type-badge">${(v.type || 'vector').toUpperCase()}</div>
-                <img class="vc-img" src="${v.thumbnail}">
-            </div>`;
-        div.onclick = () => {
-            // Alta değil, sayfanın yukarısındaki ana alana odaklanır ve detay açar
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            showDetailPanel(v, div); 
-        };
+        div.innerHTML = `<div class="vc-img-wrap" style="height:120px;"><img class="vc-img" src="${v.thumbnail}"></div>`;
+        div.onclick = () => { window.scrollTo({top:0, behavior:'smooth'}); showDetailPanel(v, div); };
         track.appendChild(div);
     });
 }
 
 function setupOurPicksArrows() {
+    const track = document.getElementById('ourPicksTrack');
     document.getElementById('ourPicksNext').onclick = () => {
-        state.ourPicksOffset -= 220;
-        document.getElementById('ourPicksTrack').style.transform = `translateX(${state.ourPicksOffset}px)`;
+        state.ourPicksOffset -= 175; // 160px width + 15px gap
+        if (Math.abs(state.ourPicksOffset) >= (state.picksCount * 175)) {
+            state.ourPicksOffset = 0; // Başa dön
+        }
+        track.style.transform = `translateX(${state.ourPicksOffset}px)`;
     };
     document.getElementById('ourPicksPrev').onclick = () => {
-        state.ourPicksOffset = Math.min(0, state.ourPicksOffset + 220);
-        document.getElementById('ourPicksTrack').style.transform = `translateX(${state.ourPicksOffset}px)`;
+        state.ourPicksOffset = state.ourPicksOffset >= 0 ? -(state.picksCount * 175) : state.ourPicksOffset + 175;
+        track.style.transform = `translateX(${state.ourPicksOffset}px)`;
     };
 }
 
@@ -217,6 +205,7 @@ function setupModalHandlers() {
         };
     });
     document.getElementById('infoModalClose').onclick = () => document.getElementById('infoModal').style.display = 'none';
+    window.onclick = (event) => { if (event.target == document.getElementById('infoModal')) document.getElementById('infoModal').style.display = "none"; };
 }
 
 function updatePagination() {
