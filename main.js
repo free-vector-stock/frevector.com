@@ -1,5 +1,5 @@
 /**
- * frevector.com - Core Script Revized
+ * frevector.com - Core Script Revized (Final Version)
  */
 
 const MODAL_DATA = {
@@ -52,7 +52,7 @@ const CATEGORY_H1_MAP = {
 const state = {
     vectors: [], currentPage: 1, totalPages: 1, 
     selectedCategory: 'all', selectedType: 'all', searchQuery: '', sortOrder: '',
-    isLoading: false, picksOffset: 0, pickItemWidth: 130 // 120px card + 10px gap
+    isLoading: false, picksOffset: 0, pickItemWidth: 130 
 };
 
 async function init() {
@@ -73,7 +73,7 @@ async function fetchVectors() {
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
-        if (state.sortOrder) url.searchParams.set('sort', state.sortOrder); // SORT ÇALIŞSIN
+        if (state.sortOrder) url.searchParams.set('sort', state.sortOrder);
         
         const res = await fetch(url);
         const data = await res.json();
@@ -81,8 +81,23 @@ async function fetchVectors() {
         state.totalPages = data.totalPages || 1;
         renderVectors();
         updatePagination();
+        updateH1(); // 32. MADDE: Her fetch işleminde H1'i kontrol et
     } catch (err) { console.error(err); }
     finally { state.isLoading = false; showLoader(false); }
+}
+
+// 32. MADDE: H1 BAŞLIĞI GÜNCELLEME SİSTEMİ
+function updateH1() {
+    const h1 = document.getElementById('categoryTitle');
+    if (!h1) return;
+
+    if (state.searchQuery) {
+        h1.textContent = `Search results for: "${state.searchQuery}"`;
+    } else if (state.selectedCategory !== 'all') {
+        h1.textContent = CATEGORY_H1_MAP[state.selectedCategory] || "Free Vectors, SVGs, Icons and Clipart";
+    } else {
+        h1.textContent = "Free Vectors, SVGs, Icons and Clipart";
+    }
 }
 
 function renderVectors() {
@@ -96,6 +111,7 @@ function renderVectors() {
 }
 
 function createVectorCard(v) {
+    // 29-30. MADDE: İsimlendirmeye göre Badge
     const isJpeg = v.name.toLowerCase().includes('-jpeg-');
     const badge = isJpeg ? 'JPEG' : 'VECTOR';
     const card = document.createElement('div');
@@ -123,7 +139,7 @@ function showDetailPanel(v, cardElement, container) {
         <div class="dp-info">
             <h2 class="dp-title">${v.title}</h2>
             <div class="dp-kw">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
-            <button class="download-btn-short" id="startDL">DOWNLOAD PAGE</button>
+            <button class="download-btn-short" id="openDLPage">DOWNLOAD PAGE</button>
         </div>
     `;
     
@@ -135,35 +151,66 @@ function showDetailPanel(v, cardElement, container) {
         cardElement.after(panel);
     }
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    document.getElementById('startDL').onclick = () => runDownloadProcess(v);
+    
+    // 25. MADDE: Download Page Butonu aksiyonu
+    document.getElementById('openDLPage').onclick = () => openDownloadPage(v);
 }
 
-function runDownloadProcess(v) {
-    const overlay = document.getElementById('downloadOverlay');
-    const counterEl = document.getElementById('dlCounter');
-    document.getElementById('dlPreviewArea').innerHTML = `<img src="${v.thumbnail}" style="max-height:100px;"><h3>${v.title}</h3>`;
-    overlay.style.display = 'flex';
-    let count = 4;
-    counterEl.textContent = count;
-    const itv = setInterval(() => {
-        count--; counterEl.textContent = count;
-        if (count <= 0) {
-            clearInterval(itv);
-            window.location.href = `/api/download?slug=${v.name}`;
-            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
-        }
-    }, 1000);
-    document.getElementById('closeDL').onclick = () => { clearInterval(itv); overlay.style.display = 'none'; };
+// 25. MADDE: AYRI SAYFA GÖRÜNÜMÜ VE GERİ SAYIM
+function openDownloadPage(v) {
+    const overlay = document.getElementById('downloadPageOverlay');
+    if (!overlay) return;
+
+    // Overlay içeriğini doldur
+    document.getElementById('dlPreviewImg').src = v.thumbnail;
+    document.getElementById('dlPageTitle').textContent = v.title;
+    document.getElementById('dlPageFormat').textContent = v.name.toLowerCase().includes('-jpeg-') ? 'JPEG' : 'VECTOR (SVG/EPS)';
+    
+    overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    const finalBtn = document.getElementById('finalDownloadBtn');
+    const timerBox = document.getElementById('dlTimerBox');
+    const countdown = document.getElementById('countdownNum');
+
+    // Reset view
+    finalBtn.style.display = 'block';
+    timerBox.style.display = 'none';
+
+    finalBtn.onclick = () => {
+        finalBtn.style.display = 'none';
+        timerBox.style.display = 'block';
+        let count = 4;
+        countdown.textContent = count;
+
+        const itv = setInterval(() => {
+            count--;
+            countdown.textContent = count;
+            if (count <= 0) {
+                clearInterval(itv);
+                window.location.href = `/api/download?slug=${v.name}`;
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 1000);
+            }
+        }, 1000);
+    };
+
+    document.getElementById('closeDLPage').onclick = () => {
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    };
 }
 
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
+    if (!track) return;
     const res = await fetch(`/api/vectors?limit=20`);
     const data = await res.json();
     const items = data.vectors || [];
     
     track.innerHTML = '';
-    // Sonsuz döngü için listenin başına ve sonuna ekleme yapıyoruz
     const extendedItems = [...items, ...items, ...items];
     extendedItems.forEach(v => {
         const card = createVectorCard(v);
@@ -171,7 +218,6 @@ async function fetchAndRenderOurPicks() {
         track.appendChild(card);
     });
 
-    // Başlangıç konumu (orta set)
     state.picksOffset = -(items.length * state.pickItemWidth);
     track.style.transform = `translateX(${state.picksOffset}px)`;
 
@@ -234,12 +280,13 @@ function setupEventListeners() {
     document.getElementById('sortFilter').onchange = (e) => {
         state.sortOrder = e.target.value; state.currentPage = 1; fetchVectors();
     };
-    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
-    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
+    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); window.scrollTo(0,0); } };
+    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); window.scrollTo(0,0); } };
 }
 
 function setupCategories() {
     const list = document.getElementById('categoriesList');
+    if (!list) return;
     list.innerHTML = '';
     ['all', ...Object.keys(CATEGORY_H1_MAP)].forEach(cat => {
         const a = document.createElement('a');
@@ -247,7 +294,6 @@ function setupCategories() {
         a.textContent = cat;
         a.onclick = (e) => {
             e.preventDefault(); state.selectedCategory = cat; state.currentPage = 1;
-            document.getElementById('categoryTitle').textContent = cat === 'all' ? "Free Vectors, SVGs, Icons and Clipart" : CATEGORY_H1_MAP[cat];
             setupCategories(); fetchVectors();
         };
         list.appendChild(a);
