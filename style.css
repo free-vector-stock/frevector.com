@@ -6,67 +6,143 @@
     --gray-mid: #e0e0e0;
     --gray-text: #666666;
     --border: #e8e8e8;
-    --font: 'Inter', sans-serif;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; margin: 0; overflow: hidden; }
-body { font-family: var(--font); background: var(--white); display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
 
-/* Banner & Header */
+/* SAYFA YAPISI - KÖKTEN ÇÖZÜM */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Tüm sayfanın kaymasını engelle */
+}
+
+body { 
+    font-family: var(--font); 
+    background: var(--white); 
+    display: flex;
+    flex-direction: column; /* İçeriği yukarıdan aşağıya diz */
+}
+
+/* Üst Sabit Alanlar */
 .top-banner { background: var(--black); padding: 10px; display: flex; justify-content: center; height: 52px; flex-shrink: 0; z-index: 1100; }
 .banner-logo { height: 32px; }
+
 .header { height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; flex-shrink: 0; z-index: 1000; gap: 10px; }
 .header-center { flex: 1; display: flex; justify-content: center; }
 .search-container { max-width: 600px; width: 100%; display: flex; border: 1px solid var(--border); padding: 5px 10px; border-radius: 3px; }
-.search-input { border: none; outline: none; width: 100%; font-size: 14px; font-family: var(--font); }
+.search-input { border: none; outline: none; width: 100%; font-size: 14px; }
 .search-icon-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; }
 
-/* Sidebar */
-.main-container { display: flex; flex: 1; overflow: hidden; width: 100%; }
-.sidebar { width: 160px; border-right: 1px solid var(--border); overflow-y: auto; padding: 10px 0; background: #fff; flex-shrink: 0; }
-.sidebar-title { padding: 0 16px 5px; font-size: 11px; font-weight: 800; color: #333; text-transform: uppercase; letter-spacing: 0.5px; }
-.category-item { display: block; padding: 6px 16px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; font-weight: 500; }
-.category-item.active { background: var(--black); color: var(--white); font-weight: 600; }
+/* ORTA ALAN: Üst ve Alt panel arasında kalan tüm boşluğu doldurur */
+.main-container { 
+    display: flex; 
+    flex: 1; /* Kalan tüm boşluğu bu alan kaplar */
+    overflow: hidden; /* İçindeki sidebar ve content kendi başlarına kayacak */
+    width: 100%; 
+}
 
-/* Grid & Cards */
-.content { flex: 1; padding: 20px; overflow-y: auto; background: #fff; }
-.category-title-h1 { font-size: 24px; margin-bottom: 20px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; }
+.sidebar { 
+    width: 160px; 
+    border-right: 1px solid var(--border); 
+    overflow-y: auto; 
+    padding: 10px 0; 
+    background: #fff; 
+    flex-shrink: 0;
+}
+.sidebar-title { padding: 0 16px 5px; font-size: 11px; font-weight: bold; color: #333; text-transform: uppercase; }
+.category-item { display: block; padding: 6px 16px; text-decoration: none; color: #333; font-size: 13px; cursor: pointer; transition: 0.2s; }
+.category-item.active { background: var(--black); color: var(--white); font-weight: 500; }
+.category-item:hover:not(.active) { background: var(--gray-light); }
+
+.content { 
+    flex: 1; 
+    padding: 20px; 
+    overflow-y: auto; /* SADECE BURASI KAYDIRILABİLİR */
+    background: #fff; 
+}
+.category-title { font-size: 20px; margin-bottom: 20px; font-weight: 500; }
 .vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; position: relative; transition: border-color 0.2s; }
+
+/* Vector Card Styles */
+.vector-card { background: #fff; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; cursor: pointer; transition: 0.2s; position: relative; }
+.vector-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+.vector-card.card-active { border: 2px solid var(--black); }
 .vc-img-wrap { aspect-ratio: 1; overflow: hidden; position: relative; background: var(--gray-light); }
-.vc-img { width: 100%; height: 100%; object-fit: cover; }
-.vc-type-badge { position: absolute; top: 5px; right: 5px; font-size: 9px; padding: 2px 5px; color: white; border-radius: 2px; font-weight: 800; z-index: 5; }
-.vc-type-badge.jpeg { background: #1d4ed8; }
+.vc-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vc-type-badge { position: absolute; top: 5px; right: 5px; font-size: 8px; padding: 2px 4px; color: white; border-radius: 2px; font-weight: bold; z-index: 5; }
 .vc-type-badge.vector { background: #15803d; }
+.vc-type-badge.jpeg { background: #1d4ed8; }
 .vc-info { padding: 8px; border-top: 1px solid var(--border); }
-.vc-description { font-size: 11px; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vc-description { font-size: 11px; font-weight: bold; color: #222; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vc-keywords { font-size: 10px; color: var(--gray-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Our Picks Arrows (GÜNCELLENDİ) */
-.custom-arrow-btn { background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; min-width: 40px; }
-.custom-arrow-btn img { height: 35px; width: auto; display: block; }
-.our-picks-section { padding: 15px 0; text-align: center; }
-.our-picks-label { font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; color: #444; }
-.our-picks-content-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 10px; }
-.our-picks-track-wrap { overflow: hidden; width: 100%; max-width: 1300px; }
-.our-picks-track { display: flex; gap: 10px; }
+/* Detail In-Grid Panel */
+.detail-panel { grid-column: 1 / -1; background: var(--gray-light); padding: 25px; border-radius: 4px; margin: 10px 0; display: flex; gap: 25px; border: 1px solid var(--border); }
+.detail-inner { display: flex; gap: 25px; width: 100%; }
+.detail-left { flex: 0 0 300px; }
+.detail-img { width: 100%; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.detail-right { flex: 1; }
+.detail-title { font-size: 22px; margin-bottom: 15px; }
+.kw-tag { display: inline-block; background: #e0e0e0; padding: 4px 8px; margin: 2px; border-radius: 3px; font-size: 11px; color: #444; }
+.download-btn { background: #000; color: #fff; border: none; padding: 12px 25px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+.detail-close-btn { background: none; border: 1px solid #ccc; padding: 12px 25px; cursor: pointer; border-radius: 4px; }
 
-/* Modals & Footer */
-.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; align-items: center; }
-.footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; font-weight: 500; }
+/* ALT SABİT ALAN: ASLA YERİNDEN OYNAMAZ */
+.bottom-fixed-container { 
+    flex-shrink: 0; /* Küçülmesini engelle */
+    width: 100%; 
+    background: white; 
+    border-top: 1px solid var(--border); 
+    z-index: 1001; 
+}
+.pagination-wrapper { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: center; align-items: center; }
+.pag-btn { background: none; border: 1px solid #ddd; padding: 5px 15px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+.page-num { font-weight: bold; padding: 0 10px; font-size: 13px; }
+
+.our-picks-section { padding: 10px 0; text-align: center; background: #fff; }
+.our-picks-label { font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; color: #999; }
+.our-picks-content-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 20px; }
+.our-picks-track-wrap { overflow: hidden; width: 100%; max-width: 1200px; }
+.our-picks-track { display: flex; gap: 10px; transition: transform 0.4s ease; }
+.our-picks-track .vector-card { width: 80px; min-width: 80px; }
+.our-picks-track .vc-info { display: none; }
+.our-picks-arrow { background: white; border: 1px solid #ddd; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+.footer { background: #000; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; font-size: 11px; }
+.footer-link { color: #ccc; text-decoration: none; margin-left: 15px; cursor: pointer; }
+
+/* Modals & Full Overlay */
 .info-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; display:none; justify-content:center; align-items:center; }
-.info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:700px; width:90%; max-height: 85vh; overflow-y: auto; position: relative; }
-.info-modal-close { position:absolute; top:15px; right:15px; background:none; border:none; font-size:24px; cursor:pointer; }
+.info-modal-box { background:#fff; padding:40px; border-radius:8px; max-width:600px; width:90%; position:relative; overflow-y: auto; max-height: 90vh; }
+.info-modal-close { position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; }
 
-/* Download Page */
-.download-page { position: fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:2000; display:none; flex-direction:column; }
-.download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.download-page-body { flex:1; display:flex; padding:40px; gap:40px; max-width:1200px; margin:0 auto; overflow-y:auto; }
-.download-btn { background:#000; color:#fff; border:none; padding:15px 30px; cursor:pointer; font-weight:800; font-family: var(--font); border-radius: 4px; }
+.download-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: none; flex-direction: column; }
+.download-page-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.dp-site { font-weight: bold; font-size: 18px; }
+.dp-close { background: none; border: none; font-size: 24px; cursor: pointer; }
+.download-page-body { flex: 1; display: flex; padding: 40px; gap: 40px; max-width: 1200px; margin: 0 auto; width: 100%; overflow-y: auto; }
+.dp-left { flex: 1; }
+.dp-image { width: 100%; border-radius: 8px; border: 1px solid var(--border); }
+.dp-right { flex: 1; }
+.dp-title { font-size: 28px; margin-bottom: 20px; }
+.detail-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+.detail-table td { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+.dt-label { color: #999; width: 150px; }
+.dp-countdown-box { text-align: center; padding: 20px; background: #f9f9f9; border-radius: 8px; margin-top: 20px; }
+.dp-countdown-num { font-size: 48px; font-weight: bold; color: #000; }
+
+.loader-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#fff; z-index:4000; display:none; justify-content:center; align-items:center; }
+.spinner { width:40px; height:40px; border:4px solid #f3f3f3; border-top:4px solid #000; border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
 
 @media (max-width: 768px) {
-    .main-container { flex-direction: column; overflow: visible; }
-    .sidebar { width: 100%; display: flex; overflow-x: auto; height: auto; border-bottom: 1px solid var(--border); }
-    .download-page-body { flex-direction: column; }
+    body { overflow-y: auto; height: auto; }
+    .main-container { flex-direction: column; height: auto; overflow: visible; }
+    .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; height: auto; padding: 5px; flex-shrink: 0; }
+    .sidebar-title { display: none; }
+    .content { overflow-y: visible; }
+    .bottom-fixed-container { position: static; flex-shrink: 0; }
+    .download-page-body { flex-direction: column; padding: 20px; }
 }
