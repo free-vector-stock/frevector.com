@@ -9,19 +9,19 @@ const CATEGORIES = [
     'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
-// Footer link içerikleri - Eksiksiz Metinler
+// Footer içerikleri - Tam ve Eksiksiz
 const MODAL_CONTENTS = {
     about: { 
         title: 'ABOUT US', 
         content: `<h2>ABOUT US</h2>
         <p>Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
         <p>The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms.</p>
-        <p>All files can be used in both personal and commercial projects. Our only rule is this: Files cannot be redistributed, sold, or reshared as part of a package.</p>` 
+        <p>Each work is built from scratch and undergoes an original production process. All files can be used in both personal and commercial projects. Our only rule: Files cannot be redistributed or sold as-is.</p>` 
     },
     privacy: { 
         title: 'PRIVACY POLICY', 
         content: `<h2>PRIVACY POLICY</h2>
-        <p>As Frevector.com, we prioritize user privacy. We only collect anonymous data for analytics and performance improvements.</p>
+        <p>At Frevector.com, we prioritize user privacy. We only collect anonymous data for analytics and performance improvements.</p>
         <p>We do not sell user data to third parties. Cookies may be used to enhance site functions and provide a better experience.</p>` 
     },
     terms: { 
@@ -33,7 +33,7 @@ const MODAL_CONTENTS = {
     contact: { 
         title: 'CONTACT', 
         content: `<h2>CONTACT</h2>
-        <p>If you have any questions, copyright concerns, or support requests, please feel free to reach out to us.</p>
+        <p>If you have any questions or support requests, please feel free to reach out to us.</p>
         <p>Email: <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>` 
     }
 };
@@ -288,20 +288,25 @@ function scrollOurPicks(dir) {
 }
 
 function setupOurPicksArrows() {
-    document.getElementById('ourPicksPrev').onclick = () => scrollOurPicks(-1);
-    document.getElementById('ourPicksNext').onclick = () => scrollOurPicks(1);
+    const prev = document.getElementById('ourPicksPrev');
+    const next = document.getElementById('ourPicksNext');
+    if(prev) prev.onclick = () => scrollOurPicks(-1);
+    if(next) next.onclick = () => scrollOurPicks(1);
 }
 
 function setupDownloadPageHandlers() { 
-    document.getElementById('dpClose').onclick = () => { 
+    const closeBtn = document.getElementById('dpClose');
+    if(closeBtn) closeBtn.onclick = () => { 
         document.getElementById('downloadPage').style.display = 'none'; 
         if(state.countdownInterval) clearInterval(state.countdownInterval); 
     };
 }
 
 function updatePagination() { 
-    document.getElementById('pageNumber').textContent = state.currentPage; 
-    document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`; 
+    const pNum = document.getElementById('pageNumber');
+    const pTot = document.getElementById('pageTotal');
+    if(pNum) pNum.textContent = state.currentPage; 
+    if(pTot) pTot.textContent = `/ ${state.totalPages}`; 
 }
 
 function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
