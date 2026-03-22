@@ -17,7 +17,7 @@
         <div class="header-center">
             <div class="search-container">
                 <button class="search-icon-btn" id="searchBtn">
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="8" cy="8" r="6" stroke="#000" stroke-width="2"/><path d="M12.5 12.5L18 18" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="8" cy=\"8\" r=\"6\" stroke="#000" stroke-width="2"/><path d="M12.5 12.5L18 18" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
                 </button>
                 <input type="text" id="searchInput" class="search-input" placeholder="Search keywords (e.g. pizza, animal)...">
             </div>
@@ -43,8 +43,8 @@
             
             <div class="type-filters" style="margin-bottom: 20px; display: flex; gap: 10px;">
                 <a href="#" class="type-filter active" data-type="all">All Assets</a>
-                <a href="#" class="type-filter" data-type="vector">Vector</a>
-                <a href="#" class="type-filter" data-type="jpeg">JPEG</a>
+                <a href="#" class="type-filter" data-type="vector">Vectors</a>
+                <a href="#" class="type-filter" data-type="jpeg">Photos/JPEG</a>
             </div>
 
             <div id="vectorsGrid" class="vectors-grid">
@@ -78,8 +78,8 @@
             <div class="footer-right">
                 <a class="footer-link modal-trigger" data-modal="about">About Us</a>
                 <a class="footer-link modal-trigger" data-modal="privacy">Privacy Policy</a>
-                <a class="footer-link modal-trigger" data-modal="terms">Terms & Service</a>
-                <a class="footer-link modal-trigger" data-modal="contact">Contact</a>
+                <a class="footer-link modal-trigger" data-modal="terms">Terms & License</a>
+                <a class="footer-link modal-trigger" data-modal="contact">Contact & FAQ</a>
             </div>
         </footer>
     </div>
@@ -96,17 +96,12 @@
             <div class="dp-right">
                 <h2 id="dpTitle" class="dp-title"></h2>
                 <div id="dpKeywords" class="detail-keywords"></div>
-                
                 <table class="detail-table">
-                    <tr><td class="dt-label">File Format</td><td id="dpFileFormat" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">Category</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">Resolution</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">License</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
-                    <tr><td class="dt-label">File Size</td><td id="dpFileSize" class="dt-value">Fast Download</td></tr>
+                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG / VECTOR</td></tr>
+                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
+                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
                 </table>
-
                 <button id="dpDownloadBtn" class="download-btn">DOWNLOAD NOW</button>
-                
                 <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
                     <p>Your download will start in</p>
                     <div id="dpCountdown" class="dp-countdown-num">4</div>
