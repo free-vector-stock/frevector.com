@@ -9,7 +9,7 @@ const CATEGORIES = [
     'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
-// Footer linklerine tıklandığında gösterilecek eksiksiz metinler
+// Footer link içerikleri
 const MODAL_CONTENTS = {
     about: { 
         title: 'ABOUT US', 
@@ -96,20 +96,10 @@ async function init() {
     setTimeout(() => fetchAndRenderOurPicks(), 300);
 }
 
-// SEO H1 TITLE LOGIC
 function getH1Text(cat) {
     if (cat === 'all') return "Free Vectors, SVGs, Icons and Clipart";
-    
     let displayCat = cat;
-    const specialCases = {
-        'Animals': 'Animal',
-        'The Arts': 'Art',
-        'Backgrounds': 'Background',
-        'Buildings': 'Building',
-        'Celebrities': 'Celebrity',
-        'Holidays': 'Holiday'
-    };
-    
+    const specialCases = { 'Animals': 'Animal', 'The Arts': 'Art', 'Backgrounds': 'Background', 'Buildings': 'Building', 'Celebrities': 'Celebrity', 'Holidays': 'Holiday' };
     if (specialCases[cat]) displayCat = specialCases[cat];
     return `Free ${displayCat} Vectors, SVGs, Icons and Clipart`;
 }
@@ -132,14 +122,12 @@ function setupCategories() {
     const list = document.getElementById('categoriesList');
     if (!list) return;
     list.innerHTML = '';
-
     const allLink = document.createElement('a');
     allLink.href = '#';
     allLink.className = 'category-item' + (state.selectedCategory === 'all' ? ' active' : '');
     allLink.textContent = 'All Categories';
     allLink.onclick = (e) => { e.preventDefault(); selectCategory('all'); };
     list.appendChild(allLink);
-
     CATEGORIES.forEach(cat => {
         const a = document.createElement('a');
         a.href = '#';
@@ -170,7 +158,6 @@ async function fetchVectors() {
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         if (state.selectedType !== 'all') url.searchParams.set('type', state.selectedType);
-        
         const res = await fetch(url);
         const data = await res.json();
         state.vectors = data.vectors || [];
@@ -210,7 +197,6 @@ function openDetailPanel(v, cardEl) {
     state.openedVector = v;
     state.openedCardEl = cardEl;
     cardEl.classList.add('card-active');
-
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
     panel.className = 'detail-panel';
@@ -222,19 +208,17 @@ function openDetailPanel(v, cardEl) {
                 <div class="detail-keywords">${(v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('')}</div>
                 <div style="margin-top:20px; display:flex; gap:10px;">
                     <button class="download-btn" id="mainDownloadBtn">DOWNLOAD PAGE</button>
-                    <button class="detail-close-btn" id="mainCloseBtn">Close</button>
+                    <button class="detail-close-btn" id="mainCloseBtn" style="background:#ddd; border:none; padding:10px 20px; cursor:pointer;">Close</button>
                 </div>
             </div>
         </div>
     `;
-
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
     const index = cards.indexOf(cardEl);
     const cols = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfter = Math.min(cards.length - 1, Math.floor(index / cols) * cols + (cols - 1));
     grid.insertBefore(panel, cards[insertAfter].nextSibling);
-
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -254,7 +238,6 @@ function showDownloadPage(v) {
     document.getElementById('dpKeywords').innerHTML = (v.keywords || []).map(k => `<span class="kw-tag">${k}</span>`).join('');
     document.getElementById('dpDownloadBtn').style.display = 'block';
     document.getElementById('dpCountdownBox').style.display = 'none';
-    
     document.getElementById('dpDownloadBtn').onclick = () => {
         document.getElementById('dpDownloadBtn').style.display = 'none';
         document.getElementById('dpCountdownBox').style.display = 'block';
@@ -302,7 +285,6 @@ function setupEventListeners() {
     document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } }; 
 }
 
-// OUR PICKS SLIDER LOGIC
 async function fetchAndRenderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
@@ -348,12 +330,15 @@ function scrollOurPicks(dir) {
 }
 
 function setupOurPicksArrows() {
-    document.getElementById('ourPicksPrev').onclick = () => scrollOurPicks(-1);
-    document.getElementById('ourPicksNext').onclick = () => scrollOurPicks(1);
+    const prev = document.getElementById('ourPicksPrev');
+    const next = document.getElementById('ourPicksNext');
+    if(prev) prev.onclick = () => scrollOurPicks(-1);
+    if(next) next.onclick = () => scrollOurPicks(1);
 }
 
 function setupDownloadPageHandlers() { 
-    document.getElementById('dpClose').onclick = () => { 
+    const closeBtn = document.getElementById('dpClose');
+    if(closeBtn) closeBtn.onclick = () => { 
         document.getElementById('downloadPage').style.display = 'none'; 
         if(state.countdownInterval) clearInterval(state.countdownInterval); 
     };
