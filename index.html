@@ -33,7 +33,14 @@
 
     <div class="main-container">
         <aside class="sidebar">
-            <div class="sidebar-title">Categories</div>
+            <div class="sidebar-title">TYPE</div>
+            <div id="typeList">
+                <a href="#" class="category-item active" data-type="all">All</a>
+                <a href="#" class="category-item" data-type="vector">Vector</a>
+                <a href="#" class="category-item" data-type="jpeg">Jpeg</a>
+            </div>
+            <div style="height: 20px;"></div>
+            <div class="sidebar-title">CATEGORIES</div>
             <div id="categoriesList"></div>
         </aside>
 
@@ -88,7 +95,7 @@
                 <h2 id="dpTitle" class="dp-title"></h2>
                 <div id="dpKeywords" class="detail-keywords"></div>
                 <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">JPEG / VECTOR</td></tr>
+                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG / VECTOR</td></tr>
                     <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
                     <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
                 </table>
