@@ -40,7 +40,7 @@
             <nav class="type-list">
                 <a href="#" class="category-item type-filter active" data-type="all">All</a>
                 <a href="#" class="category-item type-filter" data-type="vector">Vector</a>
-                <a href="#" class="category-item type-filter" data-type="jpeg">Jpeg</a>
+                <a href="#" class="category-item type-filter" data-type="jpeg">JPEG</a>
             </nav>
             <div class="sidebar-title" style="margin-top: 15px;">CATEGORIES</div>
             <nav class="categories-list" id="categoriesList">
@@ -49,21 +49,20 @@
 
         <main class="content">
             <h1 id="categoryTitle" class="category-title-h1">Free Vectors, SVGs, Icons and Clipart</h1>
-            
-            <div class="pagination-wrapper-centered top-pag">
-                <div class="pagination-nav">
-                    <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                    <span id="pageNumber" class="page-num">1</span>
-                    <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                    <span class="page-total" id="pageTotal">/ 1</span>
-                </div>
-            </div>
-
             <div id="vectorsGrid" class="vectors-grid"></div>
         </main>
     </div>
 
     <div class="bottom-fixed-container">
+        <div class="pagination-wrapper-centered">
+            <div class="pagination-nav">
+                <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
+                <span id="pageNumber" class="page-num">1</span>
+                <button id="nextBtn" class="pag-btn">Next &#8250;</button>
+                <span class="page-total" id="pageTotal">/ 1</span>
+            </div>
+        </div>
+
         <section class="our-picks-section" id="ourPicksSection">
             <div class="our-picks-label">Our selections for you</div>
             <div class="our-picks-content-wrapper">
@@ -105,10 +104,16 @@
                 </button>
             </div>
             <div class="dl-page-content">
-                <div class="dl-page-preview"><img id="dlPreviewImg" src="" alt=""></div>
+                <div class="dl-page-preview">
+                    <img id="dlPreviewImg" src="" alt="Preview">
+                </div>
                 <div class="dl-page-details">
                     <h2 id="dlPageTitle"></h2>
                     <div id="dlKeywords" class="dp-kw"></div>
+                    <div class="dl-meta-info">
+                        <p><strong>License:</strong> Free for Personal & Commercial Use</p>
+                        <p><strong>Format:</strong> <span id="dlPageFormat"></span></p>
+                    </div>
                     <div class="dl-action-area">
                         <button id="finalDownloadBtn" class="final-download-btn">DOWNLOAD</button>
                         <div id="dlTimerBox" class="dl-timer-box" style="display:none;">
@@ -120,6 +125,8 @@
             </div>
         </div>
     </div>
+
+    <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
     <script src="main.js"></script>
 </body>
 </html>
