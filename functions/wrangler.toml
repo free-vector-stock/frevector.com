@@ -1,0 +1,11 @@
+name = "frevector-com"
+compatibility_date = "2026-01-01"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "VECTOR_DB"
+id = "0a2e10400ced49898918a0b30a4dba93"
+
+[[r2_buckets]]
+binding = "VECTOR_ASSETS"
+bucket_name = "vector-assets"

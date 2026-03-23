@@ -1,0 +1,12 @@
+# Frevector Redirects
+# Note: admin.html is served directly - no redirect needed
+
+# API routes - these are handled by Cloudflare Pages Functions
+# The functions/ directory structure maps to /api/ routes automatically
+# /api/admin -> functions/api/admin.js
+# /api/vectors -> functions/api/vectors.js
+# /api/asset -> functions/api/asset.js
+# etc.
+
+# SPA fallback - route all non-file requests to index.html for client-side routing
+/*  /index.html  200
