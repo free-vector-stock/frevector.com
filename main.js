@@ -291,34 +291,35 @@ function updateCategoryTitle() {
     el.textContent = h1Text;
 }
 
+/** * GÜNCELLENEN KISIM: Veriyi API yerine JSON dosyasından çekiyoruz 
+ */
 async function fetchVectors() {
     if (state.isLoading) return;
     state.isLoading = true;
     showLoader(true);
 
     try {
-        const url = new URL('/api/vectors', window.location.origin);
-        url.searchParams.set('page', state.currentPage);
-        url.searchParams.set('limit', '24');
-        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
-        if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
-        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
+        // HAKAN: Burayı senin R2'deki statik JSON dosyana bağladım.
+        // Gelecekte page-2, page-3 diye artıracağız.
+        const url = `/vectors/page-1.json`;
         
         const res = await fetch(url);
-        if (!res.ok) throw new Error('API request failed');
+        if (!res.ok) throw new Error('JSON dosyası bulunamadı!');
         
         const data = await res.json();
-        state.vectors = data.vectors || [];
-        state.totalPages = data.totalPages || 1;
-        state.total = data.total || 0;
+        
+        // Gelen veriyi state içine alıyoruz
+        // (Statik dosyada totalPages manuel ayarlanabilir, şimdilik 1 yaptık)
+        state.vectors = data || [];
+        state.totalPages = 1; 
+        state.total = state.vectors.length;
 
         renderVectors();
         renderOurPicks();
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-        console.error('Fetch error:', err);
+        console.error('Hata:', err);
     } finally {
         state.isLoading = false;
         showLoader(false);
@@ -344,7 +345,7 @@ function renderVectors() {
 
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                <img class="vc-img" src="${v.thumbnail || v.image}" alt="${escHtml(v.title)}" loading="lazy">
                 ${typeLabel}
             </div>
             <div class="vc-info">
@@ -371,7 +372,7 @@ function renderOurPicks() {
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                <img class="vc-img" src="${v.thumbnail || v.image}" alt="${escHtml(v.title)}" loading="lazy">
                 ${typeLabel}
             </div>
         `;
@@ -445,10 +446,10 @@ function openDetailPanel(v, cardEl) {
     panel.innerHTML = `
         <div class="detail-inner">
             <div class="detail-left">
-                <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}">
+                <img class="detail-img" src="${v.thumbnail || v.image}" alt="${escHtml(v.title)}">
                 <table class="detail-table">
                     <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td class="dt-value">${escHtml(v.category)}</td></tr>
+                    <tr><td class="dt-label">CATEGORY</td><td class="dt-value">${escHtml(v.category || "General")}</td></tr>
                     <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
                     <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
                     <tr><td class="dt-label">FILE SIZE</td><td class="dt-value">${v.fileSize || 'N/A'}</td></tr>
@@ -494,8 +495,8 @@ function showDownloadPage(v) {
 
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpDescription').textContent = v.description;
-    document.getElementById('dpImage').src = v.thumbnail;
-    document.getElementById('dpCategory').textContent = v.category;
+    document.getElementById('dpImage').src = v.thumbnail || v.image;
+    document.getElementById('dpCategory').textContent = v.category || "General";
     document.getElementById('dpFileSize').textContent = v.fileSize || 'N/A';
     
     // Update file format in download page
@@ -523,7 +524,8 @@ function showDownloadPage(v) {
             countNum.textContent = count;
             if (count <= 0) {
                 clearInterval(state.countdownInterval);
-                window.location.href = `/api/download?slug=${v.name}`;
+                // İNDİRME ADRESİ: Eğer v.download varsa oraya gider, yoksa API'ye sorar.
+                window.location.href = v.download || `/api/download?slug=${v.name}`;
                 setTimeout(() => { dp.style.display = 'none'; document.body.style.overflow = ''; }, 1000);
             }
         }, 1000);
