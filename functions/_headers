@@ -1,6 +1,5 @@
 /*
   Cache-Control: public, max-age=31536000, immutable
 
-/vectors/*
-  Cache-Control: public, max-age=31536000, immutable
-  Access-Control-Allow-Origin: *
+/api/*
+  Cache-Control: public, max-age=3600
