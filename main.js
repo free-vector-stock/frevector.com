@@ -70,4 +70,21 @@ async function fetchVectors() {
 
     state.vectors = data.vectors || [];
     state.totalPages = data.totalPages || 1;
-    state.total = data.total || 0
+    state.total = data.total || 0;
+
+    renderVectors();
+    renderOurPicks();
+    updateCategoryTitle();
+    updatePagination();
+  } catch (err) {
+    console.error('Fetch error:', err);
+  } finally {
+    state.isLoading = false;
+  }
+}
+
+function renderVectors() {
+  const grid = document.getElementById('vectorsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  state
