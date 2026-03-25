@@ -6,8 +6,7 @@
 const CORS_HEADERS = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    // Cache süresi artırıldı ve stale-while-revalidate eklendi
-    "Cache-Control": "public, max-age=300, stale-while-revalidate=600"
+    "Cache-Control": "public, max-age=60"
 };
 
 export async function onRequestGet(context) {
@@ -103,7 +102,7 @@ export async function onRequestGet(context) {
 
         const response = new Response(JSON.stringify(result), { status: 200, headers: CORS_HEADERS });
         
-        // Cache the response for 5 minutes (as defined in max-age)
+        // Cache the response for 1 minute (as defined in max-age)
         context.waitUntil(cache.put(context.request, response.clone()));
 
         return response;
