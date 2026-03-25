@@ -10,7 +10,20 @@
         .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
     </style>
 </head>
-<body>
+<!-- ULTRA PERF PRELOAD -->
+<link rel="preconnect" href="https://frevector.com" crossorigin>
+<link rel="dns-prefetch" href="https://frevector.com">
+
+<script>
+/* scroll FPS boost */
+let lastScroll = 0;
+window.addEventListener("scroll", () => {
+  const now = performance.now();
+  if (now - lastScroll < 16) return;
+  lastScroll = now;
+}, { passive: true });
+</script>
+    <body>
     <div class="top-banner">
         <a href="/" class="banner-logo-link">
             <img src="logo.svg" alt="Frevector" class="banner-logo">
