@@ -49,7 +49,21 @@ async function init() {
 function setupCategories() { /* senin verdiğin kategori kodları */ }
 function selectCategory(cat) { /* senin verdiğin kod */ }
 function selectType(type) { /* senin verdiğin kod */ }
-function updateCategoryTitle() { /* senin verdiğin kod */ }
+
+// H1 BAŞLIĞI EKLENMİŞ HALİ
+function updateCategoryTitle() {
+    const el = document.getElementById('categoryTitle');
+    if (!el) return;
+    
+    let h1Text = '';
+    if (state.selectedCategory === 'all') {
+        h1Text = 'Free Vectors, SVGs, Icons and Clipart';
+    } else {
+        h1Text = `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
+    }
+    
+    el.innerHTML = `<h1 style="font-family: 'Inter', sans-serif; font-weight: 600;">${h1Text}</h1>`;
+}
 
 // MEMORY CACHE EKLEMESİ BURADA
 async function fetchVectors() {
@@ -58,45 +72,31 @@ async function fetchVectors() {
     showLoader(true);
 
     try {
-        // Memory cache kontrolü
-        if (window.cachedVectorsData && !state.searchQuery && state.selectedCategory === 'all' && state.selectedType === 'all') {
-            const data = window.cachedVectorsData;
-            state.vectors = data.vectors || [];
-            state.totalPages = data.totalPages || 1;
-            state.total = data.total || 0;
+        const url = new URL('/api/vectors', window.location.origin);
+        url.searchParams.set('page', state.currentPage);
+        url.searchParams.set('limit', '24');
+        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+        if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
+        if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
+        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API request failed');
+        
+        const data = await res.json();
 
-            renderVectors();
-            renderOurPicks();
-            updatePagination();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            const url = new URL('/api/vectors', window.location.origin);
-            url.searchParams.set('page', state.currentPage);
-            url.searchParams.set('limit', '24');
-            if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-            if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
-            if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
-            if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
-            
-            const res = await fetch(url);
-            if (!res.ok) throw new Error('API request failed');
-            
-            const data = await res.json();
+        // Memory cache’e kaydet (sayfa bazlı)
+        if (!window.cachedVectorsData) window.cachedVectorsData = { pages: {} };
+        window.cachedVectorsData.pages[state.currentPage] = data;
 
-            // Memory cache’e kaydet
-            if (!state.searchQuery && state.selectedCategory === 'all' && state.selectedType === 'all') {
-                window.cachedVectorsData = data;
-            }
+        state.vectors = data.vectors || [];
+        state.totalPages = data.totalPages || 1;
+        state.total = data.total || 0;
 
-            state.vectors = data.vectors || [];
-            state.totalPages = data.totalPages || 1;
-            state.total = data.total || 0;
-
-            renderVectors();
-            renderOurPicks();
-            updatePagination();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        renderVectors();
+        renderOurPicks();
+        updatePagination();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
         console.error('Fetch error:', err);
     } finally {
@@ -106,9 +106,71 @@ async function fetchVectors() {
 }
 
 function renderVectors() { /* senin verdiğin kod */ }
-function renderOurPicks() { /* senin verdiğin kod */ }
-function setupOurPicksArrows() { /* senin verdiğin kod */ }
-function scrollOurPicks(direction) { /* senin verdiğin kod */ }
+
+// OUR PICKS: tüm sayfalardan shuffle + sonsuz kaydırma
+function renderOurPicks() {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track) return;
+    track.innerHTML = '';
+
+    let allVectors = [];
+    if (window.cachedVectorsData && window.cachedVectorsData.pages) {
+        Object.values(window.cachedVectorsData.pages).forEach(page => {
+            if (page.vectors) {
+                allVectors = allVectors.concat(page.vectors);
+            }
+        });
+    } else {
+        allVectors = state.vectors.slice();
+    }
+
+    // Karıştır
+    allVectors = allVectors.sort(() => Math.random() - 0.5);
+
+    allVectors.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'vector-card';
+        const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+        card.innerHTML = `
+            <div class="vc-img-wrap">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                ${typeLabel}
+            </div>
+        `;
+        card.onclick = () => openDetailPanel(v, card);
+        track.appendChild(card);
+    });
+
+    state.ourPicksOffset = 0;
+    track.style.transform = `translateX(0px)`;
+}
+
+function scrollOurPicks(direction) {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track) return;
+
+    const cardWidth = 140; // kart genişliği + boşluk
+    state.ourPicksOffset += direction * cardWidth;
+
+    const totalWidth = track.scrollWidth;
+    const visibleWidth = track.parentElement.offsetWidth;
+
+    if (state.ourPicksOffset < 0) {
+        state.ourPicksOffset = totalWidth - visibleWidth;
+    } else if (state.ourPicksOffset > totalWidth - visibleWidth) {
+        state.ourPicksOffset = 0;
+    }
+
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+}
+
+function setupOurPicksArrows() {
+    const prev = document.getElementById('ourPicksPrev');
+    const next = document.getElementById('ourPicksNext');
+    if (prev) prev.onclick = () => scrollOurPicks(-1);
+    if (next) next.onclick = () => scrollOurPicks(1);
+}
+
 function updateOurPicksArrows() { /* senin verdiğin kod */ }
 function openDetailPanel(v, cardEl) { /* senin verdiğin kod */ }
 function closeDetailPanel() { /* senin verdiğin kod */ }
