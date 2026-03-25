@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frevector - Free Vector, SVG & EPS Downloads</title>
+    <title>Frevector - Free Vectors, SVGs, Icons and Clipart</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .dp-countdown-box { text-align: center; margin-top: 20px; }
-        .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
-    </style>
 </head>
 <body>
+
     <div class="top-banner">
-        <a href="/" class="banner-logo-link">
-            <img src="logo.svg" alt="Frevector" class="banner-logo">
+        <a href="/">
+            <img src="https://frevector.com/logo-white.png" alt="Frevector Logo" class="banner-logo">
         </a>
     </div>
 
@@ -21,106 +18,104 @@
         <div class="header-center">
             <div class="search-container">
                 <button class="search-icon-btn" id="searchBtn">
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="8" cy="8" r="6" stroke="#000" stroke-width="2"/><path d="M12.5 12.5L18 18" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search vectors...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search for free vectors, icons...">
             </div>
         </div>
-        <div class="header-right">
-            <select id="sortFilter" class="sort-filter">
-                <option value="">Upload date: Any time</option>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-            </select>
-        </div>
+
+        <button id="themeToggle" class="theme-btn" title="Toggle Dark Mode">
+            <span id="themeIcon">🌙</span>
+        </button>
+
+        <select id="sortFilter" class="sort-filter">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+        </select>
     </header>
 
     <div class="main-container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-title">CATEGORIES</div>
-            <nav class="categories-list" id="categoriesList"></nav>
+            <nav class="categories-list" id="categoriesList">
+                </nav>
         </aside>
 
         <main class="content">
-            <h1 id="categoryTitle" class="category-title">Vector</h1>
-            <div id="vectorsGrid" class="vectors-grid"></div>
+            <h1 class="category-title" id="categoryTitle">Free Vectors, SVGs, Icons and Clipart</h1>
+            <div class="vectors-grid" id="vectorsGrid">
+                </div>
         </main>
     </div>
 
-    <!-- REVİZYON 1 & 2: Our Picks ve Sayfalama - Footer üzerine sabitlendi -->
     <div class="bottom-fixed-container">
-        <section class="our-picks-section" id="ourPicksSection">
+        <section class="our-picks-section">
             <div class="our-picks-header">
-                <div class="our-picks-label">Our selections for you</div>
+                <span class="our-picks-label">OUR PICKS</span>
                 <div class="our-picks-nav">
-                    <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
-                    <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
+                    <button class="our-picks-arrow" id="ourPicksPrev">←</button>
+                    <button class="our-picks-arrow" id="ourPicksNext">→</button>
                 </div>
             </div>
             <div class="our-picks-track-wrap">
-                <div class="our-picks-track" id="ourPicksTrack"></div>
+                <div class="our-picks-track" id="ourPicksTrack">
+                    </div>
             </div>
         </section>
 
         <div class="pagination-wrapper">
             <div class="pagination-nav">
-                <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" class="page-num">1</span>
-                <button id="nextBtn" class="pag-btn">Next &#8250;</button>
+                <button class="pag-btn" id="prevBtn">PREV</button>
+                <span class="page-num" id="pageNumber">1</span>
                 <span class="page-total" id="pageTotal">/ 1</span>
+                <button class="pag-btn" id="nextBtn">NEXT</button>
             </div>
         </div>
 
         <footer class="footer">
-            <span class="copyright">2026 &copy; frevector.com</span>
-            <nav class="footer-nav">
-                <a href="#" class="footer-link modal-trigger" data-modal="about">About Us</a>
-                <a href="#" class="footer-link modal-trigger" data-modal="privacy">Privacy Policy</a>
-                <a href="#" class="footer-link modal-trigger" data-modal="terms">Terms of Service</a>
+            <div class="footer-left">
+                © 2026 Frevector. All rights reserved.
+            </div>
+            <div class="footer-nav">
+                <a href="#" class="footer-link modal-trigger" data-modal="about">About</a>
                 <a href="#" class="footer-link modal-trigger" data-modal="contact">Contact</a>
-            </nav>
+                <a href="#" class="footer-link modal-trigger" data-modal="terms">Terms</a>
+                <a href="#" class="footer-link modal-trigger" data-modal="privacy">Privacy</a>
+            </div>
         </footer>
     </div>
 
-    <div id="downloadPage" class="download-page" style="display:none;">
+    <div id="downloadPage" class="download-page" style="display: none;">
         <div class="download-page-header">
-            <span class="dp-site">frevector.com</span>
-            <button id="dpClose" class="dp-close">&#10005;</button>
+            <span class="dp-site">FREVECTOR</span>
+            <button class="dp-close" id="dpClose">×</button>
         </div>
         <div class="download-page-body">
             <div class="dp-left">
-                <img id="dpImage" src="" alt="" class="dp-image">
+                <img id="dpImage" src="" alt="Download preview" class="dp-image">
             </div>
             <div class="dp-right">
-                <h2 id="dpTitle" class="dp-title"></h2>
-                <p id="dpDescription" class="dp-desc"></p>
-                <div id="dpKeywords" class="detail-keywords"></div>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
-                    <tr><td class="dt-label">FILE SIZE</td><td id="dpFileSize" class="dt-value">-</td></tr>
-                </table>
-                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
-                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
-                    <p>Your download will start in</p>
-                    <div id="dpCountdown" class="dp-countdown-num">4</div>
-                    <p>High-speed secure download from frevector.com</p>
+                <h1 id="dpTitle" style="margin-bottom: 20px;">Vector Title</h1>
+                <p style="margin-bottom: 10px;"><strong>Format:</strong> <span id="dpFileFormat">EPS, SVG, JPEG</span></p>
+                <p style="margin-bottom: 30px; color: #666;">Your download will start automatically. Please wait a few seconds.</p>
+                
+                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD NOW</button>
+                
+                <div id="dpCountdownBox" style="display: none; text-align: center;">
+                    <div style="font-size: 48px; font-weight: 800; margin-bottom: 10px;" id="dpCountdown">3</div>
+                    <p>Preparing your file...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="infoModal" class="info-modal" style="display:none;">
+    <div id="infoModal" class="info-modal" style="display: none;">
         <div class="info-modal-box">
-            <button class="info-modal-close" id="infoModalClose">&#10005;</button>
-            <div id="infoModalBody" class="info-modal-body"></div>
+            <button class="info-modal-close" id="infoModalClose">×</button>
+            <div id="infoModalBody"></div>
         </div>
     </div>
 
-    <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-
-    <script src="main.js?v=2026031407"></script>
+    <script src="main.js"></script>
 </body>
 </html>
