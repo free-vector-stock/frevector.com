@@ -13,6 +13,7 @@ export async function onRequestGet(context) {
     const cache = caches.default;
     const url = new URL(context.request.url);
     
+    // Check Edge Cache
     const cacheResponse = await cache.match(context.request);
     if (cacheResponse) {
         return cacheResponse;
@@ -26,13 +27,15 @@ export async function onRequestGet(context) {
         const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "24")));
         const search = (url.searchParams.get("search") || "").toLowerCase().trim();
         const sort = url.searchParams.get("sort") || "";
-        const type = url.searchParams.get("type") || "";
+        const type = url.searchParams.get("type") || ""; // 'vector', 'jpeg', or empty for all
 
+        // Try to get all_vectors from R2 first (optimized)
         let allVectorsRaw;
         const r2Object = await r2.get("all_vectors.json");
         if (r2Object) {
             allVectorsRaw = await r2Object.text();
         } else {
+            // Fallback to KV if R2 is not yet populated
             const kv = context.env.VECTOR_DB;
             allVectorsRaw = await kv.get("all_vectors");
         }
@@ -43,6 +46,7 @@ export async function onRequestGet(context) {
 
         let allVectors = JSON.parse(allVectorsRaw);
 
+        // Single vector detail
         if (slug) {
             const vector = allVectors.find(v => v.name === slug);
             if (!vector) return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers: CORS_HEADERS });
@@ -51,43 +55,35 @@ export async function onRequestGet(context) {
             return response;
         }
 
+        // Category filter
         if (category && category !== "all") {
             const catLower = category.toLowerCase().trim();
             allVectors = allVectors.filter(v => (v.category || "").toLowerCase().trim() === catLower);
         }
 
+        // Type filter (vector or jpeg)
         if (type === "vector") {
             allVectors = allVectors.filter(v => v.contentType !== "jpeg");
         } else if (type === "jpeg") {
             allVectors = allVectors.filter(v => v.contentType === "jpeg");
         }
 
-        // GELİŞMİŞ ANAHTAR KELİME ARAMA ALGORİTMASI
+        // Search filter
         if (search) {
-            const terms = search.split(/\s+/).filter(t => t.length > 0);
+            const terms = search.split(/\s+/).filter(Boolean);
             allVectors = allVectors.filter(v => {
-                const searchText = [
-                    (v.title || ""),
-                    (v.description || ""),
-                    ...(v.keywords || [])
-                ].join(" ").toLowerCase();
-                
-                return terms.every(term => searchText.includes(term));
+                const title = (v.title || "").toLowerCase();
+                const keywords = (v.keywords || []).map(k => k.toLowerCase());
+                const description = (v.description || "").toLowerCase();
+                return terms.some(t => title.includes(t) || keywords.some(k => k.includes(t)) || description.includes(t));
             });
-            
-            // Relevancy (Alaka) Sıralaması
-            allVectors.sort((a, b) => {
-                const aTitle = (a.title || "").toLowerCase().includes(search);
-                const bTitle = (b.title || "").toLowerCase().includes(search);
-                return bTitle - aTitle;
-            });
+        }
+
+        // Sort
+        if (sort === "oldest") {
+            allVectors.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
         } else {
-            // Normal Sıralama
-            if (sort === "oldest") {
-                allVectors.sort((a, b) => new Date(a.date || 0) - new Date(a.date || 0));
-            } else {
-                allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-            }
+            allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
         }
 
         const total = allVectors.length;
@@ -105,7 +101,10 @@ export async function onRequestGet(context) {
         };
 
         const response = new Response(JSON.stringify(result), { status: 200, headers: CORS_HEADERS });
+        
+        // Cache the response for 1 minute (as defined in max-age)
         context.waitUntil(cache.put(context.request, response.clone()));
+
         return response;
 
     } catch (e) {
@@ -116,11 +115,16 @@ export async function onRequestGet(context) {
 function enrichVector(v) {
     const id = v.name;
     const category = v.category || "Miscellaneous";
+    
+    // Structure: Category/ID/ID-thumb.jpg
     const thumbKey = `${category}/${id}/${id}.jpg`;
+    const isJpegOnly = v.contentType === 'jpeg';
+
     return {
         ...v,
         title: v.title || v.name || "",
+        // Requirement: ALWAYS use thumbnail in site
         thumbnail: `/api/asset?key=${encodeURIComponent(thumbKey)}`,
-        isJpegOnly: v.contentType === 'jpeg'
+        isJpegOnly: isJpegOnly
     };
 }
