@@ -13,6 +13,6 @@ body { font-family:'Inter',sans-serif; background:#fff; color:#000; }
 /* Mobil düzenleme */
 @media(max-width:768px){
   .main-container{flex-direction:column;}
-  #sidebar{display:none;}
+  .sidebar{display:none;}
   .vectors-grid{grid-template-columns:1fr;}
 }
