@@ -13,7 +13,12 @@ const CATEGORIES = [
     'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
-const MODAL_CONTENTS = { /* ... senin verdiğin tüm modal içerikleri burada eksiksiz ... */ };
+const MODAL_CONTENTS = {
+    about: { /* senin verdiğin içerikler */ },
+    privacy: { /* senin verdiğin içerikler */ },
+    terms: { /* senin verdiğin içerikler */ },
+    contact: { /* senin verdiğin içerikler */ }
+};
 
 const state = {
     vectors: [],
@@ -41,11 +46,10 @@ async function init() {
     await fetchVectors();
 }
 
-function setupCategories() { /* ... senin verdiğin kategori kodları eksiksiz ... */ }
-
-function selectCategory(cat) { /* ... senin verdiğin kod eksiksiz ... */ }
-function selectType(type) { /* ... senin verdiğin kod eksiksiz ... */ }
-function updateCategoryTitle() { /* ... senin verdiğin kod eksiksiz ... */ }
+function setupCategories() { /* senin verdiğin kategori kodları */ }
+function selectCategory(cat) { /* senin verdiğin kod */ }
+function selectType(type) { /* senin verdiğin kod */ }
+function updateCategoryTitle() { /* senin verdiğin kod */ }
 
 // MEMORY CACHE EKLEMESİ BURADA
 async function fetchVectors() {
@@ -101,19 +105,19 @@ async function fetchVectors() {
     }
 }
 
-function renderVectors() { /* ... senin verdiğin kod eksiksiz ... */ }
-function renderOurPicks() { /* ... senin verdiğin kod eksiksiz ... */ }
-function setupOurPicksArrows() { /* ... senin verdiğin kod eksiksiz ... */ }
-function scrollOurPicks(direction) { /* ... senin verdiğin kod eksiksiz ... */ }
-function updateOurPicksArrows() { /* ... senin verdiğin kod eksiksiz ... */ }
-function openDetailPanel(v, cardEl) { /* ... senin verdiğin kod eksiksiz ... */ }
-function closeDetailPanel() { /* ... senin verdiğin kod eksiksiz ... */ }
-function showDownloadPage(v) { /* ... senin verdiğin kod eksiksiz ... */ }
-function setupDownloadPageHandlers() { /* ... senin verdiğin kod eksiksiz ... */ }
-function setupModalHandlers() { /* ... senin verdiğin kod eksiksiz ... */ }
-function setupEventListeners() { /* ... senin verdiğin kod eksiksiz ... */ }
-function updatePagination() { /* ... senin verdiğin kod eksiksiz ... */ }
-function showLoader(show) { /* ... senin verdiğin kod eksiksiz ... */ }
-function escHtml(str) { /* ... senin verdiğin kod eksiksiz ... */ }
+function renderVectors() { /* senin verdiğin kod */ }
+function renderOurPicks() { /* senin verdiğin kod */ }
+function setupOurPicksArrows() { /* senin verdiğin kod */ }
+function scrollOurPicks(direction) { /* senin verdiğin kod */ }
+function updateOurPicksArrows() { /* senin verdiğin kod */ }
+function openDetailPanel(v, cardEl) { /* senin verdiğin kod */ }
+function closeDetailPanel() { /* senin verdiğin kod */ }
+function showDownloadPage(v) { /* senin verdiğin kod */ }
+function setupDownloadPageHandlers() { /* senin verdiğin kod */ }
+function setupModalHandlers() { /* senin verdiğin kod */ }
+function setupEventListeners() { /* senin verdiğin kod */ }
+function updatePagination() { /* senin verdiğin kod */ }
+function showLoader(show) { /* senin verdiğin kod */ }
+function escHtml(str) { /* senin verdiğin kod */ }
 
 document.addEventListener('DOMContentLoaded', init);
