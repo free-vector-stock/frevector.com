@@ -613,3 +613,110 @@ function escHtml(str) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+/* =========================
+ULTRA PERFORMANCE PATCH v1
+(append-only)
+========================= */
+
+(function () {
+  if (window.__ULTRA_PERF_PATCH__) return;
+  window.__ULTRA_PERF_PATCH__ = true;
+
+  const BATCH_SIZE = 20;
+  const IDLE_TIMEOUT = 50;
+
+  let observer;
+  let queue = [];
+  let rendering = false;
+
+  function createObserver() {
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.removeAttribute("data-src");
+            img.decode?.().catch(() => {});
+            observer.unobserve(img);
+          }
+        }
+      });
+    }, {
+      rootMargin: "300px"
+    });
+  }
+
+  function processQueue(deadline) {
+    if (rendering) return;
+    rendering = true;
+
+    while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && queue.length > 0) {
+      const item = queue.shift();
+      item();
+    }
+
+    rendering = false;
+
+    if (queue.length > 0) {
+      requestIdleCallback(processQueue, { timeout: IDLE_TIMEOUT });
+    }
+  }
+
+  function schedule(task) {
+    queue.push(task);
+    requestIdleCallback(processQueue, { timeout: IDLE_TIMEOUT });
+  }
+
+  function optimizeImages() {
+    const images = document.querySelectorAll("img");
+
+    images.forEach((img) => {
+      if (img.dataset.optimized) return;
+
+      img.dataset.optimized = "1";
+
+      if (img.src && !img.dataset.src) {
+        img.dataset.src = img.src;
+        img.src = "";
+      }
+
+      img.loading = "lazy";
+      img.decoding = "async";
+
+      observer.observe(img);
+    });
+  }
+
+  function preloadNextPage() {
+    const nextBtn = document.querySelector(".pagination .next");
+    if (!nextBtn) return;
+
+    const href = nextBtn.getAttribute("href");
+    if (!href) return;
+
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  function init() {
+    createObserver();
+
+    schedule(() => optimizeImages());
+    schedule(() => preloadNextPage());
+
+    const mutation = new MutationObserver(() => {
+      schedule(() => optimizeImages());
+    });
+
+    mutation.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
