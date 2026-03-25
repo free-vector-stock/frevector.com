@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing
+ * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing, download fix
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -13,6 +13,13 @@ const CATEGORIES = [
     'Technology','Transportation','Vintage','Logo','Font','Icon'
 ];
 
+const MODAL_CONTENTS = {
+    about: { /* senin verdiğin içerikler */ },
+    privacy: { /* senin verdiğin içerikler */ },
+    terms: { /* senin verdiğin içerikler */ },
+    contact: { /* senin verdiğin içerikler */ }
+};
+
 const state = {
     vectors: [],
     currentPage: 1,
@@ -22,16 +29,28 @@ const state = {
     selectedType: 'all',
     searchQuery: '',
     isLoading: false,
+    openedVector: null,
+    openedCardEl: null,
+    countdownInterval: null,
+    detailPanelOpen: false,
+    downloadInProgress: false,
     ourPicksOffset: 0
 };
 
 async function init() {
     setupCategories();
     setupEventListeners();
+    setupModalHandlers();
+    setupDownloadPageHandlers();
     setupOurPicksArrows();
     await fetchVectors();
 }
 
+function setupCategories() { /* senin verdiğin kategori kodları */ }
+function selectCategory(cat) { /* senin verdiğin kod */ }
+function selectType(type) { /* senin verdiğin kod */ }
+
+// H1 BAŞLIĞI
 function updateCategoryTitle() {
     const el = document.getElementById('categoryTitle');
     if (!el) return;
@@ -41,9 +60,11 @@ function updateCategoryTitle() {
     el.innerHTML = `<h1 style="font-family:'Inter',sans-serif;font-weight:600;">${h1Text}</h1>`;
 }
 
+// MEMORY CACHE
 async function fetchVectors() {
     if (state.isLoading) return;
     state.isLoading = true;
+    showLoader(true);
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('page', state.currentPage);
@@ -53,6 +74,7 @@ async function fetchVectors() {
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
 
         const res = await fetch(url);
+        if (!res.ok) throw new Error('API request failed');
         const data = await res.json();
 
         if (!window.cachedVectorsData) window.cachedVectorsData = { pages: {} };
@@ -64,14 +86,20 @@ async function fetchVectors() {
 
         renderVectors();
         renderOurPicks();
+        updatePagination();
         updateCategoryTitle();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+        console.error('Fetch error:', err);
     } finally {
         state.isLoading = false;
+        showLoader(false);
     }
 }
 
 function renderVectors() { /* senin verdiğin kod */ }
 
+// OUR PICKS: shuffle + sonsuz kaydırma
 function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
@@ -91,4 +119,83 @@ function renderOurPicks() {
     allVectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        const typeLabel = v.isJ
+        const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+        card.innerHTML = `
+            <div class="vc-img-wrap">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                ${typeLabel}
+            </div>
+        `;
+        card.onclick = () => openDetailPanel(v, card);
+        track.appendChild(card);
+    });
+
+    state.ourPicksOffset = 0;
+    track.style.transform = `translateX(0px)`;
+}
+
+function scrollOurPicks(direction) {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track) return;
+
+    const cardWidth = 140;
+    state.ourPicksOffset += direction * cardWidth;
+
+    const totalWidth = track.scrollWidth;
+    const visibleWidth = track.parentElement.offsetWidth;
+
+    if (state.ourPicksOffset < 0) {
+        state.ourPicksOffset = totalWidth - visibleWidth;
+    } else if (state.ourPicksOffset > totalWidth - visibleWidth) {
+        state.ourPicksOffset = 0;
+    }
+
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+}
+
+function setupOurPicksArrows() {
+    const prev = document.getElementById('ourPicksPrev');
+    const next = document.getElementById('ourPicksNext');
+    if (prev) prev.onclick = () => scrollOurPicks(-1);
+    if (next) next.onclick = () => scrollOurPicks(1);
+}
+
+// DOWNLOAD SAYFASI REVİZESİ
+function showDownloadPage(v) {
+    const dp = document.getElementById('downloadPage');
+    if (!dp) return;
+
+    document.getElementById('dpImage').src = v.thumbnail;
+    document.getElementById('dpTitle').textContent = v.title;
+    document.getElementById('dpDescription').textContent = v.description || '';
+    document.getElementById('dpCategory').textContent = v.category || '-';
+    document.getElementById('dpFileSize').textContent = v.fileSize || '-';
+    document.getElementById('dpFileFormat').textContent = v.isJpegOnly ? 'JPEG' : 'VECTOR';
+
+    const downloadBtn = document.getElementById('dpDownloadBtn');
+    downloadBtn.onclick = () => {
+        let url = v.downloadUrl || `/download/${v.id}`;
+        window.open(url, '_blank'); // yeni sekmede aç
+    };
+
+    dp.style.display = 'block';
+}
+
+function setupDownloadPageHandlers() {
+    const closeBtn = document.getElementById('dpClose');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            document.getElementById('downloadPage').style.display = 'none';
+        };
+    }
+}
+
+function updatePagination() { /* senin verdiğin kod */ }
+function showLoader(show) { /* senin verdiğin kod */ }
+function escHtml(str) { /* senin verdiğin kod */ }
+function setupModalHandlers() { /* senin verdiğin kod */ }
+function setupEventListeners() { /* senin verdiğin kod */ }
+function openDetailPanel(v, cardEl) { /* senin verdiğin kod */ }
+function closeDetailPanel() { /* senin verdiğin kod */ }
+
+document.addEventListener('DOMContentLoaded', init);
