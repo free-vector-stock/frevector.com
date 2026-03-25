@@ -120,3 +120,37 @@ export async function onRequestOptions() {
         }
     });
 }
+/* =========================
+CDN + CACHE BOOST
+========================= */
+
+addEventListener("fetch", event => {
+  const url = new URL(event.request.url);
+
+  if (url.pathname.includes("/vector-assets/")) {
+    event.respondWith(handleCache(event.request));
+  }
+});
+
+async function handleCache(request) {
+  const cache = caches.default;
+  let response = await cache.match(request);
+
+  if (!response) {
+    response = await fetch(request, {
+      cf: {
+        cacheEverything: true,
+        cacheTtl: 31536000,
+        polish: "lossy",
+        webp: true
+      }
+    });
+
+    response = new Response(response.body, response);
+    response.headers.set("Cache-Control", "public, max-age=31536000, immutable");
+
+    await cache.put(request, response.clone());
+  }
+
+  return response;
+}
