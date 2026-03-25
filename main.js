@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026032501 - Revisions: Performance Optimization, Smooth Transitions, Skeleton Loaders
+ * v2026032502 - Full Integration: Dark Mode, Performance, Smooth Transitions
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -20,7 +20,6 @@ const MODAL_CONTENTS = {
             <h2 style="margin-bottom:16px;">About Us</h2>
             <p style="margin-bottom:12px;">Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
             <p style="margin-bottom:12px;">The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists.</p>
-            <p style="margin-bottom:12px;">Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control.</p>
             <p style="margin-bottom:12px;">All files can be used in both personal and commercial projects.</p>
             <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>
         `
@@ -30,25 +29,20 @@ const MODAL_CONTENTS = {
         content: `
             <h2 style="margin-bottom:16px;">Privacy Policy</h2>
             <p style="margin-bottom:12px;">As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">1. Data Collected</h3>
-            <p style="margin-bottom:8px;">Collected data may include: Cookies, Browser/Device info, IP address, and interaction data for analytical purposes.</p>
         `
     },
     terms: {
         title: 'Terms of Service',
         content: `
             <h2 style="margin-bottom:16px;">Terms of Service</h2>
-            <h3 style="margin-bottom:8px;margin-top:16px;">1. Content Ownership</h3>
-            <p style="margin-bottom:12px;">All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">2. Right of Use</h3>
-            <p style="margin-bottom:12px;">Downloaded files can be used in personal and commercial projects. Redistribution is prohibited.</p>
+            <p style="margin-bottom:12px;">All graphic designs on the site are original works prepared by Frevector artists. Downloaded files can be used in personal and commercial projects.</p>
         `
     },
     contact: {
         title: 'Contact',
         content: `
             <h2 style="margin-bottom:16px;">Contact</h2>
-            <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000;text-decoration:underline;">hakankacar2014@gmail.com</a></p>
+            <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:inherit;text-decoration:underline;">hakankacar2014@gmail.com</a></p>
         `
     }
 };
@@ -65,12 +59,12 @@ const state = {
     openedVector: null,
     openedCardEl: null,
     countdownInterval: null,
-    detailPanelOpen: false,
-    downloadInProgress: false,
     ourPicksOffset: 0
 };
 
+// --- INITIALIZATION ---
 async function init() {
+    setupTheme(); // Dark mode başlatıcı
     setupCategories();
     setupEventListeners();
     setupModalHandlers();
@@ -79,6 +73,35 @@ async function init() {
     await fetchVectors();
 }
 
+// --- DARK MODE LOGIC ---
+function setupTheme() {
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    if (!btn || !icon) return;
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+    }
+
+    btn.onclick = (e) => {
+        e.preventDefault();
+        let theme = document.documentElement.getAttribute('data-theme');
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            icon.textContent = '🌙';
+            localStorage.setItem('theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            icon.textContent = '☀️';
+            localStorage.setItem('theme', 'dark');
+        }
+    };
+}
+
+// --- CATEGORY & UI SETUP ---
 function setupCategories() {
     const list = document.getElementById('categoriesList');
     if (!list) return;
@@ -86,29 +109,26 @@ function setupCategories() {
 
     const isMobile = window.innerWidth <= 768;
 
-    // Type Selector (Vector/JPEG)
     if (!isMobile) {
         const typeContainer = document.createElement('div');
-        typeContainer.className = 'type-filter-container';
-        typeContainer.style = 'padding:0 16px 8px; margin-bottom:8px; border-bottom:1px solid #ddd;';
+        typeContainer.style = 'padding:0 16px 8px; margin-bottom:8px; border-bottom:1px solid var(--border-color);';
         
         const typeLabel = document.createElement('div');
-        typeLabel.style = 'font-size:10px; font-weight:600; color:#666; margin-bottom:4px;';
+        typeLabel.style = 'font-size:10px; font-weight:600; color:var(--text-muted); margin-bottom:4px;';
         typeLabel.textContent = 'TYPE';
         typeContainer.appendChild(typeLabel);
         
         ['all', 'vector', 'jpeg'].forEach(t => {
-            const btn = document.createElement('a');
-            btn.href = '#';
-            btn.className = `category-item ${state.selectedType === t ? 'active' : ''}`;
-            btn.textContent = t.toUpperCase();
-            btn.onclick = (e) => { e.preventDefault(); selectType(t); };
-            typeContainer.appendChild(btn);
+            const a = document.createElement('a');
+            a.href = '#';
+            a.className = `category-item ${state.selectedType === t ? 'active' : ''}`;
+            a.textContent = t.toUpperCase();
+            a.onclick = (e) => { e.preventDefault(); selectType(t); };
+            typeContainer.appendChild(a);
         });
         list.appendChild(typeContainer);
     }
 
-    // Categories
     const allLink = document.createElement('a');
     allLink.href = '#';
     allLink.className = `category-item ${state.selectedCategory === 'all' ? 'active' : ''}`;
@@ -140,8 +160,8 @@ function selectType(type) {
 
 function resetSearchAndFetch() {
     state.searchQuery = '';
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.value = '';
+    const input = document.getElementById('searchInput');
+    if (input) input.value = '';
     closeDetailPanel();
     setupCategories();
     updateCategoryTitle();
@@ -156,10 +176,11 @@ function updateCategoryTitle() {
         : `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
 }
 
+// --- DATA FETCHING ---
 async function fetchVectors() {
     if (state.isLoading) return;
     state.isLoading = true;
-    showSkeleton(true); // Gerçekçi bir yükleme hissi için Skeleton ekledik
+    showSkeleton(true);
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
@@ -170,9 +191,8 @@ async function fetchVectors() {
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         
         const res = await fetch(url);
-        if (!res.ok) throw new Error('API failed');
-        
         const data = await res.json();
+        
         state.vectors = data.vectors || [];
         state.totalPages = data.totalPages || 1;
         state.total = data.total || 0;
@@ -194,11 +214,12 @@ function showSkeleton(show) {
     if (!grid) return;
     if (show) {
         grid.innerHTML = Array(12).fill(0).map(() => `
-            <div class="skeleton-card" style="height:200px; background:#f0f0f0; border-radius:8px; animation: pulse 1.5s infinite;"></div>
+            <div class="skeleton-card" style="height:220px; border-radius:8px; background:var(--card-bg); opacity:0.6;"></div>
         `).join('');
     }
 }
 
+// --- RENDERING ---
 function renderVectors() {
     const grid = document.getElementById('vectorsGrid');
     if (!grid) return;
@@ -211,12 +232,12 @@ function renderVectors() {
 
     state.vectors.forEach(v => {
         const card = document.createElement('div');
-        card.className = 'vector-card fade-in'; // Geçiş efekti eklendi
+        card.className = 'vector-card fade-in';
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
 
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy" onload="this.classList.add('loaded')">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
                 ${typeLabel}
             </div>
             <div class="vc-info">
@@ -233,7 +254,7 @@ function renderOurPicks() {
     if (!track || !state.vectors.length) return;
     track.innerHTML = '';
     
-    state.vectors.slice(0, 20).forEach(v => {
+    state.vectors.slice(0, 15).forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
@@ -246,15 +267,14 @@ function renderOurPicks() {
         card.onclick = () => openDetailPanel(v, card);
         track.appendChild(card);
     });
-    updateOurPicksArrows();
 }
 
+// --- PANELS & MODALS ---
 function openDetailPanel(v, cardEl) {
     if (state.openedVector && state.openedVector.name === v.name) {
         closeDetailPanel();
         return;
     }
-
     closeDetailPanel();
     state.openedVector = v;
     state.openedCardEl = cardEl;
@@ -263,7 +283,6 @@ function openDetailPanel(v, cardEl) {
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
     panel.className = 'detail-panel slide-down';
-    
     const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
 
     panel.innerHTML = `
@@ -274,10 +293,10 @@ function openDetailPanel(v, cardEl) {
             <div class="detail-right">
                 <h2 class="detail-title">${escHtml(v.title)}</h2>
                 <p class="detail-desc">${escHtml(v.description || "")}</p>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal & Commercial Use</td></tr>
-                </table>
+                <div class="detail-meta">
+                    <p><strong>Format:</strong> ${fileFormat}</p>
+                    <p><strong>License:</strong> Free for Personal & Commercial Use</p>
+                </div>
                 <div style="margin-top: 20px; display: flex; gap: 12px;">
                     <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
                     <button class="detail-close-btn" id="mainCloseBtn">Close</button>
@@ -341,28 +360,24 @@ function showDownloadPage(v) {
     document.body.style.overflow = 'hidden';
 }
 
-// Helper: Escape HTML to prevent XSS
-function escHtml(str) {
-    if (!str) return '';
-    return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// --- EVENT HANDLERS ---
+function setupEventListeners() {
+    const input = document.getElementById('searchInput');
+    const btn = document.getElementById('searchBtn');
+    if (input) input.onkeydown = (e) => { if (e.key === 'Enter') { state.searchQuery = input.value; state.currentPage = 1; fetchVectors(); } };
+    if (btn) btn.onclick = () => { state.searchQuery = input.value; state.currentPage = 1; fetchVectors(); };
+
+    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
 }
 
-// Event Listeners for Our Picks Arrows
 function setupOurPicksArrows() {
     const prev = document.getElementById('ourPicksPrev');
     const next = document.getElementById('ourPicksNext');
     if (!prev || !next) return;
-    prev.onclick = () => scrollPicks(-1);
-    next.onclick = () => scrollPicks(1);
+    prev.onclick = () => document.getElementById('ourPicksTrack').scrollBy({ left: -250, behavior: 'smooth' });
+    next.onclick = () => document.getElementById('ourPicksTrack').scrollBy({ left: 250, behavior: 'smooth' });
 }
-
-function scrollPicks(dir) {
-    const track = document.getElementById('ourPicksTrack');
-    const step = 200;
-    track.scrollBy({ left: dir * step, behavior: 'smooth' });
-}
-
-function updateOurPicksArrows() {} // Handled by CSS/Native Scroll usually
 
 function setupDownloadPageHandlers() {
     const close = document.getElementById('dpClose');
@@ -387,24 +402,14 @@ function setupModalHandlers() {
     if (close) close.onclick = () => document.getElementById('infoModal').style.display = 'none';
 }
 
-function setupEventListeners() {
-    const input = document.getElementById('searchInput');
-    const btn = document.getElementById('searchBtn');
-    const executeSearch = () => {
-        state.searchQuery = input.value;
-        state.currentPage = 1;
-        fetchVectors();
-    };
-    if (input) input.onkeydown = (e) => { if (e.key === 'Enter') executeSearch(); };
-    if (btn) btn.onclick = executeSearch;
-
-    document.getElementById('prevBtn').onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
-    document.getElementById('nextBtn').onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
-}
-
 function updatePagination() {
     document.getElementById('pageNumber').textContent = state.currentPage;
     document.getElementById('pageTotal').textContent = `/ ${state.totalPages}`;
+}
+
+function escHtml(str) {
+    if (!str) return '';
+    return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 document.addEventListener('DOMContentLoaded', init);
