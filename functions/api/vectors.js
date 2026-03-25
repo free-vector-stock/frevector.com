@@ -86,14 +86,15 @@ export async function onRequestGet(context) {
             allVectors = allVectors.filter(v => v.contentType === "jpeg");
         }
 
-        // Arama Filtresi
+        // Arama Filtresi (Senin keywords bazlı zorunlu talimatın eklendi)
         if (search) {
             const terms = search.split(/\s+/).filter(Boolean);
             allVectors = allVectors.filter(v => {
                 const title = (v.title || "").toLowerCase();
                 const keywords = (v.keywords || []).map(k => k.toLowerCase());
                 const description = (v.description || "").toLowerCase();
-                return terms.some(t => title.includes(t) || keywords.some(k => k.includes(t)) || description.includes(t));
+                // Relevance: Hem başlıkta hem keywords içinde arar
+                return terms.every(t => title.includes(t) || keywords.some(k => k.includes(t)) || description.includes(t));
             });
         }
 
