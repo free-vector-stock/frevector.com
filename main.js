@@ -1,30 +1,17 @@
-/**
- * frevector.com - Frontend Logic
- * v2026031413 - TAM ENTEGRE: kategoriler, görseller, shuffle, sonsuz kaydırma, download fix, memory cache
- */
-
-const CATEGORIES = [
-  'Abstract','Animals','The Arts','Backgrounds','Fashion','Buildings','Business','Celebrities',
-  'Education','Food','Drink','Medical','Holidays','Industrial','Interiors','Miscellaneous',
-  'Nature','Objects','Outdoor','People','Religion','Science','Symbols','Sports',
-  'Technology','Transportation','Vintage','Logo','Font','Icon'
-];
+const CATEGORIES = ['Abstract','Animals','Food','Drink','Medical','Nature','Technology','Sports'];
 
 const state = {
   vectors: [],
   currentPage: 1,
   totalPages: 1,
-  total: 0,
   selectedCategory: 'all',
-  selectedType: 'all',
   searchQuery: '',
-  isLoading: false,
   ourPicksOffset: 0
 };
 
 async function init() {
   setupCategories();
-  setupEventListeners();
+  setupPagination();
   setupOurPicksArrows();
   setupDownloadPageHandlers();
   await fetchVectors();
@@ -32,9 +19,8 @@ async function init() {
 
 function setupCategories() {
   const list = document.getElementById('categoriesList');
-  if (!list) return;
   list.innerHTML = '';
-  ['all','vector','jpeg',...CATEGORIES].forEach(cat => {
+  ['all',...CATEGORIES].forEach(cat => {
     const btn = document.createElement('button');
     btn.textContent = cat.toUpperCase();
     btn.onclick = () => { state.selectedCategory = cat; state.currentPage=1; fetchVectors(); };
@@ -42,49 +28,72 @@ function setupCategories() {
   });
 }
 
-function updateCategoryTitle() {
-  const el = document.getElementById('categoryTitle');
-  if (!el) return;
-  let h1Text = state.selectedCategory === 'all'
-    ? 'Free Vectors, SVGs, Icons and Clipart'
-    : `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
-  el.innerHTML = `<h1 style="font-family:'Inter',sans-serif;font-weight:600;">${h1Text}</h1>`;
-}
-
 async function fetchVectors() {
-  if (state.isLoading) return;
-  state.isLoading = true;
-  try {
-    const url = new URL('/api/vectors', window.location.origin);
-    url.searchParams.set('page', state.currentPage);
-    url.searchParams.set('limit','24');
-    if (state.selectedCategory!=='all') url.searchParams.set('category',state.selectedCategory);
-    if (state.selectedType!=='all') url.searchParams.set('type',state.selectedType);
-    if (state.searchQuery) url.searchParams.set('search',state.searchQuery);
+  const url = new URL('/api/vectors', window.location.origin);
+  url.searchParams.set('page', state.currentPage);
+  url.searchParams.set('limit','24');
+  if (state.selectedCategory!=='all') url.searchParams.set('category',state.selectedCategory);
+  if (state.searchQuery) url.searchParams.set('search',state.searchQuery);
 
-    const res = await fetch(url);
-    const data = await res.json();
+  const res = await fetch(url);
+  const data = await res.json();
 
-    if (!window.cachedVectorsData) window.cachedVectorsData = { pages: {} };
-    window.cachedVectorsData.pages[state.currentPage] = data;
+  state.vectors = data.vectors || [];
+  state.totalPages = data.totalPages || 1;
 
-    state.vectors = data.vectors || [];
-    state.totalPages = data.totalPages || 1;
-    state.total = data.total || 0;
-
-    renderVectors();
-    renderOurPicks();
-    updateCategoryTitle();
-    updatePagination();
-  } catch (err) {
-    console.error('Fetch error:', err);
-  } finally {
-    state.isLoading = false;
-  }
+  renderVectors();
+  renderOurPicks();
+  updatePagination();
 }
 
 function renderVectors() {
   const grid = document.getElementById('vectorsGrid');
-  if (!grid) return;
   grid.innerHTML = '';
-  state
+  state.vectors.forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'vector-card';
+    card.innerHTML = `
+      <div class="vc-img-wrap">
+        <img class="vc-img" src="${v.thumbnail}" alt="${v.title}" loading="lazy">
+        <span class="vc-type-badge ${v.isJpegOnly?'jpeg':'vector'}">${v.isJpegOnly?'JPEG':'VECTOR'}</span>
+      </div>`;
+    card.onclick = () => showDownloadPage(v);
+    grid.appendChild(card);
+  });
+}
+
+function renderOurPicks() {
+  const track = document.getElementById('ourPicksTrack');
+  track.innerHTML = '';
+  const shuffled = [...state.vectors].sort(()=>Math.random()-0.5);
+  shuffled.forEach(v=>{
+    const card=document.createElement('div');
+    card.className='vector-card';
+    card.innerHTML=`<div class="vc-img-wrap"><img class="vc-img" src="${v.thumbnail}" alt="${v.title}" loading="lazy"></div>`;
+    card.onclick=()=>showDownloadPage(v);
+    track.appendChild(card);
+  });
+}
+
+function scrollOurPicks(dir) {
+  const track=document.getElementById('ourPicksTrack');
+  const cardWidth=160;
+  state.ourPicksOffset+=dir*cardWidth;
+  const totalWidth=track.scrollWidth;
+  const visibleWidth=track.parentElement.offsetWidth;
+  if(state.ourPicksOffset<0) state.ourPicksOffset=totalWidth-visibleWidth;
+  if(state.ourPicksOffset>totalWidth-visibleWidth) state.ourPicksOffset=0;
+  track.style.transform=`translateX(-${state.ourPicksOffset}px)`;
+}
+
+function setupOurPicksArrows() {
+  document.getElementById('ourPicksPrev').onclick=()=>scrollOurPicks(-1);
+  document.getElementById('ourPicksNext').onclick=()=>scrollOurPicks(1);
+}
+
+function showDownloadPage(v) {
+  document.getElementById('dpImage').src=v.thumbnail;
+  document.getElementById('dpTitle').textContent=v.title;
+  document.getElementById('dpDescription').textContent=v.description||'';
+  document.getElementById('dpCategory').textContent=v.category||'-';
+  document.getElementBy
