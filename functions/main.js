@@ -1,6 +1,6 @@
 /**
  * frevector.com - Frontend Logic
- * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing
+ * v20260325 - Performance Optimized with Server-Side Pagination
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
@@ -151,7 +151,6 @@ const state = {
     countdownInterval: null,
     detailPanelOpen: false,
     downloadInProgress: false,
-    // REVİZYON 3: Our Picks kaydırma durumu
     ourPicksOffset: 0
 };
 
@@ -172,7 +171,6 @@ function setupCategories() {
     const isMobile = window.innerWidth <= 768;
 
     if (!isMobile) {
-        // Desktop: Keep the TYPE container
         const typeContainer = document.createElement('div');
         typeContainer.style.padding = '0 16px 8px';
         typeContainer.style.marginBottom = '8px';
@@ -210,7 +208,6 @@ function setupCategories() {
         
         list.appendChild(typeContainer);
     } else {
-        // Mobile: Add TYPE items directly to the list as tags
         const typeAll = document.createElement('a');
         typeAll.href = '#';
         typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
@@ -279,18 +276,11 @@ function selectType(type) {
 function updateCategoryTitle() {
     const el = document.getElementById('categoryTitle');
     if (!el) return;
-    
-    // Generate H1 title based on selected category
-    let h1Text = '';
-    if (state.selectedCategory === 'all') {
-        h1Text = 'Free Vectors, SVGs, Icons and Clipart';
-    } else {
-        h1Text = `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
-    }
-    
+    let h1Text = state.selectedCategory === 'all' ? 'Free Vectors, SVGs, Icons and Clipart' : `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
     el.textContent = h1Text;
 }
 
+// --- GÜNCEL FETCH FONKSİYONU ---
 async function fetchVectors() {
     if (state.isLoading) return;
     state.isLoading = true;
@@ -305,6 +295,9 @@ async function fetchVectors() {
         if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         
+        const sortFilter = document.getElementById('sortFilter');
+        if (sortFilter) url.searchParams.set('sort', sortFilter.value);
+
         const res = await fetch(url);
         if (!res.ok) throw new Error('API request failed');
         
@@ -312,9 +305,10 @@ async function fetchVectors() {
         state.vectors = data.vectors || [];
         state.totalPages = data.totalPages || 1;
         state.total = data.total || 0;
+        state.currentPage = data.page || 1;
 
         renderVectors();
-        renderOurPicks();
+        if (state.currentPage === 1) renderOurPicks();
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -357,17 +351,16 @@ function renderVectors() {
     });
 }
 
-// REVİZYON 3: Our Picks - VECTOR/JPEG etiketi eklendi, ok butonları ile kaydırma
 function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
     if (!track || !state.vectors.length) return;
     track.innerHTML = '';
     state.ourPicksOffset = 0;
+    track.style.transform = `translateX(0px)`;
     
     state.vectors.slice(0, 20).forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        // REVİZYON 3: VECTOR veya JPEG etiketi sağ üst köşede
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
         card.innerHTML = `
             <div class="vc-img-wrap">
@@ -378,31 +371,24 @@ function renderOurPicks() {
         card.onclick = () => openDetailPanel(v, card);
         track.appendChild(card);
     });
-
-    // Ok butonlarını güncelle
     updateOurPicksArrows();
 }
 
-// REVİZYON 3: Our Picks ok butonları kurulumu
 function setupOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
-    if (!prevBtn || !nextBtn) return;
-
-    prevBtn.onclick = () => scrollOurPicks(-1);
-    nextBtn.onclick = () => scrollOurPicks(1);
+    if (prevBtn) prevBtn.onclick = () => scrollOurPicks(-1);
+    if (nextBtn) nextBtn.onclick = () => scrollOurPicks(1);
 }
 
 function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
     if (!track) return;
-
-    const cardWidth = 100; // 90px card + 10px gap
+    const cardWidth = 100;
     const visibleWidth = track.parentElement.offsetWidth;
     const totalWidth = track.scrollWidth;
     const maxOffset = Math.max(0, totalWidth - visibleWidth);
     const step = Math.floor(visibleWidth / cardWidth) * cardWidth;
-
     state.ourPicksOffset = Math.max(0, Math.min(maxOffset, state.ourPicksOffset + direction * step));
     track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
     updateOurPicksArrows();
@@ -413,11 +399,9 @@ function updateOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
     if (!track || !prevBtn || !nextBtn) return;
-
-    const visibleWidth = track.parentElement ? track.parentElement.offsetWidth : 0;
+    const visibleWidth = track.parentElement.offsetWidth;
     const totalWidth = track.scrollWidth;
     const maxOffset = Math.max(0, totalWidth - visibleWidth);
-
     prevBtn.style.opacity = state.ourPicksOffset <= 0 ? '0.3' : '1';
     prevBtn.style.cursor = state.ourPicksOffset <= 0 ? 'default' : 'pointer';
     nextBtn.style.opacity = state.ourPicksOffset >= maxOffset ? '0.3' : '1';
@@ -429,7 +413,6 @@ function openDetailPanel(v, cardEl) {
         closeDetailPanel();
         return;
     }
-
     closeDetailPanel();
     state.openedVector = v;
     state.openedCardEl = cardEl;
@@ -438,7 +421,6 @@ function openDetailPanel(v, cardEl) {
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
     panel.className = 'detail-panel';
-    
     const keywords = [...new Set([...(v.keywords || [])])];
     const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
 
@@ -473,7 +455,7 @@ function openDetailPanel(v, cardEl) {
     const index = cards.indexOf(cardEl);
     const columns = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
-    grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
+    grid.insertBefore(panel, (cards[insertAfterIndex] || cardEl).nextSibling);
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
@@ -491,28 +473,21 @@ function closeDetailPanel() {
 function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
     if (!dp) return;
-
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpDescription').textContent = v.description;
     document.getElementById('dpImage').src = v.thumbnail;
     document.getElementById('dpCategory').textContent = v.category;
     document.getElementById('dpFileSize').textContent = v.fileSize || 'N/A';
-    
-    // Update file format in download page
     const dpFormatCell = document.getElementById('dpFileFormat');
     if (dpFormatCell) dpFormatCell.textContent = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
-
     const kwBox = document.getElementById('dpKeywords');
     const keywords = [...new Set([...EXTRA_KEYWORDS, ...(v.keywords || [])])];
     kwBox.innerHTML = keywords.map(kw => `<span class="kw-tag">${escHtml(kw)}</span>`).join('');
-
     const btn = document.getElementById('dpDownloadBtn');
     const countBox = document.getElementById('dpCountdownBox');
     const countNum = document.getElementById('dpCountdown');
-
     btn.style.display = 'block';
     countBox.style.display = 'none';
-
     btn.onclick = () => {
         btn.style.display = 'none';
         countBox.style.display = 'block';
@@ -528,7 +503,6 @@ function showDownloadPage(v) {
             }
         }, 1000);
     };
-
     dp.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
@@ -555,20 +529,9 @@ function setupModalHandlers() {
         };
     });
     const infoModalClose = document.getElementById('infoModalClose');
-    if (infoModalClose) {
-        infoModalClose.onclick = () => {
-            document.getElementById('infoModal').style.display = 'none';
-        };
-    }
-    // Close modal on backdrop click
+    if (infoModalClose) infoModalClose.onclick = () => document.getElementById('infoModal').style.display = 'none';
     const infoModal = document.getElementById('infoModal');
-    if (infoModal) {
-        infoModal.onclick = (e) => {
-            if (e.target === infoModal) {
-                infoModal.style.display = 'none';
-            }
-        };
-    }
+    if (infoModal) infoModal.onclick = (e) => { if (e.target === infoModal) infoModal.style.display = 'none'; };
 }
 
 function setupEventListeners() {
@@ -577,22 +540,13 @@ function setupEventListeners() {
         input.onkeydown = (e) => { if (e.key === 'Enter') { state.searchQuery = input.value; state.currentPage = 1; fetchVectors(); } };
     }
     const searchBtn = document.getElementById('searchBtn');
-    if (searchBtn) {
-        searchBtn.onclick = () => { state.searchQuery = input.value; state.currentPage = 1; fetchVectors(); };
-    }
+    if (searchBtn) searchBtn.onclick = () => { state.searchQuery = input ? input.value : ''; state.currentPage = 1; fetchVectors(); };
     const sortFilter = document.getElementById('sortFilter');
-    if (sortFilter) {
-        sortFilter.onchange = () => { state.currentPage = 1; fetchVectors(); };
-    }
-    
+    if (sortFilter) sortFilter.onchange = () => { state.currentPage = 1; fetchVectors(); };
     const prevBtn = document.getElementById('prevBtn');
-    if (prevBtn) {
-        prevBtn.onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
-    }
+    if (prevBtn) prevBtn.onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
     const nextBtn = document.getElementById('nextBtn');
-    if (nextBtn) {
-        nextBtn.onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
-    }
+    if (nextBtn) nextBtn.onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
 }
 
 function updatePagination() {
