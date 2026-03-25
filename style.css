@@ -1,9 +1,6 @@
-/* SADECE PERFORMANS EK */
+/* EKSTRA PERFORMANS */
 .vc-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    content-visibility: auto;
-    contain-intrinsic-size: 200px 150px;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
