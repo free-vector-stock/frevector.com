@@ -8,34 +8,6 @@
     <style>
         .dp-countdown-box { text-align: center; margin-top: 20px; }
         .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
-
-        /* Our Picks okları için ek stil */
-        .our-picks-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .our-picks-arrow {
-            background: #000;
-            color: #fff;
-            border: none;
-            font-size: 28px;
-            padding: 10px 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-            z-index: 10;
-        }
-        .our-picks-arrow:hover {
-            background: #444;
-        }
-        .our-picks-track-wrap {
-            flex: 1;
-            overflow: hidden;
-        }
-        .our-picks-track {
-            display: flex;
-            transition: transform 0.3s ease;
-        }
     </style>
 </head>
 <body>
@@ -75,18 +47,18 @@
         </main>
     </div>
 
-    <!-- REVİZYON: Our Picks okları track’in yanına taşındı -->
+    <!-- REVİZYON 1 & 2: Our Picks ve Sayfalama - Footer üzerine sabitlendi -->
     <div class="bottom-fixed-container">
         <section class="our-picks-section" id="ourPicksSection">
             <div class="our-picks-header">
                 <div class="our-picks-label">Our selections for you</div>
-            </div>
-            <div class="our-picks-wrapper">
-                <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
-                <div class="our-picks-track-wrap">
-                    <div class="our-picks-track" id="ourPicksTrack"></div>
+                <div class="our-picks-nav">
+                    <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
+                    <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
                 </div>
-                <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
+            </div>
+            <div class="our-picks-track-wrap">
+                <div class="our-picks-track" id="ourPicksTrack"></div>
             </div>
         </section>
 
