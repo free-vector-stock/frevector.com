@@ -49,7 +49,21 @@ async function init() {
 function setupCategories() { /* senin verdiğin kategori kodları */ }
 function selectCategory(cat) { /* senin verdiğin kod */ }
 function selectType(type) { /* senin verdiğin kod */ }
-function updateCategoryTitle() { /* senin verdiğin kod */ }
+
+// H1 BAŞLIĞI EKLENMİŞ HALİ
+function updateCategoryTitle() {
+    const el = document.getElementById('categoryTitle');
+    if (!el) return;
+    
+    let h1Text = '';
+    if (state.selectedCategory === 'all') {
+        h1Text = 'Free Vectors, SVGs, Icons and Clipart';
+    } else {
+        h1Text = `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
+    }
+    
+    el.innerHTML = `<h1 style="font-family: 'Inter', sans-serif; font-weight: 600;">${h1Text}</h1>`;
+}
 
 // MEMORY CACHE EKLEMESİ BURADA
 async function fetchVectors() {
@@ -58,7 +72,6 @@ async function fetchVectors() {
     showLoader(true);
 
     try {
-        // Memory cache kontrolü
         if (window.cachedVectorsData && !state.searchQuery && state.selectedCategory === 'all' && state.selectedType === 'all') {
             const data = window.cachedVectorsData;
             state.vectors = data.vectors || [];
@@ -83,7 +96,6 @@ async function fetchVectors() {
             
             const data = await res.json();
 
-            // Memory cache’e kaydet
             if (!state.searchQuery && state.selectedCategory === 'all' && state.selectedType === 'all') {
                 window.cachedVectorsData = data;
             }
