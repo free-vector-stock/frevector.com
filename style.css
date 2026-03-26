@@ -550,3 +550,50 @@ body {
 body {
     overflow-x: hidden;
 }
+/* ===== ULTRA FIX (KESİN ÇÖZÜM) ===== */
+
+.our-picks {
+    position: relative;
+    height: 170px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.our-picks-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.our-picks-track {
+    display: flex !important;
+    gap: 10px;
+    align-items: center;
+}
+
+/* 🔴 ANA FIX BURASI */
+.our-picks-track .vector-card {
+    flex: 0 0 140px !important;
+    width: 140px !important;
+    min-width: 140px !important;
+    max-width: 140px !important;
+}
+
+/* 🔴 RESİMİ ZORLA KÜÇÜLT */
+.our-picks-track .vector-card img {
+    width: 140px !important;
+    height: 140px !important;
+    object-fit: cover !important;
+    display: block;
+}
+
+/* OKLARI ORTALA */
+.our-picks-arrow {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+/* SAYFA TAŞMASINI KES */
+body {
+    overflow-x: hidden;
+}
