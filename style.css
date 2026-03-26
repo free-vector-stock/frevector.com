@@ -510,3 +510,43 @@ body {
 .our-picks-arrow:hover {
     opacity: 1;
 }
+/* ===== FIX OUR PICKS SIZE & LAYOUT ===== */
+
+.our-picks {
+    height: 180px;
+    display: flex;
+    align-items: center;
+}
+
+.our-picks-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+.our-picks-track {
+    display: flex;
+    align-items: center;
+}
+
+.our-picks-track .vector-card {
+    min-width: 140px;
+    max-width: 140px;
+}
+
+.our-picks-track img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* okları ortala */
+.our-picks-arrow {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* footer kaybolma fix */
+body {
+    overflow-x: hidden;
+}
