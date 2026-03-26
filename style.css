@@ -597,3 +597,42 @@ body {
 body {
     overflow-x: hidden;
 }
+/* ===== FINAL STABLE FIX ===== */
+
+.our-picks {
+    height: 160px;
+    overflow: hidden;
+    position: relative;
+}
+
+.our-picks-track {
+    display: flex;
+    gap: 10px;
+}
+
+/* TÜM KARTLARI SABİTLE */
+.our-picks-track > * {
+    flex: 0 0 140px !important;
+    width: 140px !important;
+    max-width: 140px !important;
+}
+
+/* TÜM RESİMLERİ SABİTLE */
+.our-picks-track img {
+    width: 140px !important;
+    height: 140px !important;
+    object-fit: cover !important;
+    display: block;
+}
+
+/* OKLAR */
+.our-picks-arrow {
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+/* TAŞMA KES */
+body {
+    overflow-x: hidden;
+}
