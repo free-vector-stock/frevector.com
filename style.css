@@ -468,3 +468,45 @@ img {
 body {
   backface-visibility: hidden;
 }
+/* ===== OUR PICKS SAFE PATCH ===== */
+
+.our-picks {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.our-picks-container {
+    overflow: hidden;
+}
+
+.our-picks-track {
+    display: flex;
+    gap: 10px;
+    transition: transform 0.3s ease;
+    will-change: transform;
+}
+
+.our-picks-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 999;
+    background: #000;
+    color: #fff;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 28px;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.our-picks-arrow.left { left: 10px; }
+.our-picks-arrow.right { right: 10px; }
+
+.our-picks-arrow:hover {
+    opacity: 1;
+}
