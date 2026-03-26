@@ -468,3 +468,29 @@ img {
 body {
   backface-visibility: hidden;
 }
+
+/* --- OUR SELECTIONS OK VE TASARIM REVİZYONU --- */
+.our-picks-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
+.our-picks-scroll { scroll-behavior: smooth; display: flex; overflow-x: hidden; gap: 15px; width: 100%; }
+.pick-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+}
+.pick-arrow:hover { background: #000; transform: translateY(-50%) scale(1.1); }
+.pick-arrow.prev { left: 10px; }
+.pick-arrow.next { right: 10px; }
