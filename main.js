@@ -434,10 +434,6 @@ function openDetailPanel(v, cardEl) {
     state.openedVector = v;
     state.openedCardEl = cardEl;
     cardEl.classList.add('card-active');
-// URL güncellemesi
-const slug = v.name ? v.name.toLowerCase().replace(/\s+/g, "-") : "item";
-window.history.pushState({ vector: v.name }, "", "/details/" + slug);
-    
 
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
@@ -490,9 +486,6 @@ function closeDetailPanel() {
     if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
     state.openedVector = null;
     state.openedCardEl = null;
-// URL'yi geri al
-window.history.pushState({}, "", "/");
-
 }
 
 function showDownloadPage(v) {
@@ -620,30 +613,6 @@ function escHtml(str) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
-document.addEventListener('DOMContentLoaded', () => {
-    init();
-
-    // Eğer URL /details/... ile başlıyorsa paneli otomatik aç
-    if (location.pathname.startsWith("/details/")) {
-        const slug = location.pathname.split("/details/")[1];
-        if (slug) {
-            // slug'a göre ilgili vector'ü bul
-            const match = state.vectors.find(v =>
-                v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug
-            );
-            if (match) {
-                const grid = document.getElementById('vectorsGrid');
-                const cardEl = Array.from(grid.children)
-                    .find(el => el.querySelector(".vc-img")?.alt === match.title);
-                if (cardEl) {
-                    openDetailPanel(match, cardEl);
-                }
-            }
-        }
-    }
-});
-
-
 
 /* =========================
 ULTRA PERFORMANCE PATCH v1
@@ -733,21 +702,21 @@ ULTRA PERFORMANCE PATCH v1
     document.head.appendChild(link);
   }
 
-function init() {
-    fetchVectors().then(() => {
-        if (location.pathname.startsWith("/details/")) {
-            const slug = location.pathname.split("/details/")[1];
-            const match = state.vectors.find(v =>
-                v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug
-            );
-            if (match) {
-                const grid = document.getElementById("vectorsGrid");
-                const cardEl = Array.from(grid.children)
-                    .find(el => el.querySelector(".vc-img")?.alt === match.title);
-                if (cardEl) {
-                    openDetailPanel(match, cardEl);
-                }
-            }
-        }
+  function init() {
+    createObserver();
+
+    schedule(() => optimizeImages());
+    schedule(() => preloadNextPage());
+
+    const mutation = new MutationObserver(() => {
+      schedule(() => optimizeImages());
     });
-}
+
+    mutation.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
