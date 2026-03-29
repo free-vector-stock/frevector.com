@@ -435,7 +435,7 @@ function openDetailPanel(v, cardEl) {
     state.openedCardEl = cardEl;
     cardEl.classList.add('card-active');
 // URL güncellemesi
-const slug = v.name.toLowerCase().replace(/\s+/g, "-");
+const slug = v.name ? v.name.toLowerCase().replace(/\s+/g, "-") : "item";
 window.history.pushState({ vector: v.name }, "", "/details/" + slug);
     
 
@@ -490,7 +490,7 @@ function closeDetailPanel() {
     if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
     state.openedVector = null;
     state.openedCardEl = null;
-    // URL'yi geri al
+// URL'yi geri al
 window.history.pushState({}, "", "/");
 
 }
