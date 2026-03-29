@@ -734,9 +734,7 @@ ULTRA PERFORMANCE PATCH v1
   }
 
 function init() {
-    // Vektörleri yükle
     fetchVectors().then(() => {
-        // Eğer URL /details/... ile başlıyorsa paneli otomatik aç
         if (location.pathname.startsWith("/details/")) {
             const slug = location.pathname.split("/details/")[1];
             const match = state.vectors.find(v =>
@@ -744,8 +742,8 @@ function init() {
             );
             if (match) {
                 const grid = document.getElementById("vectorsGrid");
-                const cards = Array.from(grid.children);
-                const cardEl = cards.find(el => el.querySelector(".vc-img")?.alt === match.title);
+                const cardEl = Array.from(grid.children)
+                    .find(el => el.querySelector(".vc-img")?.alt === match.title);
                 if (cardEl) {
                     openDetailPanel(match, cardEl);
                 }
