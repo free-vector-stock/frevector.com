@@ -434,6 +434,10 @@ function openDetailPanel(v, cardEl) {
     state.openedVector = v;
     state.openedCardEl = cardEl;
     cardEl.classList.add('card-active');
+// URL güncellemesi
+const slug = v.name.toLowerCase().replace(/\s+/g, "-");
+window.history.pushState({ vector: v.name }, "", "/details/" + slug);
+    
 
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
@@ -486,6 +490,9 @@ function closeDetailPanel() {
     if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
     state.openedVector = null;
     state.openedCardEl = null;
+    // URL'yi geri al
+window.history.pushState({}, "", "/");
+
 }
 
 function showDownloadPage(v) {
@@ -613,6 +620,12 @@ function escHtml(str) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+window.addEventListener("popstate", (event) => {
+    if (!event.state || !event.state.vector) {
+        closeDetailPanel();
+    }
+});
+
 
 /* =========================
 ULTRA PERFORMANCE PATCH v1
