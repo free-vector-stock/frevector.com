@@ -620,11 +620,29 @@ function escHtml(str) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
-window.addEventListener("popstate", (event) => {
-    if (!event.state || !event.state.vector) {
-        closeDetailPanel();
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+
+    // Eğer URL /details/... ile başlıyorsa paneli otomatik aç
+    if (location.pathname.startsWith("/details/")) {
+        const slug = location.pathname.split("/details/")[1];
+        if (slug) {
+            // slug'a göre ilgili vector'ü bul
+            const match = state.vectors.find(v =>
+                v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug
+            );
+            if (match) {
+                const grid = document.getElementById('vectorsGrid');
+                const cardEl = Array.from(grid.children)
+                    .find(el => el.querySelector(".vc-img")?.alt === match.title);
+                if (cardEl) {
+                    openDetailPanel(match, cardEl);
+                }
+            }
+        }
     }
 });
+
 
 
 /* =========================
