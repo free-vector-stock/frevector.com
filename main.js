@@ -733,21 +733,23 @@ ULTRA PERFORMANCE PATCH v1
     document.head.appendChild(link);
   }
 
-  function init() {
-    createObserver();
-
-    schedule(() => optimizeImages());
-    schedule(() => preloadNextPage());
-
-    const mutation = new MutationObserver(() => {
-      schedule(() => optimizeImages());
+function init() {
+    // Vektörleri yükle
+    fetchVectors().then(() => {
+        // Eğer URL /details/... ile başlıyorsa paneli otomatik aç
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1];
+            const match = state.vectors.find(v =>
+                v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug
+            );
+            if (match) {
+                const grid = document.getElementById("vectorsGrid");
+                const cards = Array.from(grid.children);
+                const cardEl = cards.find(el => el.querySelector(".vc-img")?.alt === match.title);
+                if (cardEl) {
+                    openDetailPanel(match, cardEl);
+                }
+            }
+        }
     });
-
-    mutation.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", init);
-})();
+}
