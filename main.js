@@ -314,6 +314,13 @@ async function fetchVectors() {
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
+        
+        // Deep link support
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            url.searchParams.set('fetchAllForSlug', slug);
+        }
+
         url.searchParams.set('page', state.currentPage);
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);

@@ -22,6 +22,7 @@ export async function onRequestGet(context) {
     try {
         const r2 = context.env.VECTOR_ASSETS;
         const slug = url.searchParams.get("slug");
+        const fetchAllForSlug = url.searchParams.get("fetchAllForSlug");
         const category = url.searchParams.get("category") || "";
         const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
         const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "24")));
@@ -90,7 +91,14 @@ export async function onRequestGet(context) {
         const totalPages = Math.max(1, Math.ceil(total / limit));
         const validPage = Math.min(page, totalPages);
         const offset = (validPage - 1) * limit;
-        const pageVectors = allVectors.slice(offset, offset + limit);
+        let pageVectors = allVectors.slice(offset, offset + limit);
+
+        if (fetchAllForSlug) {
+            const slugMatch = allVectors.find(v => v.name === fetchAllForSlug);
+            if (slugMatch && !pageVectors.find(v => v.name === fetchAllForSlug)) {
+                pageVectors.unshift(slugMatch);
+            }
+        }
 
         const result = {
             vectors: pageVectors.map(enrichVector),
