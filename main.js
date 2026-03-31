@@ -164,9 +164,9 @@ function init() {
 
     fetchVectors().then(() => {
         if (location.pathname.startsWith("/details/")) {
-            const slug = location.pathname.split("/details/")[1];
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
             const match = state.vectors.find(v =>
-                v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug
+                v.name === slug || (v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug)
             );
             if (match) {
                 const grid = document.getElementById("vectorsGrid");
