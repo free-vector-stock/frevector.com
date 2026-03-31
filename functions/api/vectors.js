@@ -124,7 +124,7 @@ function enrichVector(v) {
         ...v,
         title: v.title || v.name || "",
         // Requirement: ALWAYS use thumbnail in site
-        thumbnail: `/api/asset?key=${encodeURIComponent(thumbKey)}`,
+        thumbnail: `https://vector-assets.r2.cloudflarestorage.com/${thumbKey}`,
         isJpegOnly: isJpegOnly
     };
 }
