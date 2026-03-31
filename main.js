@@ -169,12 +169,18 @@ function init() {
                 v.name === slug || (v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug)
             );
             if (match) {
-                const grid = document.getElementById("vectorsGrid");
-                const cardEl = Array.from(grid.children)
-                    .find(el => el.querySelector(".vc-img")?.alt === match.title);
-                if (cardEl) {
-                    openDetailPanel(match, cardEl);
-                }
+                // DOM'un render edilmesi için kısa bir süre bekle
+                setTimeout(() => {
+                    const grid = document.getElementById("vectorsGrid");
+                    if (!grid) return;
+                    const cardEl = Array.from(grid.children)
+                        .find(el => el.querySelector(".vc-img")?.alt === match.title);
+                    if (cardEl) {
+                        openDetailPanel(match, cardEl);
+                        // Panelin görünür olması için yukarı kaydır
+                        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
             }
         }
     });
