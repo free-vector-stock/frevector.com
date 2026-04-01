@@ -447,7 +447,18 @@ function renderOurPicks() {
                 ${typeLabel}
             </div>
         `;
-        card.onclick = () => openDetailPanel(v, card);
+        card.onclick = () => {
+            // "Our Picks" görselleri için özel davranış: Önce ana ekranda (detay paneli) açılacak
+            // scrollIntoView'ı burada engelliyoruz çünkü sayfa kaymasını istemiyoruz
+            openDetailPanel(v, null); 
+            
+            // Detay paneli açıldığında ana ızgaradaki ilgili kartı bulup aktif yapalım (eğer varsa)
+            const mainGrid = document.getElementById('vectorsGrid');
+            if (mainGrid) {
+                const mainCards = mainGrid.querySelectorAll('.vector-card');
+                mainCards.forEach(c => c.classList.remove('card-active'));
+            }
+        };
         track.appendChild(card);
     });
 
@@ -559,6 +570,7 @@ function openDetailPanel(v, cardEl) {
         window.history.pushState({ slug: v.name }, v.title, newPath);
     }
     
+    // Detay panelini görünür kılmak için her zaman scroll yapalım
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
