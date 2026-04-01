@@ -378,6 +378,8 @@ async function fetchOurPicksRandomly() {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('limit', '100');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+        if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
+        if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
         
         if (state.totalPages > 1) {
             const randomPage = Math.floor(Math.random() * state.totalPages) + 1;
@@ -388,6 +390,14 @@ async function fetchOurPicksRandomly() {
         if (res.ok) {
             const data = await res.json();
             let picks = data.vectors || [];
+            
+            // Client-side filtering as a safety measure
+            if (state.selectedType === 'vector') {
+                picks = picks.filter(v => !v.isJpegOnly);
+            } else if (state.selectedType === 'jpeg') {
+                picks = picks.filter(v => v.isJpegOnly);
+            }
+            
             picks.sort(() => Math.random() - 0.5);
             state.ourPicksVectors = picks;
             renderOurPicks();
@@ -550,16 +560,8 @@ function openDetailPanel(v, cardEl) {
     `;
 
     const grid = document.getElementById('vectorsGrid');
-    const cards = Array.from(grid.children);
-    const index = cardEl ? cards.indexOf(cardEl) : 0;
-    const columns = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
-    const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
-    
-    if (cards.length > 0) {
-        grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
-    } else {
-        grid.appendChild(panel);
-    }
+    // Detay panelini her zaman tüm görsellerin en altına ekle
+    grid.appendChild(panel);
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
