@@ -173,14 +173,22 @@ function init() {
                 setTimeout(() => {
                     const grid = document.getElementById("vectorsGrid");
                     if (!grid) return;
-                    const cardEl = Array.from(grid.children)
+                    
+                    // Önce mevcut kartlar arasında ara
+                    let cardEl = Array.from(grid.children)
                         .find(el => el.querySelector(".vc-img")?.alt === match.title);
+                    
+                    // Eğer kart bulunamazsa (farklı sayfada olabilir), ilk kartı referans al veya sanal bir kart oluşturma mantığı yerine direkt aç
                     if (cardEl) {
                         openDetailPanel(match, cardEl);
-                        // Panelin görünür olması için yukarı kaydır
                         cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        // Kart bulunamadıysa bile paneli açmak için ilk kartı kullan (grid boş değilse)
+                        if (grid.children.length > 0) {
+                            openDetailPanel(match, grid.children[0]);
+                        }
                     }
-                }, 100);
+                }, 200);
             }
         }
     });
@@ -462,7 +470,7 @@ function openDetailPanel(v, cardEl) {
     closeDetailPanel();
     state.openedVector = v;
     state.openedCardEl = cardEl;
-    cardEl.classList.add('card-active');
+    if (cardEl) cardEl.classList.add('card-active');
 
     const panel = document.createElement('div');
     panel.id = 'detailPanel';
@@ -499,10 +507,15 @@ function openDetailPanel(v, cardEl) {
 
     const grid = document.getElementById('vectorsGrid');
     const cards = Array.from(grid.children);
-    const index = cards.indexOf(cardEl);
+    const index = cardEl ? cards.indexOf(cardEl) : 0;
     const columns = window.innerWidth >= 1200 ? 6 : (window.innerWidth >= 768 ? 4 : 1);
     const insertAfterIndex = Math.min(cards.length - 1, Math.floor(index / columns) * columns + (columns - 1));
-    grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
+    
+    if (cards.length > 0) {
+        grid.insertBefore(panel, cards[insertAfterIndex].nextSibling);
+    } else {
+        grid.appendChild(panel);
+    }
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
