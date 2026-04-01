@@ -341,17 +341,16 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         border-bottom: 1px solid var(--border);
         padding: 8px 0;
         overflow: visible;
-        order: 4; /* Kategoriler 4. sırada */
+        order: 3; /* Kategoriler aramanın altına */
     }
     
     .sidebar-title { padding: 0 16px 4px; font-size: 9px; }
     
     .categories-list { 
         display: flex; 
-        flex-direction: row; 
-        flex-wrap: wrap;
+        flex-direction: column; /* Dikey liste */
         width: 100%;
-        gap: 4px; /* Boşluklar azaltıldı */
+        gap: 4px;
         overflow: visible;
         padding: 4px 16px;
     }
@@ -400,10 +399,11 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         border-top: 1px solid var(--border); 
         display: flex;
         flex-direction: column;
-        order: 6; /* Alt bölüm 6. sırada */
+        order: 6;
     }
-    .our-picks-section { order: 1; padding: 12px 0; margin-left: 0; }
-    .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; }bel { font-size: 9px; }
+    .our-picks-section { order: 1; padding: 12px 0; margin-left: 0; } /* Our selections footer üzerinde */
+    .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; }
+    .footer { order: 3; } /* Footer en altta */
     .our-picks-nav { gap: 6px; }
     .our-picks-arrow { width: 28px; height: 28px; font-size: 16px; }
     .our-picks-track-wrap { padding: 0 16px; }

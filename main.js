@@ -163,7 +163,6 @@ function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
 
-    // Geri/İleri butonlarını dinle
     window.onpopstate = (event) => {
         if (location.pathname.startsWith("/details/")) {
             const slug = location.pathname.split("/details/")[1].split("?")[0];
@@ -499,6 +498,7 @@ function renderOurPicks() {
 function setupOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
+
     if (!prevBtn || !nextBtn) return;
 
     prevBtn.onclick = () => scrollOurPicks(-1);
@@ -556,6 +556,10 @@ function openDetailPanel(v, cardEl) {
     panel.className = 'detail-panel';
     
     const keywords = [...new Set([...(v.keywords || [])])];
+    
+    // REVİZYON: Tip ve Kategori Fallback Mekanizması
+    const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
+    const displayCategory = v.category || 'Belirtilmemiş';
     const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
 
     panel.innerHTML = `
@@ -563,8 +567,9 @@ function openDetailPanel(v, cardEl) {
             <div class="detail-left">
                 <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}">
                 <table class="detail-table">
+                    <tr><td class="dt-label">TIP</td><td class="dt-value">${displayType}</td></tr>
+                    <tr><td class="dt-label">KATEGORI</td><td class="dt-value">${escHtml(displayCategory)}</td></tr>
                     <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td class="dt-value">${escHtml(v.category)}</td></tr>
                     <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
                     <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
                     <tr><td class="dt-label">FILE SIZE</td><td class="dt-value">${v.fileSize || 'N/A'}</td></tr>
@@ -622,7 +627,12 @@ function showDownloadPage(v) {
     document.getElementById('dpTitle').textContent = v.title;
     document.getElementById('dpDescription').textContent = v.description;
     document.getElementById('dpImage').src = v.thumbnail;
-    document.getElementById('dpCategory').textContent = v.category;
+    
+    // REVİZYON: Download sayfasında da Tip ve Kategori gösterimi
+    const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
+    const displayCategory = v.category || 'Belirtilmemiş';
+    
+    document.getElementById('dpCategory').textContent = displayCategory;
     document.getElementById('dpFileSize').textContent = v.fileSize || 'N/A';
     
     // Update file format in download page
