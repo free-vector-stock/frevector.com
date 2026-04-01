@@ -453,11 +453,12 @@ function renderOurPicks() {
     track.innerHTML = '';
     
     // Kesin filtreleme: state.selectedType'a göre
+    // isJpegOnly flag'i bazen API'den gelmeyebilir, bu yüzden v.name veya v.isJpegOnly kontrolü yapalım
     let filteredPicks = [...state.ourPicksVectors];
     if (state.selectedType === 'vector') {
-        filteredPicks = filteredPicks.filter(v => !v.isJpegOnly);
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
     } else if (state.selectedType === 'jpeg') {
-        filteredPicks = filteredPicks.filter(v => v.isJpegOnly);
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
     }
     
     if (filteredPicks.length === 0) return;
@@ -518,9 +519,9 @@ function scrollOurPicks(direction) {
     // Filtrelenmiş listeye göre genişliği hesapla
     let filteredPicks = [...state.ourPicksVectors];
     if (state.selectedType === 'vector') {
-        filteredPicks = filteredPicks.filter(v => !v.isJpegOnly);
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
     } else if (state.selectedType === 'jpeg') {
-        filteredPicks = filteredPicks.filter(v => v.isJpegOnly);
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
     }
     const singleSetWidth = filteredPicks.length * cardWidth;
     
