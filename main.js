@@ -152,7 +152,8 @@ const state = {
     detailPanelOpen: false,
     downloadInProgress: false,
     // REVİZYON 3: Our Picks kaydırma durumu
-    ourPicksOffset: 0
+    ourPicksOffset: 0,
+    ourPicksVectors: []
 };
 
 function init() {
@@ -340,7 +341,6 @@ async function fetchVectors() {
     try {
         const url = new URL('/api/vectors', window.location.origin);
         
-        // Deep link support
         if (location.pathname.startsWith("/details/")) {
             const slug = location.pathname.split("/details/")[1].split("?")[0];
             url.searchParams.set('fetchAllForSlug', slug);
@@ -362,7 +362,7 @@ async function fetchVectors() {
         state.total = data.total || 0;
 
         renderVectors();
-        renderOurPicks();
+        fetchOurPicksRandomly();
         updatePagination();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -370,6 +370,30 @@ async function fetchVectors() {
     } finally {
         state.isLoading = false;
         showLoader(false);
+    }
+}
+
+async function fetchOurPicksRandomly() {
+    try {
+        const url = new URL('/api/vectors', window.location.origin);
+        url.searchParams.set('limit', '100');
+        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+        
+        if (state.totalPages > 1) {
+            const randomPage = Math.floor(Math.random() * state.totalPages) + 1;
+            url.searchParams.set('page', randomPage);
+        }
+
+        const res = await fetch(url);
+        if (res.ok) {
+            const data = await res.json();
+            let picks = data.vectors || [];
+            picks.sort(() => Math.random() - 0.5);
+            state.ourPicksVectors = picks;
+            renderOurPicks();
+        }
+    } catch (err) {
+        console.error('Our Picks fetch error:', err);
     }
 }
 
@@ -405,17 +429,17 @@ function renderVectors() {
     });
 }
 
-// REVİZYON 3: Our Picks - VECTOR/JPEG etiketi eklendi, ok butonları ile kaydırma
+// REVİZYON 3: Our Picks - Sonsuz Döngü ve Rastgele Görseller
 function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    if (!track || !state.vectors.length) return;
+    if (!track || !state.ourPicksVectors.length) return;
     track.innerHTML = '';
-    state.ourPicksOffset = 0;
     
-    state.vectors.slice(0, 20).forEach(v => {
+    const displayVectors = [...state.ourPicksVectors, ...state.ourPicksVectors, ...state.ourPicksVectors];
+    
+    displayVectors.forEach(v => {
         const card = document.createElement('div');
         card.className = 'vector-card';
-        // REVİZYON 3: VECTOR veya JPEG etiketi sağ üst köşede
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
         card.innerHTML = `
             <div class="vc-img-wrap">
@@ -427,11 +451,12 @@ function renderOurPicks() {
         track.appendChild(card);
     });
 
-    // Ok butonlarını güncelle
-    updateOurPicksArrows();
+    const cardWidth = 90; 
+    state.ourPicksOffset = state.ourPicksVectors.length * cardWidth;
+    track.style.transition = 'none';
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
 }
 
-// REVİZYON 3: Our Picks ok butonları kurulumu
 function setupOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
@@ -443,33 +468,30 @@ function setupOurPicksArrows() {
 
 function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
-    if (!track) return;
+    if (!track || !state.ourPicksVectors.length) return;
 
-    const cardWidth = 100; // 90px card + 10px gap
-    const visibleWidth = track.parentElement.offsetWidth;
-    const totalWidth = track.scrollWidth;
-    const maxOffset = Math.max(0, totalWidth - visibleWidth);
-    const step = Math.floor(visibleWidth / cardWidth) * cardWidth;
+    const cardWidth = 90; 
+    const step = 3 * cardWidth; 
+    
+    state.ourPicksOffset += direction * step;
+    track.style.transition = 'transform 0.4s ease-out';
+    track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
 
-    state.ourPicksOffset = Math.max(0, Math.min(maxOffset, state.ourPicksOffset + direction * step));
-    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
-    updateOurPicksArrows();
-}
-
-function updateOurPicksArrows() {
-    const track = document.getElementById('ourPicksTrack');
-    const prevBtn = document.getElementById('ourPicksPrev');
-    const nextBtn = document.getElementById('ourPicksNext');
-    if (!track || !prevBtn || !nextBtn) return;
-
-    const visibleWidth = track.parentElement ? track.parentElement.offsetWidth : 0;
-    const totalWidth = track.scrollWidth;
-    const maxOffset = Math.max(0, totalWidth - visibleWidth);
-
-    prevBtn.style.opacity = state.ourPicksOffset <= 0 ? '0.3' : '1';
-    prevBtn.style.cursor = state.ourPicksOffset <= 0 ? 'default' : 'pointer';
-    nextBtn.style.opacity = state.ourPicksOffset >= maxOffset ? '0.3' : '1';
-    nextBtn.style.cursor = state.ourPicksOffset >= maxOffset ? 'default' : 'pointer';
+    const singleSetWidth = state.ourPicksVectors.length * cardWidth;
+    
+    track.addEventListener('transitionend', function handleTransitionEnd() {
+        track.removeEventListener('transitionend', handleTransitionEnd);
+        
+        if (state.ourPicksOffset >= 2 * singleSetWidth) {
+            state.ourPicksOffset -= singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        } else if (state.ourPicksOffset <= 0) {
+            state.ourPicksOffset += singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        }
+    });
 }
 
 function openDetailPanel(v, cardEl) {
