@@ -185,7 +185,6 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     justify-content: center;
     padding: 0 20px;
     margin-bottom: 8px;
-    position: relative;
 }
 
 .our-picks-label { 
@@ -199,10 +198,9 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 
 .our-picks-nav { 
     position: absolute;
-    top: 65%;
+    top: 55px; /* Label altındaki görsellerin ortasına denk gelecek şekilde */
     left: 0;
     right: 0;
-    transform: translateY(-50%);
     display: flex; 
     justify-content: space-between;
     padding: 0 5px;

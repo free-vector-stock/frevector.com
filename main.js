@@ -447,7 +447,7 @@ function renderOurPicks() {
                 ${typeLabel}
             </div>
         `;
-        card.onclick = () => openDetailPanel(v, card);
+        card.onclick = () => showDownloadPage(v);
         track.appendChild(card);
     });
 
