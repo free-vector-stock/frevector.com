@@ -377,21 +377,28 @@ async function fetchOurPicksRandomly() {
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('limit', '100');
-        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
-        if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
         
-        if (state.totalPages > 1) {
-            const randomPage = Math.floor(Math.random() * state.totalPages) + 1;
-            url.searchParams.set('page', randomPage);
+        // ÖNEMLİ: API'ye hem kategori hem de tip parametrelerini gönderiyoruz
+        if (state.selectedCategory && state.selectedCategory !== 'all') {
+            url.searchParams.set('category', state.selectedCategory);
         }
-
+        
+        if (state.selectedType === 'vector') {
+            url.searchParams.set('type', 'vector');
+        } else if (state.selectedType === 'jpeg') {
+            url.searchParams.set('type', 'jpeg');
+        }
+        
+        // Eğer kategori veya tip seçiliyse, rastgele bir sayfa seçelim (toplam sayfa sayısına göre)
+        // Ancak fetchVectors henüz tamamlanmamışsa state.totalPages güncel olmayabilir.
+        // Bu yüzden basitçe ilk sayfadan 100 tane çekip içinden filtrelemek daha güvenli olabilir.
+        
         const res = await fetch(url);
         if (res.ok) {
             const data = await res.json();
             let picks = data.vectors || [];
             
-            // Client-side filtering as a safety measure
+            // API'den gelen veriyi tekrar client tarafında kesin olarak filtreleyelim
             if (state.selectedType === 'vector') {
                 picks = picks.filter(v => !v.isJpegOnly);
             } else if (state.selectedType === 'jpeg') {
