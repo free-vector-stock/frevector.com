@@ -162,6 +162,17 @@ function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
 
+    // Geri/İleri butonlarını dinle
+    window.onpopstate = (event) => {
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            const match = state.vectors.find(v => v.name === slug);
+            if (match) openDetailPanel(match);
+        } else {
+            closeDetailPanel();
+        }
+    };
+
     fetchVectors().then(() => {
         if (location.pathname.startsWith("/details/")) {
             const slug = location.pathname.split("/details/")[1].split("?")[0];
@@ -519,6 +530,13 @@ function openDetailPanel(v, cardEl) {
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
+    
+    // URL'yi güncelle (objects-jpeg-000000000131 takılı kalma sorununu çözer)
+    const newPath = `/details/${v.name}`;
+    if (window.location.pathname !== newPath) {
+        window.history.pushState({ slug: v.name }, v.title, newPath);
+    }
+    
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -526,6 +544,12 @@ function closeDetailPanel() {
     const panel = document.getElementById('detailPanel');
     if (panel) panel.remove();
     if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
+    
+    // URL'yi ana sayfaya döndür
+    if (window.location.pathname.startsWith('/details/')) {
+        window.history.pushState({}, 'Frevector', '/');
+    }
+    
     state.openedVector = null;
     state.openedCardEl = null;
 }
