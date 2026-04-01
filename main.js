@@ -350,6 +350,13 @@ async function fetchVectors() {
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
         if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
+        
+        // Sıralama filtresini ekle
+        const sortFilter = document.getElementById('sortFilter');
+        if (sortFilter && sortFilter.value) {
+            url.searchParams.set('sort', sortFilter.value);
+        }
+
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         
         const res = await fetch(url);
@@ -489,7 +496,7 @@ function renderOurPicks() {
         track.appendChild(card);
     });
 
-    const cardWidth = 90; 
+    const cardWidth = window.innerWidth <= 768 ? 70 : 90; 
     state.ourPicksOffset = 2 * filteredPicks.length * cardWidth;
     track.style.transition = 'none';
     track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
@@ -498,25 +505,95 @@ function renderOurPicks() {
 function setupOurPicksArrows() {
     const prevBtn = document.getElementById('ourPicksPrev');
     const nextBtn = document.getElementById('ourPicksNext');
+    const track = document.getElementById('ourPicksTrack');
+    const wrap = document.querySelector('.our-picks-track-wrap');
 
-    if (!prevBtn || !nextBtn) return;
+    if (prevBtn && nextBtn) {
+        prevBtn.onclick = () => scrollOurPicks(-1);
+        nextBtn.onclick = () => scrollOurPicks(1);
+    }
 
-    prevBtn.onclick = () => scrollOurPicks(-1);
-    nextBtn.onclick = () => scrollOurPicks(1);
+    if (!track || !wrap) return;
+
+    // Swipe/Drag functionality
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let initialOffset;
+
+    const start = (e) => {
+        isDown = true;
+        track.style.transition = 'none';
+        startX = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
+        initialOffset = state.ourPicksOffset;
+    };
+
+    const end = () => {
+        if (!isDown) return;
+        isDown = false;
+        track.style.transition = 'transform 0.3s ease-out';
+        
+        // Snap to nearest card
+        const cardWidth = window.innerWidth <= 768 ? 70 : 90; // gap dahil (60+10 veya 80+10)
+        state.ourPicksOffset = Math.round(state.ourPicksOffset / cardWidth) * cardWidth;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        
+        // Sonsuz döngü kontrolü
+        checkInfiniteScroll();
+    };
+
+    const move = (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
+        const walk = (x - startX);
+        state.ourPicksOffset = initialOffset - walk;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+    };
+
+    function checkInfiniteScroll() {
+        let filteredPicks = [...state.ourPicksVectors];
+        if (state.selectedType === 'vector') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
+        } else if (state.selectedType === 'jpeg') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
+        }
+        const cardWidth = window.innerWidth <= 768 ? 70 : 90;
+        const singleSetWidth = filteredPicks.length * cardWidth;
+
+        if (state.ourPicksOffset >= 3 * singleSetWidth) {
+            state.ourPicksOffset -= singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        } else if (state.ourPicksOffset <= singleSetWidth) {
+            state.ourPicksOffset += singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        }
+    }
+
+    wrap.addEventListener('mousedown', start);
+    wrap.addEventListener('touchstart', start, { passive: true });
+    
+    window.addEventListener('mouseup', end);
+    wrap.addEventListener('touchend', end);
+    
+    wrap.addEventListener('mousemove', move);
+    wrap.addEventListener('touchmove', move, { passive: false });
 }
 
 function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
     if (!track || !state.ourPicksVectors.length) return;
 
-    const cardWidth = 90; 
-    const step = 3 * cardWidth; 
+    const isMobile = window.innerWidth <= 768;
+    const cardWidth = isMobile ? 70 : 90; 
+    const step = (isMobile ? 2 : 3) * cardWidth; 
     
     state.ourPicksOffset += direction * step;
     track.style.transition = 'transform 0.4s ease-out';
     track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
 
-    // Filtrelenmiş listeye göre genişliği hesapla
     let filteredPicks = [...state.ourPicksVectors];
     if (state.selectedType === 'vector') {
         filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
@@ -715,11 +792,24 @@ function setupEventListeners() {
     }
     const searchBtn = document.getElementById('searchBtn');
     if (searchBtn) {
-        searchBtn.onclick = () => { state.searchQuery = input.value; state.currentPage = 1; fetchVectors(); };
+        const triggerSearch = () => { 
+            state.searchQuery = input.value; 
+            state.currentPage = 1; 
+            fetchVectors(); 
+        };
+        searchBtn.onclick = triggerSearch;
+        searchBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            triggerSearch();
+        }, { passive: false });
     }
     const sortFilter = document.getElementById('sortFilter');
     if (sortFilter) {
-        sortFilter.onchange = () => { state.currentPage = 1; fetchVectors(); };
+        sortFilter.onchange = () => { 
+            state.currentPage = 1; 
+            // Sıralama değerini state'e eklemiyoruz ama fetchVectors içinde select'ten okuyacağız
+            fetchVectors(); 
+        };
     }
     
     const prevBtn = document.getElementById('prevBtn');
