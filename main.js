@@ -449,10 +449,20 @@ function renderVectors() {
 // REVİZYON 3: Our Picks - Sonsuz Döngü ve Rastgele Görseller
 function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    if (!track || !state.ourPicksVectors.length) return;
+    if (!track) return;
     track.innerHTML = '';
     
-    const displayVectors = [...state.ourPicksVectors, ...state.ourPicksVectors, ...state.ourPicksVectors, ...state.ourPicksVectors, ...state.ourPicksVectors];
+    // Kesin filtreleme: state.selectedType'a göre
+    let filteredPicks = [...state.ourPicksVectors];
+    if (state.selectedType === 'vector') {
+        filteredPicks = filteredPicks.filter(v => !v.isJpegOnly);
+    } else if (state.selectedType === 'jpeg') {
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly);
+    }
+    
+    if (filteredPicks.length === 0) return;
+    
+    const displayVectors = [...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks];
     
     displayVectors.forEach(v => {
         const card = document.createElement('div');
@@ -480,7 +490,7 @@ function renderOurPicks() {
     });
 
     const cardWidth = 90; 
-    state.ourPicksOffset = 2 * state.ourPicksVectors.length * cardWidth;
+    state.ourPicksOffset = 2 * filteredPicks.length * cardWidth;
     track.style.transition = 'none';
     track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
 }
@@ -505,7 +515,14 @@ function scrollOurPicks(direction) {
     track.style.transition = 'transform 0.4s ease-out';
     track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
 
-    const singleSetWidth = state.ourPicksVectors.length * cardWidth;
+    // Filtrelenmiş listeye göre genişliği hesapla
+    let filteredPicks = [...state.ourPicksVectors];
+    if (state.selectedType === 'vector') {
+        filteredPicks = filteredPicks.filter(v => !v.isJpegOnly);
+    } else if (state.selectedType === 'jpeg') {
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly);
+    }
+    const singleSetWidth = filteredPicks.length * cardWidth;
     
     track.addEventListener('transitionend', function handleTransitionEnd() {
         track.removeEventListener('transitionend', handleTransitionEnd);
