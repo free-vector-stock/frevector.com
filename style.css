@@ -250,6 +250,8 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     width: 80px; 
     min-width: 80px; 
     flex-shrink: 0; 
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 .our-picks-track .vector-card .vc-img-wrap { 
