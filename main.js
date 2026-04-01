@@ -430,16 +430,20 @@ function renderVectors() {
         return;
     }
 
-    state.vectors.forEach(v => {
+    state.vectors.forEach((v, index) => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         if (state.openedVector && state.openedVector.name === v.name) card.classList.add('card-active');
         
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
 
+        // İlk 6 görseli eager (hemen), diğerlerini lazy yükle
+        const loadingAttr = index < 6 ? 'eager' : 'lazy';
+        const fetchPriority = index < 6 ? 'high' : 'low';
+
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" fetchpriority="${fetchPriority}" decoding="async">
                 ${typeLabel}
             </div>
             <div class="vc-info">
@@ -471,13 +475,17 @@ function renderOurPicks() {
     
     const displayVectors = [...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks];
     
-    displayVectors.forEach(v => {
+    displayVectors.forEach((v, index) => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+        
+        // Our Picks için ilk birkaç görseli hızlı yükle
+        const loadingAttr = index < 10 ? 'eager' : 'lazy';
+
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async">
                 ${typeLabel}
             </div>
         `;
@@ -841,109 +849,4 @@ function escHtml(str) {
 
 document.addEventListener('DOMContentLoaded', init);
 
-/* =========================
-ULTRA PERFORMANCE PATCH v1
-(append-only)
-========================= */
-
-(function () {
-  if (window.__ULTRA_PERF_PATCH__) return;
-  window.__ULTRA_PERF_PATCH__ = true;
-
-  const BATCH_SIZE = 20;
-  const IDLE_TIMEOUT = 50;
-
-  let observer;
-  let queue = [];
-  let rendering = false;
-
-  function createObserver() {
-    observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          if (img.dataset.src) {
-            img.src = img.dataset.src;
-            img.removeAttribute("data-src");
-            img.decode?.().catch(() => {});
-            observer.unobserve(img);
-          }
-        }
-      });
-    }, {
-      rootMargin: "300px"
-    });
-  }
-
-  function processQueue(deadline) {
-    if (rendering) return;
-    rendering = true;
-
-    while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && queue.length > 0) {
-      const item = queue.shift();
-      item();
-    }
-
-    rendering = false;
-
-    if (queue.length > 0) {
-      requestIdleCallback(processQueue, { timeout: IDLE_TIMEOUT });
-    }
-  }
-
-  function schedule(task) {
-    queue.push(task);
-    requestIdleCallback(processQueue, { timeout: IDLE_TIMEOUT });
-  }
-
-  function optimizeImages() {
-    const images = document.querySelectorAll("img");
-
-    images.forEach((img) => {
-      if (img.dataset.optimized) return;
-
-      img.dataset.optimized = "1";
-
-      if (img.src && !img.dataset.src) {
-        img.dataset.src = img.src;
-        img.src = "";
-      }
-
-      img.loading = "lazy";
-      img.decoding = "async";
-
-      observer.observe(img);
-    });
-  }
-
-  function preloadNextPage() {
-    const nextBtn = document.querySelector(".pagination .next");
-    if (!nextBtn) return;
-
-    const href = nextBtn.getAttribute("href");
-    if (!href) return;
-
-    const link = document.createElement("link");
-    link.rel = "prefetch";
-    link.href = href;
-    document.head.appendChild(link);
-  }
-
-  function init() {
-    createObserver();
-
-    schedule(() => optimizeImages());
-    schedule(() => preloadNextPage());
-
-    const mutation = new MutationObserver(() => {
-      schedule(() => optimizeImages());
-    });
-
-    mutation.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", init);
-})();
+/* ULTRA PERFORMANCE PATCH v1 REMOVED - Native browser optimizations used instead */

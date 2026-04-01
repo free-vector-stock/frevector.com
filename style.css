@@ -238,6 +238,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     position: relative; 
     width: calc(100% - 80px);
     margin: 0 auto;
+    contain: content;
 }
 
 .our-picks-track { 
@@ -246,6 +247,8 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     transition: transform 0.3s ease; 
     user-select: none;
     -webkit-user-drag: none;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .our-picks-track .vector-card { 
