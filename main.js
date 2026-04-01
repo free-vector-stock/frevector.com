@@ -661,7 +661,7 @@ function showDownloadPage(v) {
             if (count <= 0) {
                 clearInterval(state.countdownInterval);
                 window.location.href = `/api/download?slug=${v.name}`;
-                setTimeout(() => { dp.style.display = 'none'; document.body.style.overflow = ''; }, 1000);
+                // Sayfanın kapanması (dp.style.display = 'none') kaldırıldı, artık açık kalacak.
             }
         }, 1000);
     };
