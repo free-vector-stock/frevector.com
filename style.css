@@ -47,8 +47,8 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 }
 .header-center { flex: 1; margin-left: 0; }
 .search-container { display: flex; align-items: center; gap: 0; border: 1px solid var(--border); border-radius: 3px; padding: 0; background: var(--white); }
-.search-input { border: none; outline: none; flex: 1; font-size: 13px; color: #1a1a1a; background: transparent; padding: 7px 12px; }
-.search-icon-btn { background: var(--black); border: none; cursor: pointer; padding: 7px 12px; display: flex; align-items: center; justify-content: center; color: var(--white); flex-shrink: 0; border-radius: 0 3px 3px 0; transition: background 0.2s; }
+.search-input { border: none; outline: none; flex: 1; font-size: 13px; color: #1a1a1a; background: transparent; padding: 7px 12px; order: 1; }
+.search-icon-btn { background: var(--black); border: none; cursor: pointer; padding: 7px 12px; display: flex; align-items: center; justify-content: center; color: var(--white); flex-shrink: 0; border-radius: 0 3px 3px 0; transition: background 0.2s; order: 2; }
 .search-icon-btn:hover { background: #333; }
 .sort-filter { border: 1px solid var(--border); padding: 7px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; background: var(--white); color: #1a1a1a; white-space: nowrap; flex-shrink: 0; }
 
@@ -410,9 +410,9 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         flex-direction: column;
         order: 6; /* Alt bölüm en sonda */
     }
-    .pagination-wrapper { order: 1; padding: 12px 0; margin-left: 0; } /* Sayfalama en üstte */
-    .our-picks-section { order: 2; padding: 12px 0; margin-left: 0; } /* Our selections sayfalama altında */
-    .footer { order: 3; } /* Footer en altta */
+    .our-picks-section { order: 1; padding: 12px 0; margin-left: 0; border-bottom: 1px solid var(--border); }
+    .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; border-bottom: 1px solid var(--border); }
+    .footer { order: 3; padding-bottom: 0; margin-bottom: 0; }
     .our-picks-nav { gap: 6px; }
     .our-picks-arrow { width: 28px; height: 28px; font-size: 16px; }
     .our-picks-track-wrap { padding: 0 16px; }
