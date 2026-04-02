@@ -480,12 +480,12 @@ function renderOurPicks() {
         card.className = 'vector-card';
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
         
-        // Our Picks için ilk birkaç görseli hızlı yükle
-        const loadingAttr = index < 10 ? 'eager' : 'lazy';
+        // Our Picks için ilk birkaç görseli hızlı yükle, diğerlerini lazy load
+        const loadingAttr = index < 15 ? 'eager' : 'lazy';
 
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async" fetchpriority="${index < 5 ? 'high' : 'auto'}">
                 ${typeLabel}
             </div>
         `;
@@ -523,31 +523,43 @@ function setupOurPicksArrows() {
 
     if (!track || !wrap) return;
 
-    // Swipe/Drag functionality
+    // Swipe/Drag functionality with momentum
     let isDown = false;
     let startX;
     let scrollLeft;
     let initialOffset;
+    let lastX = 0;
+    let lastTime = 0;
+    let velocity = 0;
+    let momentumAnimationId = null;
 
     const start = (e) => {
         isDown = true;
         track.style.transition = 'none';
         startX = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
         initialOffset = state.ourPicksOffset;
+        lastX = startX;
+        lastTime = Date.now();
+        velocity = 0;
+        if (momentumAnimationId) cancelAnimationFrame(momentumAnimationId);
     };
 
     const end = () => {
         if (!isDown) return;
         isDown = false;
-        track.style.transition = 'transform 0.3s ease-out';
         
-        // Snap to nearest card
-        const cardWidth = window.innerWidth <= 768 ? 70 : 90; // gap dahil (60+10 veya 80+10)
-        state.ourPicksOffset = Math.round(state.ourPicksOffset / cardWidth) * cardWidth;
-        track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        // Calculate velocity for momentum
+        const now = Date.now();
+        const timeDiff = now - lastTime;
+        if (timeDiff > 0) {
+            velocity = (lastX - startX) / timeDiff;
+        }
+        
+        // Apply momentum with easing
+        applyMomentum(velocity);
         
         // Sonsuz döngü kontrolü
-        checkInfiniteScroll();
+        setTimeout(checkInfiniteScroll, 500);
     };
 
     const move = (e) => {
@@ -557,6 +569,31 @@ function setupOurPicksArrows() {
         const walk = (x - startX);
         state.ourPicksOffset = initialOffset - walk;
         track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        lastX = x;
+        lastTime = Date.now();
+    };
+    
+    const applyMomentum = (vel) => {
+        const cardWidth = window.innerWidth <= 768 ? 70 : 90;
+        const friction = 0.95;
+        const minVelocity = 0.1;
+        let currentVel = vel;
+        
+        const animate = () => {
+            if (Math.abs(currentVel) > minVelocity) {
+                state.ourPicksOffset -= currentVel * 16; // 16ms per frame
+                currentVel *= friction;
+                track.style.transition = 'none';
+                track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+                momentumAnimationId = requestAnimationFrame(animate);
+            } else {
+                // Snap to nearest card after momentum ends
+                track.style.transition = 'transform 0.3s ease-out';
+                state.ourPicksOffset = Math.round(state.ourPicksOffset / cardWidth) * cardWidth;
+                track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+            }
+        };
+        animate();
     };
 
     function checkInfiniteScroll() {
@@ -585,6 +622,7 @@ function setupOurPicksArrows() {
     
     window.addEventListener('mouseup', end);
     wrap.addEventListener('touchend', end);
+    wrap.addEventListener('mouseleave', end);
     
     wrap.addEventListener('mousemove', move);
     wrap.addEventListener('touchmove', move, { passive: false });
