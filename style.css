@@ -407,8 +407,8 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         flex-direction: column;
         order: 6; /* Alt bölüm en sonda */
     }
-    .our-picks-section { order: 1; padding: 12px 0; margin-left: 0; } /* Our selections footer'ın üzerinde */
-    .pagination-wrapper { order: 2; padding: 12px 0; margin-left: 0; } /* Sayfalama footer'ın üzerinde */
+    .pagination-wrapper { order: 1; padding: 12px 0; margin-left: 0; } /* Sayfalama en üstte */
+    .our-picks-section { order: 2; padding: 12px 0; margin-left: 0; } /* Our selections sayfalama altında */
     .footer { order: 3; } /* Footer en altta */
     .our-picks-nav { gap: 6px; }
     .our-picks-arrow { width: 28px; height: 28px; font-size: 16px; }
