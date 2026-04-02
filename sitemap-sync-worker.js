@@ -4,7 +4,8 @@ export default {
   },
   async fetch(request, env, ctx) {
     // Allow manual trigger via HTTP for testing
-    if (new URL(request.url).pathname === "/sync") {
+    const url = new URL(request.url);
+    if (url.pathname === "/sync") {
       await syncSitemap(env);
       return new Response("Sitemap sync triggered", { status: 200 });
     }
@@ -16,7 +17,6 @@ async function syncSitemap(env) {
   console.log("Starting sitemap sync...");
   
   // 1. List objects from R2
-  // Assuming the bucket binding is VECTOR_ASSETS as seen in wrangler.toml
   const bucket = env.VECTOR_ASSETS;
   if (!bucket) {
     console.error("R2 bucket binding VECTOR_ASSETS not found");
@@ -47,28 +47,21 @@ async function syncSitemap(env) {
   xml += '    <priority>1.0</priority>\n';
   xml += '  </url>\n';
 
-  // The user wants to sync with R2 content. 
-  // Based on the project structure, each vector has a folder: Category/ID/
-  // And files like Category/ID/ID.json, Category/ID/ID.jpg, etc.
-  // We should extract the unique IDs.
-  
+  // Extract unique IDs from R2 objects
   const vectorIds = new Set();
   const idToDate = new Map();
 
   for (const obj of objects) {
-    // Skip all_vectors.json and other non-vector files
+    // Skip internal files
     if (obj.key === "all_vectors.json" || obj.key.includes("thumb")) continue;
     
-    // Extract ID from path: Category/ID/Filename
-    // Or if it's just ID.extension in the root
+    // Path format: Category/ID/Filename (e.g., Animals/A123/A123.json)
     const parts = obj.key.split('/');
     let id = "";
     
     if (parts.length >= 2) {
-      // It's in a folder: Category/ID/...
       id = parts[1];
     } else {
-      // It's in the root: ID.extension
       id = parts[0].replace(/\.[^/.]+$/, "");
     }
 
@@ -100,7 +93,7 @@ async function syncSitemap(env) {
     return;
   }
 
-  // Get current file SHA
+  // Get current file SHA to update existing file
   const getFileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     headers: {
       "Authorization": `token ${GITHUB_TOKEN}`,
@@ -113,10 +106,13 @@ async function syncSitemap(env) {
     const fileData = await getFileRes.json();
     sha = fileData.sha;
   } else {
-    console.log("Sitemap.xml not found on GitHub, creating new one.");
+    console.log("sitemap.xml not found on GitHub, will create new one.");
   }
 
   // Commit to GitHub
+  // Using btoa(unescape(encodeURIComponent(xml))) for safe base64 encoding of UTF-8
+  const contentBase64 = btoa(unescape(encodeURIComponent(xml)));
+  
   const commitRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     method: "PUT",
     headers: {
@@ -126,7 +122,7 @@ async function syncSitemap(env) {
     },
     body: JSON.stringify({
       message: "Auto-sync sitemap with R2",
-      content: btoa(unescape(encodeURIComponent(xml))), // Base64 encode UTF-8 string
+      content: contentBase64,
       sha: sha || undefined
     })
   });
@@ -134,7 +130,7 @@ async function syncSitemap(env) {
   if (commitRes.ok) {
     console.log("Sitemap successfully updated on GitHub");
   } else {
-    const error = await commitRes.text();
-    console.error("Failed to update sitemap on GitHub:", error);
+    const errorText = await commitRes.text();
+    console.error("Failed to update sitemap on GitHub:", errorText);
   }
 }
