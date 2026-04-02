@@ -1,6 +1,10 @@
 name = "frevector-com"
+main = "sitemap-sync-worker.js"
 compatibility_date = "2026-01-01"
 pages_build_output_dir = "."
+
+[triggers]
+crons = ["0 * * * *"] # her saat başı çalışır
 
 [[kv_namespaces]]
 binding = "VECTOR_DB"
