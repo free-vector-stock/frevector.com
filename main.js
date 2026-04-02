@@ -245,7 +245,7 @@ function setupCategories() {
         const typeJpeg = document.createElement('a');
         typeJpeg.href = '#';
         typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
-        typeJpeg.textContent = 'JPEG';
+        typeJpeg.textContent = 'Jpeg';
         typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
         typeContainer.appendChild(typeJpeg);
         
@@ -269,7 +269,7 @@ function setupCategories() {
         const typeJpeg = document.createElement('a');
         typeJpeg.href = '#';
         typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
-        typeJpeg.textContent = 'JPEG';
+        typeJpeg.textContent = 'Jpeg';
         typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
         list.appendChild(typeJpeg);
     }
