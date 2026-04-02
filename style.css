@@ -46,9 +46,10 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     height: 52px;
 }
 .header-center { flex: 1; margin-left: 0; }
-.search-container { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 3px; padding: 7px 12px; background: var(--white); }
-.search-input { border: none; outline: none; width: 100%; font-size: 13px; color: #1a1a1a; background: transparent; }
-.search-icon-btn { background: none; border: none; cursor: pointer; padding: 0; margin-right: 8px; display: flex; align-items: center; color: var(--black); flex-shrink: 0; }
+.search-container { display: flex; align-items: center; gap: 0; border: 1px solid var(--border); border-radius: 3px; padding: 0; background: var(--white); }
+.search-input { border: none; outline: none; flex: 1; font-size: 13px; color: #1a1a1a; background: transparent; padding: 7px 12px; }
+.search-icon-btn { background: var(--black); border: none; cursor: pointer; padding: 7px 12px; display: flex; align-items: center; justify-content: center; color: var(--white); flex-shrink: 0; border-radius: 0 3px 3px 0; transition: background 0.2s; }
+.search-icon-btn:hover { background: #333; }
 .sort-filter { border: 1px solid var(--border); padding: 7px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; background: var(--white); color: #1a1a1a; white-space: nowrap; flex-shrink: 0; }
 
 /* SABIT DÜZEN - SIDEBAR (KATEGORİLER) */
@@ -324,6 +325,9 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         order: 2; /* Arama kutusu 2. sırada */
     }
     .header-center { margin-left: 0; width: 100%; }
+    .search-container { flex-direction: row; width: 100%; }
+    .search-input { padding: 8px 12px; }
+    .search-icon-btn { padding: 8px 12px; border-radius: 0 3px 3px 0; }
     .sort-filter { width: 100%; order: 3; } /* Filtre 3. sırada */
     
     .main-container { 
