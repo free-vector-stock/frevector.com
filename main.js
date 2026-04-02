@@ -153,9 +153,7 @@ const state = {
     downloadInProgress: false,
     // REVİZYON 3: Our Picks kaydırma durumu
     ourPicksOffset: 0,
-    ourPicksVectors: [],
-    ourPicksVelocity: 0,
-    ourPicksMomentumInterval: null
+    ourPicksVectors: []
 };
 
 function init() {
@@ -165,90 +163,173 @@ function init() {
     setupDownloadPageHandlers();
     setupOurPicksArrows();
 
-    const initialCategory = new URLSearchParams(window.location.search).get('category') || 'all';
-    if (initialCategory !== 'all') {
-        document.querySelectorAll('.category-item').forEach(el => {
-            if (el.textContent.toLowerCase() === initialCategory.toLowerCase()) {
-                el.click();
-            }
-        });
-    } else {
-        fetchVectors();
-    }
-}
-
-function setupCategories() {
-    const categoriesList = document.getElementById('categoriesList');
-    if (!categoriesList) return;
-
-    const allBtn = document.createElement('a');
-    allBtn.className = 'category-item active';
-    allBtn.textContent = 'All Categories';
-    allBtn.onclick = (e) => {
-        e.preventDefault();
-        selectCategory('all', allBtn);
+    window.onpopstate = (event) => {
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            const match = state.vectors.find(v => v.name === slug);
+            if (match) openDetailPanel(match);
+        } else {
+            closeDetailPanel();
+        }
     };
-    categoriesList.appendChild(allBtn);
 
-    CATEGORIES.forEach(cat => {
-        const link = document.createElement('a');
-        link.className = 'category-item';
-        link.textContent = cat;
-        link.onclick = (e) => {
-            e.preventDefault();
-            selectCategory(cat, link);
-        };
-        categoriesList.appendChild(link);
+    fetchVectors().then(() => {
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            const match = state.vectors.find(v =>
+                v.name === slug || (v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug)
+            );
+            if (match) {
+                // DOM'un render edilmesi için kısa bir süre bekle
+                setTimeout(() => {
+                    const grid = document.getElementById("vectorsGrid");
+                    if (!grid) return;
+                    
+                    // Önce mevcut kartlar arasında ara
+                    let cardEl = Array.from(grid.children)
+                        .find(el => el.querySelector(".vc-img")?.alt === match.title);
+                    
+                    // Eğer kart bulunamazsa (farklı sayfada olabilir), ilk kartı referans al veya sanal bir kart oluşturma mantığı yerine direkt aç
+                    if (cardEl) {
+                        openDetailPanel(match, cardEl);
+                        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        // Kart bulunamadıysa bile paneli açmak için ilk kartı kullan (grid boş değilse)
+                        if (grid.children.length > 0) {
+                            openDetailPanel(match, grid.children[0]);
+                        }
+                    }
+                }, 200);
+            }
+        }
     });
 }
 
-function selectCategory(cat, element) {
-    document.querySelectorAll('.category-item').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
+function setupCategories() {
+    const list = document.getElementById('categoriesList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const isMobile = window.innerWidth <= 768;
+
+    if (!isMobile) {
+        // Desktop: Keep the TYPE container
+        const typeContainer = document.createElement('div');
+        typeContainer.style.padding = '0 16px 8px';
+        typeContainer.style.marginBottom = '8px';
+        typeContainer.style.paddingBottom = '8px';
+        typeContainer.style.borderBottom = '1px solid #ddd';
+        
+        const typeLabel = document.createElement('div');
+        typeLabel.style.fontSize = '10px';
+        typeLabel.style.fontWeight = '600';
+        typeLabel.style.color = '#666';
+        typeLabel.style.marginBottom = '4px';
+        typeLabel.textContent = 'TYPE';
+        typeContainer.appendChild(typeLabel);
+        
+        const typeAll = document.createElement('a');
+        typeAll.href = '#';
+        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
+        typeAll.textContent = 'All';
+        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
+        typeContainer.appendChild(typeAll);
+        
+        const typeVector = document.createElement('a');
+        typeVector.href = '#';
+        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
+        typeVector.textContent = 'Vector';
+        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
+        typeContainer.appendChild(typeVector);
+        
+        const typeJpeg = document.createElement('a');
+        typeJpeg.href = '#';
+        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
+        typeJpeg.textContent = 'Jpeg';
+        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
+        typeContainer.appendChild(typeJpeg);
+        
+        list.appendChild(typeContainer);
+    } else {
+        // Mobile: Add TYPE items directly to the list as tags
+        const typeAll = document.createElement('a');
+        typeAll.href = '#';
+        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
+        typeAll.textContent = 'All Types';
+        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
+        list.appendChild(typeAll);
+        
+        const typeVector = document.createElement('a');
+        typeVector.href = '#';
+        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
+        typeVector.textContent = 'Vector';
+        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
+        list.appendChild(typeVector);
+        
+        const typeJpeg = document.createElement('a');
+        typeJpeg.href = '#';
+        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
+        typeJpeg.textContent = 'Jpeg';
+        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
+        list.appendChild(typeJpeg);
+    }
+
+    const allLink = document.createElement('a');
+    allLink.href = '#';
+    allLink.className = 'category-item' + (state.selectedCategory === 'all' ? ' active' : '');
+    allLink.dataset.cat = 'all';
+    allLink.textContent = 'All Categories';
+    allLink.onclick = (e) => { e.preventDefault(); selectCategory('all'); };
+    list.appendChild(allLink);
+
+    CATEGORIES.forEach(cat => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'category-item' + (state.selectedCategory === cat ? ' active' : '');
+        a.dataset.cat = cat;
+        a.textContent = cat;
+        a.onclick = (e) => { e.preventDefault(); selectCategory(cat); };
+        list.appendChild(a);
+    });
+}
+
+function selectCategory(cat) {
     state.selectedCategory = cat;
     state.currentPage = 1;
+    state.searchQuery = '';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
+    closeDetailPanel();
+    setupCategories();
+    updateCategoryTitle();
     fetchVectors();
 }
 
-function setupEventListeners() {
+function selectType(type) {
+    state.selectedType = type;
+    state.currentPage = 1;
+    state.searchQuery = '';
     const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const sortFilter = document.getElementById('sortFilter');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
+    if (searchInput) searchInput.value = '';
+    closeDetailPanel();
+    setupCategories();
+    updateCategoryTitle();
+    fetchVectors();
+}
 
-    searchBtn.onclick = () => {
-        state.searchQuery = searchInput.value.trim();
-        state.currentPage = 1;
-        fetchVectors();
-    };
-
-    searchInput.onkeypress = (e) => {
-        if (e.key === 'Enter') {
-            state.searchQuery = searchInput.value.trim();
-            state.currentPage = 1;
-            fetchVectors();
-        }
-    };
-
-    sortFilter.onchange = () => {
-        state.currentPage = 1;
-        fetchVectors();
-    };
-
-    prevBtn.onclick = () => {
-        if (state.currentPage > 1) {
-            state.currentPage--;
-            fetchVectors();
-        }
-    };
-
-    nextBtn.onclick = () => {
-        if (state.currentPage < state.totalPages) {
-            state.currentPage++;
-            fetchVectors();
-        }
-    };
+function updateCategoryTitle() {
+    const el = document.getElementById('categoryTitle');
+    if (!el) return;
+    
+    // Generate H1 title based on selected category
+    let h1Text = '';
+    if (state.selectedCategory === 'all') {
+        h1Text = 'Free Vectors, SVGs, Icons and Clipart';
+    } else {
+        h1Text = `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
+    }
+    
+    el.textContent = h1Text;
 }
 
 async function fetchVectors() {
@@ -258,11 +339,24 @@ async function fetchVectors() {
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
+        
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            url.searchParams.set('fetchAllForSlug', slug);
+        }
+
         url.searchParams.set('page', state.currentPage);
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
         if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
+        
+        // Sıralama filtresini ekle
+        const sortFilter = document.getElementById('sortFilter');
+        if (sortFilter && sortFilter.value) {
+            url.searchParams.set('sort', sortFilter.value);
+        }
+
         if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
         
         const res = await fetch(url);
@@ -289,17 +383,34 @@ async function fetchOurPicksRandomly() {
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('limit', '100');
-        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         
-        if (state.totalPages > 1) {
-            const randomPage = Math.floor(Math.random() * state.totalPages) + 1;
-            url.searchParams.set('page', randomPage);
+        // ÖNEMLİ: API'ye hem kategori hem de tip parametrelerini gönderiyoruz
+        if (state.selectedCategory && state.selectedCategory !== 'all') {
+            url.searchParams.set('category', state.selectedCategory);
         }
-
+        
+        if (state.selectedType === 'vector') {
+            url.searchParams.set('type', 'vector');
+        } else if (state.selectedType === 'jpeg') {
+            url.searchParams.set('type', 'jpeg');
+        }
+        
+        // Eğer kategori veya tip seçiliyse, rastgele bir sayfa seçelim (toplam sayfa sayısına göre)
+        // Ancak fetchVectors henüz tamamlanmamışsa state.totalPages güncel olmayabilir.
+        // Bu yüzden basitçe ilk sayfadan 100 tane çekip içinden filtrelemek daha güvenli olabilir.
+        
         const res = await fetch(url);
         if (res.ok) {
             const data = await res.json();
             let picks = data.vectors || [];
+            
+            // API'den gelen veriyi tekrar client tarafında kesin olarak filtreleyelim
+            if (state.selectedType === 'vector') {
+                picks = picks.filter(v => !v.isJpegOnly);
+            } else if (state.selectedType === 'jpeg') {
+                picks = picks.filter(v => v.isJpegOnly);
+            }
+            
             picks.sort(() => Math.random() - 0.5);
             state.ourPicksVectors = picks;
             renderOurPicks();
@@ -319,16 +430,20 @@ function renderVectors() {
         return;
     }
 
-    state.vectors.forEach(v => {
+    state.vectors.forEach((v, index) => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         if (state.openedVector && state.openedVector.name === v.name) card.classList.add('card-active');
         
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
 
+        // İlk 6 görseli eager (hemen), diğerlerini lazy yükle
+        const loadingAttr = index < 6 ? 'eager' : 'lazy';
+        const fetchPriority = index < 6 ? 'high' : 'low';
+
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" fetchpriority="${fetchPriority}" decoding="async">
                 ${typeLabel}
             </div>
             <div class="vc-info">
@@ -344,35 +459,45 @@ function renderVectors() {
 // REVİZYON 3: Our Picks - Sonsuz Döngü ve Rastgele Görseller
 function renderOurPicks() {
     const track = document.getElementById('ourPicksTrack');
-    if (!track || !state.ourPicksVectors.length) return;
+    if (!track) return;
     track.innerHTML = '';
     
+    // Kesin filtreleme: state.selectedType'a göre
+    // isJpegOnly flag'i bazen API'den gelmeyebilir, bu yüzden v.name veya v.isJpegOnly kontrolü yapalım
     let filteredPicks = [...state.ourPicksVectors];
     if (state.selectedType === 'vector') {
         filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
     } else if (state.selectedType === 'jpeg') {
         filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
     }
-
-    if (!filteredPicks.length) return;
-
+    
+    if (filteredPicks.length === 0) return;
+    
     const displayVectors = [...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks];
     
-    displayVectors.forEach(v => {
+    displayVectors.forEach((v, index) => {
         const card = document.createElement('div');
         card.className = 'vector-card';
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+        
+        // Our Picks için ilk birkaç görseli hızlı yükle
+        const loadingAttr = index < 10 ? 'eager' : 'lazy';
+
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="lazy">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async">
                 ${typeLabel}
             </div>
         `;
         card.onclick = () => {
-            openDetailPanel(v, card);
-            const grid = document.getElementById('vectorsGrid');
-            if (grid) {
-                const mainCards = grid.querySelectorAll('.vector-card');
+            // "Our Picks" görselleri için özel davranış: Önce ana ekranda (detay paneli) açılacak
+            // scrollIntoView'ı burada engelliyoruz çünkü sayfa kaymasını istemiyoruz
+            openDetailPanel(v, null); 
+            
+            // Detay paneli açıldığında ana ızgaradaki ilgili kartı bulup aktif yapalım (eğer varsa)
+            const mainGrid = document.getElementById('vectorsGrid');
+            if (mainGrid) {
+                const mainCards = mainGrid.querySelectorAll('.vector-card');
                 mainCards.forEach(c => c.classList.remove('card-active'));
             }
         };
@@ -398,39 +523,31 @@ function setupOurPicksArrows() {
 
     if (!track || !wrap) return;
 
-    // Enhanced Swipe/Drag functionality with momentum
+    // Swipe/Drag functionality
     let isDown = false;
     let startX;
+    let scrollLeft;
     let initialOffset;
-    let lastX;
-    let lastTime;
-    const velocityHistory = [];
 
     const start = (e) => {
         isDown = true;
         track.style.transition = 'none';
         startX = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
-        lastX = startX;
-        lastTime = Date.now();
         initialOffset = state.ourPicksOffset;
-        velocityHistory.length = 0;
-        
-        if (state.ourPicksMomentumInterval) {
-            clearInterval(state.ourPicksMomentumInterval);
-        }
     };
 
     const end = () => {
         if (!isDown) return;
         isDown = false;
+        track.style.transition = 'transform 0.3s ease-out';
         
-        // Ortalama hızı momentum için kullan
-        if (velocityHistory.length > 0) {
-            state.ourPicksVelocity = velocityHistory.reduce((a, b) => a + b, 0) / velocityHistory.length;
-        }
+        // Snap to nearest card
+        const cardWidth = window.innerWidth <= 768 ? 70 : 90; // gap dahil (60+10 veya 80+10)
+        state.ourPicksOffset = Math.round(state.ourPicksOffset / cardWidth) * cardWidth;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
         
-        // Momentum animasyonu başlat
-        applyOurPicksMomentum(track);
+        // Sonsuz döngü kontrolü
+        checkInfiniteScroll();
     };
 
     const move = (e) => {
@@ -438,25 +555,30 @@ function setupOurPicksArrows() {
         e.preventDefault();
         const x = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
         const walk = (x - startX);
-        
-        // Hızı hesapla (piksel/ms)
-        const now = Date.now();
-        const timeDelta = Math.max(now - lastTime, 1);
-        const distanceDelta = x - lastX;
-        const velocity = (distanceDelta / timeDelta) * 16; // 16ms = ~60fps
-        
-        // Hız geçmişine ekle (son 5 frame)
-        velocityHistory.push(velocity);
-        if (velocityHistory.length > 5) {
-            velocityHistory.shift();
-        }
-        
-        lastX = x;
-        lastTime = now;
-        
         state.ourPicksOffset = initialOffset - walk;
         track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
     };
+
+    function checkInfiniteScroll() {
+        let filteredPicks = [...state.ourPicksVectors];
+        if (state.selectedType === 'vector') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
+        } else if (state.selectedType === 'jpeg') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
+        }
+        const cardWidth = window.innerWidth <= 768 ? 70 : 90;
+        const singleSetWidth = filteredPicks.length * cardWidth;
+
+        if (state.ourPicksOffset >= 3 * singleSetWidth) {
+            state.ourPicksOffset -= singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        } else if (state.ourPicksOffset <= singleSetWidth) {
+            state.ourPicksOffset += singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        }
+    }
 
     wrap.addEventListener('mousedown', start);
     wrap.addEventListener('touchstart', start, { passive: true });
@@ -472,74 +594,35 @@ function scrollOurPicks(direction) {
     const track = document.getElementById('ourPicksTrack');
     if (!track || !state.ourPicksVectors.length) return;
 
-    // Momentum için hızı ayarla
-    state.ourPicksVelocity = direction * 15; // Başlangıç hızı
+    const isMobile = window.innerWidth <= 768;
+    const cardWidth = isMobile ? 70 : 90; 
+    const step = (isMobile ? 2 : 3) * cardWidth; 
     
-    // Devam eden momentum interval'i temizle
-    if (state.ourPicksMomentumInterval) {
-        clearInterval(state.ourPicksMomentumInterval);
-    }
-    
-    // Momentum animasyonu başlat
-    applyOurPicksMomentum(track);
-}
+    state.ourPicksOffset += direction * step;
+    track.style.transition = 'transform 0.4s ease-out';
+    track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
 
-function applyOurPicksMomentum(track) {
-    const cardWidth = window.innerWidth <= 768 ? 70 : 90;
-    
     let filteredPicks = [...state.ourPicksVectors];
     if (state.selectedType === 'vector') {
         filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
     } else if (state.selectedType === 'jpeg') {
         filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
     }
-    
     const singleSetWidth = filteredPicks.length * cardWidth;
-    const friction = 0.94; // Sürtünme katsayısı (daha düşük = daha uzun sürer)
-    const minVelocity = 0.3; // Minimum hız eşiği
     
-    state.ourPicksMomentumInterval = setInterval(() => {
-        // Hızı azalt (sürtünme uygula)
-        state.ourPicksVelocity *= friction;
+    track.addEventListener('transitionend', function handleTransitionEnd() {
+        track.removeEventListener('transitionend', handleTransitionEnd);
         
-        // Hız çok küçük olursa dur
-        if (Math.abs(state.ourPicksVelocity) < minVelocity) {
-            clearInterval(state.ourPicksMomentumInterval);
-            state.ourPicksMomentumInterval = null;
-            state.ourPicksVelocity = 0;
-            
-            // Snap to nearest card
-            state.ourPicksOffset = Math.round(state.ourPicksOffset / cardWidth) * cardWidth;
-            track.style.transition = 'transform 0.3s ease-out';
-            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
-            
-            // Sonsuz döngü kontrolü
-            setTimeout(() => {
-                if (state.ourPicksOffset >= 3 * singleSetWidth) {
-                    state.ourPicksOffset -= singleSetWidth;
-                    track.style.transition = 'none';
-                    track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
-                } else if (state.ourPicksOffset <= singleSetWidth) {
-                    state.ourPicksOffset += singleSetWidth;
-                    track.style.transition = 'none';
-                    track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
-                }
-            }, 300);
-            return;
-        }
-        
-        // Konumu güncelle
-        state.ourPicksOffset += state.ourPicksVelocity;
-        track.style.transition = 'none';
-        track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
-        
-        // Hareket halindeyken de sonsuz döngü kontrolü
         if (state.ourPicksOffset >= 3 * singleSetWidth) {
             state.ourPicksOffset -= singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
         } else if (state.ourPicksOffset <= singleSetWidth) {
             state.ourPicksOffset += singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
         }
-    }, 16);
+    });
 }
 
 function openDetailPanel(v, cardEl) {
@@ -559,6 +642,7 @@ function openDetailPanel(v, cardEl) {
     
     const keywords = [...new Set([...(v.keywords || [])])];
     
+    // REVİZYON: Tip ve Kategori Fallback Mekanizması
     const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
     const displayCategory = v.category || 'Belirtilmemiş';
     const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
@@ -591,16 +675,19 @@ function openDetailPanel(v, cardEl) {
     `;
 
     const grid = document.getElementById('vectorsGrid');
+    // Detay panelini her zaman tüm görsellerin en altına ekle
     grid.appendChild(panel);
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
     
+    // URL'yi güncelle (objects-jpeg-000000000131 takılı kalma sorununu çözer)
     const newPath = `/details/${v.name}`;
     if (window.location.pathname !== newPath) {
         window.history.pushState({ slug: v.name }, v.title, newPath);
     }
     
+    // Detay panelini görünür kılmak için her zaman scroll yapalım
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -609,6 +696,7 @@ function closeDetailPanel() {
     if (panel) panel.remove();
     if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
     
+    // URL'yi ana sayfaya döndür
     if (window.location.pathname.startsWith('/details/')) {
         window.history.pushState({}, 'Frevector', '/');
     }
@@ -625,12 +713,14 @@ function showDownloadPage(v) {
     document.getElementById('dpDescription').textContent = v.description;
     document.getElementById('dpImage').src = v.thumbnail;
     
+    // REVİZYON: Download sayfasında da Tip ve Kategori gösterimi
     const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
     const displayCategory = v.category || 'Belirtilmemiş';
     
     document.getElementById('dpCategory').textContent = displayCategory;
     document.getElementById('dpFileSize').textContent = v.fileSize || 'N/A';
     
+    // Update file format in download page
     const dpFormatCell = document.getElementById('dpFileFormat');
     if (dpFormatCell) dpFormatCell.textContent = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
 
@@ -656,6 +746,7 @@ function showDownloadPage(v) {
             if (count <= 0) {
                 clearInterval(state.countdownInterval);
                 window.location.href = `/api/download?slug=${v.name}`;
+                // Sayfanın kapanması (dp.style.display = 'none') kaldırıldı, artık açık kalacak.
             }
         }, 1000);
     };
@@ -691,18 +782,59 @@ function setupModalHandlers() {
             document.getElementById('infoModal').style.display = 'none';
         };
     }
+    // Close modal on backdrop click
+    const infoModal = document.getElementById('infoModal');
+    if (infoModal) {
+        infoModal.onclick = (e) => {
+            if (e.target === infoModal) {
+                infoModal.style.display = 'none';
+            }
+        };
+    }
+}
+
+function setupEventListeners() {
+    const input = document.getElementById('searchInput');
+    if (input) {
+        input.onkeydown = (e) => { if (e.key === 'Enter') { state.searchQuery = input.value; state.currentPage = 1; fetchVectors(); } };
+    }
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn) {
+        const triggerSearch = () => { 
+            state.searchQuery = input.value; 
+            state.currentPage = 1; 
+            fetchVectors(); 
+        };
+        searchBtn.onclick = triggerSearch;
+        searchBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            triggerSearch();
+        }, { passive: false });
+    }
+    const sortFilter = document.getElementById('sortFilter');
+    if (sortFilter) {
+        sortFilter.onchange = () => { 
+            state.currentPage = 1; 
+            // Sıralama değerini state'e eklemiyoruz ama fetchVectors içinde select'ten okuyacağız
+            fetchVectors(); 
+        };
+    }
+    
+    const prevBtn = document.getElementById('prevBtn');
+    if (prevBtn) {
+        prevBtn.onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+    }
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) {
+        nextBtn.onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
+    }
 }
 
 function updatePagination() {
-    const pageNum = document.getElementById('pageNumber');
+    const pageNumber = document.getElementById('pageNumber');
+    if (pageNumber) pageNumber.textContent = state.currentPage;
     const pageTotal = document.getElementById('pageTotal');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    pageNum.textContent = state.currentPage;
-    pageTotal.textContent = `/ ${state.totalPages}`;
-    prevBtn.disabled = state.currentPage <= 1;
-    nextBtn.disabled = state.currentPage >= state.totalPages;
+    if (pageTotal) pageTotal.textContent = `/ ${state.totalPages}`;
 }
 
 function showLoader(show) {
@@ -710,9 +842,11 @@ function showLoader(show) {
     if (loader) loader.style.display = show ? 'flex' : 'none';
 }
 
-function escHtml(text) {
-    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return text.replace(/[&<>"']/g, m => map[m]);
+function escHtml(str) {
+    if (!str) return '';
+    return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-window.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', init);
+
+/* ULTRA PERFORMANCE PATCH v1 REMOVED - Native browser optimizations used instead */
