@@ -370,7 +370,6 @@ function renderOurPicks() {
         `;
         card.onclick = () => {
             openDetailPanel(v, card);
-            // Our Picks'ten tıklandığında ana griddeki aktifliği temizle
             const grid = document.getElementById('vectorsGrid');
             if (grid) {
                 const mainCards = grid.querySelectorAll('.vector-card');
@@ -399,16 +398,22 @@ function setupOurPicksArrows() {
 
     if (!track || !wrap) return;
 
-    // Swipe/Drag functionality
+    // Enhanced Swipe/Drag functionality with momentum
     let isDown = false;
     let startX;
     let initialOffset;
+    let lastX;
+    let lastTime;
+    const velocityHistory = [];
 
     const start = (e) => {
         isDown = true;
         track.style.transition = 'none';
         startX = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
+        lastX = startX;
+        lastTime = Date.now();
         initialOffset = state.ourPicksOffset;
+        velocityHistory.length = 0;
         
         if (state.ourPicksMomentumInterval) {
             clearInterval(state.ourPicksMomentumInterval);
@@ -418,6 +423,11 @@ function setupOurPicksArrows() {
     const end = () => {
         if (!isDown) return;
         isDown = false;
+        
+        // Ortalama hızı momentum için kullan
+        if (velocityHistory.length > 0) {
+            state.ourPicksVelocity = velocityHistory.reduce((a, b) => a + b, 0) / velocityHistory.length;
+        }
         
         // Momentum animasyonu başlat
         applyOurPicksMomentum(track);
@@ -429,8 +439,20 @@ function setupOurPicksArrows() {
         const x = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
         const walk = (x - startX);
         
-        // Hızı hesapla
-        state.ourPicksVelocity = -walk * 0.5;
+        // Hızı hesapla (piksel/ms)
+        const now = Date.now();
+        const timeDelta = Math.max(now - lastTime, 1);
+        const distanceDelta = x - lastX;
+        const velocity = (distanceDelta / timeDelta) * 16; // 16ms = ~60fps
+        
+        // Hız geçmişine ekle (son 5 frame)
+        velocityHistory.push(velocity);
+        if (velocityHistory.length > 5) {
+            velocityHistory.shift();
+        }
+        
+        lastX = x;
+        lastTime = now;
         
         state.ourPicksOffset = initialOffset - walk;
         track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
@@ -473,8 +495,8 @@ function applyOurPicksMomentum(track) {
     }
     
     const singleSetWidth = filteredPicks.length * cardWidth;
-    const friction = 0.95; // Sürtünme katsayısı
-    const minVelocity = 0.5; // Minimum hız eşiği
+    const friction = 0.94; // Sürtünme katsayısı (daha düşük = daha uzun sürer)
+    const minVelocity = 0.3; // Minimum hız eşiği
     
     state.ourPicksMomentumInterval = setInterval(() => {
         // Hızı azalt (sürtünme uygula)
