@@ -3,7 +3,7 @@ main = "sitemap-sync-worker.js"
 compatibility_date = "2026-01-01"
 
 [triggers]
-crons = ["0 * * * *"] # Her saat başı çalışır
+crons = ["0 */8 * * *"] # Günde 3 kez (8 saatte bir) çalışır
 
 [[r2_buckets]]
 binding = "VECTOR_ASSETS"
