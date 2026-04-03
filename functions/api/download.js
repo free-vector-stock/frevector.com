@@ -96,12 +96,19 @@ export async function onRequestGet(context) {
         // Increment download counter
         context.waitUntil((async () => {
             try {
+                // 1. Update individual file counter in downloads_count table
+                const countKey = `downloads_count:${slug}`;
+                const currentCount = await kv.get(countKey);
+                const newCount = (parseInt(currentCount) || 0) + 1;
+                await kv.put(countKey, newCount.toString());
+
+                // 2. Also update the main index for backward compatibility and dashboard
                 const freshRaw = await kv.get("all_vectors");
                 if (freshRaw) {
                     const freshVectors = JSON.parse(freshRaw);
                     const idx = freshVectors.findIndex(v => v.name === slug);
                     if (idx !== -1) {
-                        freshVectors[idx].downloads = (freshVectors[idx].downloads || 0) + 1;
+                        freshVectors[idx].downloads = newCount;
                         await kv.put("all_vectors", JSON.stringify(freshVectors));
                     }
                 }

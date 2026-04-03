@@ -248,7 +248,7 @@ function renderManageTable(type = 'vector') {
                 <td><strong>${escHtml(v.name)}</strong></td>
                 <td><span class="badge badge-${isJpeg ? 'blue' : 'green'}">${(v.contentType || type).toUpperCase()}</span></td>
                 <td>${escHtml(v.category)}</td>
-                <td>${v.downloads || 0}</td>
+                <td>${v.downloads || 0} downloads</td>
                 <td style="display:flex;gap:6px;">
                     <button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">DELETE</button>
                     <button class="btn-download-single" style="padding:6px 12px;background:#fff;border:1px solid #38a169;color:#38a169;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;" onclick="downloadVector('${escHtml(v.name)}')">DOWNLOAD</button>
