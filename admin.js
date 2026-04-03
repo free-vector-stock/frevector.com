@@ -514,6 +514,8 @@ async function handleBulkUpload(type = 'vector') {
     
     let success = 0;
     let errors = 0;
+    const batchSize = 5; // 5'erli gruplar halinde işle
+    
     for (let i = 0; i < bulkFiles.length; i++) {
         const group = bulkFiles[i];
         if (progressText) progressText.textContent = `Processing ${group.id} (${i+1}/${bulkFiles.length})...`;
@@ -558,8 +560,9 @@ async function handleBulkUpload(type = 'vector') {
                 } else {
                     retries--;
                     if (retries > 0) {
-                        if (progressTextSingle) progressTextSingle.textContent = `Failed ${group.id}, retrying in 2s... (${retries} left)`;
-                        await new Promise(r => setTimeout(r, 2000));
+                        const waitTime = (4 - retries) * 2000; // Kademeli bekleme: 2s, 4s, 6s
+                        if (progressTextSingle) progressTextSingle.textContent = `Failed ${group.id}, retrying in ${waitTime/1000}s... (${retries} left)`;
+                        await new Promise(r => setTimeout(r, waitTime));
                     } else {
                         errors++;
                         console.warn(`Upload failed for ${group.id} after retries:`, res.status);
@@ -575,8 +578,14 @@ async function handleBulkUpload(type = 'vector') {
                 }
             }
         }
-        // Her yükleme sonrası KV/R2 yazma işlemleri için sunucuya nefes aldır (0.5 sn bekleme)
-        await new Promise(r => setTimeout(r, 500));
+        
+        // Her 5 dosyada bir sunucunun KV limitlerini (write rate limit) aşmamak için daha uzun bekle
+        if ((i + 1) % batchSize === 0) {
+            if (progressTextSingle) progressTextSingle.textContent = `Batch finished, cooling down for 3s...`;
+            await new Promise(r => setTimeout(r, 3000));
+        } else {
+            await new Promise(r => setTimeout(r, 1000)); // Normal bekleme 1 saniye
+        }
     }
 
     if (progressFill) progressFill.style.width = '100%';

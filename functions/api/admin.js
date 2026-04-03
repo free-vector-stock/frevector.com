@@ -151,15 +151,57 @@ export async function onRequestPost(context) {
     else allVectors.unshift(vectorRecord);
     
     const updatedRaw = JSON.stringify(allVectors);
-    await kv.put("all_vectors", updatedRaw);
     
-    // Sync to R2
-    await r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } });
+    // KV ve R2 yazma işlemlerini paralel yaparak süreyi kısalt
+    await Promise.all([
+        kv.put("all_vectors", updatedRaw),
+        r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
+    ]);
 
     return new Response(JSON.stringify({ success: true, vector: vectorRecord }), { status: 200, headers });
   } catch (e) {
+    console.error("Upload error:", e);
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
   }
+}
+
+// Re-indexing logic to fix broken index
+async function reindexFromR2(kv, r2) {
+    const list = await r2.list();
+    const vectors = [];
+    
+    // R2 listesi üzerinden tüm JSON dosyalarını bulup indeksi yeniden oluştur
+    // Bu işlem büyük kütüphanelerde yavaş olabilir ama kurtarma için gereklidir
+    for (const obj of list.objects) {
+        if (obj.key.endsWith('.json') && obj.key !== 'all_vectors.json') {
+            const res = await r2.get(obj.key);
+            if (res) {
+                try {
+                    const metadata = await res.json();
+                    const id = obj.key.split('/').pop().replace('.json', '');
+                    const category = obj.key.split('/')[0];
+                    vectors.push({
+                        name: id,
+                        category: category,
+                        title: metadata.title || id,
+                        description: metadata.description || "",
+                        keywords: metadata.keywords || [],
+                        date: obj.uploaded.toISOString(),
+                        downloads: 0,
+                        fileSize: "Unknown",
+                        contentType: id.includes('-jpeg-') ? 'jpeg' : 'vector'
+                    });
+                } catch (e) {}
+            }
+        }
+    }
+    
+    const raw = JSON.stringify(vectors);
+    await Promise.all([
+        kv.put("all_vectors", raw),
+        r2.put("all_vectors.json", raw, { httpMetadata: { contentType: "application/json" } })
+    ]);
+    return vectors.length;
 }
 
 export async function onRequestDelete(context) {
