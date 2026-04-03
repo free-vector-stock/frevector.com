@@ -526,38 +526,57 @@ async function handleBulkUpload(type = 'vector') {
         formData.append('jpeg', group.jpeg);
         if (group.zip) formData.append('zip', group.zip);
 
-        try {
-            const res = await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', '/api/admin');
-                xhr.setRequestHeader('X-Admin-Key', key);
-                
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percent = Math.round((e.loaded / e.total) * 100);
-                        if (progressFillSingle) progressFillSingle.style.width = `${percent}%`;
-                        if (progressTextSingle) progressTextSingle.textContent = `Uploading ${group.id}: ${percent}%`;
+        let retries = 3;
+        let uploaded = false;
+        
+        while (retries > 0 && !uploaded) {
+            try {
+                const res = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/admin');
+                    xhr.setRequestHeader('X-Admin-Key', key);
+                    
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            if (progressFillSingle) progressFillSingle.style.width = `${percent}%`;
+                            if (progressTextSingle) progressTextSingle.textContent = `Uploading ${group.id}: ${percent}% (Retry: ${3-retries})`;
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true });
+                        else resolve({ ok: false, status: xhr.status });
+                    };
+                    xhr.onerror = () => reject(new Error('Network error'));
+                    xhr.send(formData);
+                });
+
+                if (res.ok) {
+                    success++;
+                    uploaded = true;
+                } else {
+                    retries--;
+                    if (retries > 0) {
+                        if (progressTextSingle) progressTextSingle.textContent = `Failed ${group.id}, retrying in 2s... (${retries} left)`;
+                        await new Promise(r => setTimeout(r, 2000));
+                    } else {
+                        errors++;
+                        console.warn(`Upload failed for ${group.id} after retries:`, res.status);
                     }
-                };
-
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true });
-                    else resolve({ ok: false, status: xhr.status });
-                };
-                xhr.onerror = () => reject(new Error('Network error'));
-                xhr.send(formData);
-            });
-
-            if (res.ok) {
-                success++;
-            } else {
-                errors++;
-                console.warn(`Upload failed for ${group.id}:`, res.status);
+                }
+            } catch (e) { 
+                retries--;
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 2000));
+                } else {
+                    errors++;
+                    console.error(`Error uploading ${group.id}:`, e);
+                }
             }
-        } catch (e) { 
-            errors++;
-            console.error(e); 
         }
+        // Her yükleme sonrası KV/R2 yazma işlemleri için sunucuya nefes aldır (0.5 sn bekleme)
+        await new Promise(r => setTimeout(r, 500));
     }
 
     if (progressFill) progressFill.style.width = '100%';

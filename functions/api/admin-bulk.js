@@ -65,9 +65,29 @@ export async function onRequestPost(context) {
       const isJpegOnly = !zipBuffer;
 
       const slug = jsonFile.name.replace(/\.json$/, "");
-      const resolvedCategory = resolveCategory(metadata.category, slug);
+      // 1. Tür Belirleme (Dosya adında -jpeg- varsa)
+      const isJpegFromFilename = slug.toLowerCase().includes('-jpeg-');
+      const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
+
+      // 2. Kategori Belirleme (Dosya adından, -jpeg- hariç)
+      let rawCat = slug.toLowerCase();
+      if (rawCat.includes('-jpeg-')) {
+          rawCat = rawCat.split('-jpeg-')[0];
+      } else {
+          const parts = rawCat.split('-');
+          rawCat = parts[0];
+      }
+      const resolvedCategory = resolveCategory(rawCat, slug);
+
       const title = metadata.title || slug;
-      const keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
+      const description = metadata.description || "";
+      let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
+
+      const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
+      const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
+      
+      const prefixKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
+      keywords = [...new Set([...prefixKeywords, ...keywords])];
 
       const r2JpgKey = `${resolvedCategory}/${slug}/${slug}.jpg`;
       // const r2ThumbKey = `${resolvedCategory}/${slug}/${slug}-thumb.jpg`; // Thumbnail removed
@@ -97,19 +117,23 @@ export async function onRequestPost(context) {
         name: slug,
         category: resolvedCategory,
         title: title,
-        description: metadata.description || "",
+        description: description,
         keywords: keywords,
         date: new Date().toISOString(),
         downloads: 0,
         fileSize: zipBuffer ? `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB` : `${(jpegBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`,
-        contentType: isJpegOnly ? 'jpeg' : 'vector'
+        contentType: contentTypeToSet
       };
 
       const existingIndex = allVectors.findIndex(v => v.name === slug);
       if (existingIndex > -1) allVectors[existingIndex] = vectorRecord;
       else allVectors.unshift(vectorRecord);
       
-      await kv.put("all_vectors", JSON.stringify(allVectors));
+      const updatedRaw = JSON.stringify(allVectors);
+      await kv.put("all_vectors", updatedRaw);
+      
+      // Sync to R2 for consistency
+      await r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } });
 
       return new Response(JSON.stringify({ success: true, message: `Uploaded: ${slug}` }), { status: 200, headers });
     }
