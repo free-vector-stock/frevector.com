@@ -1,5 +1,6 @@
 /**
- * Admin Bulk API - Updated to remove Thumbnail Generation and Sharp Dependency
+ * Admin Bulk API - Optimized for Large Batches
+ * Updated to support batch KV updates and prevent rate limits
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -21,9 +22,9 @@ function authenticate(request) {
 
 function resolveCategory(raw, id) {
     if (!raw) return "Miscellaneous";
-    const s = raw.toString().trim();
+    const s = raw.toString().trim().toLowerCase();
     for (const cat of VALID_CATEGORIES) {
-        if (cat.toLowerCase() === s.toLowerCase()) return cat;
+        if (cat.toLowerCase() === s) return cat;
     }
     return "Miscellaneous";
 }
@@ -54,6 +55,7 @@ export async function onRequestPost(context) {
       const jsonFile = formData.get("json");
       const jpegFile = formData.get("jpeg");
       const zipFile = formData.get("zip");
+      const skipIndexUpdate = formData.get("skipIndexUpdate") === "true";
 
       if (!jsonFile || !jpegFile) {
         return new Response(JSON.stringify({ error: "Missing JSON or JPEG" }), { status: 400, headers });
@@ -62,14 +64,11 @@ export async function onRequestPost(context) {
       const metadata = JSON.parse(await jsonFile.text());
       const jpegBuffer = await jpegFile.arrayBuffer();
       const zipBuffer = zipFile ? await zipFile.arrayBuffer() : null;
-      const isJpegOnly = !zipBuffer;
 
       const slug = jsonFile.name.replace(/\.json$/, "");
-      // 1. Tür Belirleme (Dosya adında -jpeg- varsa)
       const isJpegFromFilename = slug.toLowerCase().includes('-jpeg-');
       const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
 
-      // 2. Kategori Belirleme (Dosya adından, -jpeg- hariç)
       let rawCat = slug.toLowerCase();
       if (rawCat.includes('-jpeg-')) {
           rawCat = rawCat.split('-jpeg-')[0];
@@ -90,28 +89,22 @@ export async function onRequestPost(context) {
       keywords = [...new Set([...prefixKeywords, ...keywords])];
 
       const r2JpgKey = `${resolvedCategory}/${slug}/${slug}.jpg`;
-      // const r2ThumbKey = `${resolvedCategory}/${slug}/${slug}-thumb.jpg`; // Thumbnail removed
       const r2ZipKey = `${resolvedCategory}/${slug}/${slug}.zip`;
       const r2JsonKey = `${resolvedCategory}/${slug}/${slug}.json`;
 
-      const allVectorsRaw = await kv.get("all_vectors");
-      let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
-
-      // Upload Original JPEG
-      const jpgUpload = await uploadWithRetry(r2, r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } });
-      if (!jpgUpload.success) return new Response(JSON.stringify({ error: "JPEG upload failed: " + jpgUpload.error }), { status: 500, headers });
-
-      // Thumbnail generation removed - using original JPEG directly
-
-      // Upload ZIP if vector
+      // Upload Assets to R2
+      const uploads = [
+        uploadWithRetry(r2, r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } }),
+        uploadWithRetry(r2, r2JsonKey, JSON.stringify(metadata), { httpMetadata: { contentType: "application/json" } })
+      ];
       if (zipBuffer) {
-        const zipUpload = await uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } });
-        if (!zipUpload.success) return new Response(JSON.stringify({ error: "ZIP upload failed: " + zipUpload.error }), { status: 500, headers });
+        uploads.push(uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } }));
       }
 
-      // Upload JSON
-      const jsonUpload = await uploadWithRetry(r2, r2JsonKey, JSON.stringify(metadata), { httpMetadata: { contentType: "application/json" } });
-      if (!jsonUpload.success) return new Response(JSON.stringify({ error: "JSON upload failed: " + jsonUpload.error }), { status: 500, headers });
+      const results = await Promise.all(uploads);
+      for (const res of results) {
+        if (!res.success) return new Response(JSON.stringify({ error: "R2 upload failed: " + res.error }), { status: 500, headers });
+      }
 
       const vectorRecord = {
         name: slug,
@@ -125,17 +118,46 @@ export async function onRequestPost(context) {
         contentType: contentTypeToSet
       };
 
-      const existingIndex = allVectors.findIndex(v => v.name === slug);
-      if (existingIndex > -1) allVectors[existingIndex] = vectorRecord;
-      else allVectors.unshift(vectorRecord);
+      // Index update can be skipped for batch operations to be handled at the end
+      if (!skipIndexUpdate) {
+        const allVectorsRaw = await kv.get("all_vectors");
+        let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+        const existingIndex = allVectors.findIndex(v => v.name === slug);
+        if (existingIndex > -1) allVectors[existingIndex] = vectorRecord;
+        else allVectors.unshift(vectorRecord);
+        
+        const updatedRaw = JSON.stringify(allVectors);
+        await Promise.all([
+            kv.put("all_vectors", updatedRaw),
+            r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
+        ]);
+      }
+
+      return new Response(JSON.stringify({ success: true, vector: vectorRecord }), { status: 200, headers });
+    }
+
+    if (action === "finalize-bulk") {
+      const newVectorsJson = formData.get("vectors");
+      if (!newVectorsJson) return new Response(JSON.stringify({ error: "Missing vectors data" }), { status: 400, headers });
+      
+      const newVectors = JSON.parse(newVectorsJson);
+      const allVectorsRaw = await kv.get("all_vectors");
+      let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+      
+      // Merge new vectors
+      for (const v of newVectors) {
+        const idx = allVectors.findIndex(old => old.name === v.name);
+        if (idx > -1) allVectors[idx] = v;
+        else allVectors.unshift(v);
+      }
       
       const updatedRaw = JSON.stringify(allVectors);
-      await kv.put("all_vectors", updatedRaw);
+      await Promise.all([
+          kv.put("all_vectors", updatedRaw),
+          r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
+      ]);
       
-      // Sync to R2 for consistency
-      await r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } });
-
-      return new Response(JSON.stringify({ success: true, message: `Uploaded: ${slug}` }), { status: 200, headers });
+      return new Response(JSON.stringify({ success: true, count: newVectors.length }), { status: 200, headers });
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers });
