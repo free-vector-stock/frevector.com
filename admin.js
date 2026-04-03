@@ -1,6 +1,7 @@
 /**
  * Frevector Admin Panel - Frontend Logic
  * Optimized for Large Bulk Uploads (1000+ files)
+ * Fixed Pagination and Bulk Selection Persistence
  */
 
 const ADMIN_KEY = "vector2026";
@@ -102,18 +103,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Pagination
     document.getElementById('prevManage')?.addEventListener('click', () => { if (state.managePage > 1) { state.managePage--; filterAndRenderManage('vector'); } });
     document.getElementById('nextManage')?.addEventListener('click', () => {
-        if (state.managePage < Math.ceil(state.filteredVectors.length / state.manageLimit)) { state.managePage++; filterAndRenderManage('vector'); }
+        const totalPages = Math.ceil(state.filteredVectors.length / state.manageLimit);
+        if (state.managePage < totalPages) { state.managePage++; filterAndRenderManage('vector'); }
     });
     document.getElementById('prevManageJpeg')?.addEventListener('click', () => { if (state.managePageJpeg > 1) { state.managePageJpeg--; filterAndRenderManage('jpeg'); } });
     document.getElementById('nextManageJpeg')?.addEventListener('click', () => {
-        if (state.managePageJpeg < Math.ceil(state.filteredJpegs.length / state.manageLimit)) { state.managePageJpeg++; filterAndRenderManage('jpeg'); }
+        const totalPages = Math.ceil(state.filteredJpegs.length / state.manageLimit);
+        if (state.managePageJpeg < totalPages) { state.managePageJpeg++; filterAndRenderManage('jpeg'); }
     });
 
     // Select All
     const setupSelectAll = (checkId, type) => {
         document.getElementById(checkId)?.addEventListener('change', (e) => {
-            document.querySelectorAll(`input[type="checkbox"].vector-checkbox[data-type="${type}"]`).forEach(cb => { cb.checked = e.target.checked; });
-            updateBulkButtons(type);
+            const isChecked = e.target.checked;
+            const filtered = type === 'vector' ? state.filteredVectors : state.filteredJpegs;
+            const selectedSet = type === 'vector' ? state.selectedVectors : state.selectedJpegs;
+            
+            filtered.forEach(v => {
+                if (isChecked) selectedSet.add(v.name);
+                else selectedSet.delete(v.name);
+            });
+            
+            renderManageTable(type);
         });
     };
     setupSelectAll('selectAllCheckbox', 'vector');
@@ -221,6 +232,7 @@ function renderManageTable(type = 'vector') {
     const tbody = document.getElementById(isJpeg ? 'manageTableBodyJpeg' : 'manageTableBody');
     const filtered = isJpeg ? state.filteredJpegs : state.filteredVectors;
     const page = isJpeg ? state.managePageJpeg : state.managePage;
+    const selectedSet = isJpeg ? state.selectedJpegs : state.selectedVectors;
     
     if (!tbody) return;
     const start = (page - 1) * state.manageLimit;
@@ -228,158 +240,248 @@ function renderManageTable(type = 'vector') {
     
     tbody.innerHTML = items.length ? items.map(v => {
         const thumbKey = encodeURIComponent(`${v.category || 'Miscellaneous'}/${v.name}/${v.name}.jpg`);
+        const isChecked = selectedSet.has(v.name) ? 'checked' : '';
         return `
             <tr>
-                <td><input type="checkbox" class="vector-checkbox" data-id="${escHtml(v.name)}" data-type="${type}"></td>
+                <td><input type="checkbox" class="vector-checkbox" data-id="${escHtml(v.name)}" data-type="${type}" ${isChecked}></td>
                 <td><img src="/api/asset?key=${thumbKey}" class="preview-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2275%22%3E%3Crect fill=%22%23eee%22 width=%22100%22 height=%2275%22/%3E%3C/svg%3E'"></td>
                 <td><strong>${escHtml(v.name)}</strong></td>
-                <td><span class="badge badge-${isJpeg ? 'blue' : 'green'}">${type.toUpperCase()}</span></td>
+                <td><span class="badge badge-${isJpeg ? 'blue' : 'green'}">${(v.contentType || type).toUpperCase()}</span></td>
                 <td>${escHtml(v.category)}</td>
                 <td>${v.downloads || 0}</td>
-                <td><button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">DELETE</button></td>
+                <td style="display:flex;gap:6px;">
+                    <button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">DELETE</button>
+                    <button class="btn-download-single" style="padding:6px 12px;background:#fff;border:1px solid #38a169;color:#38a169;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;" onclick="downloadVector('${escHtml(v.name)}')">DOWNLOAD</button>
+                </td>
             </tr>
         `;
-    }).join('') : `<tr><td colspan="7" style="text-align:center;padding:20px;">No items found.</td></tr>`;
-    
-    document.getElementById(isJpeg ? 'managePaginationInfoJpeg' : 'managePaginationInfo').textContent = 
-        `Page ${page} of ${Math.ceil(filtered.length / state.manageLimit)} (${filtered.length} items)`;
-    
-    tbody.querySelectorAll('.vector-checkbox').forEach(cb => cb.onchange = () => updateBulkButtons(type));
+    }).join('') : `<tr><td colspan="7" style="text-align:center;padding:20px;">No items found</td></tr>`;
+
+    // Re-bind checkbox listeners
+    tbody.querySelectorAll('.vector-checkbox').forEach(cb => {
+        cb.onchange = () => {
+            const id = cb.dataset.id;
+            if (cb.checked) selectedSet.add(id);
+            else selectedSet.delete(id);
+            updateBulkButtons(type);
+        };
+    });
+
+    // Update Pagination Info
+    const totalPages = Math.max(1, Math.ceil(filtered.length / state.manageLimit));
+    const infoId = isJpeg ? 'managePaginationInfoJpeg' : 'managePaginationInfo';
+    const infoEl = document.getElementById(infoId);
+    if (infoEl) infoEl.textContent = `Page ${page} of ${totalPages} (${filtered.length} items)`;
+
+    // Update Button States
+    const prevBtn = document.getElementById(isJpeg ? 'prevManageJpeg' : 'prevManage');
+    const nextBtn = document.getElementById(isJpeg ? 'nextManageJpeg' : 'nextManage');
+    if (prevBtn) prevBtn.disabled = page <= 1;
+    if (nextBtn) nextBtn.disabled = page >= totalPages;
+
     updateBulkButtons(type);
 }
 
 function updateBulkButtons(type = 'vector') {
-    const selected = Array.from(document.querySelectorAll(`input[type="checkbox"].vector-checkbox[data-type="${type}"]`)).filter(cb => cb.checked);
-    const delBtn = document.getElementById(type === 'vector' ? 'bulkDeleteBtn' : 'bulkDeleteBtnJpeg');
-    if (delBtn) { delBtn.disabled = !selected.length; delBtn.textContent = `Delete Selected (${selected.length})`; }
+    const isJpeg = type === 'jpeg';
+    const selectedSet = isJpeg ? state.selectedJpegs : state.selectedVectors;
+    const count = selectedSet.size;
+
+    const deleteBtn = document.getElementById(isJpeg ? 'bulkDeleteBtnJpeg' : 'bulkDeleteBtn');
+    const downloadBtn = document.getElementById(isJpeg ? 'bulkDownloadBtnJpeg' : 'bulkDownloadBtn');
+
+    if (deleteBtn) {
+        deleteBtn.disabled = count === 0;
+        deleteBtn.textContent = `Delete Selected (${count})`;
+    }
+    if (downloadBtn) {
+        downloadBtn.disabled = count === 0;
+        downloadBtn.textContent = `Download Selected (${count})`;
+    }
 }
 
 async function deleteVector(slug) {
-    if (!confirm(`Delete "${slug}"?`)) return;
+    if (!confirm(`Are you sure you want to delete "${slug}"?`)) return;
     const key = sessionStorage.getItem('fv_admin');
-    const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, { method: 'DELETE', headers: { 'X-Admin-Key': key } });
-    if (res.ok) { state.vectors = state.vectors.filter(v => v.name !== slug); loadDashboard(); loadManageVectors(); loadManageJpegs(); }
+    try {
+        const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
+            method: 'DELETE',
+            headers: { 'X-Admin-Key': key }
+        });
+        if (res.ok) {
+            state.vectors = state.vectors.filter(v => v.name !== slug);
+            state.selectedVectors.delete(slug);
+            state.selectedJpegs.delete(slug);
+            loadDashboard();
+            filterAndRenderManage('vector');
+            filterAndRenderManage('jpeg');
+        } else alert('Delete failed');
+    } catch (e) { console.error(e); }
+}
+
+function downloadVector(slug) {
+    const key = sessionStorage.getItem('fv_admin');
+    window.open(`/api/download?slug=${encodeURIComponent(slug)}&key=${key}`, '_blank');
+}
+
+async function bulkDeleteVectors(type = 'vector') {
+    const isJpeg = type === 'jpeg';
+    const selectedSet = isJpeg ? state.selectedJpegs : state.selectedVectors;
+    const selected = Array.from(selectedSet);
+    if (!selected.length || !confirm(`Delete ${selected.length} items?`)) return;
+
+    const key = sessionStorage.getItem('fv_admin');
+    for (const slug of selected) {
+        try {
+            const res = await fetch(`/api/admin?slug=${encodeURIComponent(slug)}`, {
+                method: 'DELETE',
+                headers: { 'X-Admin-Key': key }
+            });
+            if (res.ok) {
+                state.vectors = state.vectors.filter(v => v.name !== slug);
+                selectedSet.delete(slug);
+            }
+        } catch (e) { console.error(e); }
+    }
+    loadDashboard();
+    filterAndRenderManage(type);
+}
+
+async function bulkDownloadVectors(type = 'vector') {
+    const isJpeg = type === 'jpeg';
+    const selectedSet = isJpeg ? state.selectedJpegs : state.selectedVectors;
+    const selected = Array.from(selectedSet);
+    if (!selected.length) return;
+
+    const key = sessionStorage.getItem('fv_admin');
+    for (const slug of selected) {
+        window.open(`/api/download?slug=${encodeURIComponent(slug)}&key=${key}`, '_blank');
+        await new Promise(r => setTimeout(r, 500));
+    }
 }
 
 function handleBulkAnalyze(type = 'vector') {
     const input = document.getElementById(type === 'vector' ? 'bulkFileInput' : 'bulkFileInputJpeg');
-    if (!input?.files.length) return;
+    if (!input || !input.files.length) return;
     
+    const files = Array.from(input.files);
     const groups = {};
-    Array.from(input.files).forEach(f => {
-        const id = f.name.substring(0, f.name.lastIndexOf('.'));
-        const ext = f.name.substring(f.name.lastIndexOf('.')).toLowerCase();
+    files.forEach(f => {
+        const name = f.name;
+        const id = name.substring(0, name.lastIndexOf('.'));
+        const ext = name.substring(name.lastIndexOf('.')).toLowerCase();
         if (!groups[id]) groups[id] = {};
         if (ext === '.json') groups[id].json = f;
-        else if (['.jpg', '.jpeg'].includes(ext)) groups[id].jpeg = f;
-        else if (ext === '.zip') groups[id].zip = f;
+        if (ext === '.jpg' || ext === '.jpeg') groups[id].jpeg = f;
+        if (ext === '.zip') groups[id].zip = f;
     });
 
     bulkFiles = Object.entries(groups).map(([id, g]) => ({ id, ...g })).filter(g => g.json && g.jpeg);
+    
     const status = document.getElementById(type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg');
     if (status) {
         status.className = 'status-box info';
         status.textContent = `Found ${bulkFiles.length} valid sets. Ready to upload.`;
     }
     const btn = document.getElementById(type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg');
-    if (btn) btn.disabled = !bulkFiles.length;
+    if (btn) btn.disabled = bulkFiles.length === 0;
 }
 
 async function handleBulkUpload(type = 'vector') {
     const key = sessionStorage.getItem('fv_admin');
-    const isVec = type === 'vector';
-    const status = document.getElementById(isVec ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg');
-    const progressWrap = document.getElementById(isVec ? 'bulkProgressWrap' : 'bulkProgressWrapJpeg');
-    const progressFill = document.getElementById(isVec ? 'bulkProgressFill' : 'bulkProgressFillJpeg');
-    const progressText = document.getElementById(isVec ? 'bulkProgressText' : 'bulkProgressTextJpeg');
+    const isJpeg = type === 'jpeg';
+    const btnId = isJpeg ? 'bulkUploadBtnJpeg' : 'bulkUploadBtn';
+    const analyzeBtnId = isJpeg ? 'bulkAnalyzeBtnJpeg' : 'bulkAnalyzeBtn';
+    const statusId = isJpeg ? 'bulkUploadStatusJpeg' : 'bulkUploadStatus';
     
-    const progressWrapS = document.getElementById(isVec ? 'bulkProgressWrapSingle' : 'bulkProgressWrapSingleJpeg');
-    const progressFillS = document.getElementById(isVec ? 'bulkProgressFillSingle' : 'bulkProgressFillSingleJpeg');
-    const progressTextS = document.getElementById(isVec ? 'bulkProgressTextSingle' : 'bulkProgressTextSingleJpeg');
+    const progressText = document.getElementById(isJpeg ? 'bulkProgressTextJpeg' : 'bulkProgressText');
+    const progressFill = document.getElementById(isJpeg ? 'bulkProgressFillJpeg' : 'bulkProgressFill');
+    const progressWrap = document.getElementById(isJpeg ? 'bulkProgressWrapJpeg' : 'bulkProgressWrap');
+    
+    const progressTextSingle = document.getElementById(isJpeg ? 'bulkProgressTextSingleJpeg' : 'bulkProgressTextSingle');
+    const progressFillSingle = document.getElementById(isJpeg ? 'bulkProgressFillSingleJpeg' : 'bulkProgressFillSingle');
+    const progressWrapSingle = document.getElementById(isJpeg ? 'bulkProgressWrapSingleJpeg' : 'bulkProgressWrapSingle');
 
+    document.getElementById(btnId).disabled = true;
+    document.getElementById(analyzeBtnId).disabled = true;
     if (progressWrap) progressWrap.style.display = 'block';
-    if (progressWrapS) progressWrapS.style.display = 'block';
+    if (progressWrapSingle) progressWrapSingle.style.display = 'block';
     
-    let success = 0, errors = 0;
-    const uploadedVectors = [];
-    const batchSize = 10;
-
+    let success = 0; let errors = 0;
+    const batchSize = 5;
+    
     for (let i = 0; i < bulkFiles.length; i++) {
         const group = bulkFiles[i];
-        if (progressText) progressText.textContent = `Processing ${i+1}/${bulkFiles.length}: ${group.id}`;
+        if (progressText) progressText.textContent = `Processing ${group.id} (${i+1}/${bulkFiles.length})...`;
         if (progressFill) progressFill.style.width = `${Math.round((i / bulkFiles.length) * 100)}%`;
+        if (progressFillSingle) progressFillSingle.style.width = '0%';
 
         const formData = new FormData();
-        formData.append('action', 'bulk-upload');
         formData.append('json', group.json);
         formData.append('jpeg', group.jpeg);
         if (group.zip) formData.append('zip', group.zip);
-        formData.append('skipIndexUpdate', 'true');
 
-        let retries = 3, uploaded = false;
+        let retries = 3; let uploaded = false;
         while (retries > 0 && !uploaded) {
             try {
                 const res = await new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/api/admin-bulk');
+                    xhr.open('POST', '/api/admin');
                     xhr.setRequestHeader('X-Admin-Key', key);
                     xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable && progressFillS) {
-                            const p = Math.round((e.loaded / e.total) * 100);
-                            progressFillS.style.width = `${p}%`;
-                            if (progressTextS) progressTextS.textContent = `Uploading ${group.id}: ${p}%`;
+                        if (e.lengthComputable && progressFillSingle) {
+                            progressFillSingle.style.width = `${Math.round((e.loaded / e.total) * 100)}%`;
                         }
                     };
-                    xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300 ? { ok: true, data: JSON.parse(xhr.responseText) } : { ok: false });
-                    xhr.onerror = () => reject(new Error('Network error'));
+                    xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
+                    xhr.onerror = () => reject();
                     xhr.send(formData);
                 });
 
-                if (res.ok) {
-                    success++; uploaded = true;
-                    uploadedVectors.push(res.data.vector);
-                } else {
+                if (res) { success++; uploaded = true; }
+                else {
                     retries--;
-                    if (retries > 0) await new Promise(r => setTimeout(r, 1000 * (4 - retries)));
+                    if (retries > 0) await new Promise(r => setTimeout(r, (4 - retries) * 2000));
                     else errors++;
                 }
-            } catch (e) { retries--; if (retries === 0) errors++; await new Promise(r => setTimeout(r, 1000)); }
-        }
-
-        // Finalize batch or every 50 items to prevent data loss
-        if (uploadedVectors.length >= 50 || (i === bulkFiles.length - 1 && uploadedVectors.length > 0)) {
-            if (progressTextS) progressTextS.textContent = `Finalizing index update for batch...`;
-            const finalForm = new FormData();
-            finalForm.append('action', 'finalize-bulk');
-            finalForm.append('vectors', JSON.stringify(uploadedVectors));
-            await fetch('/api/admin-bulk', { method: 'POST', headers: { 'X-Admin-Key': key }, body: finalForm });
-            uploadedVectors.length = 0; // Clear batch
+            } catch (e) {
+                retries--;
+                if (retries > 0) await new Promise(r => setTimeout(r, 2000));
+                else errors++;
+            }
         }
         
-        // Cooldown to avoid rate limits
-        if ((i + 1) % batchSize === 0) await new Promise(r => setTimeout(r, 1000));
+        if ((i + 1) % batchSize === 0) await new Promise(r => setTimeout(r, 3000));
+        else await new Promise(r => setTimeout(r, 1000));
     }
 
     if (progressFill) progressFill.style.width = '100%';
-    if (progressText) progressText.textContent = `Upload complete. Success: ${success}, Errors: ${errors}`;
+    if (progressWrapSingle) progressWrapSingle.style.display = 'none';
+    
+    const status = document.getElementById(statusId);
     if (status) {
         status.className = `status-box ${errors === 0 ? 'success' : 'warning'}`;
         status.textContent = `Bulk upload finished. ${success} uploaded, ${errors} failed.`;
     }
-    loadDashboard(); loadManageVectors(); loadManageJpegs();
+    
+    document.getElementById(analyzeBtnId).disabled = false;
+    loadDashboard();
+    loadManageVectors();
+    loadManageJpegs();
 }
 
 async function loadHealth() {
     const key = sessionStorage.getItem('fv_admin');
     const status = document.getElementById('healthStatus');
+    status.className = 'status-box info';
     status.textContent = 'Loading...';
     try {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
-        document.getElementById('kvCount').textContent = data.vectors.length;
-        document.getElementById('r2Count').textContent = '~' + (data.vectors.length * 2.5).toFixed(0);
-        status.textContent = 'System healthy.';
-    } catch (e) { status.textContent = 'Error loading health.'; }
+        document.getElementById('kvCount').textContent = (data.vectors || []).length;
+        status.className = 'status-box success';
+        status.textContent = 'Health data loaded.';
+    } catch (e) { status.className = 'status-box error'; status.textContent = 'Error'; }
 }
 
 function escHtml(str) {
