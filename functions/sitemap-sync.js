@@ -34,16 +34,16 @@ async function syncSitemap(env) {
     cursor = list.cursor;
   }
 
-  console.log(\`Found \${objects.length} objects in R2\`);
+  console.log(`Found ${objects.length} objects in R2`);
 
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\\n';
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
-  xml += '  <url>\\n';
-  xml += '    <loc>https://frevector.com/</loc>\\n';
-  xml += \`    <lastmod>\${new Date().toISOString().split('T')[0]}</lastmod>\\n\`;
-  xml += '    <priority>1.0</priority>\\n';
-  xml += '  </url>\\n';
+  xml += '  <url>\n';
+  xml += '    <loc>https://frevector.com/</loc>\n';
+  xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
+  xml += '    <priority>1.0</priority>\n';
+  xml += '  </url>\n';
 
   const vectorIds = new Set();
   const idToDate = new Map();
@@ -57,7 +57,7 @@ async function syncSitemap(env) {
     if (parts.length >= 2) {
       id = parts[1];
     } else {
-      id = parts[0].replace(/\\.[^/.]+$/, "");
+      id = parts[0].replace(/\.[^/.]+$/, "");
     }
 
     if (id && !vectorIds.has(id)) {
@@ -66,14 +66,14 @@ async function syncSitemap(env) {
     }
   }
 
-  console.log(\`Extracted \${vectorIds.size} unique vector IDs\`);
+  console.log(`Extracted ${vectorIds.size} unique vector IDs`);
 
   for (const id of vectorIds) {
     const uploadDate = idToDate.get(id);
-    xml += '  <url>\\n';
-    xml += \`    <loc>https://frevector.com/details/\${id}</loc>\\n\`;
-    xml += \`    <lastmod>\${uploadDate}</lastmod>\\n\`;
-    xml += '  </url>\\n';
+    xml += '  <url>\n';
+    xml += `    <loc>https://frevector.com/details/${id}</loc>\n`;
+    xml += `    <lastmod>${uploadDate}</lastmod>\n`;
+    xml += '  </url>\n';
   }
 
   xml += '</urlset>';
@@ -86,9 +86,9 @@ async function syncSitemap(env) {
     throw new Error("GITHUB_TOKEN not found in environment");
   }
 
-  const getFileRes = await fetch(\`https://api.github.com/repos/\${REPO}/contents/\${FILE_PATH}\`, {
+  const getFileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     headers: {
-      "Authorization": \`token \${GITHUB_TOKEN}\`,
+      "Authorization": `token ${GITHUB_TOKEN}`,
       "User-Agent": "Cloudflare-Worker-Sitemap-Sync"
     }
   });
@@ -101,10 +101,10 @@ async function syncSitemap(env) {
 
   const contentBase64 = btoa(unescape(encodeURIComponent(xml)));
   
-  const commitRes = await fetch(\`https://api.github.com/repos/\${REPO}/contents/\${FILE_PATH}\`, {
+  const commitRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     method: "PUT",
     headers: {
-      "Authorization": \`token \${GITHUB_TOKEN}\`,
+      "Authorization": `token ${GITHUB_TOKEN}`,
       "User-Agent": "Cloudflare-Worker-Sitemap-Sync",
       "Content-Type": "application/json"
     },
