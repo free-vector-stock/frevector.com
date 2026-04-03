@@ -713,8 +713,14 @@ function openDetailPanel(v, cardEl) {
     `;
 
     const grid = document.getElementById('vectorsGrid');
-    // Detay panelini her zaman tüm görsellerin en altına ekle
-    grid.appendChild(panel);
+    
+    // MOBİL REVİZYON: Mobilde detay panelini tıklanan görselin hemen altına ekle
+    if (window.innerWidth <= 768 && cardEl) {
+        cardEl.after(panel);
+    } else {
+        // Masaüstünde eski mantık: en sona ekle
+        grid.appendChild(panel);
+    }
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
