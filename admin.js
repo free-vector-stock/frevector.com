@@ -270,7 +270,7 @@ function renderManageTable(type = 'vector') {
         return `
             <tr>
                 <td><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelect('${escHtml(v.name)}', '${type}')"></td>
-                <td><img src="${v.preview || '/placeholder.jpg'}" class="preview-img" alt="preview" onerror="this.src='/placeholder.jpg'"></td>
+                <td><img src="/api/asset?key=${encodeURIComponent((v.category || 'Miscellaneous') + '/' + v.name + '/' + v.name + '.jpg')}" class="preview-img" alt="preview" onerror="this.style.opacity='0.3'"></td>
                 <td>${escHtml(v.name)}</td>
                 <td>${escHtml(v.contentType || 'vector')}</td>
                 <td>${escHtml(v.category || 'Miscellaneous')}</td>
