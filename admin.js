@@ -244,7 +244,7 @@ function filterAndRenderManage(type = 'vector') {
     });
 
     // Sort: Downloaded files first, then by download count descending
-    filtered.sort((a, b) => {
+    const sorted = [...filtered].sort((a, b) => {
         const da = a.downloads || 0;
         const db = b.downloads || 0;
         if (da > 0 && db === 0) return -1;
@@ -252,7 +252,7 @@ function filterAndRenderManage(type = 'vector') {
         return db - da;
     });
 
-    if (isJpeg) state.filteredJpegs = filtered; else state.filteredVectors = filtered;
+    if (isJpeg) state.filteredJpegs = sorted; else state.filteredVectors = sorted;
     renderManageTable(type);
 }
 
