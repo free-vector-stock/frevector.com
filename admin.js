@@ -108,7 +108,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state.managePage > 1) { 
             state.managePage--; 
             filterAndRenderManage('vector'); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Ensure scroll to top
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
         } 
     });
     document.getElementById('nextManage')?.addEventListener('click', () => {
@@ -116,14 +119,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state.managePage < totalPages) { 
             state.managePage++; 
             filterAndRenderManage('vector'); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Ensure scroll to top
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
         }
     });
     document.getElementById('prevManageJpeg')?.addEventListener('click', () => { 
         if (state.managePageJpeg > 1) { 
             state.managePageJpeg--; 
             filterAndRenderManage('jpeg'); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Ensure scroll to top
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
         } 
     });
     document.getElementById('nextManageJpeg')?.addEventListener('click', () => {
@@ -131,7 +140,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state.managePageJpeg < totalPages) { 
             state.managePageJpeg++; 
             filterAndRenderManage('jpeg'); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Ensure scroll to top
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
         }
     });
 
@@ -245,6 +257,9 @@ function filterAndRenderManage(type = 'vector') {
         const catMatch = !cat || v.category === cat;
         return typeMatch && searchMatch && catMatch;
     });
+
+    // Sort: Downloaded files first (descending by download count)
+    filtered.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
 
     if (isJpeg) state.filteredJpegs = filtered;
     else state.filteredVectors = filtered;
