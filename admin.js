@@ -101,15 +101,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupCatFilter('filterCategoryJpeg', 'jpeg');
 
     // Pagination
-    document.getElementById('prevManage')?.addEventListener('click', () => { if (state.managePage > 1) { state.managePage--; filterAndRenderManage('vector'); } });
+    document.getElementById('prevManage')?.addEventListener('click', () => { 
+        if (state.managePage > 1) { 
+            state.managePage--; 
+            filterAndRenderManage('vector'); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } 
+    });
     document.getElementById('nextManage')?.addEventListener('click', () => {
         const totalPages = Math.ceil(state.filteredVectors.length / state.manageLimit);
-        if (state.managePage < totalPages) { state.managePage++; filterAndRenderManage('vector'); }
+        if (state.managePage < totalPages) { 
+            state.managePage++; 
+            filterAndRenderManage('vector'); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     });
-    document.getElementById('prevManageJpeg')?.addEventListener('click', () => { if (state.managePageJpeg > 1) { state.managePageJpeg--; filterAndRenderManage('jpeg'); } });
+    document.getElementById('prevManageJpeg')?.addEventListener('click', () => { 
+        if (state.managePageJpeg > 1) { 
+            state.managePageJpeg--; 
+            filterAndRenderManage('jpeg'); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } 
+    });
     document.getElementById('nextManageJpeg')?.addEventListener('click', () => {
         const totalPages = Math.ceil(state.filteredJpegs.length / state.manageLimit);
-        if (state.managePageJpeg < totalPages) { state.managePageJpeg++; filterAndRenderManage('jpeg'); }
+        if (state.managePageJpeg < totalPages) { 
+            state.managePageJpeg++; 
+            filterAndRenderManage('jpeg'); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     });
 
     // Select All
@@ -221,6 +241,15 @@ function filterAndRenderManage(type = 'vector') {
         const searchMatch = v.name.toLowerCase().includes(query) || (v.title || "").toLowerCase().includes(query);
         const catMatch = !cat || v.category === cat;
         return typeMatch && searchMatch && catMatch;
+    });
+
+    // Sort: Downloaded files first, then by download count descending
+    filtered.sort((a, b) => {
+        const da = a.downloads || 0;
+        const db = b.downloads || 0;
+        if (da > 0 && db === 0) return -1;
+        if (da === 0 && db > 0) return 1;
+        return db - da;
     });
 
     if (isJpeg) state.filteredJpegs = filtered; else state.filteredVectors = filtered;
