@@ -552,18 +552,27 @@ async function handleBulkUpload(type = 'vector') {
                         }
                     };
                     xhr.onload = () => {
+                        console.log(`XHR Response - Status: ${xhr.status}, Content-Type: ${xhr.getResponseHeader('content-type')}`);
                         if (xhr.status >= 200 && xhr.status < 300) {
                             resolve({ success: true, status: xhr.status });
                         } else {
                             try {
                                 const errData = JSON.parse(xhr.responseText);
-                                resolve({ success: false, status: xhr.status, error: errData.error || 'Upload failed' });
+                                resolve({ success: false, status: xhr.status, error: errData.error || `Upload failed (${xhr.status})` });
                             } catch (e) {
-                                resolve({ success: false, status: xhr.status, error: xhr.statusText });
+                                console.error('Error parsing response:', xhr.responseText);
+                                resolve({ success: false, status: xhr.status, error: `Server error: ${xhr.statusText}` });
                             }
                         }
                     };
-                    xhr.onerror = () => reject(new Error('Network error'));
+                    xhr.onerror = () => {
+                        console.error('XHR Network error');
+                        reject(new Error('Network error'));
+                    };
+                    xhr.ontimeout = () => {
+                        console.error('XHR Timeout');
+                        reject(new Error('Request timeout'));
+                    };
                     xhr.send(formData);
                 });
 
