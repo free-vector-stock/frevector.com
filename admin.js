@@ -556,13 +556,17 @@ async function handleBulkUpload(type = 'vector') {
                         if (xhr.status >= 200 && xhr.status < 300) {
                             resolve({ success: true, status: xhr.status });
                         } else {
+                            let errorMsg = `Upload failed (${xhr.status})`;
                             try {
-                                const errData = JSON.parse(xhr.responseText);
-                                resolve({ success: false, status: xhr.status, error: errData.error || `Upload failed (${xhr.status})` });
+                                if (xhr.responseText) {
+                                    const errData = JSON.parse(xhr.responseText);
+                                    errorMsg = errData.error || errorMsg;
+                                }
                             } catch (e) {
                                 console.error('Error parsing response:', xhr.responseText);
-                                resolve({ success: false, status: xhr.status, error: `Server error: ${xhr.statusText}` });
+                                errorMsg = `Server error: ${xhr.status} ${xhr.statusText}`;
                             }
+                            resolve({ success: false, status: xhr.status, error: errorMsg });
                         }
                     };
                     xhr.onerror = () => {

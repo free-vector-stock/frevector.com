@@ -113,11 +113,23 @@ export async function onRequestPost(context) {
     let rawCat = id.toLowerCase();
     if (rawCat.includes('-jpeg-')) {
         rawCat = rawCat.split('-jpeg-')[0];
-    } else {
-        const parts = rawCat.split('-');
-        rawCat = parts[0];
     }
-    const category = resolveCategory(rawCat, id);
+    
+    // Improved category extraction: try matching from the start of the filename
+    let category = "Miscellaneous";
+    const sortedCategories = [...VALID_CATEGORIES].sort((a, b) => b.length - a.length);
+    for (const cat of sortedCategories) {
+        if (rawCat.startsWith(cat.toLowerCase().replace(/\s+/g, '')) || 
+            rawCat.startsWith(cat.toLowerCase().replace(/\s+/g, '-'))) {
+            category = cat;
+            break;
+        }
+    }
+    
+    if (category === "Miscellaneous") {
+        const parts = rawCat.split('-');
+        category = resolveCategory(parts[0], id);
+    }
 
     // Extract metadata fields
     const title = (metadata.title || id).trim();
