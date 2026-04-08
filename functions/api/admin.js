@@ -1,10 +1,9 @@
 /**
- * Admin API - FIXED VERSION
+ * Admin API - FIXED VERSION v2
  * - Improved batch upload handling
- * - Deterministic file matching
- * - Detailed error reporting
+ * - Better error recovery
  * - Optimized KV/R2 operations
- * - 100% stable upload process
+ * - Proper timeout handling
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -32,7 +31,6 @@ function resolveCategory(raw, id) {
     if (!raw) return "Miscellaneous";
     const s = raw.toString().trim().toLowerCase();
     
-    // Special case mapping
     const specialCats = {
         'arts': 'The Arts',
         'thearts': 'The Arts',
@@ -47,15 +45,17 @@ function resolveCategory(raw, id) {
     return "Miscellaneous";
 }
 
-// Retry wrapper for R2 operations
-async function uploadWithRetry(r2, key, body, options, retries = 3) {
+// Retry wrapper for R2 operations with exponential backoff
+async function uploadWithRetry(r2, key, body, options, retries = 5) {
   for (let i = 0; i < retries; i++) {
     try {
       await r2.put(key, body, options);
       return { success: true };
     } catch (e) {
+      console.error(`R2 upload attempt ${i+1}/${retries} failed for ${key}:`, e.message);
       if (i === retries - 1) return { success: false, error: e.message };
-      await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+      const delay = Math.min(1000 * Math.pow(2, i), 10000);
+      await new Promise(r => setTimeout(r, delay));
     }
   }
 }
@@ -69,6 +69,7 @@ export async function onRequestGet(context) {
     const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
     return new Response(JSON.stringify({ vectors: allVectors }), { status: 200, headers });
   } catch (e) {
+    console.error("GET error:", e);
     return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
   }
 }
@@ -80,47 +81,59 @@ export async function onRequestPost(context) {
   try {
     const kv = context.env.VECTOR_DB;
     const r2 = context.env.VECTOR_ASSETS;
-    const formData = await context.request.formData();
+    
+    let formData;
+    try {
+      formData = await context.request.formData();
+    } catch (e) {
+      console.error("FormData parsing error:", e);
+      return new Response(JSON.stringify({ error: "Invalid form data: " + e.message }), { status: 400, headers });
+    }
 
     const jsonFile = formData.get("json");
     const jpegFile = formData.get("jpeg");
     const zipFile  = formData.get("zip");
 
-    // Validate required files
     if (!jsonFile) return new Response(JSON.stringify({ error: "Missing JSON metadata file" }), { status: 400, headers });
     if (!jpegFile) return new Response(JSON.stringify({ error: "Missing JPEG preview image" }), { status: 400, headers });
 
     // Parse metadata
     let metadata;
     try {
-      metadata = JSON.parse(await jsonFile.text());
+      const jsonText = await jsonFile.text();
+      metadata = JSON.parse(jsonText);
     } catch (e) {
+      console.error("JSON parsing error:", e);
       return new Response(JSON.stringify({ error: "Invalid JSON: " + e.message }), { status: 400, headers });
     }
 
-    const jpegBuffer = await jpegFile.arrayBuffer();
-    const zipBuffer = zipFile ? await zipFile.arrayBuffer() : null;
+    let jpegBuffer, zipBuffer;
+    try {
+      jpegBuffer = await jpegFile.arrayBuffer();
+      zipBuffer = zipFile ? await zipFile.arrayBuffer() : null;
+    } catch (e) {
+      console.error("File buffer error:", e);
+      return new Response(JSON.stringify({ error: "Error reading file buffers: " + e.message }), { status: 400, headers });
+    }
     
-    // Derive ID from JSON filename
     const id = jsonFile.name.replace(/\.json$/, "").trim();
     if (!id) return new Response(JSON.stringify({ error: "Invalid JSON filename" }), { status: 400, headers });
     
-    // Determine content type (vector or jpeg)
     const isJpegFromFilename = id.toLowerCase().includes('-jpeg-');
     const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
 
-    // Determine category from filename
+    // Improved category extraction
     let rawCat = id.toLowerCase();
     if (rawCat.includes('-jpeg-')) {
         rawCat = rawCat.split('-jpeg-')[0];
     }
     
-    // Improved category extraction: try matching from the start of the filename
     let category = "Miscellaneous";
     const sortedCategories = [...VALID_CATEGORIES].sort((a, b) => b.length - a.length);
     for (const cat of sortedCategories) {
-        if (rawCat.startsWith(cat.toLowerCase().replace(/\s+/g, '')) || 
-            rawCat.startsWith(cat.toLowerCase().replace(/\s+/g, '-'))) {
+        const catLower = cat.toLowerCase().replace(/\s+/g, '');
+        const catHyphen = cat.toLowerCase().replace(/\s+/g, '-');
+        if (rawCat.startsWith(catLower) || rawCat.startsWith(catHyphen)) {
             category = cat;
             break;
         }
@@ -131,19 +144,16 @@ export async function onRequestPost(context) {
         category = resolveCategory(parts[0], id);
     }
 
-    // Extract metadata fields
     const title = (metadata.title || id).trim();
     const description = (metadata.description || "").trim();
     let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
 
-    // Add SEO keywords
     const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free eps', 'free jpeg', 'free', 'fre', 'vector eps', 'svg', 'jpeg'];
     const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
     
     const prefixKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
     keywords = [...new Set([...prefixKeywords, ...keywords])];
 
-    // Validate JPEG content
     if (contentTypeToSet === 'jpeg') {
         const fullText = (title + " " + description + " " + keywords.join(" ")).toLowerCase();
         for (const word of FORBIDDEN_WORDS_JPEG) {
@@ -153,10 +163,11 @@ export async function onRequestPost(context) {
         }
     }
 
-    // Prepare R2 keys
     const r2JpgKey = `${category}/${id}/${id}.jpg`;
     const r2ZipKey = `${category}/${id}/${id}.zip`;
     const r2JsonKey = `${category}/${id}/${id}.json`;
+
+    console.log(`Uploading ${id} to category ${category}...`);
 
     // Upload files to R2 with retry
     const uploadResults = await Promise.all([
@@ -165,14 +176,13 @@ export async function onRequestPost(context) {
         zipBuffer ? uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } }) : Promise.resolve({ success: true })
     ]);
 
-    // Check for R2 upload failures
     for (const result of uploadResults) {
         if (!result.success) {
+            console.error("R2 upload failed:", result.error);
             return new Response(JSON.stringify({ error: "R2 upload failed: " + result.error }), { status: 500, headers });
         }
     }
 
-    // Create vector record
     const fileSize = zipBuffer ? `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB` : `${(jpegBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
     
     const vectorRecord = {
@@ -200,12 +210,18 @@ export async function onRequestPost(context) {
     
     const updatedRaw = JSON.stringify(allVectors);
     
-    // Write to both KV and R2 in parallel
-    await Promise.all([
-        kv.put("all_vectors", updatedRaw),
-        r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
-    ]);
+    // Write to both KV and R2
+    try {
+      await Promise.all([
+          kv.put("all_vectors", updatedRaw),
+          r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
+      ]);
+    } catch (e) {
+      console.error("KV/R2 index update error:", e);
+      return new Response(JSON.stringify({ error: "Index update failed: " + e.message }), { status: 500, headers });
+    }
 
+    console.log(`Successfully uploaded ${id}`);
     return new Response(JSON.stringify({ 
         success: true, 
         vector: vectorRecord,
@@ -215,50 +231,6 @@ export async function onRequestPost(context) {
     console.error("Upload error:", e);
     return new Response(JSON.stringify({ error: "Server error: " + e.message }), { status: 500, headers });
   }
-}
-
-// Re-indexing logic to fix broken index
-async function reindexFromR2(kv, r2) {
-    try {
-        const list = await r2.list();
-        const vectors = [];
-        
-        for (const obj of list.objects) {
-            if (obj.key.endsWith('.json') && obj.key !== 'all_vectors.json') {
-                const res = await r2.get(obj.key);
-                if (res) {
-                    try {
-                        const metadata = await res.json();
-                        const id = obj.key.split('/').pop().replace('.json', '');
-                        const category = obj.key.split('/')[0];
-                        vectors.push({
-                            name: id,
-                            category: category,
-                            title: metadata.title || id,
-                            description: metadata.description || "",
-                            keywords: metadata.keywords || [],
-                            date: obj.uploaded.toISOString(),
-                            downloads: 0,
-                            fileSize: "Unknown",
-                            contentType: id.includes('-jpeg-') ? 'jpeg' : 'vector'
-                        });
-                    } catch (e) {
-                        console.error("Error parsing metadata for " + obj.key, e);
-                    }
-                }
-            }
-        }
-        
-        const raw = JSON.stringify(vectors);
-        await Promise.all([
-            kv.put("all_vectors", raw),
-            r2.put("all_vectors.json", raw, { httpMetadata: { contentType: "application/json" } })
-        ]);
-        return vectors.length;
-    } catch (e) {
-        console.error("Reindex error:", e);
-        return 0;
-    }
 }
 
 export async function onRequestDelete(context) {
@@ -272,7 +244,6 @@ export async function onRequestDelete(context) {
     
     if (!slug) return new Response(JSON.stringify({ error: "Missing slug parameter" }), { status: 400, headers });
 
-    // Get current index
     const allVectorsRaw = await kv.get("all_vectors");
     let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
     const vector = allVectors.find(v => v.name === slug);
@@ -281,14 +252,12 @@ export async function onRequestDelete(context) {
 
     const category = vector.category || 'Miscellaneous';
     
-    // Delete from R2
     await Promise.all([
         r2.delete(`${category}/${slug}/${slug}.jpg`),
         r2.delete(`${category}/${slug}/${slug}.zip`),
         r2.delete(`${category}/${slug}/${slug}.json`)
     ]);
 
-    // Update index
     allVectors = allVectors.filter(v => v.name !== slug);
     const updatedRaw = JSON.stringify(allVectors);
     

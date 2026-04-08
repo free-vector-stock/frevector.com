@@ -1,8 +1,8 @@
 /**
- * Frevector Admin Panel - Frontend Logic (FIXED)
- * - Deterministic file matching algorithm
+ * Frevector Admin Panel - Frontend Logic (FIXED v2)
+ * - Sequential file uploads (no parallel batching)
+ * - Improved error handling and retry logic
  * - Detailed error reporting per file
- * - Batch upload with proper validation
  * - 100% stable upload process
  */
 
@@ -108,7 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state.managePage > 1) { 
             state.managePage--; 
             filterAndRenderManage('vector'); 
-            // Ensure scroll to top
             window.scrollTo(0, 0);
             document.documentElement.scrollTop = 0;
             document.body.scrollTop = 0;
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state.managePage < totalPages) { 
             state.managePage++; 
             filterAndRenderManage('vector'); 
-            // Ensure scroll to top
             window.scrollTo(0, 0);
             document.documentElement.scrollTop = 0;
             document.body.scrollTop = 0;
@@ -129,7 +127,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state.managePageJpeg > 1) { 
             state.managePageJpeg--; 
             filterAndRenderManage('jpeg'); 
-            // Ensure scroll to top
             window.scrollTo(0, 0);
             document.documentElement.scrollTop = 0;
             document.body.scrollTop = 0;
@@ -140,7 +137,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (state.managePageJpeg < totalPages) { 
             state.managePageJpeg++; 
             filterAndRenderManage('jpeg'); 
-            // Ensure scroll to top
             window.scrollTo(0, 0);
             document.documentElement.scrollTop = 0;
             document.body.scrollTop = 0;
@@ -258,7 +254,6 @@ function filterAndRenderManage(type = 'vector') {
         return typeMatch && searchMatch && catMatch;
     });
 
-    // Sort: Downloaded files first (descending by download count)
     filtered.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
 
     if (isJpeg) state.filteredJpegs = filtered;
@@ -300,7 +295,6 @@ function renderManageTable(type = 'vector') {
     const infoEl = document.getElementById(infoId);
     if (infoEl) infoEl.textContent = `Page ${page} of ${totalPages} (${filtered.length} items)`;
 
-    // Update Button States
     const prevBtn = document.getElementById(isJpeg ? 'prevManageJpeg' : 'prevManage');
     const nextBtn = document.getElementById(isJpeg ? 'nextManageJpeg' : 'nextManage');
     if (prevBtn) prevBtn.disabled = page <= 1;
@@ -396,7 +390,6 @@ async function bulkDownloadVectors(type = 'vector') {
 
 /**
  * IMPROVED BULK ANALYZE - Deterministic File Matching
- * Groups files by base name, validates presence of required files, generates detailed report
  */
 function handleBulkAnalyze(type = 'vector') {
     const input = document.getElementById(type === 'vector' ? 'bulkFileInput' : 'bulkFileInputJpeg');
@@ -406,7 +399,6 @@ function handleBulkAnalyze(type = 'vector') {
     const statusId = type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg';
     const status = document.getElementById(statusId);
     
-    // Step 1: Extract all file extensions and group by base name
     const filesByBase = {};
     const report = [];
     
@@ -435,7 +427,6 @@ function handleBulkAnalyze(type = 'vector') {
         }
     });
     
-    // Step 2: Validate each group
     bulkFiles = [];
     Object.entries(filesByBase).forEach(([baseName, group]) => {
         const hasJson = !!group.json;
@@ -451,9 +442,6 @@ function handleBulkAnalyze(type = 'vector') {
             report.push({ file: baseName, status: 'error', reason: 'Missing JPEG/JPG preview image' });
             return;
         }
-        
-        // For JPEG-only type, ZIP is optional
-        // For vector type, ZIP is optional but recommended
         
         bulkFiles.push({
             id: baseName,
@@ -473,7 +461,6 @@ function handleBulkAnalyze(type = 'vector') {
     
     bulkAnalysisReport = report;
     
-    // Step 3: Display detailed report
     if (status) {
         status.className = 'status-box info';
         const validCount = bulkFiles.length;
@@ -500,7 +487,8 @@ function handleBulkAnalyze(type = 'vector') {
 }
 
 /**
- * IMPROVED BULK UPLOAD - Batch Processing with Detailed Error Reporting
+ * IMPROVED BULK UPLOAD - Sequential Processing with Detailed Error Reporting
+ * Uploads files one at a time to avoid server overload
  */
 async function handleBulkUpload(type = 'vector') {
     const key = sessionStorage.getItem('fv_admin');
@@ -523,8 +511,8 @@ async function handleBulkUpload(type = 'vector') {
     if (progressWrapSingle) progressWrapSingle.style.display = 'block';
     
     const uploadResults = [];
-    const batchSize = 5;
     
+    // Sequential upload: one file at a time
     for (let i = 0; i < bulkFiles.length; i++) {
         const group = bulkFiles[i];
         if (progressText) progressText.textContent = `Processing ${group.id} (${i+1}/${bulkFiles.length})...`;
@@ -536,7 +524,7 @@ async function handleBulkUpload(type = 'vector') {
         formData.append('jpeg', group.jpegFile);
         if (group.zip) formData.append('zip', group.zip);
 
-        let retries = 3;
+        let retries = 5;
         let uploaded = false;
         let lastError = 'Unknown error';
         
@@ -546,11 +534,14 @@ async function handleBulkUpload(type = 'vector') {
                     const xhr = new XMLHttpRequest();
                     xhr.open('POST', '/api/admin');
                     xhr.setRequestHeader('X-Admin-Key', key);
+                    xhr.timeout = 120000; // 2 minutes per file
+                    
                     xhr.upload.onprogress = (e) => {
                         if (e.lengthComputable && progressFillSingle) {
                             progressFillSingle.style.width = `${Math.round((e.loaded / e.total) * 100)}%`;
                         }
                     };
+                    
                     xhr.onload = () => {
                         console.log(`XHR Response - Status: ${xhr.status}, Content-Type: ${xhr.getResponseHeader('content-type')}`);
                         if (xhr.status >= 200 && xhr.status < 300) {
@@ -569,14 +560,17 @@ async function handleBulkUpload(type = 'vector') {
                             resolve({ success: false, status: xhr.status, error: errorMsg });
                         }
                     };
+                    
                     xhr.onerror = () => {
                         console.error('XHR Network error');
                         reject(new Error('Network error'));
                     };
+                    
                     xhr.ontimeout = () => {
                         console.error('XHR Timeout');
-                        reject(new Error('Request timeout'));
+                        reject(new Error('Request timeout (120s)'));
                     };
+                    
                     xhr.send(formData);
                 });
 
@@ -586,12 +580,18 @@ async function handleBulkUpload(type = 'vector') {
                 } else {
                     lastError = res.error;
                     retries--;
-                    if (retries > 0) await new Promise(r => setTimeout(r, (4 - retries) * 2000));
+                    if (retries > 0) {
+                        console.log(`Retry ${6 - retries}/5 for ${group.id}...`);
+                        await new Promise(r => setTimeout(r, 3000 + Math.random() * 2000));
+                    }
                 }
             } catch (e) {
                 lastError = e.message;
                 retries--;
-                if (retries > 0) await new Promise(r => setTimeout(r, 2000));
+                if (retries > 0) {
+                    console.log(`Retry ${6 - retries}/5 for ${group.id} after error...`);
+                    await new Promise(r => setTimeout(r, 3000 + Math.random() * 2000));
+                }
             }
         }
         
@@ -599,8 +599,10 @@ async function handleBulkUpload(type = 'vector') {
             uploadResults.push({ id: group.id, status: 'error', message: lastError });
         }
         
-        if ((i + 1) % batchSize === 0) await new Promise(r => setTimeout(r, 3000));
-        else await new Promise(r => setTimeout(r, 1000));
+        // Wait between files to avoid server overload
+        if (i < bulkFiles.length - 1) {
+            await new Promise(r => setTimeout(r, 2000));
+        }
     }
 
     if (progressFill) progressFill.style.width = '100%';
