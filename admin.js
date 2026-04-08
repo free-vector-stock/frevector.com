@@ -1,8 +1,7 @@
 /**
- * Frevector Admin Panel - Frontend Logic (FIXED v2)
- * - Sequential file uploads (no parallel batching)
- * - Improved error handling and retry logic
- * - Detailed error reporting per file
+ * Frevector Admin Panel - Frontend Logic (FIXED v3 - Finalize Mechanism)
+ * - Sequential file uploads with 503 retry
+ * - Finalize step to update KV index once at the end
  * - 100% stable upload process
  */
 
@@ -109,8 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             state.managePage--; 
             filterAndRenderManage('vector'); 
             window.scrollTo(0, 0);
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
         } 
     });
     document.getElementById('nextManage')?.addEventListener('click', () => {
@@ -119,8 +116,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             state.managePage++; 
             filterAndRenderManage('vector'); 
             window.scrollTo(0, 0);
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
         }
     });
     document.getElementById('prevManageJpeg')?.addEventListener('click', () => { 
@@ -128,8 +123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             state.managePageJpeg--; 
             filterAndRenderManage('jpeg'); 
             window.scrollTo(0, 0);
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
         } 
     });
     document.getElementById('nextManageJpeg')?.addEventListener('click', () => {
@@ -138,8 +131,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             state.managePageJpeg++; 
             filterAndRenderManage('jpeg'); 
             window.scrollTo(0, 0);
-            document.documentElement.scrollTop = 0;
-            document.body.scrollTop = 0;
         }
     });
 
@@ -389,7 +380,7 @@ async function bulkDownloadVectors(type = 'vector') {
 }
 
 /**
- * IMPROVED BULK ANALYZE - Deterministic File Matching
+ * IMPROVED BULK ANALYZE
  */
 function handleBulkAnalyze(type = 'vector') {
     const input = document.getElementById(type === 'vector' ? 'bulkFileInput' : 'bulkFileInputJpeg');
@@ -482,13 +473,10 @@ function handleBulkAnalyze(type = 'vector') {
     
     const btn = document.getElementById(type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg');
     if (btn) btn.disabled = bulkFiles.length === 0;
-    
-    console.log('Analysis complete:', { validCount: bulkFiles.length, errorCount: report.filter(r => r.status === 'error').length });
 }
 
 /**
- * IMPROVED BULK UPLOAD - Sequential Processing with Detailed Error Reporting
- * Uploads files one at a time to avoid server overload
+ * IMPROVED BULK UPLOAD - Sequential with Finalize Step
  */
 async function handleBulkUpload(type = 'vector') {
     const key = sessionStorage.getItem('fv_admin');
@@ -511,11 +499,11 @@ async function handleBulkUpload(type = 'vector') {
     if (progressWrapSingle) progressWrapSingle.style.display = 'block';
     
     const uploadResults = [];
+    const successfulRecords = [];
     
-    // Sequential upload: one file at a time
     for (let i = 0; i < bulkFiles.length; i++) {
         const group = bulkFiles[i];
-        if (progressText) progressText.textContent = `Processing ${group.id} (${i+1}/${bulkFiles.length})...`;
+        if (progressText) progressText.textContent = `Uploading ${group.id} (${i+1}/${bulkFiles.length})...`;
         if (progressFill) progressFill.style.width = `${Math.round((i / bulkFiles.length) * 100)}%`;
         if (progressFillSingle) progressFillSingle.style.width = '0%';
 
@@ -523,6 +511,7 @@ async function handleBulkUpload(type = 'vector') {
         formData.append('json', group.json);
         formData.append('jpeg', group.jpegFile);
         if (group.zip) formData.append('zip', group.zip);
+        formData.append('skipIndexUpdate', 'true'); // CRITICAL: Don't update KV yet
 
         let retries = 5;
         let uploaded = false;
@@ -532,9 +521,9 @@ async function handleBulkUpload(type = 'vector') {
             try {
                 const res = await new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/api/admin');
+                    xhr.open('POST', '/api/admin-bulk'); // Use specialized bulk endpoint
                     xhr.setRequestHeader('X-Admin-Key', key);
-                    xhr.timeout = 120000; // 2 minutes per file
+                    xhr.timeout = 180000;
                     
                     xhr.upload.onprogress = (e) => {
                         if (e.lengthComputable && progressFillSingle) {
@@ -543,9 +532,11 @@ async function handleBulkUpload(type = 'vector') {
                     };
                     
                     xhr.onload = () => {
-                        console.log(`XHR Response - Status: ${xhr.status}, Content-Type: ${xhr.getResponseHeader('content-type')}`);
                         if (xhr.status >= 200 && xhr.status < 300) {
-                            resolve({ success: true, status: xhr.status });
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                resolve({ success: true, vector: data.vector });
+                            } catch (e) { resolve({ success: true }); }
                         } else {
                             let errorMsg = `Upload failed (${xhr.status})`;
                             try {
@@ -553,86 +544,69 @@ async function handleBulkUpload(type = 'vector') {
                                     const errData = JSON.parse(xhr.responseText);
                                     errorMsg = errData.error || errorMsg;
                                 }
-                            } catch (e) {
-                                console.error('Error parsing response:', xhr.responseText);
-                                errorMsg = `Server error: ${xhr.status} ${xhr.statusText}`;
-                            }
+                            } catch (e) {}
                             resolve({ success: false, status: xhr.status, error: errorMsg });
                         }
                     };
-                    
-                    xhr.onerror = () => {
-                        console.error('XHR Network error');
-                        reject(new Error('Network error'));
-                    };
-                    
-                    xhr.ontimeout = () => {
-                        console.error('XHR Timeout');
-                        reject(new Error('Request timeout (120s)'));
-                    };
-                    
+                    xhr.onerror = () => reject(new Error('Network error'));
+                    xhr.ontimeout = () => reject(new Error('Timeout'));
                     xhr.send(formData);
                 });
 
                 if (res.success) {
                     uploaded = true;
-                    uploadResults.push({ id: group.id, status: 'success', message: 'Uploaded successfully' });
+                    if (res.vector) successfulRecords.push(res.vector);
+                    uploadResults.push({ id: group.id, status: 'success' });
                 } else {
                     lastError = res.error;
                     retries--;
-                    if (retries > 0) {
-                        console.log(`Retry ${6 - retries}/5 for ${group.id}...`);
-                        await new Promise(r => setTimeout(r, 3000 + Math.random() * 2000));
-                    }
+                    if (retries > 0) await new Promise(r => setTimeout(r, 5000 + Math.random() * 5000));
                 }
             } catch (e) {
                 lastError = e.message;
                 retries--;
-                if (retries > 0) {
-                    console.log(`Retry ${6 - retries}/5 for ${group.id} after error...`);
-                    await new Promise(r => setTimeout(r, 3000 + Math.random() * 2000));
-                }
+                if (retries > 0) await new Promise(r => setTimeout(r, 5000));
             }
         }
         
-        if (!uploaded) {
-            uploadResults.push({ id: group.id, status: 'error', message: lastError });
-        }
-        
-        // Wait between files to avoid server overload
-        if (i < bulkFiles.length - 1) {
-            await new Promise(r => setTimeout(r, 2000));
-        }
+        if (!uploaded) uploadResults.push({ id: group.id, status: 'error', message: lastError });
+        await new Promise(r => setTimeout(r, 1500));
+    }
+
+    // STEP 2: FINALIZE (Update KV Index once)
+    if (successfulRecords.length > 0) {
+        if (progressText) progressText.textContent = `Finalizing index for ${successfulRecords.length} items...`;
+        try {
+            const res = await fetch('/api/admin-bulk', {
+                method: 'POST',
+                headers: { 'X-Admin-Key': key, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'finalize-bulk', vectors: successfulRecords })
+            });
+            if (!res.ok) console.error('Finalize failed');
+        } catch (e) { console.error('Finalize error:', e); }
     }
 
     if (progressFill) progressFill.style.width = '100%';
     if (progressWrapSingle) progressWrapSingle.style.display = 'none';
     
-    // Generate detailed report
     const successCount = uploadResults.filter(r => r.status === 'success').length;
     const errorCount = uploadResults.filter(r => r.status === 'error').length;
     
     const status = document.getElementById(statusId);
     if (status) {
         status.className = `status-box ${errorCount === 0 ? 'success' : errorCount === successCount ? 'error' : 'warning'}`;
-        
-        let html = `<strong>Upload Complete</strong><br>`;
-        html += `✓ Successful: ${successCount}<br>`;
-        html += `✗ Failed: ${errorCount}<br><br>`;
-        
+        let html = `<strong>Upload Complete</strong><br>✓ Successful: ${successCount}<br>✗ Failed: ${errorCount}<br><br>`;
         if (errorCount > 0) {
             html += `<strong style="color:#c53030;">Failed Items:</strong><br>`;
             uploadResults.filter(r => r.status === 'error').forEach(r => {
                 html += `• <code>${escHtml(r.id)}</code>: ${escHtml(r.message)}<br>`;
             });
         }
-        
         status.innerHTML = html;
     }
     
     document.getElementById(analyzeBtnId).disabled = false;
     document.getElementById(btnId).disabled = false;
-    
     loadDashboard();
     loadManageVectors();
     loadManageJpegs();
