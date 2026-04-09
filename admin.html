@@ -240,9 +240,11 @@
             gap: 12px;
             margin-bottom: 16px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .manage-toolbar input {
             flex: 1;
+            min-width: 200px;
             max-width: 320px;
             padding: 9px 14px;
             border: 1px solid var(--border);
@@ -403,6 +405,23 @@
         }
         .drop-zone:hover { border-color: var(--black); background-color: #f0f0f0; }
         .drop-zone p { margin: 0; }
+
+        /* NEW COUNTERS */
+        .counter-bar {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .counter-item { display: flex; align-items: center; gap: 8px; }
+        .counter-label { color: #666; font-weight: 400; }
+        .counter-value { color: var(--blue); }
     </style>
 </head>
 <body>
@@ -540,6 +559,11 @@
 
             <!-- MANAGE -->
             <section id="manage" class="admin-section">
+                <div class="counter-bar">
+                    <div class="counter-item"><span class="counter-label">Total Downloads (All Time):</span> <span class="counter-value" id="totalDlAllTime">0</span></div>
+                    <div class="counter-item"><span class="counter-label">Downloads in Last 24 Hours:</span> <span class="counter-value" id="totalDl24h">0</span></div>
+                    <div class="counter-item"><span class="counter-label">Downloads in <span id="currentMonthName">Month</span>:</span> <span class="counter-value" id="totalDlMonth">0</span></div>
+                </div>
                 <div class="manage-toolbar">
                     <input type="text" id="searchManage" placeholder="Search by name, category, keyword...">
                     <select id="filterCategory">
@@ -575,6 +599,11 @@
 
             <!-- MANAGE JPEG -->
             <section id="manage-jpeg" class="admin-section">
+                <div class="counter-bar">
+                    <div class="counter-item"><span class="counter-label">Total Downloads (All Time):</span> <span class="counter-value" id="totalDlAllTimeJpeg">0</span></div>
+                    <div class="counter-item"><span class="counter-label">Downloads in Last 24 Hours:</span> <span class="counter-value" id="totalDl24hJpeg">0</span></div>
+                    <div class="counter-item"><span class="counter-label">Downloads in <span id="currentMonthNameJpeg">Month</span>:</span> <span class="counter-value" id="totalDlMonthJpeg">0</span></div>
+                </div>
                 <div class="manage-toolbar">
                     <input type="text" id="searchManageJpeg" placeholder="Search by name, category, keyword...">
                     <select id="filterCategoryJpeg">
@@ -656,6 +685,6 @@
     </div>
 </div>
 
-<script src="admin.js?v=2026031303"></script>
+<script src="admin.js?v=2026040901"></script>
 </body>
 </html>

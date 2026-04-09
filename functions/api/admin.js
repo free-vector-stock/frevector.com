@@ -1,9 +1,10 @@
 /**
- * Admin API - FIXED VERSION v2
+ * Admin API - FIXED VERSION v3
  * - Improved batch upload handling
  * - Better error recovery
  * - Optimized KV/R2 operations
  * - Proper timeout handling
+ * - UPDATED: Added time-based download stats calculation (Last 24h and Monthly)
  */
 
 const ADMIN_PASSWORD = "vector2026";
@@ -63,8 +64,38 @@ async function uploadWithRetry(r2, key, body, options, retries = 5) {
 export async function onRequestGet(context) {
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
   if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  
   try {
     const kv = context.env.VECTOR_DB;
+    const url = new URL(context.request.url);
+    const action = url.searchParams.get("action");
+
+    if (action === "stats") {
+        const now = new Date();
+        const currentMonth = now.toISOString().substring(0, 7); // YYYY-MM
+        
+        // Get monthly downloads
+        const monthKey = `dl_stats:month:${currentMonth}`;
+        const monthCount = await kv.get(monthKey);
+
+        // Get last 24 hours downloads (sum of last 24 hourly keys)
+        let last24hCount = 0;
+        const hourPromises = [];
+        for (let i = 0; i < 24; i++) {
+            const d = new Date(now.getTime() - (i * 60 * 60 * 1000));
+            const hourStr = d.toISOString().substring(0, 13);
+            hourPromises.push(kv.get(`dl_stats:hour:${hourStr}`));
+        }
+        const hourResults = await Promise.all(hourPromises);
+        last24hCount = hourResults.reduce((sum, val) => sum + (parseInt(val) || 0), 0);
+
+        return new Response(JSON.stringify({
+            last24h: last24hCount,
+            currentMonth: parseInt(monthCount) || 0,
+            monthName: now.toLocaleString('en-US', { month: 'long' })
+        }), { status: 200, headers });
+    }
+
     const allVectorsRaw = await kv.get("all_vectors");
     const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
     return new Response(JSON.stringify({ vectors: allVectors }), { status: 200, headers });

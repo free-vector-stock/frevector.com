@@ -1,8 +1,9 @@
 /**
- * Frevector Admin Panel - Frontend Logic (FIXED v3 - Finalize Mechanism)
+ * Frevector Admin Panel - Frontend Logic (FIXED v4 - Stats Integration)
  * - Sequential file uploads with 503 retry
  * - Finalize step to update KV index once at the end
  * - 100% stable upload process
+ * - Added time-based download stats
  */
 
 const ADMIN_KEY = "vector2026";
@@ -25,7 +26,8 @@ const state = {
     filterCat: '',
     filterCatJpeg: '',
     selectedVectors: new Set(),
-    selectedJpegs: new Set()
+    selectedJpegs: new Set(),
+    stats: { last24h: 0, currentMonth: 0, monthName: 'Month' }
 };
 
 let bulkFiles = [];
@@ -176,6 +178,7 @@ function showApp() {
     loadDashboard();
     loadManageVectors();
     loadManageJpegs();
+    loadStats();
 }
 
 function switchSection(sectionId) {
@@ -184,6 +187,36 @@ function switchSection(sectionId) {
     const titleMap = { 'dashboard': 'Dashboard', 'upload': 'Upload Vector', 'manage': 'Manage Vectors', 'manage-jpeg': 'Manage JPEG', 'health': 'System Health' };
     document.getElementById('sectionTitle').textContent = titleMap[sectionId] || 'Admin';
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sectionId));
+    if (sectionId === 'manage' || sectionId === 'manage-jpeg') loadStats();
+}
+
+async function loadStats() {
+    const key = sessionStorage.getItem('fv_admin');
+    try {
+        const res = await fetch('/api/admin?action=stats', { headers: { 'X-Admin-Key': key } });
+        const data = await res.json();
+        state.stats = data;
+        updateStatsUI();
+    } catch (e) { console.error('Stats load failed:', e); }
+}
+
+function updateStatsUI() {
+    const ids = ['', 'Jpeg'];
+    ids.forEach(id => {
+        const totalEl = document.getElementById('totalDlAllTime' + id);
+        const h24El = document.getElementById('totalDl24h' + id);
+        const monthEl = document.getElementById('totalDlMonth' + id);
+        const monthNameEl = document.getElementById('currentMonthName' + id);
+
+        if (totalEl) totalEl.textContent = state.vectors.reduce((sum, v) => {
+            const isJpeg = id === 'Jpeg';
+            const typeMatch = isJpeg ? v.contentType === 'jpeg' : v.contentType !== 'jpeg';
+            return typeMatch ? sum + (v.downloads || 0) : sum;
+        }, 0);
+        if (h24El) h24El.textContent = state.stats.last24h || 0;
+        if (monthEl) monthEl.textContent = state.stats.currentMonth || 0;
+        if (monthNameEl) monthNameEl.textContent = state.stats.monthName || 'Month';
+    });
 }
 
 async function loadDashboard() {
@@ -210,6 +243,7 @@ async function loadDashboard() {
             `).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;">No data</td></tr>';
         }
         document.getElementById('totalCategories').textContent = Object.keys(catMap).length;
+        updateStatsUI();
     } catch (e) { console.error(e); }
 }
 
@@ -251,6 +285,7 @@ function filterAndRenderManage(type = 'vector') {
     else state.filteredVectors = filtered;
 
     renderManageTable(type);
+    updateStatsUI();
 }
 
 function renderManageTable(type = 'vector') {
@@ -338,11 +373,6 @@ async function deleteVector(slug) {
     } catch (e) { console.error(e); }
 }
 
-function downloadVector(slug) {
-    const key = sessionStorage.getItem('fv_admin');
-    window.open(`/api/download?slug=${encodeURIComponent(slug)}&key=${key}`, '_blank');
-}
-
 async function bulkDeleteVectors(type = 'vector') {
     const isJpeg = type === 'jpeg';
     const selectedSet = isJpeg ? state.selectedJpegs : state.selectedVectors;
@@ -379,9 +409,6 @@ async function bulkDownloadVectors(type = 'vector') {
     }
 }
 
-/**
- * IMPROVED BULK ANALYZE
- */
 function handleBulkAnalyze(type = 'vector') {
     const input = document.getElementById(type === 'vector' ? 'bulkFileInput' : 'bulkFileInputJpeg');
     if (!input || !input.files.length) return;
@@ -475,9 +502,6 @@ function handleBulkAnalyze(type = 'vector') {
     if (btn) btn.disabled = bulkFiles.length === 0;
 }
 
-/**
- * IMPROVED BULK UPLOAD - Sequential with Finalize Step
- */
 async function handleBulkUpload(type = 'vector') {
     const key = sessionStorage.getItem('fv_admin');
     const isJpeg = type === 'jpeg';
@@ -497,7 +521,7 @@ async function handleBulkUpload(type = 'vector') {
     document.getElementById(analyzeBtnId).disabled = true;
     if (progressWrap) progressWrap.style.display = 'block';
     if (progressWrapSingle) progressWrapSingle.style.display = 'block';
-    
+
     const uploadResults = [];
     const successfulRecords = [];
     
@@ -511,7 +535,7 @@ async function handleBulkUpload(type = 'vector') {
         formData.append('json', group.json);
         formData.append('jpeg', group.jpegFile);
         if (group.zip) formData.append('zip', group.zip);
-        formData.append('skipIndexUpdate', 'true'); // CRITICAL: Don't update KV yet
+        formData.append('skipIndexUpdate', 'true');
 
         let retries = 5;
         let uploaded = false;
@@ -521,7 +545,7 @@ async function handleBulkUpload(type = 'vector') {
             try {
                 const res = await new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/api/admin-bulk'); // Use specialized bulk endpoint
+                    xhr.open('POST', '/api/admin-bulk');
                     xhr.setRequestHeader('X-Admin-Key', key);
                     xhr.timeout = 180000;
                     
@@ -573,7 +597,6 @@ async function handleBulkUpload(type = 'vector') {
         await new Promise(r => setTimeout(r, 1500));
     }
 
-    // STEP 2: FINALIZE (Update KV Index once)
     if (successfulRecords.length > 0) {
         if (progressText) progressText.textContent = `Finalizing index for ${successfulRecords.length} items...`;
         try {

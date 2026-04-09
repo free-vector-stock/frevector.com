@@ -1,6 +1,7 @@
 /**
  * GET /api/download?slug=xxx
  * Increments download counter and serves ZIP (vector) or JPEG (jpeg-only) file from R2
+ * UPDATED: Added time-based download tracking (Last 24h and Monthly)
  */
 
 export async function onRequestGet(context) {
@@ -96,13 +97,29 @@ export async function onRequestGet(context) {
         // Increment download counter
         context.waitUntil((async () => {
             try {
+                const now = new Date();
+                const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+                const monthStr = dateStr.substring(0, 7); // YYYY-MM
+                const hourStr = now.toISOString().substring(0, 13); // YYYY-MM-DDTHH
+
                 // 1. Update individual file counter in downloads_count table
                 const countKey = `downloads_count:${slug}`;
                 const currentCount = await kv.get(countKey);
                 const newCount = (parseInt(currentCount) || 0) + 1;
                 await kv.put(countKey, newCount.toString());
 
-                // 2. Also update the main index for backward compatibility and dashboard
+                // 2. Update time-based counters
+                // Hourly counter (for last 24h calculation)
+                const hourKey = `dl_stats:hour:${hourStr}`;
+                const currentHourCount = await kv.get(hourKey);
+                await kv.put(hourKey, ((parseInt(currentHourCount) || 0) + 1).toString(), { expirationTtl: 172800 }); // Keep for 48h
+
+                // Monthly counter
+                const monthKey = `dl_stats:month:${monthStr}`;
+                const currentMonthCount = await kv.get(monthKey);
+                await kv.put(monthKey, ((parseInt(currentMonthCount) || 0) + 1).toString());
+
+                // 3. Also update the main index for backward compatibility and dashboard
                 const freshRaw = await kv.get("all_vectors");
                 if (freshRaw) {
                     const freshVectors = JSON.parse(freshRaw);
