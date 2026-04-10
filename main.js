@@ -813,25 +813,42 @@ function setupDownloadPageHandlers() {
 function setupModalHandlers() {
     document.querySelectorAll('.modal-trigger').forEach(btn => {
         btn.onclick = (e) => {
-            e.preventDefault();
-            const content = MODAL_CONTENTS[btn.dataset.modal];
+            // e.preventDefault() removed to allow hash to appear in URL
+            const modalType = btn.dataset.modal;
+            const content = MODAL_CONTENTS[modalType];
             if (!content) return;
             document.getElementById('infoModalBody').innerHTML = content.content;
             document.getElementById('infoModal').style.display = 'flex';
         };
     });
+
+    // Handle initial hash on load or hash change
+    const handleHash = () => {
+        const hash = window.location.hash.substring(1);
+        if (MODAL_CONTENTS[hash]) {
+            document.getElementById('infoModalBody').innerHTML = MODAL_CONTENTS[hash].content;
+            document.getElementById('infoModal').style.display = 'flex';
+        }
+    };
+    window.addEventListener('hashchange', handleHash);
+    handleHash();
+    const closeModal = () => {
+        document.getElementById('infoModal').style.display = 'none';
+        if (window.location.hash) {
+            history.pushState("", document.title, window.location.pathname + window.location.search);
+        }
+    };
+
     const infoModalClose = document.getElementById('infoModalClose');
     if (infoModalClose) {
-        infoModalClose.onclick = () => {
-            document.getElementById('infoModal').style.display = 'none';
-        };
+        infoModalClose.onclick = closeModal;
     }
     // Close modal on backdrop click
     const infoModal = document.getElementById('infoModal');
     if (infoModal) {
         infoModal.onclick = (e) => {
             if (e.target === infoModal) {
-                infoModal.style.display = 'none';
+                closeModal();
             }
         };
     }
