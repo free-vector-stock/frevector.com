@@ -1,4 +1,18 @@
-const EXTRA_KEYWORDS = ["frevector", "free vector", "vector stock", "free download", "graphic design", "illustration", "vector art", "design resources", "free icons", "logo design"];
+/**
+ * frevector.com - Frontend Logic
+ * v2026031401 - Revisions: mobile layout, our-picks arrows, category spacing
+ */
+
+const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
+const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'vector eps', 'svg'];
+
+const CATEGORIES = [
+    'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
+    'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous',
+    'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports',
+    'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
+];
+
 const MODAL_CONTENTS = {
     about: {
         title: 'About Us',
@@ -85,11 +99,13 @@ const MODAL_CONTENTS = {
             </ul>
             <p style="margin-bottom:8px;"><strong>Prohibitions:</strong></p>
             <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Redistributing files</li>
-                <li>Uploading to other platforms</li>
-                <li>Selling files</li>
+                <li>Sharing files as-is</li>
+                <li>Redistribution</li>
+                <li>Selling</li>
                 <li>Presenting as a resource on other sites</li>
+                <li>Sharing within bulk content archives</li>
             </ul>
+            <p>The Frevector license allows designs to be used in end-user projects. It does not allow the sharing of the file itself.</p>
         `
     },
     contact: {
@@ -104,107 +120,639 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:12px;">Frevector values original production and respects copyrights. The content on the site has been prepared by Frevector artists. Nevertheless, if you believe that any content infringes your copyright, please contact us.</p>
             <p style="margin-bottom:8px;">The notification must include the following:</p>
             <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Identification of the copyrighted work</li>
-                <li>Information to contact you (email, address)</li>
-                <li>A statement that the use is unauthorized</li>
+                <li>Information proving you are the copyright owner</li>
+                <li>A link to the content you believe is infringing</li>
+                <li>Your contact information</li>
+                <li>A statement regarding the accuracy of your claim</li>
             </ul>
+            <p style="margin-bottom:12px;">Upon review, if deemed appropriate, the relevant content will be removed.</p>
+            <p><strong>Contact:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000;text-decoration:underline;">hakankacar2014@gmail.com</a></p>
+            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+            <h3 style="margin-bottom:8px;">Frequently Asked Questions</h3>
+            <p style="margin-bottom:6px;"><strong>1. Are the files free?</strong><br>Yes. Files can be used for free in personal and commercial projects.</p>
+            <p style="margin-bottom:6px;"><strong>2. Can I sell the files?</strong><br>No. Selling or redistributing the files is prohibited.</p>
+            <p style="margin-bottom:6px;"><strong>3. Can I use the files for my clients?</strong><br>Yes. They can be used in commercial projects. However, the file itself cannot be provided as a separate product.</p>
+            <p><strong>4. Can I upload the files to another site?</strong><br>No. Redistribution is not permitted.</p>
         `
     }
 };
 
-let state = {
+const state = {
     vectors: [],
-    allVectors: [],
-    searchQuery: '',
     currentPage: 1,
     totalPages: 1,
-    pageSize: 18,
-    countdownInterval: null
+    total: 0,
+    selectedCategory: 'all',
+    selectedType: 'all',
+    searchQuery: '',
+    isLoading: false,
+    openedVector: null,
+    openedCardEl: null,
+    countdownInterval: null,
+    detailPanelOpen: false,
+    downloadInProgress: false,
+    // REVİZYON 3: Our Picks kaydırma durumu
+    ourPicksOffset: 0,
+    ourPicksVectors: []
 };
 
-async function init() {
-    await fetchVectors();
+function init() {
+    setupCategories();
     setupEventListeners();
     setupModalHandlers();
     setupDownloadPageHandlers();
-    
-    // URL Hash change listener
-    window.addEventListener('hashchange', handleHashChange);
-    // Initial check
-    handleHashChange();
+    setupOurPicksArrows();
+
+    window.onpopstate = (event) => {
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            const match = state.vectors.find(v => v.name === slug);
+            if (match) openDetailPanel(match);
+        } else {
+            closeDetailPanel();
+        }
+    };
+
+    fetchVectors().then(() => {
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            const match = state.vectors.find(v =>
+                v.name === slug || (v.name && v.name.toLowerCase().replace(/\s+/g, "-") === slug)
+            );
+            if (match) {
+                // DOM'un render edilmesi için kısa bir süre bekle
+                setTimeout(() => {
+                    const grid = document.getElementById("vectorsGrid");
+                    if (!grid) return;
+                    
+                    // Önce mevcut kartlar arasında ara
+                    let cardEl = Array.from(grid.children)
+                        .find(el => el.querySelector(".vc-img")?.alt === match.title);
+                    
+                    // Eğer kart bulunamazsa (farklı sayfada olabilir), ilk kartı referans al veya sanal bir kart oluşturma mantığı yerine direkt aç
+                    if (cardEl) {
+                        openDetailPanel(match, cardEl);
+                        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        // Kart bulunamadıysa bile paneli açmak için ilk kartı kullan (grid boş değilse)
+                        if (grid.children.length > 0) {
+                            openDetailPanel(match, grid.children[0]);
+                        }
+                    }
+                }, 200);
+            }
+        }
+    });
 }
 
-function handleHashChange() {
-    const hash = window.location.hash.substring(1);
-    if (MODAL_CONTENTS[hash]) {
-        showModal(hash);
-    } else if (!hash) {
-        closeModal();
+function setupCategories() {
+    const list = document.getElementById('categoriesList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const isMobile = window.innerWidth <= 768;
+
+    if (!isMobile) {
+        // Desktop: Keep the TYPE container
+        const typeContainer = document.createElement('div');
+        typeContainer.style.padding = '0 16px 8px';
+        typeContainer.style.marginBottom = '8px';
+        typeContainer.style.paddingBottom = '8px';
+        typeContainer.style.borderBottom = '1px solid #ddd';
+        
+        const typeLabel = document.createElement('div');
+        typeLabel.style.fontSize = '10px';
+        typeLabel.style.fontWeight = '600';
+        typeLabel.style.color = '#666';
+        typeLabel.style.marginBottom = '4px';
+        typeLabel.textContent = 'TYPE';
+        typeContainer.appendChild(typeLabel);
+        
+        const typeAll = document.createElement('a');
+        typeAll.href = '#';
+        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
+        typeAll.textContent = 'All';
+        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
+        typeContainer.appendChild(typeAll);
+        
+        const typeVector = document.createElement('a');
+        typeVector.href = '#';
+        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
+        typeVector.textContent = 'Vector';
+        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
+        typeContainer.appendChild(typeVector);
+        
+        const typeJpeg = document.createElement('a');
+        typeJpeg.href = '#';
+        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
+        typeJpeg.textContent = 'Jpeg';
+        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
+        typeContainer.appendChild(typeJpeg);
+        
+        list.appendChild(typeContainer);
+    } else {
+        // Mobile: Add TYPE items directly to the list as tags
+        const typeAll = document.createElement('a');
+        typeAll.href = '#';
+        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
+        typeAll.textContent = 'All Types';
+        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
+        list.appendChild(typeAll);
+        
+        const typeVector = document.createElement('a');
+        typeVector.href = '#';
+        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
+        typeVector.textContent = 'Vector';
+        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
+        list.appendChild(typeVector);
+        
+        const typeJpeg = document.createElement('a');
+        typeJpeg.href = '#';
+        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
+        typeJpeg.textContent = 'Jpeg';
+        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
+        list.appendChild(typeJpeg);
     }
+
+    const allLink = document.createElement('a');
+    allLink.href = '#';
+    allLink.className = 'category-item' + (state.selectedCategory === 'all' ? ' active' : '');
+    allLink.dataset.cat = 'all';
+    allLink.textContent = 'All Categories';
+    allLink.onclick = (e) => { e.preventDefault(); selectCategory('all'); };
+    list.appendChild(allLink);
+
+    CATEGORIES.forEach(cat => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'category-item' + (state.selectedCategory === cat ? ' active' : '');
+        a.dataset.cat = cat;
+        a.textContent = cat;
+        a.onclick = (e) => { e.preventDefault(); selectCategory(cat); };
+        list.appendChild(a);
+    });
+}
+
+function selectCategory(cat) {
+    state.selectedCategory = cat;
+    state.currentPage = 1;
+    state.searchQuery = '';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
+    closeDetailPanel();
+    setupCategories();
+    updateCategoryTitle();
+    fetchVectors();
+}
+
+function selectType(type) {
+    state.selectedType = type;
+    state.currentPage = 1;
+    state.searchQuery = '';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
+    closeDetailPanel();
+    setupCategories();
+    updateCategoryTitle();
+    fetchVectors();
+}
+
+function updateCategoryTitle() {
+    const el = document.getElementById('categoryTitle');
+    if (!el) return;
+    
+    // Generate H1 title based on selected category
+    let h1Text = '';
+    if (state.selectedCategory === 'all') {
+        h1Text = 'Free Vectors, SVGs, Icons and Clipart';
+    } else {
+        h1Text = `Free ${state.selectedCategory} Vectors, SVGs, Icons and Clipart`;
+    }
+    
+    el.textContent = h1Text;
 }
 
 async function fetchVectors() {
+    if (state.isLoading) return;
+    state.isLoading = true;
     showLoader(true);
+
     try {
-        const response = await fetch('https://vector-assets.frevector.com/vectors.json');
-        const data = await response.json();
-        state.allVectors = data;
-        applyFilters();
-    } catch (error) {
-        console.error('Error fetching vectors:', error);
+        const url = new URL('/api/vectors', window.location.origin);
+        
+        if (location.pathname.startsWith("/details/")) {
+            const slug = location.pathname.split("/details/")[1].split("?")[0];
+            url.searchParams.set('fetchAllForSlug', slug);
+        }
+
+        url.searchParams.set('page', state.currentPage);
+        url.searchParams.set('limit', '24');
+        if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
+        if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
+        if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
+        
+        // Sıralama filtresini ekle
+        const sortFilter = document.getElementById('sortFilter');
+        if (sortFilter && sortFilter.value) {
+            url.searchParams.set('sort', sortFilter.value);
+        }
+
+        if (state.searchQuery) url.searchParams.set('search', state.searchQuery);
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API request failed');
+        
+        const data = await res.json();
+        state.vectors = data.vectors || [];
+        state.totalPages = data.totalPages || 1;
+        state.total = data.total || 0;
+
+        renderVectors();
+        fetchOurPicksRandomly();
+        updatePagination();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+        console.error('Fetch error:', err);
     } finally {
+        state.isLoading = false;
         showLoader(false);
     }
 }
 
-function applyFilters() {
-    let filtered = state.allVectors;
-    if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        filtered = filtered.filter(v => 
-            v.name.toLowerCase().includes(q) || 
-            (v.keywords && v.keywords.some(k => k.toLowerCase().includes(q)))
-        );
+async function fetchOurPicksRandomly() {
+    try {
+        const url = new URL('/api/vectors', window.location.origin);
+        url.searchParams.set('limit', '100');
+        
+        // ÖNEMLİ: API'ye hem kategori hem de tip parametrelerini gönderiyoruz
+        if (state.selectedCategory && state.selectedCategory !== 'all') {
+            url.searchParams.set('category', state.selectedCategory);
+        }
+        
+        if (state.selectedType === 'vector') {
+            url.searchParams.set('type', 'vector');
+        } else if (state.selectedType === 'jpeg') {
+            url.searchParams.set('type', 'jpeg');
+        }
+        
+        // Eğer kategori veya tip seçiliyse, rastgele bir sayfa seçelim (toplam sayfa sayısına göre)
+        // Ancak fetchVectors henüz tamamlanmamışsa state.totalPages güncel olmayabilir.
+        // Bu yüzden basitçe ilk sayfadan 100 tane çekip içinden filtrelemek daha güvenli olabilir.
+        
+        const res = await fetch(url);
+        if (res.ok) {
+            const data = await res.json();
+            let picks = data.vectors || [];
+            
+            // API'den gelen veriyi tekrar client tarafında kesin olarak filtreleyelim
+            if (state.selectedType === 'vector') {
+                picks = picks.filter(v => !v.isJpegOnly);
+            } else if (state.selectedType === 'jpeg') {
+                picks = picks.filter(v => v.isJpegOnly);
+            }
+            
+            picks.sort(() => Math.random() - 0.5);
+            state.ourPicksVectors = picks;
+            renderOurPicks();
+        }
+    } catch (err) {
+        console.error('Our Picks fetch error:', err);
     }
-    
-    const sortVal = document.getElementById('sortFilter')?.value || 'newest';
-    if (sortVal === 'newest') {
-        filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
-    } else if (sortVal === 'oldest') {
-        filtered.sort((a, b) => (a.id || 0) - (b.id || 0));
-    }
-
-    state.totalPages = Math.ceil(filtered.length / state.pageSize);
-    const start = (state.currentPage - 1) * state.pageSize;
-    state.vectors = filtered.slice(start, start + state.pageSize);
-    
-    renderVectors();
-    updatePagination();
 }
 
 function renderVectors() {
-    const grid = document.getElementById('vectorGrid');
+    const grid = document.getElementById('vectorsGrid');
     if (!grid) return;
-    grid.innerHTML = state.vectors.map(v => `
-        <div class="vector-card" onclick="openDownloadPage('${v.name}')">
-            <div class="vector-img-container">
-                <img src="https://vector-assets.frevector.com/previews/${v.name}.jpg" alt="${v.name}" loading="lazy">
+    grid.innerHTML = '';
+
+    if (!state.vectors.length) {
+        grid.innerHTML = '<div class="no-results">No results found.</div>';
+        return;
+    }
+
+    state.vectors.forEach((v, index) => {
+        const card = document.createElement('div');
+        card.className = 'vector-card';
+        if (state.openedVector && state.openedVector.name === v.name) card.classList.add('card-active');
+        
+        const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+
+        // İlk 6 görseli eager (hemen), diğerlerini lazy yükle
+        const loadingAttr = index < 6 ? 'eager' : 'lazy';
+        const fetchPriority = index < 6 ? 'high' : 'low';
+
+        card.innerHTML = `
+            <div class="vc-img-wrap">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" fetchpriority="${fetchPriority}" decoding="async">
+                ${typeLabel}
             </div>
-            <div class="vector-info">
-                <h3 class="vector-title">${v.name.replace(/-/g, ' ')}</h3>
+            <div class="vc-info">
+                <div class="vc-description">${escHtml(v.description || "")}</div>
+                <div class="vc-keywords">${escHtml([...new Set([...(v.keywords || [])])].join(', '))}</div>
             </div>
-        </div>
-    `).join('');
+        `;
+        card.onclick = () => openDetailPanel(v, card);
+        grid.appendChild(card);
+    });
 }
 
-function openDownloadPage(slug) {
-    const v = state.allVectors.find(item => item.name === slug);
-    if (!v) return;
+// REVİZYON 3: Our Picks - Sonsuz Döngü ve Rastgele Görseller
+function renderOurPicks() {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track) return;
+    track.innerHTML = '';
+    
+    // Kesin filtreleme: state.selectedType'a göre
+    // isJpegOnly flag'i bazen API'den gelmeyebilir, bu yüzden v.name veya v.isJpegOnly kontrolü yapalım
+    let filteredPicks = [...state.ourPicksVectors];
+    if (state.selectedType === 'vector') {
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
+    } else if (state.selectedType === 'jpeg') {
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
+    }
+    
+    if (filteredPicks.length === 0) return;
+    
+    const displayVectors = [...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks, ...filteredPicks];
+    
+    displayVectors.forEach((v, index) => {
+        const card = document.createElement('div');
+        card.className = 'vector-card';
+        const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
+        
+        // Our Picks için ilk birkaç görseli hızlı yükle, diğerlerini lazy load
+        const loadingAttr = index < 15 ? 'eager' : 'lazy';
 
+        card.innerHTML = `
+            <div class="vc-img-wrap">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async" fetchpriority="${index < 5 ? 'high' : 'auto'}">
+                ${typeLabel}
+            </div>
+        `;
+        card.onclick = () => {
+            // "Our Picks" görselleri için özel davranış: Önce ana ekranda (detay paneli) açılacak
+            // scrollIntoView'ı burada engelliyoruz çünkü sayfa kaymasını istemiyoruz
+            openDetailPanel(v, null); 
+            
+            // Detay paneli açıldığında ana ızgaradaki ilgili kartı bulup aktif yapalım (eğer varsa)
+            const mainGrid = document.getElementById('vectorsGrid');
+            if (mainGrid) {
+                const mainCards = mainGrid.querySelectorAll('.vector-card');
+                mainCards.forEach(c => c.classList.remove('card-active'));
+            }
+        };
+        track.appendChild(card);
+    });
+
+    const cardWidth = window.innerWidth <= 768 ? 70 : 90; 
+    state.ourPicksOffset = 2 * filteredPicks.length * cardWidth;
+    track.style.transition = 'none';
+    track.style.transform = `translateX(-${state.ourPicksOffset}px)`;
+}
+
+function setupOurPicksArrows() {
+    const prevBtn = document.getElementById('ourPicksPrev');
+    const nextBtn = document.getElementById('ourPicksNext');
+    const track = document.getElementById('ourPicksTrack');
+    const wrap = document.querySelector('.our-picks-track-wrap');
+
+    if (prevBtn && nextBtn) {
+        prevBtn.onclick = () => scrollOurPicks(-1);
+        nextBtn.onclick = () => scrollOurPicks(1);
+    }
+
+    if (!track || !wrap) return;
+
+    // Swipe/Drag functionality with momentum
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let initialOffset;
+    let lastX = 0;
+    let lastTime = 0;
+    let velocity = 0;
+    let momentumAnimationId = null;
+
+    const start = (e) => {
+        isDown = true;
+        track.style.transition = 'none';
+        startX = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
+        initialOffset = state.ourPicksOffset;
+        lastX = startX;
+        lastTime = Date.now();
+        velocity = 0;
+        if (momentumAnimationId) cancelAnimationFrame(momentumAnimationId);
+    };
+
+    const end = () => {
+        if (!isDown) return;
+        isDown = false;
+        
+        // Calculate velocity for momentum
+        const now = Date.now();
+        const timeDiff = now - lastTime;
+        if (timeDiff > 0) {
+            velocity = (lastX - startX) / timeDiff;
+        }
+        
+        // Apply momentum with easing
+        applyMomentum(velocity);
+        
+        // Sonsuz döngü kontrolü
+        setTimeout(checkInfiniteScroll, 500);
+    };
+
+    const move = (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = (e.pageX || e.touches[0].pageX) - wrap.offsetLeft;
+        const walk = (x - startX);
+        state.ourPicksOffset = initialOffset - walk;
+        track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        lastX = x;
+        lastTime = Date.now();
+    };
+    
+    const applyMomentum = (vel) => {
+        const cardWidth = window.innerWidth <= 768 ? 70 : 90;
+        const friction = 0.95;
+        const minVelocity = 0.1;
+        let currentVel = vel;
+        
+        const animate = () => {
+            if (Math.abs(currentVel) > minVelocity) {
+                state.ourPicksOffset -= currentVel * 16; // 16ms per frame
+                currentVel *= friction;
+                track.style.transition = 'none';
+                track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+                momentumAnimationId = requestAnimationFrame(animate);
+            } else {
+                // Snap to nearest card after momentum ends
+                track.style.transition = 'transform 0.3s ease-out';
+                state.ourPicksOffset = Math.round(state.ourPicksOffset / cardWidth) * cardWidth;
+                track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+            }
+        };
+        animate();
+    };
+
+    function checkInfiniteScroll() {
+        let filteredPicks = [...state.ourPicksVectors];
+        if (state.selectedType === 'vector') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
+        } else if (state.selectedType === 'jpeg') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
+        }
+        const cardWidth = window.innerWidth <= 768 ? 70 : 90;
+        const singleSetWidth = filteredPicks.length * cardWidth;
+
+        if (state.ourPicksOffset >= 3 * singleSetWidth) {
+            state.ourPicksOffset -= singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        } else if (state.ourPicksOffset <= singleSetWidth) {
+            state.ourPicksOffset += singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        }
+    }
+
+    wrap.addEventListener('mousedown', start);
+    wrap.addEventListener('touchstart', start, { passive: true });
+    
+    window.addEventListener('mouseup', end);
+    wrap.addEventListener('touchend', end);
+    wrap.addEventListener('mouseleave', end);
+    
+    wrap.addEventListener('mousemove', move);
+    wrap.addEventListener('touchmove', move, { passive: false });
+}
+
+function scrollOurPicks(direction) {
+    const track = document.getElementById('ourPicksTrack');
+    if (!track || !state.ourPicksVectors.length) return;
+
+    const isMobile = window.innerWidth <= 768;
+    const cardWidth = isMobile ? 70 : 90; 
+    const step = (isMobile ? 2 : 3) * cardWidth; 
+    
+    state.ourPicksOffset += direction * step;
+    track.style.transition = 'transform 0.4s ease-out';
+    track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+
+    let filteredPicks = [...state.ourPicksVectors];
+    if (state.selectedType === 'vector') {
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
+    } else if (state.selectedType === 'jpeg') {
+        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
+    }
+    const singleSetWidth = filteredPicks.length * cardWidth;
+    
+    track.addEventListener('transitionend', function handleTransitionEnd() {
+        track.removeEventListener('transitionend', handleTransitionEnd);
+        
+        if (state.ourPicksOffset >= 3 * singleSetWidth) {
+            state.ourPicksOffset -= singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        } else if (state.ourPicksOffset <= singleSetWidth) {
+            state.ourPicksOffset += singleSetWidth;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(-${state.ourPicksOffset}px) translateZ(0)`;
+        }
+    });
+}
+
+function openDetailPanel(v, cardEl) {
+    if (state.openedVector && state.openedVector.name === v.name) {
+        closeDetailPanel();
+        return;
+    }
+
+    closeDetailPanel();
+    state.openedVector = v;
+    state.openedCardEl = cardEl;
+    if (cardEl) cardEl.classList.add('card-active');
+
+    const panel = document.createElement('div');
+    panel.id = 'detailPanel';
+    panel.className = 'detail-panel';
+    
+    const keywords = [...new Set([...(v.keywords || [])])];
+    
+    // REVİZYON: Tip ve Kategori Fallback Mekanizması
+    const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
+    const displayCategory = v.category || 'Belirtilmemiş';
+    const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
+
+    panel.innerHTML = `
+        <div class="detail-inner">
+            <div class="detail-left">
+                <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}">
+                <table class="detail-table">
+                    <tr><td class="dt-label">TIP</td><td class="dt-value">${displayType}</td></tr>
+                    <tr><td class="dt-label">KATEGORI</td><td class="dt-value">${escHtml(displayCategory)}</td></tr>
+                    <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
+                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
+                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
+                    <tr><td class="dt-label">FILE SIZE</td><td class="dt-value">${v.fileSize || 'N/A'}</td></tr>
+                </table>
+            </div>
+            <div class="detail-right">
+                <h2 class="detail-title">${escHtml(v.title)}</h2>
+                <p class="detail-desc">${escHtml(v.description || "")}</p>
+                <div class="detail-keywords">
+                    ${keywords.map(kw => `<span class="kw-tag">${escHtml(kw)}</span>`).join('')}
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 12px;">
+                    <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
+                    <button class="detail-close-btn" id="mainCloseBtn">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const grid = document.getElementById('vectorsGrid');
+    // Detay panelini her zaman tüm görsellerin en altına ekle
+    grid.appendChild(panel);
+
+    document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
+    document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
+    
+    // URL'yi güncelle (objects-jpeg-000000000131 takılı kalma sorununu çözer)
+    const newPath = `/details/${v.name}`;
+    if (window.location.pathname !== newPath) {
+        window.history.pushState({ slug: v.name }, v.title, newPath);
+    }
+    
+    // Detay panelini görünür kılmak için her zaman scroll yapalım
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function closeDetailPanel() {
+    const panel = document.getElementById('detailPanel');
+    if (panel) panel.remove();
+    if (state.openedCardEl) state.openedCardEl.classList.remove('card-active');
+    
+    // URL'yi ana sayfaya döndür
+    if (window.location.pathname.startsWith('/details/')) {
+        window.history.pushState({}, 'Frevector', '/');
+    }
+    
+    state.openedVector = null;
+    state.openedCardEl = null;
+}
+
+function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
-    document.getElementById('dpImage').src = `https://vector-assets.frevector.com/previews/${v.name}.jpg`;
-    document.getElementById('dpTitle').textContent = v.name.replace(/-/g, ' ');
-    document.getElementById('dpDescription').textContent = v.description || 'Vector';
+    if (!dp) return;
+
+    document.getElementById('dpTitle').textContent = v.title;
+    document.getElementById('dpDescription').textContent = v.description;
+    document.getElementById('dpImage').src = v.thumbnail;
+    
+    // REVİZYON: Download sayfasında da Tip ve Kategori gösterimi
+    const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
     const displayCategory = v.category || 'Belirtilmemiş';
     
     document.getElementById('dpCategory').textContent = displayCategory;
@@ -221,10 +769,10 @@ function openDownloadPage(slug) {
     const btn = document.getElementById('dpDownloadBtn');
     const countBox = document.getElementById('dpCountdownBox');
     const countNum = document.getElementById('dpCountdown');
-    
+
     btn.style.display = 'block';
     countBox.style.display = 'none';
-    
+
     btn.onclick = () => {
         btn.style.display = 'none';
         countBox.style.display = 'block';
@@ -236,6 +784,7 @@ function openDownloadPage(slug) {
             if (count <= 0) {
                 clearInterval(state.countdownInterval);
                 window.location.href = `/api/download?slug=${v.name}`;
+                // Sayfanın kapanması (dp.style.display = 'none') kaldırıldı, artık açık kalacak.
             }
         }, 1000);
     };
@@ -255,44 +804,28 @@ function setupDownloadPageHandlers() {
     }
 }
 
-function showModal(modalId) {
-    const content = MODAL_CONTENTS[modalId];
-    if (!content) return;
-    document.getElementById('infoModalBody').innerHTML = content.content;
-    document.getElementById('infoModal').style.display = 'flex';
-}
-
-function closeModal() {
-    const modal = document.getElementById('infoModal');
-    if (modal) {
-        modal.style.display = 'none';
-        if (window.location.hash) {
-            history.pushState("", document.title, window.location.pathname + window.location.search);
-        }
-    }
-}
-
 function setupModalHandlers() {
     document.querySelectorAll('.modal-trigger').forEach(btn => {
         btn.onclick = (e) => {
             e.preventDefault();
-            const modalId = btn.dataset.modal;
-            window.location.hash = modalId;
+            const content = MODAL_CONTENTS[btn.dataset.modal];
+            if (!content) return;
+            document.getElementById('infoModalBody').innerHTML = content.content;
+            document.getElementById('infoModal').style.display = 'flex';
         };
     });
-
     const infoModalClose = document.getElementById('infoModalClose');
     if (infoModalClose) {
         infoModalClose.onclick = () => {
-            closeModal();
+            document.getElementById('infoModal').style.display = 'none';
         };
     }
-
+    // Close modal on backdrop click
     const infoModal = document.getElementById('infoModal');
     if (infoModal) {
         infoModal.onclick = (e) => {
             if (e.target === infoModal) {
-                closeModal();
+                infoModal.style.display = 'none';
             }
         };
     }
@@ -320,6 +853,7 @@ function setupEventListeners() {
     if (sortFilter) {
         sortFilter.onchange = () => { 
             state.currentPage = 1; 
+            // Sıralama değerini state'e eklemiyoruz ama fetchVectors içinde select'ten okuyacağız
             fetchVectors(); 
         };
     }
@@ -352,3 +886,5 @@ function escHtml(str) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+/* ULTRA PERFORMANCE PATCH v1 REMOVED - Native browser optimizations used instead */
