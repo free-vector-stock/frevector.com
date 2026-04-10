@@ -3,10 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frevector - Free Vector Stock</title>
-    <link rel="stylesheet" href="/style.css?v=2026031407">
-    <link rel="icon" type="image/png" href="https://vector-assets.frevector.com/favicon.png">
+    <title>Frevector - Free Vector, SVG & EPS Downloads</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+        .dp-countdown-box { text-align: center; margin-top: 20px; }
+        .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
+    </style>
 </head>
+<!-- ULTRA PERF PRELOAD -->
+<link rel="preconnect" href="https://frevector.com" crossorigin>
+<link rel="dns-prefetch" href="https://frevector.com">
+<link rel="preconnect" href="https://vector-assets.frevector.com" crossorigin>
+<link rel="dns-prefetch" href="https://vector-assets.frevector.com">
+
 <body>
     <header class="header">
         <div class="header-left">
@@ -25,9 +38,11 @@
                 <option value="">Upload date: Any time</option>
                 <option value="newest">Newest</option>
                 <option value="oldest">Oldest</option>
+                <option value="downloads">Most Downloaded</option>
             </select>
         </div>
     </header>
+
     <div class="main-container">
         <aside class="sidebar">
             <div class="sidebar-title">CATEGORIES</div>
@@ -38,6 +53,7 @@
             <div id="vectorsGrid" class="vectors-grid"></div>
         </main>
     </div>
+
     <!-- REVİZYON 1 & 2: Our Picks ve Sayfalama - Footer üzerine sabitlendi -->
     <div class="bottom-fixed-container">
         <div class="pagination-wrapper">
@@ -48,6 +64,7 @@
                 <span class="page-total" id="pageTotal">/ 177</span>
             </div>
         </div>
+        
         <section class="our-picks-section" id="ourPicksSection">
             <div class="our-picks-header">
                 <div class="our-picks-label">Our selections for you</div>
@@ -60,6 +77,7 @@
                 <div class="our-picks-track" id="ourPicksTrack"></div>
             </div>
         </section>
+
         <footer class="footer">
             <span class="copyright">2026 &copy; frevector.com</span>
             <nav class="footer-nav">
@@ -70,6 +88,7 @@
             </nav>
         </footer>
     </div>
+
     <div id="downloadPage" class="download-page" style="display:none;">
         <div class="download-page-header">
             <span class="dp-site">frevector.com</span>
@@ -99,13 +118,16 @@
             </div>
         </div>
     </div>
+
     <div id="infoModal" class="info-modal" style="display:none;">
         <div class="info-modal-box">
             <button class="info-modal-close" id="infoModalClose">&#10005;</button>
             <div id="infoModalBody" class="info-modal-body"></div>
         </div>
     </div>
+
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-    <script src="/main.js?v=2026031407"></script>
+
+    <script src="/main.js?v=2026031401"></script>
 </body>
 </html>
