@@ -109,7 +109,7 @@ async function checkRobotsTxt(env) {
   const GITHUB_TOKEN = env.GITHUB_TOKEN;
   const REPO = "free-vector-stock/frevector.com";
   const FILE_PATH = "robots.txt";
-  const robotsContent = "User-agent: *\nAllow: /\nSitemap: https://frevector.com/sitemap.xml";
+  const robotsContent = "User-agent: *\\nAllow: /\\nSitemap: https://frevector.com/sitemap.xml";
   
   const getFileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     headers: {
