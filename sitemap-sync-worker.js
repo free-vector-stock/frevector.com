@@ -31,26 +31,26 @@ async function syncSitemap(env) {
     cursor = list.cursor;
   }
   
-  let xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-  xml += "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
-  xml += "  <url>\n    <loc>https://frevector.com/</loc>\n    <lastmod>" + new Date().toISOString().split("T")[0] + "</lastmod>\n    <priority>1.0</priority>\n  </url>\n";
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  xml += '  <url>\n    <loc>https://frevector.com/</loc>\n    <lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod>\n    <priority>1.0</priority>\n  </url>\n';
   
   const vectorIds = new Set();
   const idToDate = new Map();
   for (const obj of objects) {
     if (obj.key === "all_vectors.json" || obj.key.includes("thumb")) continue;
-    const parts = obj.key.split("/");
-    let id = parts.length >= 2 ? parts[1] : parts[0].replace(/\.[^/.]+$/, "");
+    const parts = obj.key.split('/');
+    let id = parts.length >= 2 ? parts[1] : parts[0].replace(/\\.[^/.]+$/, "");
     if (id && !vectorIds.has(id)) {
       vectorIds.add(id);
-      idToDate.set(id, obj.uploaded.toISOString().split("T")[0]);
+      idToDate.set(id, obj.uploaded.toISOString().split('T')[0]);
     }
   }
   
   for (const id of vectorIds) {
-    xml += "  <url>\n    <loc>https://frevector.com/details/" + id + "</loc>\n    <lastmod>" + idToDate.get(id) + "</lastmod>\n  </url>\n";
+    xml += '  <url>\n    <loc>https://frevector.com/details/' + id + '</loc>\n    <lastmod>' + idToDate.get(id) + '</lastmod>\n  </url>\n';
   }
-  xml += "</urlset>";
+  xml += '</urlset>';
   
   await updateGitHub(env, "sitemap.xml", xml, "Auto-sync sitemap with R2");
 }
