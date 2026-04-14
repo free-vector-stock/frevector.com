@@ -32,41 +32,41 @@ async function syncSitemap(env) {
     cursor = list.cursor;
   }
   console.log(`Found ${objects.length} objects in R2`);
-  let xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-  xml += "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   
-  xml += "  <url>\n";
-  xml += "    <loc>https://frevector.com/</loc>\n";
-  xml += `    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>\n`;
-  xml += "    <priority>1.0</priority>\n";
-  xml += "  </url>\n";
+  xml += '  <url>\n';
+  xml += '    <loc>https://frevector.com/</loc>\n';
+  xml += `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n`;
+  xml += '    <priority>1.0</priority>\n';
+  xml += '  </url>\n';
   const vectorIds = new Set();
   const idToDate = new Map();
   for (const obj of objects) {
     if (obj.key === "all_vectors.json" || obj.key.includes("thumb")) continue;
     
-    const parts = obj.key.split("/");
+    const parts = obj.key.split('/');
     let id = "";
     
     if (parts.length >= 2) {
       id = parts[1];
     } else {
-      id = parts[0].replace(/\.[^/.]+$/, "");
+      id = parts[0].replace(/\\.[^/.]+$/, "");
     }
     if (id && !vectorIds.has(id)) {
       vectorIds.add(id);
-      idToDate.set(id, obj.uploaded.toISOString().split("T")[0]);
+      idToDate.set(id, obj.uploaded.toISOString().split('T')[0]);
     }
   }
   console.log(`Extracted ${vectorIds.size} unique vector IDs`);
   for (const id of vectorIds) {
     const uploadDate = idToDate.get(id);
-    xml += "  <url>\n";
+    xml += '  <url>\n';
     xml += `    <loc>https://frevector.com/details/${id}</loc>\n`;
     xml += `    <lastmod>${uploadDate}</lastmod>\n`;
-    xml += "  </url>\n";
+    xml += '  </url>\n';
   }
-  xml += "</urlset>";
+  xml += '</urlset>';
   const GITHUB_TOKEN = env.GITHUB_TOKEN;
   const REPO = "free-vector-stock/frevector.com";
   const FILE_PATH = "sitemap.xml";
@@ -109,7 +109,7 @@ async function checkRobotsTxt(env) {
   const GITHUB_TOKEN = env.GITHUB_TOKEN;
   const REPO = "free-vector-stock/frevector.com";
   const FILE_PATH = "robots.txt";
-  const robotsContent = "User-agent: *\nAllow: /\nSitemap: https://frevector.com/sitemap.xml";
+  const robotsContent = "User-agent: *\\nAllow: /\\nSitemap: https://frevector.com/sitemap.xml";
   
   const getFileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`, {
     headers: {
