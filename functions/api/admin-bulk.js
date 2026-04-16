@@ -4,6 +4,8 @@
  * - Supports finalize-bulk to update index once
  */
 
+import { notifyIndexingUpdate } from "../google-indexing.js";
+
 const ADMIN_PASSWORD = "vector2026";
 
 const VALID_CATEGORIES = [
@@ -71,6 +73,11 @@ export async function onRequestPost(context) {
                 kv.put("all_vectors", updatedRaw),
                 r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
             ]);
+            try {
+                await notifyIndexingUpdate(context.env, body.vectors.map(v => `https://frevector.com/details/${encodeURIComponent(v.name)}`), "URL_UPDATED");
+            } catch (indexingError) {
+                console.error("Google Indexing API bulk notify failed:", indexingError.message);
+            }
             return new Response(JSON.stringify({ success: true, count: body.vectors.length }), { status: 200, headers });
         }
     }
@@ -95,6 +102,11 @@ export async function onRequestPost(context) {
             kv.put("all_vectors", updatedRaw),
             r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
         ]);
+        try {
+            await notifyIndexingUpdate(context.env, vectors.map(v => `https://frevector.com/details/${encodeURIComponent(v.name)}`), "URL_UPDATED");
+        } catch (indexingError) {
+            console.error("Google Indexing API finalize notify failed:", indexingError.message);
+        }
         return new Response(JSON.stringify({ success: true, count: vectors.length }), { status: 200, headers });
     }
 
@@ -161,6 +173,11 @@ export async function onRequestPost(context) {
             kv.put("all_vectors", updatedRaw),
             r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
         ]);
+        try {
+            await notifyIndexingUpdate(context.env, [`https://frevector.com/details/${encodeURIComponent(id)}`], "URL_UPDATED");
+        } catch (indexingError) {
+            console.error("Google Indexing API single bulk-upload notify failed:", indexingError.message);
+        }
     }
 
     return new Response(JSON.stringify({ success: true, vector: vectorRecord }), { status: 200, headers });

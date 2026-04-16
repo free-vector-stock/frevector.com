@@ -7,6 +7,8 @@
  * - UPDATED: Added time-based download stats calculation (Last 24h and Monthly)
  */
 
+import { notifyIndexingUpdate } from "../google-indexing.js";
+
 const ADMIN_PASSWORD = "vector2026";
 
 const VALID_CATEGORIES = [
@@ -252,6 +254,12 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: "Index update failed: " + e.message }), { status: 500, headers });
     }
 
+    try {
+      await notifyIndexingUpdate(context.env, [`https://frevector.com/details/${encodeURIComponent(id)}`], "URL_UPDATED");
+    } catch (indexingError) {
+      console.error("Google Indexing API notify failed:", indexingError.message);
+    }
+
     console.log(`Successfully uploaded ${id}`);
     return new Response(JSON.stringify({ 
         success: true, 
@@ -296,6 +304,12 @@ export async function onRequestDelete(context) {
         kv.put("all_vectors", updatedRaw),
         r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
     ]);
+
+    try {
+      await notifyIndexingUpdate(context.env, [`https://frevector.com/details/${encodeURIComponent(slug)}`], "URL_DELETED");
+    } catch (indexingError) {
+      console.error("Google Indexing API delete notify failed:", indexingError.message);
+    }
 
     return new Response(JSON.stringify({ 
         success: true, 
