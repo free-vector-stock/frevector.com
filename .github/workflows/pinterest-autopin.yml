@@ -22,6 +22,7 @@ jobs:
 
       - name: Refresh Pinterest Token
         id: refresh_token
+        continue-on-error: true
         run: node scripts/refreshToken.js
         env:
           PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
@@ -31,14 +32,14 @@ jobs:
       - name: Run Auto Pin
         run: npm run autopin
         env:
-          PINTEREST_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.access_token }}
+          PINTEREST_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.access_token || secrets.PINTEREST_ACCESS_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Generate Report
         run: npm run report
         env:
-          PINTEREST_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.access_token }}
+          PINTEREST_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.access_token || secrets.PINTEREST_ACCESS_TOKEN }}
 
       - name: Commit and Push Progress
         run: |
