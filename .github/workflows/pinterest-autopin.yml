@@ -1,0 +1,50 @@
+name: Pinterest Auto Pin
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Run every day at 3:00 AM
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  autopin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Refresh Pinterest Token
+        id: refresh_token
+        run: node scripts/refreshToken.js
+        env:
+          PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
+          PINTEREST_APP_ID: ${{ secrets.PINTEREST_APP_ID }}
+          PINTEREST_CLIENT_SECRET: ${{ secrets.PINTEREST_CLIENT_SECRET }}
+
+      - name: Run Auto Pin
+        run: npm run autopin
+        env:
+          PINTEREST_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.access_token }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Generate Report
+        run: npm run report
+        env:
+          PINTEREST_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.access_token }}
+
+      - name: Commit and Push Progress
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pinterest/sent.json pinterest/report.json
+          git commit -m "chore: update pinterest progress and report [skip ci]" || echo "No changes to commit"
+          git push
