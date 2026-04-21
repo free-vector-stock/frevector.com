@@ -311,7 +311,10 @@ function renderManageTable(type = 'vector') {
                 <td>${escHtml(v.contentType || 'vector')}</td>
                 <td>${escHtml(v.category || 'Miscellaneous')}</td>
                 <td>${v.downloads || 0}</td>
-                <td><button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">Delete</button></td>
+                <td style="display: flex; gap: 8px;">
+                    <button class="btn-upload" style="padding: 6px 12px; font-size: 11px; background: #2b6cb0;" onclick="downloadSingleVector('${escHtml(v.name)}')">Download</button>
+                    <button class="btn-delete" onclick="deleteVector('${escHtml(v.name)}')">Delete</button>
+                </td>
             </tr>
         `;
     }).join('') || '<tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">No items</td></tr>';
@@ -351,6 +354,7 @@ function updateBulkButtons(type = 'vector') {
     if (downloadBtn) {
         downloadBtn.disabled = count === 0;
         downloadBtn.textContent = `Download Selected (${count})`;
+        downloadBtn.style.display = count > 0 ? 'inline-block' : 'none';
     }
 }
 
@@ -396,6 +400,17 @@ async function bulkDeleteVectors(type = 'vector') {
     filterAndRenderManage(type);
 }
 
+function downloadSingleVector(slug) {
+    const key = sessionStorage.getItem('fv_admin');
+    const link = document.createElement('a');
+    link.style.display = 'none';
+    link.href = `/api/download?slug=${encodeURIComponent(slug)}&key=${key}`;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 async function bulkDownloadVectors(type = 'vector') {
     const isJpeg = type === 'jpeg';
     const selectedSet = isJpeg ? state.selectedJpegs : state.selectedVectors;
@@ -403,10 +418,24 @@ async function bulkDownloadVectors(type = 'vector') {
     if (!selected.length) return;
 
     const key = sessionStorage.getItem('fv_admin');
+    
+    // Create a temporary link to trigger downloads
+    const link = document.createElement('a');
+    link.style.display = 'none';
+    document.body.appendChild(link);
+
     for (const slug of selected) {
-        window.open(`/api/download?slug=${encodeURIComponent(slug)}&key=${key}`, '_blank');
-        await new Promise(r => setTimeout(r, 500));
+        // Using the existing download API
+        const downloadUrl = `/api/download?slug=${encodeURIComponent(slug)}&key=${key}`;
+        link.href = downloadUrl;
+        link.setAttribute('download', '');
+        link.click();
+        
+        // Small delay to prevent browser from blocking multiple downloads
+        await new Promise(r => setTimeout(r, 800));
     }
+    
+    document.body.removeChild(link);
 }
 
 function handleBulkAnalyze(type = 'vector') {
