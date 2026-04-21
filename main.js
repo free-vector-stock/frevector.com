@@ -706,7 +706,7 @@ function openDetailPanel(v, cardEl) {
                 </div>
                 <div style="margin-top: 20px; display: flex; gap: 12px;">
                     <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
-                    <a href="/details/${v.name}" class="visit-site-btn">Siteye Git</a>
+
                     <button class="detail-close-btn" id="mainCloseBtn">Close</button>
                 </div>
             </div>
