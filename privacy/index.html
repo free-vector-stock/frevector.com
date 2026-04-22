@@ -7,14 +7,23 @@
     <link rel="stylesheet" href="/style.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <style>
+        /* Global overflow override for this page only */
+        html, body {
+            overflow: auto !important;
+            height: auto !important;
+            min-height: 100% !important;
+        }
+        
         .legal-content {
             max-width: 800px;
-            margin: 120px auto 40px;
+            margin: 100px auto 60px;
             padding: 40px;
             background: #fff;
             border: 1px solid #e8e8e8;
             border-radius: 8px;
             line-height: 1.6;
+            position: relative;
+            z-index: 1;
         }
         .legal-content h1 { font-size: 28px; font-weight: 800; margin-bottom: 24px; }
         .legal-content h2 { font-size: 20px; font-weight: 700; margin-top: 24px; margin-bottom: 12px; }
@@ -29,8 +38,21 @@
             font-weight: bold;
             font-size: 18px;
         }
+        
+        /* Fixed footer override for this page */
+        .footer {
+            position: relative !important;
+            bottom: auto !important;
+            left: auto !important;
+            right: auto !important;
+            width: 100% !important;
+            margin-top: 40px;
+            z-index: 10;
+            height: 60px !important; /* Fixed height for footer */
+        }
+
         @media (max-width: 768px) {
-            .legal-content { margin-top: 20px; padding: 20px; border: none; }
+            .legal-content { margin-top: 80px; padding: 20px; border: none; }
         }
     </style>
 </head>
