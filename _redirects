@@ -1,4 +1,2 @@
-# Frevector Redirects
-# SPA routing is handled by Cloudflare Pages Functions in /functions/details/[[path]].js
-# No _redirects rules needed here - Functions take precedence over static redirects
-/privacy-policy /privacy 301
+/privacy-policy /privacy/ 301
+/privacy /privacy/ 301
