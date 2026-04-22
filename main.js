@@ -34,38 +34,7 @@ const MODAL_CONTENTS = {
             <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>
         `
     },
-    privacy: {
-        title: 'Privacy Policy',
-        content: `
-            <h2 style="margin-bottom:16px;">Privacy Policy</h2>
-            <p style="margin-bottom:12px;">As Frevector.com, we prioritize user privacy. This policy explains what data may be collected and how it may be used when you visit the site.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">1. Data Collected</h3>
-            <p style="margin-bottom:8px;">When you visit the site, certain anonymous data may be collected automatically. This data does not directly identify you.</p>
-            <p style="margin-bottom:8px;">Collected data may include:</p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Cookies</li>
-                <li>Browser and device information</li>
-                <li>IP address (for anonymous analytical purposes)</li>
-                <li>Page visit and interaction data</li>
-                <li>Analytical usage information</li>
-            </ul>
-            <h3 style="margin-bottom:8px;margin-top:16px;">2. Purposes of Data Use</h3>
-            <p style="margin-bottom:8px;">The collected data may be used for the following purposes:</p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Improving site performance</li>
-                <li>Enhancing user experience</li>
-                <li>Detecting technical issues</li>
-                <li>Ensuring security</li>
-                <li>Supporting the content development process</li>
-            </ul>
-            <h3 style="margin-bottom:8px;margin-top:16px;">3. Personal Data</h3>
-            <p style="margin-bottom:12px;">Personal data (name, email, etc.) is only processed when voluntarily shared by the user—for example, via emails sent for communication purposes. Frevector does not sell user data to third parties or share it for commercial purposes.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">4. Cookie Policy</h3>
-            <p style="margin-bottom:12px;">Cookies may be used on the site to support site functions, remember user preferences, and measure performance. Users can limit or disable the use of cookies through their browser settings.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">5. Data Security</h3>
-            <p>Necessary technical and administrative measures are taken to protect data. However, it cannot be guaranteed that data transmission over the internet is completely secure.</p>
-        `
-    },
+
     terms: {
         title: 'Terms of Service',
         content: `
