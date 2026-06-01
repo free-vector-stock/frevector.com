@@ -74,7 +74,9 @@ async function autopin() {
                 
                 const title = metadata.title || slug;
                 const description = (metadata.keywords || []).join(', ') || category;
-                const imageUrl = `https://frevector.com/api/asset?key=${encodeURIComponent(category + '/' + slug + '/' + slug + '.jpg')}`;
+                // R2 uses Title Case for category folders
+                const categoryTitle = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+                const imageUrl = `https://frevector.com/api/asset?key=${encodeURIComponent(categoryTitle + '/' + slug + '/' + slug + '.jpg')}`;
 
                 await pinterest.createPin(boardId, title, description, imageUrl, url);
                 sentUrls.push(url);
@@ -98,13 +100,11 @@ async function fetchMetadata(category, slug) {
     const cfToken = process.env.CLOUDFLARE_API_TOKEN;
     const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
     const bucket = 'vector-assets';
-    const key = `${category}/${slug}/${slug}.json`;
+    // R2 uses Title Case for category folders (e.g., Abstract, Food, Nature)
+    const categoryTitle = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+    const key = `${categoryTitle}/${slug}/${slug}.json`;
 
     try {
-        // Since we can't easily use S3 SDK here without adding many deps, 
-        // we'll try to use the public API if available or fallback to defaults
-        // For now, return a placeholder or attempt a simple fetch if the API supports it
-        // Actually, the user provided CF Token, so we can use CF API to get object
         const url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucket}/objects/${encodeURIComponent(key)}`;
         const response = await axios.get(url, {
             headers: { 'Authorization': `Bearer ${cfToken}` },
@@ -112,8 +112,10 @@ async function fetchMetadata(category, slug) {
         });
         return response.data;
     } catch (err) {
-        console.warn(`Could not fetch metadata for ${slug}, using defaults.`);
-        return { title: slug, keywords: [category] };
+        console.warn(`Could not fetch metadata for ${slug} (key: ${key}), using defaults.`);
+        // Generate a human-readable title from slug
+        const readableTitle = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()).replace(/\d+$/, '').trim();
+        return { title: readableTitle || slug, keywords: [category.toLowerCase()] };
     }
 }
 

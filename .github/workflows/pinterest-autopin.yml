@@ -8,6 +8,8 @@ on:
 jobs:
   autopin:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # Required for git push
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -29,6 +31,16 @@ jobs:
           PINTEREST_APP_ID: ${{ secrets.PINTEREST_APP_ID }}
           PINTEREST_CLIENT_SECRET: ${{ secrets.PINTEREST_CLIENT_SECRET }}
 
+      - name: Update Refresh Token Secret (if refreshed)
+        if: steps.refresh_token.outputs.refresh_token != ''
+        run: |
+          echo "Updating PINTEREST_REFRESH_TOKEN secret..."
+          echo "${{ steps.refresh_token.outputs.refresh_token }}" | gh secret set PINTEREST_REFRESH_TOKEN --repo ${{ github.repository }}
+          echo "Updating PINTEREST_ACCESS_TOKEN secret..."
+          echo "${{ steps.refresh_token.outputs.access_token }}" | gh secret set PINTEREST_ACCESS_TOKEN --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - name: Run Auto Pin
         run: npm run autopin
         env:
@@ -37,6 +49,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Generate Report
+        continue-on-error: true
         run: npm run report
         env:
           PINTEREST_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.access_token || secrets.PINTEREST_ACCESS_TOKEN }}
@@ -45,6 +58,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add pinterest/sent.json pinterest/report.json
+          git add pinterest/sent.json
+          git add pinterest/report.json 2>/dev/null || true
           git commit -m "chore: update pinterest progress and report [skip ci]" || echo "No changes to commit"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
