@@ -13,7 +13,6 @@ export default {
     return new Response("Sitemap Sync Worker Running", { status: 200 });
   }
 };
-
 async function syncSitemap(env) {
   console.log("Starting sitemap sync...");
   const bucket = env.VECTOR_ASSETS;
@@ -54,32 +53,27 @@ async function syncSitemap(env) {
   
   await updateGitHub(env, "sitemap.xml", xml, "Auto-sync sitemap with R2");
 }
-
 async function checkRobotsTxt(env) {
   const robotsContent = "User-agent: *\nAllow: /\nSitemap: https://frevector.com/sitemap.xml";
   await updateGitHub(env, "robots.txt", robotsContent, "Auto-check/create robots.txt", true);
 }
-
 async function updateGitHub(env, filePath, content, message, onlyIfMissing = false) {
-  const GITHUB_TOKEN = env.GITHUB_TOKEN;
+  const GH_TOKEN = env.GH_TOKEN;
   const REPO = "free-vector-stock/frevector.com";
-  if (!GITHUB_TOKEN) return;
-
+  if (!GH_TOKEN) return;
   const getFileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${filePath}`, {
-    headers: { "Authorization": `token ${GITHUB_TOKEN}`, "User-Agent": "Cloudflare-Worker" }
+    headers: { "Authorization": `token ${GH_TOKEN}`, "User-Agent": "Cloudflare-Worker" }
   });
-
   let sha = "";
   if (getFileRes.ok) {
     if (onlyIfMissing) return;
     const fileData = await getFileRes.json();
     sha = fileData.sha;
   }
-
   const contentBase64 = btoa(unescape(encodeURIComponent(content)));
   await fetch(`https://api.github.com/repos/${REPO}/contents/${filePath}`, {
     method: "PUT",
-    headers: { "Authorization": `token ${GITHUB_TOKEN}`, "User-Agent": "Cloudflare-Worker", "Content-Type": "application/json" },
+    headers: { "Authorization": `token ${GH_TOKEN}`, "User-Agent": "Cloudflare-Worker", "Content-Type": "application/json" },
     body: JSON.stringify({ message, content: contentBase64, sha: sha || undefined })
   });
 }
