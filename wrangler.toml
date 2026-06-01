@@ -1,9 +1,13 @@
 name = "frevector-com"
-main = "sitemap-sync-worker.js"
 compatibility_date = "2026-01-01"
+pages_build_output_dir = "."
 
 [triggers]
-crons = ["0 */8 * * *"] # Günde 3 kez (8 saatte bir) çalışır
+crons = ["0 2 * * *"]  # Her gün gece 02:00'de çalışır
+
+[[kv_namespaces]]
+binding = "VECTOR_DB"
+id = "0a2e10400ced49898918a0b30a4dba93"
 
 [[r2_buckets]]
 binding = "VECTOR_ASSETS"
