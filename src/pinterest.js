@@ -12,7 +12,7 @@ class PinterestAPI {
 
     async getBoards() {
         try {
-            const response = await axios.get(`${this.baseUrl}/boards`, {
+            const response = await axios.get(`${this.baseUrl}/boards?page_size=100`, {
                 headers: {
                     'Authorization': `Bearer ${this.accessToken}`,
                     'Content-Type': 'application/json'
@@ -21,6 +21,25 @@ class PinterestAPI {
             return response.data.items;
         } catch (error) {
             console.error('Error fetching boards:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
+    async createBoard(name, description = '') {
+        try {
+            const response = await axios.post(`${this.baseUrl}/boards`, {
+                name: name,
+                description: description,
+                privacy: 'PUBLIC'
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error creating board ${name}:`, error.response?.data || error.message);
             throw error;
         }
     }

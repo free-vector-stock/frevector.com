@@ -60,12 +60,26 @@ async function autopin() {
                 // Example URL: https://frevector.com/details/abstract-00000002
                 const slug = url.split('/').pop();
                 const categoryPart = slug.split('-')[0];
-                const category = categoryPart.charAt(0).toUpperCase() + categoryPart.slice(1);
+                const category = categoryPart.charAt(0).toUpperCase() + categoryPart.slice(1).toLowerCase();
 
-                const boardId = boardMap[category.toLowerCase()] || boardMap['miscellaneous'];
+                let boardId = boardMap[category.toLowerCase()];
+                
+                // If board doesn't exist, create it automatically
+                if (!boardId) {
+                    console.log(`Board not found for category "${category}". Creating automatically...`);
+                    try {
+                        const newBoard = await pinterest.createBoard(category, `Free ${category} vectors and images from frevector.com`);
+                        boardId = newBoard.id;
+                        boardMap[category.toLowerCase()] = boardId; // Update local map
+                        console.log(`Successfully created new board: ${category} (${boardId})`);
+                    } catch (createErr) {
+                        console.warn(`Could not create board for ${category}, falling back to miscellaneous.`);
+                        boardId = boardMap['miscellaneous'];
+                    }
+                }
                 
                 if (!boardId) {
-                    console.warn(`No board found for category: ${category}, skipping ${url}`);
+                    console.warn(`No board found or could be created for category: ${category}, skipping ${url}`);
                     continue;
                 }
 
