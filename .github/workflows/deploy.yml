@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Pages and Worker
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy to Cloudflare Pages
+    name: Deploy
     permissions:
       contents: read
       deployments: write
@@ -35,9 +35,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Deploy Sitemap Sync Worker
+        run: wrangler deploy --config wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Deployment Success
         run: |
-          echo "✅ Deployed to Cloudflare Pages"
+          echo "✅ Pages deployed"
+          echo "✅ Worker deployed"
           echo "🔗 Site: https://frevector.com"
           echo "📅 Timestamp: $(date -u)"
-          echo "📝 Commit: ${{ github.sha }}"
