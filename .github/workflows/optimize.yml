@@ -10,21 +10,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install -g svgo clean-css-cli terser
+      - run: npm install svgo clean-css-cli terser
       - name: Minify CSS
         run: |
           shopt -s globstar
           for f in **/*.css; do
             [[ "$f" == *.min.css ]] && continue
-            clean-css-cli -o "${f%.css}.min.css" "$f"
+            npx clean-css-cli -o "${f%.css}.min.css" "$f"
           done
       - name: Minify JS
         run: |
           shopt -s globstar
           for f in **/*.js; do
             [[ "$f" == *.min.js ]] && continue
-            terser "$f" -o "${f%.js}.min.js"
+            npx terser "$f" -o "${f%.js}.min.js"
           done
       - name: Optimize SVGs
         run: |
-          if [ -d ./assets/svg ]; then svgo -r -f ./assets/svg; fi
+          if [ -d ./assets/svg ]; then npx svgo -r -f ./assets/svg; fi
