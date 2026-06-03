@@ -97,7 +97,14 @@ document.getElementById('contactForm').addEventListener('submit', function(event
   button.disabled = true;
   button.innerText = 'Sending...';
 
+  // URL parametresinden konuyu al
+  const urlParams = new URLSearchParams(window.location.search);
+  const subjectParam = urlParams.get('subject');
+  
   const formData = new FormData(form);
+  if (subjectParam) {
+    formData.set('subject', subjectParam);
+  }
   const object = Object.fromEntries(formData);
   const json = JSON.stringify(object);
 
