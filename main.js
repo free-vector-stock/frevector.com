@@ -357,9 +357,9 @@ function renderVectors() {
         
         const typeLabel = v.isJpegOnly ? '<span class="vc-type-badge jpeg">JPEG</span>' : '<span class="vc-type-badge vector">VECTOR</span>';
 
-        // İlk 6 görseli eager (hemen), diğerlerini lazy yükle
-        const loadingAttr = index < 6 ? 'eager' : 'lazy';
-        const fetchPriority = index < 6 ? 'high' : 'low';
+        // İlk 12 görseli eager (hemen), diğerlerini lazy yükle
+        const loadingAttr = index < 12 ? 'eager' : 'lazy';
+        const fetchPriority = index < 12 ? 'high' : 'low';
 
         card.innerHTML = `
             <div class="vc-img-wrap">

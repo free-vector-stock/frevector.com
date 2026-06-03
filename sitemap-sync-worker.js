@@ -31,7 +31,7 @@ async function syncSitemap(env) {
   }
   
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
   xml += '  <url>\n    <loc>https://frevector.com/</loc>\n    <lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod>\n    <priority>1.0</priority>\n  </url>\n';
   
   const vectorIds = new Set();
@@ -47,7 +47,8 @@ async function syncSitemap(env) {
   }
   
   for (const id of vectorIds) {
-    xml += '  <url>\n    <loc>https://frevector.com/details/' + id + '</loc>\n    <lastmod>' + idToDate.get(id) + '</lastmod>\n  </url>\n';
+    const thumbKey = encodeURIComponent(id + '/thumb.jpg');
+    xml += '  <url>\n    <loc>https://frevector.com/details/' + id + '</loc>\n    <lastmod>' + idToDate.get(id) + '</lastmod>\n    <image:image>\n      <image:loc>https://frevector.com/api/asset?key=' + thumbKey + '</image:loc>\n    </image:image>\n  </url>\n';
   }
   xml += '</urlset>';
   

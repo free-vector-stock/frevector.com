@@ -33,7 +33,7 @@ async function syncSitemap(env) {
   }
   console.log(`Found ${objects.length} objects in R2`);
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
   
   xml += '  <url>\n';
   xml += '    <loc>https://frevector.com/</loc>\n';
@@ -61,9 +61,13 @@ async function syncSitemap(env) {
   console.log(`Extracted ${vectorIds.size} unique vector IDs`);
   for (const id of vectorIds) {
     const uploadDate = idToDate.get(id);
+    const thumbKey = encodeURIComponent(`${id}/thumb.jpg`);
     xml += '  <url>\n';
     xml += `    <loc>https://frevector.com/details/${id}</loc>\n`;
     xml += `    <lastmod>${uploadDate}</lastmod>\n`;
+    xml += `    <image:image>\n`;
+    xml += `      <image:loc>https://frevector.com/api/asset?key=${thumbKey}</image:loc>\n`;
+    xml += `    </image:image>\n`;
     xml += '  </url>\n';
   }
   xml += '</urlset>';

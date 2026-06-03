@@ -13,6 +13,21 @@
   Cache-Control: public, max-age=86400
   Access-Control-Allow-Origin: *
 
+/*.jpg
+  Cache-Control: public, max-age=604800
+
+/*.jpeg
+  Cache-Control: public, max-age=604800
+
+/*.png
+  Cache-Control: public, max-age=604800
+
+/*.svg
+  Cache-Control: public, max-age=604800
+
+/*.webp
+  Cache-Control: public, max-age=604800
+
 /*.js
   Cache-Control: public, max-age=0, must-revalidate
 
