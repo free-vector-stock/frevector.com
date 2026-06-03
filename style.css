@@ -60,7 +60,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     top: 104px;
     left: 0;
     right: 0;
-    bottom: 240px;
+    bottom: 300px; /* Pagination + Our Picks + Footer için yeterli alan */
     width: 100%;
     overflow: hidden;
 }
@@ -159,7 +159,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 /* SABIT DÜZEN - BOTTOM FIXED CONTAINER */
 .bottom-fixed-container {
     position: fixed;
-    bottom: 0;
+    bottom: 52px; /* Footer yüksekliği kadar yukarıda */
     left: 0;
     right: 0;
     background: var(--white);
@@ -312,6 +312,10 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     flex-shrink: 0;
     height: 52px;
     box-sizing: border-box;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 2000;
 }
 
 .footer-nav { display: flex; gap: 20px; }
