@@ -11,10 +11,10 @@ const CORS_HEADERS = {
 };
 
 const ALL_CATEGORIES = [
-    'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
-    'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous',
-    'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports',
-    'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
+    'Icon', 'Logo', 'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Business', 'Buildings', 'Celebrities',
+    'Drink', 'Education', 'Fashion', 'Food', 'Font', 'Holidays', 'Industrial', 'Interiors', 'Medical',
+    'Miscellaneous', 'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports',
+    'Technology', 'Transportation', 'Vintage'
 ];
 
 export async function onRequestGet(context) {
@@ -48,7 +48,12 @@ export async function onRequestGet(context) {
             count: categoryCounts[name] || 0
         }));
 
-        categories.sort((a, b) => a.name.localeCompare(b.name));
+        // Order: Icon first, then Logo, then others in ALL_CATEGORIES order
+        categories.sort((a, b) => {
+            const idxA = ALL_CATEGORIES.indexOf(a.name);
+            const idxB = ALL_CATEGORIES.indexOf(b.name);
+            return idxA - idxB;
+        });
 
         const result = { categories, total: allVectors.length };
         const response = new Response(JSON.stringify(result), { status: 200, headers: CORS_HEADERS });

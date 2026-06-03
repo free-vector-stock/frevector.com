@@ -7,10 +7,10 @@ const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
 const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'vector eps', 'svg'];
 
 const CATEGORIES = [
-    'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
-    'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous',
-    'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports',
-    'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
+    'Icon', 'Logo', 'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Business', 'Buildings', 'Celebrities',
+    'Drink', 'Education', 'Fashion', 'Food', 'Font', 'Holidays', 'Industrial', 'Interiors', 'Medical',
+    'Miscellaneous', 'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Sports',
+    'Symbols', 'Technology', 'Transportation', 'Vintage'
 ];
 
 const MODAL_CONTENTS = {
@@ -179,69 +179,7 @@ function setupCategories() {
     if (!list) return;
     list.innerHTML = '';
 
-    const isMobile = window.innerWidth <= 768;
-
-    if (!isMobile) {
-        // Desktop: Keep the TYPE container
-        const typeContainer = document.createElement('div');
-        typeContainer.style.padding = '0 16px 8px';
-        typeContainer.style.marginBottom = '8px';
-        typeContainer.style.paddingBottom = '8px';
-        typeContainer.style.borderBottom = '1px solid #ddd';
-        
-        const typeLabel = document.createElement('div');
-        typeLabel.style.fontSize = '10px';
-        typeLabel.style.fontWeight = '600';
-        typeLabel.style.color = '#666';
-        typeLabel.style.marginBottom = '4px';
-        typeLabel.textContent = 'TYPE';
-        typeContainer.appendChild(typeLabel);
-        
-        const typeAll = document.createElement('a');
-        typeAll.href = '#';
-        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
-        typeAll.textContent = 'All';
-        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
-        typeContainer.appendChild(typeAll);
-        
-        const typeVector = document.createElement('a');
-        typeVector.href = '#';
-        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
-        typeVector.textContent = 'Vector';
-        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
-        typeContainer.appendChild(typeVector);
-        
-        const typeJpeg = document.createElement('a');
-        typeJpeg.href = '#';
-        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
-        typeJpeg.textContent = 'Jpeg';
-        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
-        typeContainer.appendChild(typeJpeg);
-        
-        list.appendChild(typeContainer);
-    } else {
-        // Mobile: Add TYPE items directly to the list as tags
-        const typeAll = document.createElement('a');
-        typeAll.href = '#';
-        typeAll.className = 'category-item' + (state.selectedType === 'all' ? ' active' : '');
-        typeAll.textContent = 'All Types';
-        typeAll.onclick = (e) => { e.preventDefault(); selectType('all'); };
-        list.appendChild(typeAll);
-        
-        const typeVector = document.createElement('a');
-        typeVector.href = '#';
-        typeVector.className = 'category-item' + (state.selectedType === 'vector' ? ' active' : '');
-        typeVector.textContent = 'Vector';
-        typeVector.onclick = (e) => { e.preventDefault(); selectType('vector'); };
-        list.appendChild(typeVector);
-        
-        const typeJpeg = document.createElement('a');
-        typeJpeg.href = '#';
-        typeJpeg.className = 'category-item' + (state.selectedType === 'jpeg' ? ' active' : '');
-        typeJpeg.textContent = 'Jpeg';
-        typeJpeg.onclick = (e) => { e.preventDefault(); selectType('jpeg'); };
-        list.appendChild(typeJpeg);
-    }
+    // TYPE section removed as per requirement June 2026
 
     const allLink = document.createElement('a');
     allLink.href = '#';
@@ -317,8 +255,16 @@ async function fetchVectors() {
         url.searchParams.set('page', state.currentPage);
         url.searchParams.set('limit', '24');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
-        if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
-        if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
+        // JPEG visibility: JPEG files are stored in Cloudflare bucket but hidden from site display.
+        // To re-enable JPEG listings, set HIDE_JPEG = false (or remove the filter).
+        // Last updated: June 2026
+        const HIDE_JPEG = true;
+        if (HIDE_JPEG) {
+            url.searchParams.set('type', 'vector');
+        } else {
+            if (state.selectedType === 'vector') url.searchParams.set('type', 'vector');
+            if (state.selectedType === 'jpeg') url.searchParams.set('type', 'jpeg');
+        }
         
         // Sıralama filtresini ekle
         const sortFilter = document.getElementById('sortFilter');
@@ -373,11 +319,16 @@ async function fetchOurPicksRandomly() {
             const data = await res.json();
             let picks = data.vectors || [];
             
-            // API'den gelen veriyi tekrar client tarafında kesin olarak filtreleyelim
-            if (state.selectedType === 'vector') {
+            // JPEG visibility: JPEG files are stored in Cloudflare bucket but hidden from site display.
+            const HIDE_JPEG = true;
+            if (HIDE_JPEG) {
                 picks = picks.filter(v => !v.isJpegOnly);
-            } else if (state.selectedType === 'jpeg') {
-                picks = picks.filter(v => v.isJpegOnly);
+            } else {
+                if (state.selectedType === 'vector') {
+                    picks = picks.filter(v => !v.isJpegOnly);
+                } else if (state.selectedType === 'jpeg') {
+                    picks = picks.filter(v => v.isJpegOnly);
+                }
             }
             
             picks.sort(() => Math.random() - 0.5);
@@ -431,13 +382,17 @@ function renderOurPicks() {
     if (!track) return;
     track.innerHTML = '';
     
-    // Kesin filtreleme: state.selectedType'a göre
-    // isJpegOnly flag'i bazen API'den gelmeyebilir, bu yüzden v.name veya v.isJpegOnly kontrolü yapalım
+    // JPEG visibility: JPEG files are stored in Cloudflare bucket but hidden from site display.
+    const HIDE_JPEG = true;
     let filteredPicks = [...state.ourPicksVectors];
-    if (state.selectedType === 'vector') {
+    if (HIDE_JPEG) {
         filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
-    } else if (state.selectedType === 'jpeg') {
-        filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
+    } else {
+        if (state.selectedType === 'vector') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === false || (typeof v.isJpegOnly === 'undefined' && !v.name.includes('jpeg')));
+        } else if (state.selectedType === 'jpeg') {
+            filteredPicks = filteredPicks.filter(v => v.isJpegOnly === true || (typeof v.isJpegOnly === 'undefined' && v.name.includes('jpeg')));
+        }
     }
     
     if (filteredPicks.length === 0) return;

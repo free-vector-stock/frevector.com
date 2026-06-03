@@ -5,21 +5,24 @@
  */
 
 const CATEGORIES_LIST = [
+    'Icon',
+    'Logo',
     'Abstract',
     'Animals',
     'The Arts',
     'Backgrounds',
-    'Fashion',
-    'Buildings',
     'Business',
+    'Buildings',
     'Celebrities',
-    'Education',
-    'Food',
     'Drink',
-    'Medical',
+    'Education',
+    'Fashion',
+    'Food',
+    'Font',
     'Holidays',
     'Industrial',
     'Interiors',
+    'Medical',
     'Miscellaneous',
     'Nature',
     'Objects',
@@ -27,14 +30,11 @@ const CATEGORIES_LIST = [
     'People',
     'Religion',
     'Science',
-    'Symbols',
     'Sports',
+    'Symbols',
     'Technology',
     'Transportation',
-    'Vintage',
-    'Logo',
-    'Font',
-    'Icon'
+    'Vintage'
 ];
 
 // Export for Node.js (backend)
