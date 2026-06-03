@@ -29,8 +29,18 @@
     <main class="legal-content">
         <h1>DMCA Policy — frevector.com</h1><p><strong>Last updated:</strong> June 2026</p><p>frevector.com respects intellectual property rights and complies with the Digital Millennium Copyright Act (DMCA). If you believe that any content on our platform infringes your copyright, please follow the procedure below.</p>
         <h2>How to Submit a DMCA Takedown Notice</h2><p>To be valid, your DMCA takedown notice must include all of the following:</p><ol><li>Your electronic or physical signature as the copyright owner or authorized representative.</li><li>A description of the copyrighted work you claim has been infringed.</li><li>The full URL of the content on frevector.com that you believe infringes your copyright.</li><li>Your full name, mailing address, telephone number, and email address.</li><li>A statement that you have a good-faith belief that the use of the material is not authorized by the copyright owner, its agent, or the law.</li><li>A statement, made under penalty of perjury, that the information in your notice is accurate and that you are the copyright owner or authorized to act on behalf of the owner.</li></ol>
-        <h2>Where to Send Your Notice</h2><p>Send your complete DMCA notice by email to: <a href="mailto:dmca@frevector.com" target="_blank">dmca@frevector.com</a></p><p>Valid requests are reviewed and processed within 3-5 business days. Content confirmed to be infringing will be removed promptly.</p>
-        <h2>Counter-Notice</h2><p>If you believe your content was removed in error, you may submit a counter-notice to <a href="mailto:dmca@frevector.com" target="_blank">dmca@frevector.com</a>. Your counter-notice must include the same information listed above.</p>
+        <h2>Where to Send Your Notice</h2><p>Send your complete DMCA notice by email to: <code style="background:#eee;padding:2px 6px;border-radius:4px">dmca@frevector.com</code>
+        <button onclick="copyEmail('dmca@frevector.com', this)" style="margin-left:10px;padding:4px 12px;font-size:12px;cursor:pointer;background:#1a5276;color:#fff;border:none;border-radius:4px">Copy</button>
+        <a href="mailto:dmca@frevector.com" style="margin-left:5px;padding:4px 12px;font-size:12px;background:#27ae60;color:#fff;text-decoration:none;border-radius:4px;display:inline-block">Send Email</a>
+        <script>
+        function copyEmail(email, btn) {
+            navigator.clipboard.writeText(email);
+            const originalText = btn.innerText;
+            btn.innerText = 'Copied!';
+            setTimeout(() => btn.innerText = originalText, 2000);
+        }
+        </script></p><p>Valid requests are reviewed and processed within 3-5 business days. Content confirmed to be infringing will be removed promptly.</p>
+        <h2>Counter-Notice</h2><p>If you believe your content was removed in error, you may submit a counter-notice to <code style="background:#eee;padding:2px 6px;border-radius:4px">dmca@frevector.com</code>. Your counter-notice must include the same information listed above.</p>
         <h2>Disclaimer</h2><p>frevector.com is not directly responsible for content uploaded by users or linked from third parties. However, we take all copyright infringement reports seriously and act on valid notices as quickly as possible.</p>
     </main>
     <footer class="footer">
