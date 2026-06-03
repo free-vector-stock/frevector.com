@@ -67,7 +67,7 @@ window.addEventListener("scroll", () => {
         </aside>
 
         <main class="content">
-            <h1 id="categoryTitle" class="category-title">Vector</h1>
+            <h1 id="categoryTitle" class="category-title">Free Vector Graphics — SVG &amp; EPS Downloads</h1>
             <div id="vectorsGrid" class="vectors-grid"></div>
             
             <!-- Welcome metni görsel grid'in altına taşındı -->
@@ -76,6 +76,12 @@ window.addEventListener("scroll", () => {
               <p style="font-size:14px;line-height:1.7;margin-bottom:10px">Welcome to frevector.com — your go-to free resource for high-quality vector graphics, SVG files, and EPS illustrations. Whether you are a graphic designer, web developer, marketing professional, or student, our constantly growing library of free vectors is ready for you to download and use in both personal and commercial projects.</p>
               <p style="font-size:14px;line-height:1.7;margin-bottom:10px">Browse thousands of fully scalable vector assets organized by category. From flat icons and geometric patterns to detailed illustrations and decorative backgrounds — frevector.com has the design resources you need. Every file is available in SVG and EPS formats, ensuring perfect quality at any size. No registration, no subscription, no hidden fees. Just search, preview, and download instantly.</p>
               <p style="font-size:14px;line-height:1.7">Our library is updated regularly with fresh content across all categories. All files are free to use under a personal and commercial license. Looking for something specific? Use the search bar or browse by category to find exactly what your project needs.</p>
+              
+              <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                Browse <strong>10,000+ free vector files</strong> across
+                <strong>25+ categories</strong> — all free for personal
+                and commercial use. No registration required.
+              </p>
               
               <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:20px;margin-top:24px">
                 <div>
@@ -110,6 +116,7 @@ window.addEventListener("scroll", () => {
                 <span id="pageNumber" class="page-num">1</span>
                 <button id="nextBtn" class="pag-btn">Next &#8250;</button>
                 <span class="page-total" id="pageTotal">/ 177</span>
+                <span style="font-size: 12px; color: var(--gray-text); margin-left: 10px;">(10,540 free vectors available)</span>
             </div>
         </div>
 
@@ -122,12 +129,27 @@ window.addEventListener("scroll", () => {
                 </div>
             </div>
             <div class="our-picks-track-wrap">
-                <div class="our-picks-track" id="ourPicksTrack"></div>
+                <div class="our-picks-track" id="ourPicksTrack">
+                    <!-- Statik HTML Listesi (SEO ve JS kapalıyken görünüm için) -->
+                    <ul style="display:none;">
+                        <li><a href="/details/abstract-00000001">Abstract Background Vector</a></li>
+                        <li><a href="/details/business-00000001">Business Icons Collection</a></li>
+                        <li><a href="/details/technology-00000001">Technology Icon Set</a></li>
+                        <li><a href="/details/nature-00000001">Nature Illustration Pack</a></li>
+                        <li><a href="/details/social-media-00000001">Social Media Icons SVG</a></li>
+                        <li><a href="/details/geometric-00000001">Geometric Pattern Vector</a></li>
+                    </ul>
+                </div>
             </div>
         </section>
 
     </div>
     <footer class="footer">
+        <div style="width:100%; text-align:center; margin-bottom:10px;">
+            <p style="font-size: 12px; color: #999; margin: 0;">
+                frevector.com provides free SVG and EPS vector graphics for personal and commercial use. All files are free to download without registration.
+            </p>
+        </div>
         <span class="copyright">2026 &copy; frevector.com</span>
         <nav class="footer-nav">
             <a href="/about" class="footer-link">About Us</a>
