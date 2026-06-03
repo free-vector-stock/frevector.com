@@ -363,7 +363,7 @@ function renderVectors() {
 
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" fetchpriority="${fetchPriority}" decoding="async">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" fetchpriority="${fetchPriority}" decoding="async" width="300" height="300">
                 ${typeLabel}
             </div>
             <div class="vc-info">
@@ -409,7 +409,7 @@ function renderOurPicks() {
 
         card.innerHTML = `
             <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async" fetchpriority="${index < 5 ? 'high' : 'auto'}">
+                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async" fetchpriority="${index < 5 ? 'high' : 'auto'}" width="300" height="300">
                 ${typeLabel}
             </div>
         `;
@@ -606,16 +606,16 @@ function openDetailPanel(v, cardEl) {
     
     // REVİZYON: Tip ve Kategori Fallback Mekanizması
     const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
-    const displayCategory = v.category || 'Belirtilmemiş';
+    const displayCategory = v.category || 'Unspecified';
     const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
 
     panel.innerHTML = `
         <div class="detail-inner">
             <div class="detail-left">
-                <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}">
+                <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" width="600" height="600" loading="eager">
                 <table class="detail-table">
-                    <tr><td class="dt-label">TIP</td><td class="dt-value">${displayType}</td></tr>
-                    <tr><td class="dt-label">KATEGORI</td><td class="dt-value">${escHtml(displayCategory)}</td></tr>
+                    <tr><td class="dt-label">TYPE</td><td class="dt-value">${displayType}</td></tr>
+                    <tr><td class="dt-label">CATEGORY</td><td class="dt-value">${escHtml(displayCategory)}</td></tr>
                     <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
                     <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
                     <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
@@ -628,6 +628,7 @@ function openDetailPanel(v, cardEl) {
                 <div class="detail-keywords">
                     ${keywords.map(kw => `<span class="kw-tag">${escHtml(kw)}</span>`).join('')}
                 </div>
+                ${buildVectorSeoText(v)}
                 <div style="margin-top: 20px; display: flex; gap: 12px;">
                     <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
 
@@ -674,6 +675,26 @@ function closeDetailPanel() {
     state.openedCardEl = null;
 }
 
+function buildVectorSeoText(v) {
+    const title = escHtml(v.title || 'Free Vector Graphic');
+    const category = escHtml(v.category || 'vector graphics');
+    const style = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 3).join(', ')) : 'clean and editable';
+    const useCases = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 8).join(', ')) : 'websites, social media posts, presentations, print advertisements, packaging, flyers, app icons, and infographics';
+    return `<section class="detail-seo-text" style="margin-top:24px;font-size:14px;line-height:1.75;color:#333">
+        <h3>${title} — Free SVG & EPS Download</h3>
+        <p>${title} is a high-quality free vector graphic available for download in SVG and EPS formats. This file is part of our ${category} collection and is suitable for a wide range of design projects, from digital media to print materials.</p>
+        <h3>About This File</h3>
+        <p>This vector has been prepared in a ${style} style, making it versatile and easy to customize in vector editing applications such as Adobe Illustrator, Inkscape, CorelDRAW, or Affinity Designer. The scalable format ensures that the graphic looks sharp and professional at any size, whether you need a small icon for a mobile app or a large illustration for a poster or banner.</p>
+        <p>The file is fully editable. You can change colors, resize elements, add text, or combine it with other graphics to create a unique composition. No quality loss occurs at any resolution because the artwork is delivered in a true vector format.</p>
+        <h3>How to Use This Vector</h3>
+        <p>This graphic is ideal for ${useCases}. Simply click the download button to get the file in your preferred format. SVG files can be opened directly in web browsers and most design tools. EPS files are compatible with professional design software and print workflows.</p>
+        <h3>License Information</h3>
+        <p>This file is free for both personal and commercial use. You may use it in client projects, commercial products, and publications without paying any fee or providing attribution. Redistribution or reselling of the file as a standalone asset is not permitted.</p>
+        <h3>Related Vectors</h3>
+        <p>Browse more files in our ${category} category to find additional graphics that complement this design. frevector.com offers thousands of free vectors across dozens of categories, all available for instant download. If you enjoy using frevector.com, consider bookmarking our site and checking back regularly because we add new vectors every week.</p>
+    </section>`;
+}
+
 function showDownloadPage(v) {
     const dp = document.getElementById('downloadPage');
     if (!dp) return;
@@ -684,7 +705,7 @@ function showDownloadPage(v) {
     
     // REVİZYON: Download sayfasında da Tip ve Kategori gösterimi
     const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
-    const displayCategory = v.category || 'Belirtilmemiş';
+    const displayCategory = v.category || 'Unspecified';
     
     document.getElementById('dpCategory').textContent = displayCategory;
     document.getElementById('dpFileSize').textContent = v.fileSize || 'N/A';

@@ -88,14 +88,16 @@ window.addEventListener("scroll", () => {
         </div>
 
         <footer class="footer">
-            <span class="copyright">2026 &copy; frevector.com</span>
-            <nav class="footer-nav">
-                <a href="#" class="footer-link modal-trigger" data-modal="about">About Us</a>
-                <a href="/privacy" class="footer-link">Privacy Policy</a>
-                <a href="#" class="footer-link modal-trigger" data-modal="terms">Terms of Service</a>
-                <a href="#" class="footer-link modal-trigger" data-modal="contact">Contact</a>
-            </nav>
-        </footer>
+                    <span class="copyright">2026 &copy; frevector.com</span>
+                    <nav class="footer-nav">
+                        <a href="/about" class="footer-link">About Us</a>
+                        <a href="/privacy" class="footer-link">Privacy Policy</a>
+                        <a href="/terms" class="footer-link">Terms of Service</a>
+                        <a href="/contact" class="footer-link">Contact</a>
+                        <a href="/dmca" class="footer-link">DMCA</a>
+                        <a href="/blog" class="footer-link">Blog</a>
+                    </nav>
+                </footer>
     </div>
 
     <div id="downloadPage" class="download-page" style="display:none;">
@@ -138,5 +140,20 @@ window.addEventListener("scroll", () => {
     <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
 
     <script src="/main.js?v=2026031407"></script>
+
+<div id="cookie-banner" style="position:fixed;bottom:0;left:0;right:0;background:#1a5276;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;z-index:9999;font-family:Arial,sans-serif;gap:16px;box-shadow:0 -2px 10px rgba(0,0,0,0.2)">
+  <p style="margin:0;font-size:14px;line-height:1.5">This website uses cookies to improve your experience and to serve Google AdSense advertisements. By continuing to use this site, you accept our use of cookies. <a href="/privacy" style="color:#aed6f1;text-decoration:underline">Privacy Policy</a></p>
+  <button onclick="acceptCookies()" style="background:#27ae60;color:#fff;border:none;padding:10px 24px;cursor:pointer;border-radius:4px;font-size:14px;white-space:nowrap;font-family:Arial,sans-serif">Accept</button>
+</div>
+<script>
+function acceptCookies(){
+  localStorage.setItem('cookieConsent','accepted');
+  document.getElementById('cookie-banner').style.display='none';
+}
+if(localStorage.getItem('cookieConsent')==='accepted'){
+  document.getElementById('cookie-banner').style.display='none';
+}
+</script>
+
 </body>
 </html>

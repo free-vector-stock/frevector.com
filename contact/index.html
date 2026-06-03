@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Read the privacy policy of frevector.com. Learn how we collect, use, and protect your data in compliance with GDPR.">
+    <meta name="description" content="Contact frevector.com for general inquiries, partnership requests, or copyright issues. We respond within 1-2 business days.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
-    <title>Privacy Policy - frevector.com</title>
+    <title>Contact - frevector.com</title>
     <link rel="stylesheet" href="/style.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <style>
@@ -27,18 +27,8 @@
 <body>
     <div class="top-banner"><a href="/" class="banner-logo-link"><img src="/logo.svg" alt="Frevector" class="banner-logo" width="220" height="60"></a></div>
     <main class="legal-content">
-        <h1>Privacy Policy — frevector.com</h1>
-        <p><strong>Last updated:</strong> June 2026</p>
-        <p>frevector.com is committed to protecting your privacy. This Privacy Policy explains what data may be collected when you visit our site and how it is used.</p>
-        <h2>1. Data We Collect</h2><p>When you visit frevector.com, the following anonymous data may be collected automatically:</p><ul><li>Cookies</li><li>Browser and device information</li><li>IP address for anonymous analytical purposes only</li><li>Page visit and interaction data</li><li>Analytical usage information</li></ul>
-        <h2>2. How We Use Your Data</h2><p>The collected data may be used for improving site performance, enhancing user experience, detecting and fixing technical issues, ensuring site security, and supporting content development.</p>
-        <h2>3. Personal Data</h2><p>Personal data such as your name or email address is only processed when you voluntarily provide it. frevector.com does not sell user data to third parties or share it for commercial purposes.</p>
-        <h2>4. Google AdSense and Advertising Cookies</h2><p>This website uses Google AdSense to display advertisements. Google and third-party ad providers may use cookies to serve ads based on your interests and previous visits to this and other websites. These cookies contain anonymous information about your browsing behavior.</p><p>To opt out of personalized advertising by Google, visit <a href="https://www.google.com/settings/ads">Google Ads Settings</a>. To opt out of third-party advertising cookies, visit <a href="https://www.aboutads.info">aboutads.info</a>.</p>
-        <h2>5. Cookie Policy</h2><p>Cookies are used on this site to support site functions, remember user preferences, and measure performance. You may limit or disable cookies through your browser settings. When you first visit our site, you will be asked to accept the use of cookies.</p>
-        <h2>6. Data Retention</h2><p>Collected data is retained only for as long as necessary to fulfill the purposes outlined in this policy or to comply with legal obligations.</p>
-        <h2>7. Data Security</h2><p>We take necessary technical and administrative measures to protect your data. However, no data transmission over the internet can be guaranteed to be 100% secure.</p>
-        <h2>8. Your Rights</h2><p>Under GDPR, you have the right to access, correct, delete, or object to the processing of your personal data. To exercise these rights, please contact us.</p>
-        <p><strong>Contact:</strong> <a href="mailto:info@frevector.com">info@frevector.com</a></p>
+        <h1>Contact — frevector.com</h1><p>Have a question, suggestion, or content removal request? Fill out the form below or send us a direct email.</p><p><strong>General inquiries:</strong> <a href="mailto:info@frevector.com">info@frevector.com</a><br><strong>Copyright / DMCA requests:</strong> <a href="mailto:dmca@frevector.com">dmca@frevector.com</a></p><p>We typically respond within 1-2 business days.</p>
+        <form id="contactForm" action="https://api.web3forms.com/submit" method="POST" style="max-width:600px;margin:32px auto;font-family:Arial,sans-serif"><input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE"><input type="hidden" name="subject" value="New message from frevector.com contact form"><input type="hidden" name="redirect" value="https://frevector.com/contact?success=true"><div style="margin-bottom:16px"><label style="display:block;margin-bottom:6px;font-size:14px;color:#2c3e50">Your Name *</label><input type="text" name="name" required style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:4px;font-size:14px;box-sizing:border-box"></div><div style="margin-bottom:16px"><label style="display:block;margin-bottom:6px;font-size:14px;color:#2c3e50">Email Address *</label><input type="email" name="email" required style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:4px;font-size:14px;box-sizing:border-box"></div><div style="margin-bottom:16px"><label style="display:block;margin-bottom:6px;font-size:14px;color:#2c3e50">Message *</label><textarea name="message" rows="6" required style="width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:4px;font-size:14px;box-sizing:border-box;resize:vertical"></textarea></div><button type="submit" style="background:#1a5276;color:#fff;border:none;padding:12px 32px;font-size:15px;border-radius:4px;cursor:pointer;font-family:Arial,sans-serif">Send Message</button></form>
     </main>
     <footer class="footer">
         <span class="copyright">2026 &copy; frevector.com</span>
@@ -64,6 +54,16 @@ function acceptCookies(){
 if(localStorage.getItem('cookieConsent')==='accepted'){
   document.getElementById('cookie-banner').style.display='none';
 }
+document.getElementById('contactForm').addEventListener('submit', function(event){
+  var key = this.querySelector('input[name="access_key"]').value;
+  if(key === 'YOUR_ACCESS_KEY_HERE'){
+    event.preventDefault();
+    var name = encodeURIComponent(this.querySelector('input[name="name"]').value);
+    var email = encodeURIComponent(this.querySelector('input[name="email"]').value);
+    var message = encodeURIComponent(this.querySelector('textarea[name="message"]').value);
+    window.location.href = 'mailto:info@frevector.com?subject=Contact%20form%20message%20from%20' + name + '&body=Name:%20' + name + '%0AEmail:%20' + email + '%0A%0A' + message;
+  }
+});
 </script>
 
 </body>
