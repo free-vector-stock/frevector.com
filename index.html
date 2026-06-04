@@ -144,21 +144,26 @@ window.addEventListener("scroll", () => {
         </section>
 
     </div>
-    <footer class="footer">
-        <div style="width:100%; text-align:center; margin-bottom:10px;">
-            <p style="font-size: 12px; color: #999; margin: 0;">
+    <footer class="footer" style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background: #000; z-index: 2000;">
+        <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+            <span class="copyright" style="font-size: 13px; color: #fff; white-space: nowrap;">2026 &copy; frevector.com</span>
+            <nav class="footer-nav" style="display: flex; gap: 15px;">
+                <a href="/about" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">About Us</a>
+                <a href="/privacy" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">Privacy Policy</a>
+                <a href="/terms" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">Terms of Service</a>
+                <a href="/contact" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">Contact</a>
+                <a href="/dmca" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">DMCA</a>
+                <a href="/blog" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">Blog</a>
+            </nav>
+        </div>
+        
+        <div style="flex: 1; text-align: center;">
+            <p style="font-size: 11px; color: #999; margin: 0; line-height: 1.2;">
                 frevector.com provides free SVG and EPS vector graphics for personal and commercial use. All files are free to download without registration.
             </p>
         </div>
-        <span class="copyright">2026 &copy; frevector.com</span>
-        <nav class="footer-nav">
-            <a href="/about" class="footer-link">About Us</a>
-            <a href="/privacy" class="footer-link">Privacy Policy</a>
-            <a href="/terms" class="footer-link">Terms of Service</a>
-            <a href="/contact" class="footer-link">Contact</a>
-            <a href="/dmca" class="footer-link">DMCA</a>
-            <a href="/blog" class="footer-link">Blog</a>
-        </nav>
+        
+        <div style="flex: 1;"></div> <!-- Sağ tarafı boş bırakmak için dengeleyici -->
     </footer>
 
     <div id="downloadPage" class="download-page" style="display:none;">
