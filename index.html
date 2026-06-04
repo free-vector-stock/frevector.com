@@ -111,12 +111,14 @@ window.addEventListener("scroll", () => {
     <!-- REVİZYON 1 & 2: Our Picks ve Sayfalama - Footer üzerine sabitlendi -->
     <div class="bottom-fixed-container">
         <div class="pagination-wrapper">
-            <div class="pagination-nav">
-                <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" class="page-num">1</span>
-                <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span class="page-total" id="pageTotal">/ 177</span>
-                <span style="font-size: 12px; color: var(--gray-text); margin-left: 10px;">(10,540 free vectors available)</span>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <div id="totalVectorCount" style="font-size: 13px; color: var(--gray-text); font-weight: 600;">(10,540 free vectors available)</div>
+                <div class="pagination-nav">
+                    <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
+                    <span id="pageNumber" class="page-num">1</span>
+                    <button id="nextBtn" class="pag-btn">Next &#8250;</button>
+                    <span class="page-total" id="pageTotal">/ 177</span>
+                </div>
             </div>
         </div>
 

@@ -310,16 +310,12 @@ async function fetchOurPicksRandomly() {
             url.searchParams.set('type', 'jpeg');
         }
         
-        // Eğer kategori veya tip seçiliyse, rastgele bir sayfa seçelim (toplam sayfa sayısına göre)
-        // Ancak fetchVectors henüz tamamlanmamışsa state.totalPages güncel olmayabilir.
-        // Bu yüzden basitçe ilk sayfadan 100 tane çekip içinden filtrelemek daha güvenli olabilir.
-        
         const res = await fetch(url);
         if (res.ok) {
             const data = await res.json();
             let picks = data.vectors || [];
             
-            // JPEG visibility: JPEG files are stored in Cloudflare bucket but hidden from site display.
+            // JPEG visibility
             const HIDE_JPEG = true;
             if (HIDE_JPEG) {
                 picks = picks.filter(v => !v.isJpegOnly);
@@ -328,6 +324,24 @@ async function fetchOurPicksRandomly() {
                     picks = picks.filter(v => !v.isJpegOnly);
                 } else if (state.selectedType === 'jpeg') {
                     picks = picks.filter(v => v.isJpegOnly);
+                }
+            }
+
+            // GÖREV 1: Fallback Mekanizması
+            // Eğer seçili kategoride yeterli görsel yoksa (örneğin 20'den az), diğer kategorilerden popüler görselleri ekle
+            if (picks.length < 20) {
+                const fallbackUrl = new URL('/api/vectors', window.location.origin);
+                fallbackUrl.searchParams.set('limit', '50'); // Genelden 50 tane çekelim
+                if (HIDE_JPEG) fallbackUrl.searchParams.set('type', 'vector');
+                
+                const fallbackRes = await fetch(fallbackUrl);
+                if (fallbackRes.ok) {
+                    const fallbackData = await fallbackRes.json();
+                    const fallbackVectors = (fallbackData.vectors || []).filter(fv => 
+                        !picks.find(pv => pv.name === fv.name) // Mevcutları tekrar ekleme
+                    );
+                    // Eksik olanı genelden tamamla (toplam 40'a kadar veya bulabildiğin kadar)
+                    picks = [...picks, ...fallbackVectors].slice(0, 40);
                 }
             }
             
@@ -842,6 +856,12 @@ function updatePagination() {
     if (pageNumber) pageNumber.textContent = state.currentPage;
     const pageTotal = document.getElementById('pageTotal');
     if (pageTotal) pageTotal.textContent = `/ ${state.totalPages}`;
+    
+    // GÖREV 2: Toplam vektör sayısını güncelle
+    const totalCountEl = document.getElementById('totalVectorCount');
+    if (totalCountEl && state.total > 0) {
+        totalCountEl.textContent = `(${state.total.toLocaleString()} free vectors available)`;
+    }
 }
 
 function showLoader(show) {
