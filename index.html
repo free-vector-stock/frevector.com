@@ -3,39 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Download free vector graphics, SVG files and EPS illustrations for personal and commercial use. Browse thousands of high-quality vectors at frevector.com — no registration required.">
+    <meta name="description" content="Download free SVG and EPS vector graphics. High-quality illustrations, icons, and backgrounds for personal and commercial use. No registration required.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
-    <title>Frevector - Free Vector, SVG & EPS Downloads</title>
+    <title>frevector.com - Free SVG & EPS Vector Graphics</title>
     <link rel="stylesheet" href="/style.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
-   
-    <!-- AdSense Snippet -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2381319652258578"
-     crossorigin="anonymous"></script>
-
-    <style>
-        .dp-countdown-box { text-align: center; margin-top: 20px; }
-        .dp-countdown-num { font-size: 48px; font-weight: bold; margin: 10px 0; }
-    </style>
 </head>
-<!-- ULTRA PERF PRELOAD -->
-<link rel="preconnect" href="https://frevector.com" crossorigin>
-<link rel="dns-prefetch" href="https://frevector.com">
-
-<script>
-let lastScroll = 0;
-window.addEventListener("scroll", () => {
-  const now = performance.now();
-  if (now - lastScroll < 16) return;
-  lastScroll = now;
-}, { passive: true });
-</script>
-    <body>
+<body>
     <div class="top-banner">
         <a href="/" class="banner-logo-link">
             <img src="/logo.svg" alt="Frevector" class="banner-logo" width="220" height="60">
@@ -45,108 +21,72 @@ window.addEventListener("scroll", () => {
     <header class="header">
         <div class="header-center">
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search vectors...">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search for free vectors (e.g. nature, icons, patterns)..." autocomplete="off">
                 <button class="search-icon-btn" id="searchBtn">
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="8" cy="8" r="6" stroke="#fff" stroke-width="2"/><path d="M12.5 12.5L18 18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
             </div>
         </div>
-        <div class="header-right">
-            <select id="sortFilter" class="sort-filter">
-                <option value="">Upload date: Any time</option>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-            </select>
-        </div>
+        <select class="sort-filter" id="sortFilter">
+            <option value="latest">Latest First</option>
+            <option value="popular">Most Popular</option>
+            <option value="oldest">Oldest First</option>
+        </select>
     </header>
 
     <div class="main-container">
         <aside class="sidebar">
             <div class="sidebar-title">CATEGORIES</div>
-            <nav class="categories-list" id="categoriesList"></nav>
+            <nav class="categories-list" id="categoriesList">
+                <!-- Kategoriler JS ile buraya gelecek -->
+            </nav>
         </aside>
 
-        <main class="content">
-            <h1 id="categoryTitle" class="category-title">Free Vector Graphics — SVG &amp; EPS Downloads</h1>
-            <div id="vectorsGrid" class="vectors-grid"></div>
-            
-            <!-- Welcome metni görsel grid'in altına taşındı -->
-            <section class="home-seo-content" style="padding:24px 0 32px;max-width:100%;margin:24px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee">
-              <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">Free Vector Graphics for Everyone</h2>
-              <p style="font-size:14px;line-height:1.7;margin-bottom:10px">Welcome to frevector.com — your go-to free resource for high-quality vector graphics, SVG files, and EPS illustrations. Whether you are a graphic designer, web developer, marketing professional, or student, our constantly growing library of free vectors is ready for you to download and use in both personal and commercial projects.</p>
-              <p style="font-size:14px;line-height:1.7;margin-bottom:10px">Browse thousands of fully scalable vector assets organized by category. From flat icons and geometric patterns to detailed illustrations and decorative backgrounds — frevector.com has the design resources you need. Every file is available in SVG and EPS formats, ensuring perfect quality at any size. No registration, no subscription, no hidden fees. Just search, preview, and download instantly.</p>
-              <p style="font-size:14px;line-height:1.7">Our library is updated regularly with fresh content across all categories. All files are free to use under a personal and commercial license. Looking for something specific? Use the search bar or browse by category to find exactly what your project needs.</p>
-              
-              <p style="margin-top: 10px; font-size: 14px; color: #666;">
-                Browse <strong>10,000+ free vector files</strong> across
-                <strong>25+ categories</strong> — all free for personal
-                and commercial use. No registration required.
-              </p>
-              
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:20px;margin-top:24px">
-                <div>
-                  <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a5276">Popular Categories</h3>
-                  <ul style="font-size:13px;line-height:1.6;margin:0;padding-left:18px">
-                    <li>Icons & UI Elements</li>
-                    <li>Patterns & Textures</li>
-                    <li>Backgrounds & Wallpapers</li>
-                    <li>Logos & Symbols</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a5276">Why Choose Us?</h3>
-                  <ul style="font-size:13px;line-height:1.6;margin:0;padding-left:18px">
-                    <li>100% Free Downloads</li>
-                    <li>Personal & Commercial Use</li>
-                    <li>High-Quality SVG & EPS</li>
-                    <li>No Registration Required</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
+        <main class="content" id="mainContent">
+            <h1 class="category-title" id="categoryTitle">All Vectors</h1>
+            <div class="vectors-grid" id="vectorsGrid">
+                <!-- Vektörler JS ile buraya gelecek -->
+            </div>
         </main>
     </div>
 
-
-    <!-- REVİZYON 1 & 2: Our Picks ve Sayfalama - Footer üzerine sabitlendi -->
     <div class="bottom-fixed-container">
         <div class="pagination-wrapper">
             <div class="pagination-nav">
-                <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
-                <span id="pageNumber" class="page-num">1</span>
-                <button id="nextBtn" class="pag-btn">Next &#8250;</button>
-                <span class="page-total" id="pageTotal">/ 177</span>
-                <span style="font-size: 12px; color: var(--gray-text); margin-left: 10px;">(10,540 free vectors available)</span>
+                <button class="pag-btn" id="prevBtn" disabled>&lsaquo; Previous</button>
+                <span class="page-num" id="currentPage">1</span>
+                <button class="pag-btn" id="nextBtn">Next &rsaquo;</button>
+                <span class="page-total" id="totalPages">/ 1</span>
             </div>
         </div>
 
-        <section class="our-picks-section" id="ourPicksSection">
+        <section class="our-picks-section">
             <div class="our-picks-header">
-                <div class="our-picks-label">Our selections for you</div>
-                <div class="our-picks-nav">
-                    <button class="our-picks-arrow" id="ourPicksPrev" title="Previous">&#8249;</button>
-                    <button class="our-picks-arrow" id="ourPicksNext" title="Next">&#8250;</button>
-                </div>
+                <span class="our-picks-label">Our selections for you</span>
+            </div>
+            <div class="our-picks-nav">
+                <button class="our-picks-arrow" id="picksPrev">&lsaquo;</button>
+                <button class="our-picks-arrow" id="picksNext">&rsaquo;</button>
             </div>
             <div class="our-picks-track-wrap">
-                <div class="our-picks-track" id="ourPicksTrack">
-                    <!-- Statik HTML Listesi (SEO ve JS kapalıyken görünüm için) -->
-                    <ul style="display:none;">
-                        <li><a href="/details/abstract-00000001">Abstract Background Vector</a></li>
-                        <li><a href="/details/business-00000001">Business Icons Collection</a></li>
-                        <li><a href="/details/technology-00000001">Technology Icon Set</a></li>
-                        <li><a href="/details/nature-00000001">Nature Illustration Pack</a></li>
-                        <li><a href="/details/social-media-00000001">Social Media Icons SVG</a></li>
-                        <li><a href="/details/geometric-00000001">Geometric Pattern Vector</a></li>
-                    </ul>
+                <div class="our-picks-track" id="picksTrack">
+                    <!-- Our Picks JS ile buraya gelecek -->
                 </div>
             </div>
         </section>
 
-    </div>
-    <footer class="footer" style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background: #000; z-index: 2000;">
-        <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+        <footer class="footer" style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background: #000; z-index: 2000;">
+        <div style="flex: 1; display: flex; justify-content: flex-start;">
             <span class="copyright" style="font-size: 13px; color: #fff; white-space: nowrap;">2026 &copy; frevector.com</span>
+        </div>
+        
+        <div style="flex: 2; text-align: center;">
+            <p style="font-size: 11px; color: #999; margin: 0; line-height: 1.2;">
+                frevector.com provides free SVG and EPS vector graphics for personal and commercial use. All files are free to download without registration.
+            </p>
+        </div>
+        
+        <div style="flex: 1; display: flex; justify-content: flex-end;">
             <nav class="footer-nav" style="display: flex; gap: 15px;">
                 <a href="/about" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">About Us</a>
                 <a href="/privacy" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">Privacy Policy</a>
@@ -156,70 +96,65 @@ window.addEventListener("scroll", () => {
                 <a href="/blog" class="footer-link" style="color: #fff; text-decoration: none; font-size: 13px; white-space: nowrap;">Blog</a>
             </nav>
         </div>
-        
-        <div style="flex: 1; text-align: center;">
-            <p style="font-size: 11px; color: #999; margin: 0; line-height: 1.2;">
-                frevector.com provides free SVG and EPS vector graphics for personal and commercial use. All files are free to download without registration.
-            </p>
-        </div>
-        
-        <div style="flex: 1;"></div> <!-- Sağ tarafı boş bırakmak için dengeleyici -->
     </footer>
+    </div>
 
     <div id="downloadPage" class="download-page" style="display:none;">
         <div class="download-page-header">
-            <span class="dp-site">frevector.com</span>
-            <button id="dpClose" class="dp-close">&#10005;</button>
+            <button class="back-btn" id="backToGallery">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Back to Gallery
+            </button>
+            <div class="download-logo">frevector.com</div>
         </div>
-        <div class="download-page-body">
-            <div class="dp-left">
-                <img id="dpImage" src="" alt="" class="dp-image">
-            </div>
-            <div class="dp-right">
-                <h2 id="dpTitle" class="dp-title"></h2>
-                <p id="dpDescription" class="dp-desc"></p>
-                <div id="dpKeywords" class="detail-keywords"></div>
-                <table class="detail-table">
-                    <tr><td class="dt-label">FILE FORMAT</td><td id="dpFileFormat" class="dt-value">JPEG</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td id="dpCategory" class="dt-value">-</td></tr>
-                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
-                    <tr><td class="dt-label">FILE SIZE</td><td id="dpFileSize" class="dt-value">-</td></tr>
-                </table>
-                <button id="dpDownloadBtn" class="download-btn">DOWNLOAD</button>
-                <div class="dp-countdown-box" id="dpCountdownBox" style="display:none;">
-                    <p>Your download will start in</p>
-                    <div id="dpCountdown" class="dp-countdown-num">4</div>
-                    <p>High-speed secure download from frevector.com</p>
+        
+        <div class="download-content">
+            <div class="download-main">
+                <div class="download-preview-container">
+                    <img id="downloadPreview" src="" alt="Vector Preview">
+                </div>
+                
+                <div class="download-info-panel">
+                    <h2 id="downloadTitle" class="download-title"></h2>
+                    <div class="download-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Format:</span>
+                            <span id="downloadFormat" class="meta-value">SVG / EPS</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">License:</span>
+                            <span class="meta-value">Free for Personal & Commercial use</span>
+                        </div>
+                    </div>
+                    
+                    <div class="download-actions">
+                        <button id="mainDownloadBtn" class="main-download-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download Free Vector
+                        </button>
+                        <p class="download-tip">No registration or credit card required. Scalable vector file.</p>
+                    </div>
+
+                    <div class="download-description-box">
+                        <h3>Description</h3>
+                        <p id="downloadDesc"></p>
+                    </div>
+
+                    <div class="download-keywords-box">
+                        <h3>Keywords</h3>
+                        <div id="downloadKeywords" class="detail-keywords"></div>
+                    </div>
                 </div>
             </div>
+
+            <section class="related-vectors-section">
+                <h3 class="related-title">Related Vectors</h3>
+                <div id="relatedGrid" class="vectors-grid"></div>
+            </section>
         </div>
     </div>
 
-    <div id="infoModal" class="info-modal" style="display:none;">
-        <div class="info-modal-box">
-            <button class="info-modal-close" id="infoModalClose">&#10005;</button>
-            <div id="infoModalBody" class="info-modal-body"></div>
-        </div>
-    </div>
-
-    <div id="loader" class="loader-overlay" style="display:none;"><div class="spinner"></div></div>
-
-    <script src="/main.js?v=2026031407"></script>
-
-<div id="cookie-banner" style="position:fixed;bottom:0;left:0;right:0;background:#1a5276;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;z-index:9999;font-family:Arial,sans-serif;gap:16px;box-shadow:0 -2px 10px rgba(0,0,0,0.2)">
-  <p style="margin:0;font-size:14px;line-height:1.5">This website uses cookies to improve your experience and to serve Google AdSense advertisements. By continuing to use this site, you accept our use of cookies. <a href="/privacy" style="color:#aed6f1;text-decoration:underline">Privacy Policy</a></p>
-  <button onclick="acceptCookies()" style="background:#27ae60;color:#fff;border:none;padding:10px 24px;cursor:pointer;border-radius:4px;font-size:14px;white-space:nowrap;font-family:Arial,sans-serif">Accept</button>
-</div>
-<script>
-function acceptCookies(){
-  localStorage.setItem('cookieConsent','accepted');
-  document.getElementById('cookie-banner').style.display='none';
-}
-if(localStorage.getItem('cookieConsent')==='accepted'){
-  document.getElementById('cookie-banner').style.display='none';
-}
-</script>
-
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <script src="/script.js"></script>
 </body>
 </html>
