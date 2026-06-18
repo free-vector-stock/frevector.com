@@ -322,11 +322,11 @@ function renderManageTable(type = 'vector') {
     tbody.innerHTML = '';
     
     if (pageItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">No ${type === 'jpeg' ? 'JPEG' : 'vector'} files found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">No ${type === 'jpeg' ? 'Jpeg' : 'vector'} files found.</td></tr>`;
     } else {
         pageItems.forEach(v => {
             const tr = document.createElement('tr');
-            const typeLabel = v.contentType === 'jpeg' ? '<span class="badge badge-blue">JPEG</span>' : '<span class="badge badge-green">VECTOR</span>';
+            const typeLabel = v.contentType === 'jpeg' ? '<span class="badge badge-blue">Jpeg</span>' : '<span class="badge badge-green">Vector</span>';
             // REVİZYON 2: Thumbnail URL'sini category/id/id-thumb.jpg yapısına göre oluştur
             const cat = v.category || 'Miscellaneous';
             const thumbKey = encodeURIComponent(`${cat}/${v.name}/${v.name}.jpg`);
@@ -486,7 +486,7 @@ function handleBulkAnalyze(type = 'vector') {
     const status = document.getElementById(statusId);
     if (status) {
         status.className = 'status-box info';
-        status.textContent = `Found ${bulkFiles.length} valid ${type === 'jpeg' ? 'JPEG' : 'vector'} set(s). Ready to upload.`;
+        status.textContent = `Found ${bulkFiles.length} valid ${type === 'jpeg' ? 'Jpeg' : 'vector'} set(s). Ready to upload.`;
     }
     const btnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
     const btn = document.getElementById(btnId);
