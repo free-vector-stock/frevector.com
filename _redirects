@@ -6,3 +6,6 @@
 /contact /contact/ 301
 /dmca /dmca/ 301
 /blog /blog/ 301
+
+/admin /admin.html 200
+/admin/ /admin.html 200

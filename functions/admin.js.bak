@@ -1,7 +1,6 @@
 /**
  * Frevector Admin Panel - Frontend Logic
  * Updated for JPEG Support v2026031302
- * UPDATED: Added Category Browser with Image Preview
  */
 
 const ADMIN_KEY = "vector2026";
@@ -24,10 +23,7 @@ const state = {
     filterCat: '',
     filterCatJpeg: '',
     selectedVectors: new Set(),
-    selectedJpegs: new Set(),
-    categories: [],
-    selectedCategory: null,
-    categoryImages: []
+    selectedJpegs: new Set()
 };
 
 let bulkFiles = [];
@@ -194,7 +190,6 @@ function showApp() {
     loadDashboard();
     loadManageVectors();
     loadManageJpegs();
-    loadCategoryBrowser();
 }
 
 function switchSection(sectionId) {
@@ -295,84 +290,6 @@ async function loadManageJpegs() {
         state.filteredJpegs = state.vectors.filter(v => v.contentType === 'jpeg');
         filterAndRenderManage('jpeg');
     } catch (e) { console.error(e); }
-}
-
-async function loadCategoryBrowser() {
-    try {
-        const res = await fetch('/api/categories');
-        const data = await res.json();
-        state.categories = data.categories || [];
-        renderCategorySidebar();
-    } catch (e) { 
-        console.error('Failed to load categories:', e); 
-    }
-}
-
-function renderCategorySidebar() {
-    const sidebar = document.getElementById('categorySidebar');
-    if (!sidebar) return;
-    
-    sidebar.innerHTML = '';
-    state.categories.forEach(cat => {
-        const div = document.createElement('div');
-        div.className = 'category-item';
-        if (state.selectedCategory === cat.name) div.classList.add('active');
-        
-        div.innerHTML = `
-            ${escHtml(cat.name)}
-            <span class="category-item-count">(${cat.count})</span>
-        `;
-        
-        div.onclick = () => selectCategory(cat.name);
-        sidebar.appendChild(div);
-    });
-}
-
-async function selectCategory(categoryName) {
-    state.selectedCategory = categoryName;
-    renderCategorySidebar();
-    
-    try {
-        const res = await fetch(`/api/vectors?category=${encodeURIComponent(categoryName)}&limit=100`);
-        const data = await res.json();
-        state.categoryImages = data.vectors || [];
-        renderImagePreview();
-    } catch (e) {
-        console.error('Failed to load category images:', e);
-    }
-}
-
-function renderImagePreview() {
-    const grid = document.getElementById('imagesGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    
-    if (state.categoryImages.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999; padding: 20px;">No images in this category</p>';
-        return;
-    }
-    
-    state.categoryImages.forEach(img => {
-        const card = document.createElement('div');
-        card.className = 'image-card';
-        
-        const thumbUrl = `/api/asset?key=${encodeURIComponent(`${img.category}/${img.name}/${img.name}.jpg`)}`;
-        
-        card.innerHTML = `
-            <img src="${thumbUrl}" alt="${escHtml(img.name)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22100%22%3E%3Crect fill=%22%23eee%22 width=%22120%22 height=%22100%22/%3E%3C/svg%3E'">
-            <div class="image-card-info">
-                <div class="image-card-title" title="${escHtml(img.name)}">${escHtml(img.name)}</div>
-                <div class="image-card-downloads">↓ ${img.downloads || 0}</div>
-            </div>
-        `;
-        
-        card.onclick = () => {
-            window.open(`/details/${encodeURIComponent(img.name)}`, '_blank');
-        };
-        
-        grid.appendChild(card);
-    });
 }
 
 function filterAndRenderManage(type = 'vector') {
@@ -488,7 +405,6 @@ async function deleteVector(slug) {
             loadManageVectors();
             loadManageJpegs();
             loadDashboard();
-            loadCategoryBrowser();
         } else {
             alert('Delete failed: ' + res.status);
         }
@@ -504,8 +420,12 @@ async function bulkDeleteVectors(type = 'vector') {
     const checkboxes = document.querySelectorAll(`input[type="checkbox"].vector-checkbox[data-type="${type}"]`);
     const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.id);
     
-    if (selected.length === 0) return;
-    if (!confirm(`Delete ${selected.length} items?`)) return;
+    if (selected.length === 0) {
+        alert('No items selected');
+        return;
+    }
+
+    if (!confirm(`Delete ${selected.length} item(s)?`)) return;
 
     const key = sessionStorage.getItem('fv_admin');
     let deleted = 0;
@@ -518,71 +438,66 @@ async function bulkDeleteVectors(type = 'vector') {
             if (res.ok) deleted++;
         } catch (e) { console.error(e); }
     }
-    
+
     alert(`Deleted ${deleted}/${selected.length} items`);
+    state.vectors = state.vectors.filter(v => !selected.includes(v.name));
     loadManageVectors();
     loadManageJpegs();
     loadDashboard();
-    loadCategoryBrowser();
 }
 
 async function bulkDownloadVectors(type = 'vector') {
     const checkboxes = document.querySelectorAll(`input[type="checkbox"].vector-checkbox[data-type="${type}"]`);
     const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.id);
     
-    if (selected.length === 0) return;
-    
+    if (selected.length === 0) {
+        alert('No items selected');
+        return;
+    }
+
     const key = sessionStorage.getItem('fv_admin');
-    selected.forEach(slug => {
+    for (const slug of selected) {
         window.open(`/api/download?slug=${encodeURIComponent(slug)}&key=${key}`, '_blank');
-    });
+        await new Promise(r => setTimeout(r, 300));
+    }
 }
 
-async function handleBulkAnalyze(type = 'vector') {
+function handleBulkAnalyze(type = 'vector') {
     const inputId = type === 'vector' ? 'bulkFileInput' : 'bulkFileInputJpeg';
     const input = document.getElementById(inputId);
     if (!input || !input.files.length) return;
-
-    bulkFiles = [];
-    const files = Array.from(input.files);
     
-    for (const file of files) {
-        const id = file.name.replace(/\.[^.]+$/, '');
-        
-        if (file.name.endsWith('.json')) {
-            const jsonText = await file.text();
-            const lastGroup = bulkFiles[bulkFiles.length - 1];
-            if (lastGroup && lastGroup.id === id) {
-                lastGroup.json = file;
-            } else {
-                bulkFiles.push({ id, json: file, jpeg: null, zip: null });
-            }
-        } else if (file.name.endsWith('.jpg') || file.name.endsWith('.jpeg')) {
-            const lastGroup = bulkFiles[bulkFiles.length - 1];
-            if (lastGroup && lastGroup.id === id) {
-                lastGroup.jpeg = file;
-            } else {
-                bulkFiles.push({ id, json: null, jpeg: file, zip: null });
-            }
-        } else if (file.name.endsWith('.zip')) {
-            const lastGroup = bulkFiles[bulkFiles.length - 1];
-            if (lastGroup && lastGroup.id === id) {
-                lastGroup.zip = file;
-            } else {
-                bulkFiles.push({ id, json: null, jpeg: null, zip: file });
-            }
-        }
-    }
+    const files = Array.from(input.files);
+    const groups = {};
+    files.forEach(f => {
+        const name = f.name;
+        const id = name.substring(0, name.lastIndexOf('.'));
+        const ext = name.substring(name.lastIndexOf('.')).toLowerCase();
+        if (!groups[id]) groups[id] = {};
+        if (ext === '.json') groups[id].json = f;
+        if (ext === '.jpg' || ext === '.jpeg') groups[id].jpeg = f;
+        if (ext === '.zip') groups[id].zip = f;
+    });
 
-    const valid = bulkFiles.filter(g => g.json && g.jpeg);
-    alert(`Found ${valid.length} complete file groups (JSON + JPEG)`);
+    bulkFiles = Object.entries(groups).map(([id, g]) => ({ id, ...g }))
+        .filter(g => g.json && g.jpeg);
+    
+    const statusId = type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg';
+    const status = document.getElementById(statusId);
+    if (status) {
+        status.className = 'status-box info';
+        status.textContent = `Found ${bulkFiles.length} valid ${type === 'jpeg' ? 'Jpeg' : 'vector'} set(s). Ready to upload.`;
+    }
+    const btnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
+    const btn = document.getElementById(btnId);
+    if (btn) btn.disabled = bulkFiles.length === 0;
 }
 
 async function handleBulkUpload(type = 'vector') {
     const key = sessionStorage.getItem('fv_admin');
     const btnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
     const analyzeBtnId = type === 'vector' ? 'bulkAnalyzeBtn' : 'bulkAnalyzeBtnJpeg';
-    const statusId = type === 'vector' ? 'uploadStatus' : 'uploadStatusJpeg';
+    const statusId = type === 'vector' ? 'bulkUploadStatus' : 'bulkUploadStatusJpeg';
     
     const progressText = document.getElementById(type === 'vector' ? 'bulkProgressText' : 'bulkProgressTextJpeg');
     const progressFill = document.getElementById(type === 'vector' ? 'bulkProgressFill' : 'bulkProgressFillJpeg');
@@ -659,7 +574,6 @@ async function handleBulkUpload(type = 'vector') {
     loadDashboard();
     loadManageVectors();
     loadManageJpegs();
-    loadCategoryBrowser();
 }
 
 async function loadHealth() {
