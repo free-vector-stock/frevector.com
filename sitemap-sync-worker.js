@@ -31,10 +31,18 @@ async function syncSitemap(env) {
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
   xml += '  <url><loc>https://frevector.com/</loc><lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod><priority>1.0</priority></url>\n';
 
+  let addedCount = 0;
   for (const v of allVectors) {
     const name = v.name;
+    
+    // "jpeg" kelimesi geçenleri filtrele (case-insensitive)
+    if (name.toLowerCase().includes("jpeg")) {
+      continue;
+    }
+
     const thumbKey = encodeURIComponent(name + '/thumb.jpg');
     xml += '  <url>\n    <loc>https://frevector.com/details/' + name + '</loc>\n    <lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod>\n    <image:image>\n      <image:loc>https://frevector.com/api/asset?key=' + thumbKey + '</image:loc>\n    </image:image>\n  </url>\n';
+    addedCount++;
   }
   xml += '</urlset>';
 
@@ -58,7 +66,7 @@ async function syncSitemap(env) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      message: "Sync sitemap with live vectors",
+      message: `Sync sitemap with live vectors (filtered jpeg: ${addedCount} items)`,
       content: contentBase64,
       sha: sha || undefined
     })
@@ -69,5 +77,5 @@ async function syncSitemap(env) {
     throw new Error(`GitHub API Error: ${putRes.status} ${errText}`);
   }
 
-  return `Success: Updated sitemap with ${allVectors.length} vectors`;
+  return `Success: Updated sitemap with ${addedCount} vectors (Filtered out JPEG names)`;
 }
