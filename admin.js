@@ -4,7 +4,6 @@ let state = {
     filtered: [],
     filterCat: '',
     search: '',
-    selected: new Set(),
     section: 'dashboard'
 };
 
@@ -46,7 +45,7 @@ function switchSection(s) {
     document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
     document.getElementById(s).classList.add('active');
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('onclick').includes(s));
+        btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(s));
     });
     document.getElementById('sectionTitle').textContent = s.toUpperCase();
 }
@@ -69,19 +68,23 @@ function renderDashboard() {
 function renderSidebar() {
     const cats = [...new Set(state.vectors.map(v => v.category))].sort();
     const container = document.getElementById('sidebarCategories');
-    container.innerHTML = cats.map(c => `
-        <button class="cat-nav-btn ${state.filterCat === c ? 'active' : ''}" onclick="filterByCat('${c}')">${c}</button>
-    `).join('');
+    if(container) {
+        container.innerHTML = cats.map(c => `
+            <button class="cat-nav-btn ${state.filterCat === c ? 'active' : ''}" onclick="filterByCat('${c.replace(/'/g, "\\'")}')">${c}</button>
+        `).join('');
+    }
     
     const select = document.getElementById('filterCategory');
-    select.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    if(select) {
+        select.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
 }
 
 function filterByCat(c) {
     state.filterCat = c;
-    state.section = 'manage';
     switchSection('manage');
-    document.getElementById('filterCategory').value = c;
+    const sel = document.getElementById('filterCategory');
+    if(sel) sel.value = c;
     filter();
     renderSidebar();
 }
@@ -97,21 +100,23 @@ function filter() {
 
 function renderGrid() {
     const container = document.getElementById('gridContainer');
+    if(!container) return;
+    
     const itemsPerCol = Math.ceil(state.filtered.length / 4);
     let html = '';
     
     for (let i = 0; i < 4; i++) {
         const colItems = state.filtered.slice(i * itemsPerCol, (i + 1) * itemsPerCol);
         html += '<div class="grid-column">';
-        html += '<div class="header-row"><div></div><div>THUMB</div><div>NAME</div><div>TYPE</div><div>CAT</div><div>ACT</div></div>';
+        html += '<div class="header-row"><div></div><div>THUMB</div><div style="flex:1">NAME</div><div>TYPE</div><div>CAT</div><div>ACT</div></div>';
         html += colItems.map(v => `
             <div class="item-row">
                 <input type="checkbox">
                 <img src="/api/asset?key=${encodeURIComponent(v.category + '/' + v.name + '/' + v.name + '.jpg')}">
-                <div class="name">${v.name}</div>
-                <div>${v.contentType || 'vector'}</div>
-                <div>${v.category}</div>
-                <div><button style="font-size:9px;">DEL</button></div>
+                <div class="name" title="${v.name}">${v.name}</div>
+                <div>${v.contentType === 'jpeg' ? 'jpg' : 'vec'}</div>
+                <div>${v.category.substring(0,3)}</div>
+                <div><button style="font-size:8px; padding:2px; cursor:pointer;">DEL</button></div>
             </div>
         `).join('');
         html += '</div>';
