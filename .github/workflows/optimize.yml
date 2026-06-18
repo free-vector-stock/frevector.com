@@ -1,7 +1,6 @@
 name: Optimize Assets
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 jobs:
   optimize:
     runs-on: ubuntu-latest
