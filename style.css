@@ -423,12 +423,10 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     }
     .pagination-wrapper { order: 1; padding: 12px 0; margin-left: 0; border-bottom: 1px solid var(--border); }
     .our-picks-section { order: 2; padding: 12px 0; margin-left: 0; border-bottom: 1px solid var(--border); }
-    .footer { order: 3; padding: 16px !important; height: auto !important; min-height: auto !important; display: flex !important; flex-direction: column !important; gap: 12px !important; justify-content: flex-start !important; align-items: center !important; margin-bottom: 0 !important; padding-bottom: 16px !important; position: static !important; }
-    .footer > div:nth-child(1) { order: 3 !important; flex: none !important; width: 100% !important; text-align: center !important; display: flex !important; justify-content: center !important; }
-    .footer > div:nth-child(2) { order: 3 !important; flex: none !important; width: 100% !important; text-align: center !important; display: flex !important; justify-content: center !important; }
-    .footer > div:nth-child(3) { order: 1 !important; flex: none !important; width: 100% !important; text-align: center !important; display: flex !important; justify-content: center !important; }
-    .footer-nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 12px !important; }
-    .footer-link { display: inline-block !important; padding: 4px 8px !important; white-space: normal !important; }
+    .footer { order: 3; padding: 16px; height: auto; min-height: auto; display: flex; flex-direction: column; gap: 12px; justify-content: flex-start; align-items: center; margin-bottom: 0; padding-bottom: 16px; position: static; background: #000; color: #fff; width: 100%; }
+    .footer > div { width: 100%; text-align: center; display: flex; justify-content: center; }
+    .footer-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; width: 100%; }
+    .footer-link { display: inline-block; padding: 4px 8px; white-space: nowrap; color: #fff; text-decoration: none; font-size: 13px; }
     .our-picks-nav { gap: 6px; }
     .our-picks-arrow { width: 28px; height: 28px; font-size: 16px; }
     .our-picks-track-wrap { padding: 0 16px; }
