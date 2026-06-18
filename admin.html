@@ -15,7 +15,7 @@
             --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: var(--font); background: #f8f8f8; color: #1a1a1a; }
+        body { font-family: var(--font); background: #f8f8f8; color: #1a1a1a; overflow-x: hidden; }
 
         /* LOGIN */
         #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--black); }
@@ -25,9 +25,9 @@
 
         /* LAYOUT */
         #adminApp { display: none; }
-        .admin-wrap { display: flex; min-height: 100vh; }
-        .admin-sidebar { width: 220px; background: var(--black); color: var(--white); position: fixed; height: 100vh; overflow-y: auto; padding: 20px 0; }
-        .admin-main { margin-left: 220px; flex: 1; padding: 20px; }
+        .admin-wrap { display: flex; min-height: 100vh; width: 100%; }
+        .admin-sidebar { width: 220px; background: var(--black); color: var(--white); position: fixed; height: 100vh; overflow-y: auto; padding: 20px 0; z-index: 100; }
+        .admin-main { margin-left: 220px; flex: 1; padding: 20px; width: calc(100% - 220px); min-width: 1000px; }
 
         /* SIDEBAR NAV */
         .nav-btn { display: block; width: 100%; padding: 10px 20px; background: none; border: none; color: #aaa; text-align: left; cursor: pointer; font-size: 13px; }
@@ -38,52 +38,59 @@
         .cat-nav-btn:hover { color: #fff; }
         .cat-nav-btn.active { color: #fff; font-weight: 600; }
 
-        /* GRID SYSTEM (4 COLUMNS) */
+        /* GRID SYSTEM (4 COLUMNS - FORCED DESKTOP) */
         .grid-container {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 5px;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 10px;
             margin-top: 20px;
+            width: 100%;
         }
-        .grid-column { display: flex; flex-direction: column; gap: 0; border: 1px solid #ddd; }
+        .grid-column { display: flex; flex-direction: column; gap: 0; border: 1px solid #ddd; background: #fff; }
         
         .item-row {
             display: grid;
-            grid-template-columns: 30px 50px 1fr 50px 40px 60px;
+            grid-template-columns: 25px 45px 1fr 35px 35px 40px;
             align-items: center;
-            padding: 5px;
+            padding: 4px;
             background: #fff;
             border-bottom: 1px solid #eee;
             font-size: 10px;
+            line-height: 1.2;
         }
         .item-row:hover { background: #f9f9f9; }
-        .item-row img { width: 40px; height: 30px; object-fit: cover; }
-        .item-row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; }
+        .item-row img { width: 40px; height: 30px; object-fit: cover; border: 1px solid #eee; }
+        .item-row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; font-weight: 500; }
         
         .header-row {
             background: #000;
             color: #fff;
             display: grid;
-            grid-template-columns: 30px 50px 1fr 50px 40px 60px;
-            padding: 5px;
+            grid-template-columns: 25px 45px 1fr 35px 35px 40px;
+            padding: 6px 4px;
             font-size: 9px;
             font-weight: bold;
             text-transform: uppercase;
+            position: sticky;
+            top: 0;
         }
 
         /* UTILS */
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .stats-bar { background: #fff; padding: 10px 20px; border: 1px solid #eee; border-radius: 4px; display: flex; gap: 20px; font-size: 12px; margin-bottom: 15px; }
-        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; }
-        .toolbar input, .toolbar select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
-        .btn-red { background: var(--red); color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .btn-blue { background: var(--blue); color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .stats-bar { background: #fff; padding: 10px 20px; border: 1px solid #eee; border-radius: 4px; display: flex; gap: 25px; font-size: 12px; margin-bottom: 15px; font-weight: 600; }
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        .toolbar input, .toolbar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
+        .btn-red { background: var(--red); color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .btn-blue { background: var(--blue); color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; }
+
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
     </style>
 </head>
 <body>
     <div id="loginScreen">
         <div class="login-box">
-            <h2>Frevector Admin</h2>
+            <h2 style="margin-bottom: 20px;">Frevector Admin</h2>
             <input type="password" id="loginPassword" placeholder="Password">
             <button id="loginBtn">Login</button>
             <p id="loginError" style="color:red; display:none; margin-top:10px;">Invalid Password</p>
@@ -94,7 +101,7 @@
         <div class="admin-wrap">
             <div class="admin-sidebar">
                 <div style="padding: 0 20px 20px; border-bottom: 1px solid #333; margin-bottom: 10px;">
-                    <h2 style="font-size: 16px;">Frevector</h2>
+                    <h2 style="font-size: 18px; color: #fff;">Frevector</h2>
                     <p style="font-size: 10px; color: #666;">Content Management</p>
                 </div>
                 <button class="nav-btn active" onclick="switchSection('dashboard')">Dashboard</button>
@@ -104,46 +111,51 @@
                 <button class="nav-btn" onclick="switchSection('manage-jpeg')">Manage JPEG</button>
                 <button class="nav-btn" onclick="switchSection('health')">System Health</button>
                 <div style="position: absolute; bottom: 20px; width: 100%; padding: 0 20px;">
-                    <button id="logoutBtn" style="width:100%; padding:8px; background:#222; color:#fff; border:1px solid #444; cursor:pointer;">Logout</button>
+                    <button id="logoutBtn" style="width:100%; padding:10px; background:#222; color:#fff; border:1px solid #444; cursor:pointer; font-size: 12px; border-radius: 4px;">Logout</button>
                 </div>
             </div>
 
             <div class="admin-main">
                 <div class="admin-header">
-                    <h1 id="sectionTitle">Dashboard</h1>
-                    <img src="/logo.svg" height="30" alt="logo">
+                    <h1 id="sectionTitle" style="font-size: 24px;">DASHBOARD</h1>
+                    <img src="/logo.svg" height="35" alt="logo">
                 </div>
 
                 <!-- SECTIONS -->
                 <div id="dashboard" class="admin-section active">
                     <div class="stats-bar">
-                        <div>TOTAL CONTENT: <span id="totalVectors">0</span></div>
-                        <div>TOTAL DOWNLOADS: <span id="totalDownloads">0</span></div>
+                        <div>TOTAL CONTENT: <span id="totalVectors" style="color: var(--blue);">0</span></div>
+                        <div>TOTAL DOWNLOADS: <span id="totalDownloads" style="color: var(--blue);">0</span></div>
                     </div>
-                    <table style="width:100%; background:#fff; border:1px solid #eee; border-collapse:collapse;">
-                        <thead><tr style="background:#000; color:#fff; text-align:left;"><th style="padding:10px;">Category</th><th style="padding:10px;">Vectors</th><th style="padding:10px;">JPEG</th><th style="padding:10px;">Downloads</th></tr></thead>
-                        <tbody id="catTableBody"></tbody>
-                    </table>
+                    <div style="background: #fff; border: 1px solid #eee; border-radius: 4px; overflow: hidden;">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <thead><tr style="background:#000; color:#fff; text-align:left;"><th style="padding:12px 15px; font-size: 12px;">Category</th><th style="padding:12px 15px; font-size: 12px;">Vectors</th><th style="padding:12px 15px; font-size: 12px;">JPEG</th><th style="padding:12px 15px; font-size: 12px;">Downloads</th></tr></thead>
+                            <tbody id="catTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div id="manage" class="admin-section">
                     <div class="stats-bar">
-                        <div>Total Downloads: <span id="totalDlAllTime">0</span></div>
-                        <div>Last 24h: <span id="totalDl24h">0</span></div>
+                        <div>Total Downloads (All Time): <span id="totalDlAllTime" style="color: var(--blue);">0</span></div>
+                        <div>Last 24h: <span id="totalDl24h" style="color: var(--blue);">0</span></div>
                     </div>
                     <div class="toolbar">
-                        <input type="text" id="searchManage" placeholder="Search..." style="flex:1;">
+                        <input type="text" id="searchManage" placeholder="Search by name, category, keyword..." style="flex:1;">
                         <select id="filterCategory"><option value="">All Categories</option></select>
                         <button class="btn-red" id="bulkDeleteBtn">Delete Selected (0)</button>
+                        <button class="btn-blue" id="bulkDownloadBtn">Download Selected (0)</button>
                     </div>
                     <div id="gridContainer" class="grid-container"></div>
                 </div>
                 
                 <div id="upload" class="admin-section">
-                    <div style="background:#fff; padding:30px; border:1px solid #eee;">
-                        <h3>Upload Vectors</h3>
-                        <input type="file" id="bulkFileInput" multiple style="margin-top:20px;">
-                        <button class="btn-blue" id="bulkUploadBtn" style="margin-top:20px;">Start Upload</button>
+                    <div style="background:#fff; padding:40px; border:1px solid #eee; border-radius: 4px; text-align: center;">
+                        <h3 style="margin-bottom: 20px;">Upload New Vectors</h3>
+                        <div style="border: 2px dashed #ccc; padding: 40px; margin-bottom: 20px; border-radius: 8px; background: #fafafa;">
+                            <input type="file" id="bulkFileInput" multiple style="display: block; margin: 0 auto;">
+                        </div>
+                        <button class="btn-blue" id="bulkUploadBtn" style="padding: 12px 30px; font-size: 14px;">Start Upload Process</button>
                     </div>
                 </div>
             </div>
