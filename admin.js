@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('logoutBtn').onclick = () => { sessionStorage.removeItem('fv_admin'); location.reload(); };
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.onclick = () => switchSection(btn.dataset.section);
+        btn.onclick = () => { if(btn.dataset.section === 'manage') { state.filterCat = ''; if(document.getElementById('filterCategory')) document.getElementById('filterCategory').value = ''; renderSidebarCategories(); } switchSection(btn.dataset.section); };
     });
 
     // Bulk Upload Setup
@@ -178,7 +178,7 @@ function showApp() {
     loadDashboard();
     loadManageVectors();
     loadManageJpegs();
-    loadStats();
+    loadStats(); renderSidebarCategories();
 }
 
 function switchSection(sectionId) {
@@ -187,7 +187,7 @@ function switchSection(sectionId) {
     const titleMap = { 'dashboard': 'Dashboard', 'upload': 'Upload Vector', 'manage': 'Manage Vectors', 'manage-jpeg': 'Manage JPEG', 'health': 'System Health' };
     document.getElementById('sectionTitle').textContent = titleMap[sectionId] || 'Admin';
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sectionId));
-    if (sectionId === 'manage' || sectionId === 'manage-jpeg') loadStats();
+    if (sectionId === 'manage' || sectionId === 'manage-jpeg') loadStats(); renderSidebarCategories();
 }
 
 async function loadStats() {
@@ -225,6 +225,7 @@ async function loadDashboard() {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
+        renderSidebarCategories();
         document.getElementById('totalVectors').textContent = state.vectors.length;
         document.getElementById('totalDownloads').textContent = state.vectors.reduce((sum, v) => sum + (v.downloads || 0), 0);
         
@@ -253,6 +254,7 @@ async function loadManageVectors() {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
+        renderSidebarCategories();
         filterAndRenderManage('vector');
     } catch (e) { console.error(e); }
 }
@@ -263,6 +265,7 @@ async function loadManageJpegs() {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
+        renderSidebarCategories();
         filterAndRenderManage('jpeg');
     } catch (e) { console.error(e); }
 }
@@ -682,3 +685,49 @@ function escHtml(str) {
     if (!str) return '';
     return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
+
+/**
+ * Dinamik Kategori Listeleme (Yeni Görev)
+ */
+function renderSidebarCategories() {
+    const container = document.getElementById('sidebarCategories');
+    if (!container) return;
+
+    // Mevcut kategorileri all_vectors.json verisinden (state.vectors) çıkar
+    const catMap = {};
+    state.vectors.forEach(v => {
+        const cat = v.category || 'Miscellaneous';
+        catMap[cat] = (catMap[cat] || 0) + 1;
+    });
+
+    const sortedCats = Object.keys(catMap).sort();
+    
+    container.innerHTML = sortedCats.map(cat => `
+        <button class="cat-nav-btn ${state.filterCat === cat ? 'active' : ''}" 
+                onclick="filterByCategory('${cat.replace(/'/g, "\\'")}')">
+            ${cat} (${catMap[cat]})
+        </button>
+    `).join('');
+}
+
+function filterByCategory(cat) {
+    // Manage Vectors sekmesine geç
+    switchSection('manage');
+    
+    // Filtreyi ayarla
+    state.filterCat = cat;
+    state.managePage = 1;
+    
+    // UI'daki selectbox'ı da güncelle
+    const sel = document.getElementById('filterCategory');
+    if (sel) sel.value = cat;
+    
+    // Tabloyu filtrele ve render et
+    filterAndRenderManage('vector');
+    
+    // Sidebar'daki aktiflik durumunu güncelle
+    renderSidebarCategories();
+}
+
+// showApp fonksiyonunu güncellemek için mevcut olanı bulup içine ekleme yapalım
+// Not: admin.js içinde showApp zaten tanımlı, onu sarmalayalım veya değiştirelim.
