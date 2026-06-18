@@ -21,12 +21,10 @@ async function syncSitemap(env) {
   const GH_TOKEN = env.GH_TOKEN;
   const REPO = "free-vector-stock/frevector.com";
 
-  // 1. all_vectors.json çek
   const allVectorsObj = await bucket.get("all_vectors.json");
   if (!allVectorsObj) return "Error: all_vectors.json not found in R2";
   const allVectors = await allVectorsObj.json();
   
-  // 2. XML oluştur
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
   xml += '  <url><loc>https://frevector.com/</loc><lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod><priority>1.0</priority></url>\n';
@@ -35,7 +33,7 @@ async function syncSitemap(env) {
   for (const v of allVectors) {
     const name = v.name;
     
-    // "jpeg" kelimesi geçenleri filtrele (case-insensitive)
+    // "jpeg" kelimesini kesin olarak engelle (hem küçük hem büyük harf)
     if (name.toLowerCase().includes("jpeg")) {
       continue;
     }
@@ -46,7 +44,6 @@ async function syncSitemap(env) {
   }
   xml += '</urlset>';
 
-  // 3. GitHub Güncelle
   const getFileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/sitemap.xml`, {
     headers: { "Authorization": `token ${GH_TOKEN}`, "User-Agent": "Cloudflare-Worker" }
   });
@@ -66,7 +63,7 @@ async function syncSitemap(env) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      message: `Sync sitemap with live vectors (filtered jpeg: ${addedCount} items)`,
+      message: `Final Sync: Filtered jpeg names (${addedCount} items)`,
       content: contentBase64,
       sha: sha || undefined
     })
@@ -77,5 +74,5 @@ async function syncSitemap(env) {
     throw new Error(`GitHub API Error: ${putRes.status} ${errText}`);
   }
 
-  return `Success: Updated sitemap with ${addedCount} vectors (Filtered out JPEG names)`;
+  return `Success: Updated sitemap with ${addedCount} vectors (Strict JPEG filter applied)`;
 }
