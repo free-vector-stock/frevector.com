@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Frevector Admin Panel</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
     <style>
         :root {
             --black: #000;
@@ -15,679 +11,145 @@
             --gray: #f5f5f5;
             --border: #e0e0e0;
             --red: #e53e3e;
-            --green: #38a169;
             --blue: #3182ce;
-            --orange: #dd6b20;
             --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font); background: #f8f8f8; color: #1a1a1a; }
 
         /* LOGIN */
-        #loginScreen {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--black);
-        }
-        .login-box {
-            background: var(--white);
-            padding: 48px 40px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-        }
-        .login-box h1 { font-size: 22px; margin-bottom: 8px; }
-        .login-box p { font-size: 13px; color: #666; margin-bottom: 28px; }
-        .login-box input {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 14px;
-            margin-bottom: 14px;
-        }
-        .login-box input:focus { outline: none; border-color: var(--black); }
-        .login-box button {
-            width: 100%;
-            padding: 11px;
-            background: var(--black);
-            color: var(--white);
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .login-box button:hover { opacity: 0.85; }
-        .login-error { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+        #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--black); }
+        .login-box { background: var(--white); padding: 48px 40px; border-radius: 8px; width: 380px; text-align: center; }
+        .login-box input { width: 100%; padding: 11px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 14px; }
+        .login-box button { width: 100%; padding: 11px; background: var(--black); color: var(--white); border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
 
-        /* ADMIN LAYOUT */
-        #adminApp { display: none; min-height: 100vh; }
+        /* LAYOUT */
+        #adminApp { display: none; }
         .admin-wrap { display: flex; min-height: 100vh; }
+        .admin-sidebar { width: 220px; background: var(--black); color: var(--white); position: fixed; height: 100vh; overflow-y: auto; padding: 20px 0; }
+        .admin-main { margin-left: 220px; flex: 1; padding: 20px; }
 
-        /* SIDEBAR */
-        .admin-sidebar {
-            width: 220px;
-            background: var(--black);
-            color: var(--white);
-            display: flex;
-            flex-direction: column;
-            padding: 24px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            overflow-y: auto;
-        }
-        .sidebar-logo {
-            padding: 0 20px 24px;
-            border-bottom: 1px solid #333;
-            margin-bottom: 16px;
-        }
-        .sidebar-logo h2 { font-size: 16px; font-weight: 700; }
-        .sidebar-logo p { font-size: 11px; color: #888; margin-top: 4px; }
-        .sidebar-nav { flex: 1; }
-        .nav-btn {
-            display: block;
-            width: 100%;
-            padding: 11px 20px;
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 13px;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.15s;
-            border-left: 3px solid transparent;
-        }
-        .nav-btn:hover { color: var(--white); background: #111; }
-        .nav-btn.active { color: var(--white); border-left-color: var(--white); background: #111; }
-        .cat-nav-btn { display: block; width: 100%; padding: 8px 20px; background: none; border: none; color: #888; font-size: 12px; text-align: left; cursor: pointer; transition: all 0.15s; }
-        .cat-nav-btn:hover { color: var(--white); background: #111; }
-        .cat-nav-btn.active { color: var(--white); background: #222; font-weight: 600; }
-        .sidebar-footer { padding: 16px 20px; border-top: 1px solid #333; }
-        .logout-btn {
-            width: 100%;
-            padding: 9px;
-            background: #222;
-            color: #aaa;
-            border: 1px solid #333;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .logout-btn:hover { background: var(--red); color: var(--white); border-color: var(--red); }
-
-        /* MAIN */
-        .admin-main {
-            margin-left: 220px;
-            flex: 1;
-            padding: 32px;
-        }
-        .admin-header {
-            margin-bottom: 28px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        .admin-header h1 { font-size: 22px; font-weight: 700; }
-
-        /* SECTIONS */
-        .admin-section { display: none; }
-        .admin-section.active { display: block; }
-
-        /* STATS */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 28px;
-        }
-        .stat-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 20px;
-            text-align: center;
-        }
-        .stat-value { font-size: 32px; font-weight: 800; margin-bottom: 6px; }
-        .stat-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* CATEGORY TABLE */
-        .cat-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .cat-table th {
-            background: var(--black);
-            color: var(--white);
-            padding: 10px 14px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .cat-table td {
-            padding: 10px 14px;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border);
-        }
-        .cat-table tr:last-child td { border-bottom: none; }
-        .cat-table tr:hover td { background: var(--gray); }
-
-        /* UPLOAD FORM */
-        .upload-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 28px;
-            max-width: 100%;
-        }
-        .upload-card h2 { font-size: 18px; margin-bottom: 6px; }
-        .upload-card .upload-subtitle { font-size: 12px; color: #888; margin-bottom: 20px; }
-        .btn-upload {
-            background: var(--black);
-            color: var(--white);
-            border: none;
-            padding: 12px 28px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.15s;
-        }
-        .btn-upload:hover { opacity: 0.8; }
-        .btn-upload:disabled { opacity: 0.4; cursor: not-allowed; }
-
-        /* STATUS BOX */
-        .status-box {
-            margin-top: 16px;
-            padding: 12px 16px;
-            border-radius: 4px;
-            font-size: 13px;
-            display: none;
-            line-height: 1.5;
-        }
-        .status-box.info { background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; display: block; }
-        .status-box.success { background: #f0fff4; border: 1px solid #9ae6b4; color: #276749; display: block; }
-        .status-box.error { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; display: block; }
-        .status-box.warning { background: #fffbeb; border: 1px solid #fbd38d; color: #b7791f; display: block; }
-
-        /* PROGRESS */
-        .progress-wrap { margin-top: 14px; display: none; }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--black);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        .progress-text { font-size: 12px; color: #666; margin-top: 6px; }
-
-        /* MANAGE */
-        .manage-toolbar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .manage-toolbar input {
-            flex: 1;
-            min-width: 200px;
-            max-width: 320px;
-            padding: 9px 14px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 13px;
-        }
-        .manage-toolbar input:focus { outline: none; border-color: var(--black); }
-        .manage-toolbar select {
-            padding: 9px 12px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 13px;
-            background: var(--white);
-        }
-
-        /* VECTORS TABLE */
-        .vectors-table-wrap { overflow-x: auto; }
-        .vectors-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-        }
-        .vectors-table th {
-            background: var(--black);
-            color: var(--white);
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .vectors-table td {
-            padding: 12px 16px;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border);
-        }
-        .vectors-table tr:last-child td { border-bottom: none; }
-        .vectors-table tr:hover td { background: var(--gray); }
-
-        .preview-img {
-            width: 60px;
-            height: 45px;
-            object-fit: cover;
-            border-radius: 4px;
-            background: #eee;
-        }
-
-        .btn-delete {
-            padding: 6px 12px;
-            background: #fff;
-            border: 1px solid var(--red);
-            color: var(--red);
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-delete:hover { background: var(--red); color: #fff; }
+        /* SIDEBAR NAV */
+        .nav-btn { display: block; width: 100%; padding: 10px 20px; background: none; border: none; color: #aaa; text-align: left; cursor: pointer; font-size: 13px; }
+        .nav-btn:hover, .nav-btn.active { color: #fff; background: #111; }
+        .nav-btn.active { border-left: 3px solid #fff; }
         
-        #bulkDeleteBtn, #bulkDeleteBtnJpeg {
-            background: var(--red) !important;
-            color: #fff !important;
-            border-color: var(--red) !important;
-            padding: 9px 16px !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
-        }
-        #bulkDeleteBtn:hover:not(:disabled), #bulkDeleteBtnJpeg:hover:not(:disabled) {
-            opacity: 0.85;
-        }
-        #bulkDeleteBtn:disabled, #bulkDeleteBtnJpeg:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .cat-nav-btn { display: block; width: 100%; padding: 6px 20px 6px 35px; background: none; border: none; color: #888; text-align: left; cursor: pointer; font-size: 12px; }
+        .cat-nav-btn:hover { color: #fff; }
+        .cat-nav-btn.active { color: #fff; font-weight: 600; }
 
-        .pagination-admin {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
-        .pag-admin-btn {
-            padding: 6px 12px;
-            border: 1px solid var(--border);
-            background: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .pag-admin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .pag-admin-info { font-size: 13px; color: #666; }
-
-        /* HEALTH */
-        .health-grid {
+        /* GRID SYSTEM (4 COLUMNS) */
+        .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
         }
-        .health-card {
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-        .health-card.ok { border-top: 4px solid var(--green); }
-        .health-card.warn { border-top: 4px solid var(--orange); }
-        .health-card.error { border-top: 4px solid var(--red); }
-        .health-icon { font-size: 24px; margin-bottom: 8px; }
-        .health-label { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 4px; }
-        .health-value { font-size: 24px; font-weight: 800; }
-
-        .health-issues-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-        }
-        .health-issues-table th { background: #f9f9f9; padding: 12px; text-align: left; font-size: 12px; border-bottom: 1px solid var(--border); }
-        .health-issues-table td { padding: 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
-
-        .badge {
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .badge-red { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
-        .badge-orange { background: #fffaf0; color: #9c4221; border: 1px solid #fbd38d; }
-        .badge-blue { background: #ebf8ff; color: #3182ce; border: 1px solid #bee3f8; }
-        .badge-green { background: #f0fff4; color: #38a169; border: 1px solid #9ae6b4; }
-
-        .btn-refresh {
-            padding: 8px 16px;
-            background: var(--black);
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        .drop-zone {
-            border: 2px dashed #ccc;
-            padding: 60px 40px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        .drop-zone:hover { border-color: var(--black); background-color: #f0f0f0; }
-        .drop-zone p { margin: 0; }
-
-        /* NEW COUNTERS */
-        .counter-bar {
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 12px 20px;
-            margin-bottom: 16px;
-            display: flex;
-            gap: 24px;
+        .grid-column { display: flex; flex-direction: column; gap: 0; border: 1px solid #ddd; }
+        
+        .item-row {
+            display: grid;
+            grid-template-columns: 30px 50px 1fr 50px 40px 60px;
             align-items: center;
-            font-size: 13px;
-            font-weight: 600;
+            padding: 5px;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            font-size: 10px;
         }
-        .counter-item { display: flex; align-items: center; gap: 8px; }
-        .counter-label { color: #666; font-weight: 400; }
-        .counter-value { color: var(--blue); }
+        .item-row:hover { background: #f9f9f9; }
+        .item-row img { width: 40px; height: 30px; object-fit: cover; }
+        .item-row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 5px; }
+        
+        .header-row {
+            background: #000;
+            color: #fff;
+            display: grid;
+            grid-template-columns: 30px 50px 1fr 50px 40px 60px;
+            padding: 5px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* UTILS */
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .stats-bar { background: #fff; padding: 10px 20px; border: 1px solid #eee; border-radius: 4px; display: flex; gap: 20px; font-size: 12px; margin-bottom: 15px; }
+        .toolbar { display: flex; gap: 10px; margin-bottom: 15px; }
+        .toolbar input, .toolbar select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
+        .btn-red { background: var(--red); color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-blue { background: var(--blue); color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
-
-<div id="loginScreen">
-    <div class="login-box">
-        <h1>Frevector Admin</h1>
-        <p>Please enter your admin password</p>
-        <input type="password" id="loginPassword" placeholder="Password">
-        <button id="loginBtn">Login</button>
-        <div class="login-error" id="loginError">Invalid password</div>
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2>Frevector Admin</h2>
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button id="loginBtn">Login</button>
+            <p id="loginError" style="color:red; display:none; margin-top:10px;">Invalid Password</p>
+        </div>
     </div>
-</div>
 
-<div id="adminApp">
-    <div class="admin-wrap">
-        <aside class="admin-sidebar">
-            <div class="sidebar-logo">
-                <h2>Frevector</h2>
-                <p>Content Management</p>
+    <div id="adminApp">
+        <div class="admin-wrap">
+            <div class="admin-sidebar">
+                <div style="padding: 0 20px 20px; border-bottom: 1px solid #333; margin-bottom: 10px;">
+                    <h2 style="font-size: 16px;">Frevector</h2>
+                    <p style="font-size: 10px; color: #666;">Content Management</p>
+                </div>
+                <button class="nav-btn active" onclick="switchSection('dashboard')">Dashboard</button>
+                <button class="nav-btn" onclick="switchSection('upload')">Upload Vector</button>
+                <button class="nav-btn" onclick="switchSection('manage')">Manage Vectors</button>
+                <div id="sidebarCategories"></div>
+                <button class="nav-btn" onclick="switchSection('manage-jpeg')">Manage JPEG</button>
+                <button class="nav-btn" onclick="switchSection('health')">System Health</button>
+                <div style="position: absolute; bottom: 20px; width: 100%; padding: 0 20px;">
+                    <button id="logoutBtn" style="width:100%; padding:8px; background:#222; color:#fff; border:1px solid #444; cursor:pointer;">Logout</button>
+                </div>
             </div>
-            <nav class="sidebar-nav">
-                <button class="nav-btn active" data-section="dashboard">Dashboard</button>
-                <button class="nav-btn" data-section="upload">Upload Vector</button>
-                <button class="nav-btn" data-section="manage">Manage Vectors</button>
-                <button class="nav-btn" data-section="manage-jpeg">Manage JPEG</button>
-                <button class="nav-btn" data-section="health">System Health</button>
-            </nav>
-            <div class="sidebar-footer">
-                <button class="logout-btn" id="logoutBtn">Logout</button>
-            </div>
-        </aside>
 
-        <main class="admin-main">
-        <header class="admin-header" style="display: flex; align-items: center; justify-content: space-between;">
-            <h1 id="sectionTitle">Dashboard</h1>
-            <img src="logo.svg" alt="Logo" style="height: 30px; filter: invert(1);">
-        </header>
-
-            <!-- DASHBOARD -->
-            <section id="dashboard" class="admin-section active">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalVectors">0</div>
-                        <div class="stat-label">Total Content</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalDownloads">0</div>
-                        <div class="stat-label">Total Downloads</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalCategories">0</div>
-                        <div class="stat-label">Categories</div>
-                    </div>
+            <div class="admin-main">
+                <div class="admin-header">
+                    <h1 id="sectionTitle">Dashboard</h1>
+                    <img src="/logo.svg" height="30" alt="logo">
                 </div>
 
-                <h3 style="margin-bottom:16px; font-size:16px;">Vectors and JPEG by Category</h3>
-                <table class="cat-table">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Vectors</th>
-                            <th>JPEG</th>
-                            <th>Downloads</th>
-                        </tr>
-                    </thead>
-                    <tbody id="catTableBody">
-                        <tr><td colspan="4" style="text-align:center;padding:20px;color:#666;">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- UPLOAD -->
-            <section id="upload" class="admin-section">
-                <div class="upload-card">
-                    <h2>Bulk Vector Upload (JSON + JPEG + ZIP)</h2>
-                    <p class="upload-subtitle">Upload multiple vector packages at once. The system automatically matches files, validates metadata, and normalizes previews.</p>
-                    
-                    <div id="drop-zone" class="drop-zone">
-                        <p style="font-size: 18px; color: #333; font-weight: 600;">Drag and drop files here or click to select</p>
-                        <p style="font-size: 13px; color: #888; margin-top: 10px;">You can select JSON, JPEG and ZIP files at once.</p>
-                        <input type="file" id="bulkFileInput" multiple accept=".json,.jpg,.jpeg,.zip" style="display: none;">
+                <!-- SECTIONS -->
+                <div id="dashboard" class="admin-section active">
+                    <div class="stats-bar">
+                        <div>TOTAL CONTENT: <span id="totalVectors">0</span></div>
+                        <div>TOTAL DOWNLOADS: <span id="totalDownloads">0</span></div>
                     </div>
-
-                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                        <button type="button" class="btn-upload" id="bulkAnalyzeBtn" style="flex: 1;">Analyze</button>
-                        <button type="button" class="btn-upload" id="bulkUploadBtn" style="flex: 1; background: var(--green);" disabled>Upload All</button>
-                    </div>
-
-                    <div class="status-box" id="bulkUploadStatus"></div>
-                    <div class="progress-wrap" id="bulkProgressWrap" style="display: none;">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="bulkProgressFill" style="width:0%"></div>
-                        </div>
-                        <div class="progress-text" id="bulkProgressText">Uploading...</div>
-                    </div>
-                    <div class="progress-wrap" id="bulkProgressWrapSingle" style="display: none; margin-top: 8px;">
-                        <div class="progress-bar" style="height: 4px; background: #eee;">
-                            <div class="progress-fill" id="bulkProgressFillSingle" style="width:0%; background: var(--blue);"></div>
-                        </div>
-                        <div class="progress-text" id="bulkProgressTextSingle" style="font-size: 10px;">File progress...</div>
-                    </div>
-                </div>
-
-                <div class="upload-card" style="margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 30px;">
-                    <h2>Bulk JPEG-Only Upload (JSON + JPEG + ZIP)</h2>
-                    <p class="upload-subtitle">Upload multiple JPEG-only packages. ZIP files are optional for this section.</p>
-                    
-                    <div id="drop-zone-jpeg" class="drop-zone">
-                        <p style="font-size: 18px; color: #333; font-weight: 600;">Drag and drop JPEG, JSON & ZIP files here</p>
-                        <p style="font-size: 13px; color: #888; margin-top: 10px;">Only JSON, JPEG and ZIP files will be processed.</p>
-                        <input type="file" id="bulkFileInputJpeg" multiple accept=".json,.jpg,.jpeg,.zip" style="display: none;">
-                    </div>
-
-                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                        <button type="button" class="btn-upload" id="bulkAnalyzeBtnJpeg" style="flex: 1;">Analyze JPEG-Only</button>
-                        <button type="button" class="btn-upload" id="bulkUploadBtnJpeg" style="flex: 1; background: var(--green);" disabled>Upload All JPEG-Only</button>
-                    </div>
-
-                    <div class="status-box" id="bulkUploadStatusJpeg"></div>
-                    <div class="progress-wrap" id="bulkProgressWrapJpeg" style="display: none;">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="bulkProgressFillJpeg" style="width:0%"></div>
-                        </div>
-                        <div class="progress-text" id="bulkProgressTextJpeg">Uploading...</div>
-                    </div>
-                    <div class="progress-wrap" id="bulkProgressWrapSingleJpeg" style="display: none; margin-top: 8px;">
-                        <div class="progress-bar" style="height: 4px; background: #eee;">
-                            <div class="progress-fill" id="bulkProgressFillSingleJpeg" style="width:0%; background: var(--blue);"></div>
-                        </div>
-                        <div class="progress-text" id="bulkProgressTextSingleJpeg" style="font-size: 10px;">File progress...</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- MANAGE -->
-            <section id="manage" class="admin-section">
-                <div class="counter-bar">
-                    <div class="counter-item"><span class="counter-label">Total Downloads (All Time):</span> <span class="counter-value" id="totalDlAllTime">0</span></div>
-                    <div class="counter-item"><span class="counter-label">Downloads in Last 24 Hours:</span> <span class="counter-value" id="totalDl24h">0</span></div>
-                    <div class="counter-item"><span class="counter-label">Downloads in <span id="currentMonthName">Month</span>:</span> <span class="counter-value" id="totalDlMonth">0</span></div>
-                </div>
-                <div class="manage-toolbar">
-                    <input type="text" id="searchManage" placeholder="Search by name, category, keyword...">
-                    <select id="filterCategory">
-                        <option value="">All Categories</option>
-                    </select>
-                    <button id="bulkDeleteBtn" class="btn-delete" style="padding: 9px 16px; font-size: 13px;" disabled>Delete Selected (0)</button>
-                    <button id="bulkDownloadBtn" class="btn-upload" style="background:#2b6cb0; display: none;" disabled>Download Selected (0)</button>
-                </div>
-                <div class="vectors-table-wrap">
-                    <table class="vectors-table">
-                        <thead>
-                            <tr>
-                                <th style="width:40px;"><input type="checkbox" id="selectAllCheckbox"></th>
-                                <th style="width:80px;">Thumbnail</th>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Total Downloads</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="manageTableBody">
-                            <tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">Loading...</td></tr>
-                        </tbody>
+                    <table style="width:100%; background:#fff; border:1px solid #eee; border-collapse:collapse;">
+                        <thead><tr style="background:#000; color:#fff; text-align:left;"><th style="padding:10px;">Category</th><th style="padding:10px;">Vectors</th><th style="padding:10px;">JPEG</th><th style="padding:10px;">Downloads</th></tr></thead>
+                        <tbody id="catTableBody"></tbody>
                     </table>
                 </div>
-                <div class="pagination-admin">
-                    <button id="prevManage" class="pag-admin-btn" disabled>Previous</button>
-                    <span id="managePaginationInfo" class="pag-admin-info">Page 1 of 1</span>
-                    <button id="nextManage" class="pag-admin-btn" disabled>Next</button>
-                </div>
-            </section>
 
-            <!-- MANAGE JPEG -->
-            <section id="manage-jpeg" class="admin-section">
-                <div class="counter-bar">
-                    <div class="counter-item"><span class="counter-label">Total Downloads (All Time):</span> <span class="counter-value" id="totalDlAllTimeJpeg">0</span></div>
-                    <div class="counter-item"><span class="counter-label">Downloads in Last 24 Hours:</span> <span class="counter-value" id="totalDl24hJpeg">0</span></div>
-                    <div class="counter-item"><span class="counter-label">Downloads in <span id="currentMonthNameJpeg">Month</span>:</span> <span class="counter-value" id="totalDlMonthJpeg">0</span></div>
+                <div id="manage" class="admin-section">
+                    <div class="stats-bar">
+                        <div>Total Downloads: <span id="totalDlAllTime">0</span></div>
+                        <div>Last 24h: <span id="totalDl24h">0</span></div>
+                    </div>
+                    <div class="toolbar">
+                        <input type="text" id="searchManage" placeholder="Search..." style="flex:1;">
+                        <select id="filterCategory"><option value="">All Categories</option></select>
+                        <button class="btn-red" id="bulkDeleteBtn">Delete Selected (0)</button>
+                    </div>
+                    <div id="gridContainer" class="grid-container"></div>
                 </div>
-                <div class="manage-toolbar">
-                    <input type="text" id="searchManageJpeg" placeholder="Search by name, category, keyword...">
-                    <select id="filterCategoryJpeg">
-                        <option value="">All Categories</option>
-                    </select>
-                    <button id="bulkDeleteBtnJpeg" class="btn-delete" style="padding: 9px 16px; font-size: 13px;" disabled>Delete Selected (0)</button>
-                    <button id="bulkDownloadBtnJpeg" class="btn-upload" style="background:#2b6cb0; display: none;" disabled>Download Selected (0)</button>
-                </div>
-                <div class="vectors-table-wrap">
-                    <table class="vectors-table">
-                        <thead>
-                            <tr>
-                                <th style="width:40px;"><input type="checkbox" id="selectAllCheckboxJpeg"></th>
-                                <th style="width:80px;">Thumbnail</th>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Total Downloads</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="manageTableBodyJpeg">
-                            <tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="pagination-admin">
-                    <button id="prevManageJpeg" class="pag-admin-btn" disabled>Previous</button>
-                    <span id="managePaginationInfoJpeg" class="pag-admin-info">Page 1 of 1</span>
-                    <button id="nextManageJpeg" class="pag-admin-btn" disabled>Next</button>
-                </div>
-            </section>
-
-            <!-- HEALTH -->
-            <section id="health" class="admin-section">
-                <button class="btn-refresh" id="refreshHealthBtn">Refresh Status</button>
                 
-                <div class="health-grid">
-                    <div class="health-card ok" id="kvStatus">
-                        <div class="health-icon">📦</div>
-                        <div class="health-label">KV Database</div>
-                        <div class="health-value" id="kvCount">0</div>
-                    </div>
-                    <div class="health-card ok" id="r2Status">
-                        <div class="health-icon">☁️</div>
-                        <div class="health-label">R2 Assets</div>
-                        <div class="health-value" id="r2Count">0</div>
-                    </div>
-                    <div class="health-card ok" id="syncStatus">
-                        <div class="health-icon">🔄</div>
-                        <div class="health-label">Sync Issues</div>
-                        <div class="health-value" id="issueCount">0</div>
+                <div id="upload" class="admin-section">
+                    <div style="background:#fff; padding:30px; border:1px solid #eee;">
+                        <h3>Upload Vectors</h3>
+                        <input type="file" id="bulkFileInput" multiple style="margin-top:20px;">
+                        <button class="btn-blue" id="bulkUploadBtn" style="margin-top:20px;">Start Upload</button>
                     </div>
                 </div>
-
-                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                    <button class="btn-upload" id="verifySyncBtn" style="background: var(--blue);">Verify Full Sync</button>
-                    <button class="btn-upload" id="fixCategoriesBtn" style="background: var(--orange);">Fix Category Paths</button>
-                </div>
-
-                <div class="status-box" id="healthStatus"></div>
-
-                <h3 style="margin-bottom:16px; font-size:16px;">Sync Issues</h3>
-                <table class="health-issues-table">
-                    <thead>
-                        <tr>
-                            <th>Slug</th>
-                            <th>Category</th>
-                            <th>Issue</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="healthIssuesBody">
-                        <tr><td colspan="4" style="text-align:center;padding:20px;color:#666;">No issues detected</td></tr>
-                    </tbody>
-                </table>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
-</div>
 
-<script src="admin.js?v=2026040901"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
