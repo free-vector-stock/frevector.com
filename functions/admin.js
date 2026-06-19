@@ -37,8 +37,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (savedKey === ADMIN_KEY) showApp();
     else showLogin();
 
-    document.getElementById('loginBtn').onclick = doLogin;
-    document.getElementById('loginPassword').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            doLogin();
+        });
+        loginBtn.addEventListener('touchstart', (e) => {
+            // Touch event handling for mobile responsiveness
+        }, {passive: true});
+    }
+    
+    const loginPass = document.getElementById('loginPassword');
+    if (loginPass) {
+        loginPass.addEventListener('keydown', (e) => { 
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                doLogin(); 
+            }
+        });
+    }
     document.getElementById('logoutBtn').onclick = () => { sessionStorage.removeItem('fv_admin'); location.reload(); };
 
     document.querySelectorAll('.nav-btn').forEach(btn => {

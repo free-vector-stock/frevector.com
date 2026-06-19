@@ -19,12 +19,13 @@
         body { font-family: var(--font); background: #f8f8f8; color: #1a1a1a; overflow-x: hidden; }
 
         /* LOGIN */
-        #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--black); }
-        .login-box { background: var(--white); padding: 48px 40px; border-radius: 8px; width: 380px; text-align: center; }
-        .login-box h2 { margin-bottom: 20px; }
-        .login-box input { width: 100%; padding: 11px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 14px; font-size: 14px; }
-        .login-box button { width: 100%; padding: 11px; background: var(--black); color: var(--white); border: none; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 14px; }
-        #loginError { color: var(--red); display: none; margin-top: 10px; font-size: 12px; }
+        #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--black); padding: 20px; }
+        .login-box { background: var(--white); padding: 40px 30px; border-radius: 8px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .login-box h2 { margin-bottom: 25px; color: var(--black); font-size: 24px; }
+        .login-box input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 16px; font-size: 16px; -webkit-appearance: none; }
+        .login-box button { width: 100%; padding: 14px; background: var(--black); color: var(--white); border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 16px; transition: opacity 0.2s; -webkit-tap-highlight-color: transparent; }
+        .login-box button:active { opacity: 0.8; }
+        #loginError { color: var(--red); display: none; margin-top: 12px; font-size: 14px; font-weight: 600; }
 
         /* LAYOUT */
         #adminApp { display: none; }
