@@ -347,12 +347,12 @@
 <body>
     <!-- LOGIN SCREEN -->
     <div id="loginScreen">
-        <div class="login-box">
+        <form class="login-box" id="loginForm" onsubmit="return false;">
             <h2>Frevector Admin</h2>
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button id="loginBtn">Login</button>
+            <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
+            <button type="submit" id="loginBtn">Login</button>
             <p id="loginError">Invalid Password</p>
-        </div>
+        </form>
     </div>
 
     <!-- ADMIN APP -->
@@ -520,6 +520,6 @@
         </div>
     </div>
 
-    <script src="/functions/admin.js"></script>
+    <script src="/functions/admin.js?v=2026061901"></script>
 </body>
 </html>
