@@ -127,6 +127,21 @@ class PinterestAPI {
             throw error;
         }
     }
+
+    async deletePin(pinId) {
+        try {
+            const response = await axios.delete(`${this.baseUrl}/pins/${pinId}`, {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error deleting pin ${pinId}:`, error.response?.data || error.message);
+            throw error;
+        }
+    }
 }
 
 module.exports = PinterestAPI;

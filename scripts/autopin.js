@@ -40,12 +40,14 @@ async function autopin() {
     const parser = new xml2js.Parser();
     const sitemap = await parser.parseStringPromise(sitemapContent);
     
-    const allUrls = sitemap.urlset.url.map(u => u.loc[0]).filter(url => url.includes('/details/'));
+    const allUrls = sitemap.urlset.url.map(u => u.loc[0]).filter(url => url.includes('/details/') && !url.toLowerCase().includes('jpeg'));
 
     // FIX B: Build per-category buckets, then interleave (round-robin)
+    // FILTER: Skip URLs containing "jpeg" (JPEG files are no longer pinned)
     const categoryBuckets = {};
     for (const url of allUrls) {
         if (sentSet.has(url)) continue; // skip already-pinned
+        if (url.toLowerCase().includes('jpeg')) continue; // skip JPEG files
         const slug = url.split('/').pop();
         const categoryKey = slug.split('-')[0].toLowerCase();
         if (!categoryBuckets[categoryKey]) categoryBuckets[categoryKey] = [];

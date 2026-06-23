@@ -61,9 +61,10 @@ async function batchUpdatePins() {
         }
     }
 
-    // 3. Filter sent URLs to only those that exist on Pinterest
-    const urlsToUpdate = sentUrls.filter(url => urlToPinId[url]);
-    console.log(`${urlsToUpdate.length} of ${sentUrls.length} sent URLs found on Pinterest.`);
+    // 3. Filter sent URLs to only those that exist on Pinterest AND are not JPEG files
+    const urlsToUpdate = sentUrls.filter(url => urlToPinId[url] && !url.toLowerCase().includes('jpeg'));
+    const jpegUrlsSkipped = sentUrls.filter(url => url.toLowerCase().includes('jpeg')).length;
+    console.log(`${urlsToUpdate.length} of ${sentUrls.length} sent URLs found on Pinterest (skipped ${jpegUrlsSkipped} JPEG URLs).`);
 
     if (urlsToUpdate.length === 0) {
         console.log('No pins to update.');

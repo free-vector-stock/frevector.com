@@ -9,6 +9,7 @@
     "refresh-token": "node scripts/refreshToken.js",
     "report": "node scripts/report.js"
     ,"batch-update-pins": "node scripts/batch-update-pins.js"
+    ,"delete-jpeg-pins": "node scripts/delete-jpeg-pins.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
