@@ -86,7 +86,7 @@ export async function onRequestGet(context) {
         const isJpeg = decodedKey.endsWith(".jpg") || decodedKey.endsWith(".jpeg");
 
         const headers = {
-            "Cache-Control": "public, max-age=86400",
+            "Cache-Control": "public, max-age=31536000, immutable",
             "Access-Control-Allow-Origin": "*"
         };
 
