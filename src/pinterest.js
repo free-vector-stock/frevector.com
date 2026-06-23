@@ -44,9 +44,9 @@ class PinterestAPI {
         }
     }
 
-    async createPin(boardId, title, description, imageUrl, link) {
+    async createPin(boardId, title, description, imageUrl, link, altText = '') {
         try {
-            const response = await axios.post(`${this.baseUrl}/pins`, {
+            const pinData = {
                 board_id: boardId,
                 title: title,
                 description: description,
@@ -55,7 +55,9 @@ class PinterestAPI {
                     source_type: 'image_url',
                     url: imageUrl
                 }
-            }, {
+            };
+            if (altText) pinData.alt_text = altText;
+            const response = await axios.post(`${this.baseUrl}/pins`, pinData, {
                 headers: {
                     'Authorization': `Bearer ${this.accessToken}`,
                     'Content-Type': 'application/json'

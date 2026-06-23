@@ -1,6 +1,11 @@
 /**
  * Auto Pin script for Frevector.com
  * Parses sitemap.xml and pins new items to Pinterest
+ *
+ * FIX A: Pin description now uses metadata.description (full text from JSON),
+ *         not just keywords. Alt text uses keywords joined.
+ * FIX B: Category-balanced (round-robin) selection so pins are spread across
+ *         all categories instead of flooding one category at a time.
  */
 
 const fs = require('fs');
@@ -28,6 +33,7 @@ async function autopin() {
     if (fs.existsSync(SENT_JSON_PATH)) {
         sentUrls = JSON.parse(fs.readFileSync(SENT_JSON_PATH, 'utf8'));
     }
+    const sentSet = new Set(sentUrls); // O(1) lookup for duplicate prevention
 
     // 2. Parse Sitemap
     const sitemapContent = fs.readFileSync(SITEMAP_PATH, 'utf8');
@@ -35,14 +41,38 @@ async function autopin() {
     const sitemap = await parser.parseStringPromise(sitemapContent);
     
     const allUrls = sitemap.urlset.url.map(u => u.loc[0]).filter(url => url.includes('/details/'));
-    const newUrls = allUrls.filter(url => !sentUrls.includes(url)).slice(0, QUOTA_LIMIT);
+
+    // FIX B: Build per-category buckets, then interleave (round-robin)
+    const categoryBuckets = {};
+    for (const url of allUrls) {
+        if (sentSet.has(url)) continue; // skip already-pinned
+        const slug = url.split('/').pop();
+        const categoryKey = slug.split('-')[0].toLowerCase();
+        if (!categoryBuckets[categoryKey]) categoryBuckets[categoryKey] = [];
+        categoryBuckets[categoryKey].push(url);
+    }
+
+    // Round-robin interleave across categories
+    const newUrls = [];
+    const bucketKeys = Object.keys(categoryBuckets);
+    let anyLeft = true;
+    while (anyLeft && newUrls.length < QUOTA_LIMIT) {
+        anyLeft = false;
+        for (const key of bucketKeys) {
+            if (categoryBuckets[key].length > 0) {
+                newUrls.push(categoryBuckets[key].shift());
+                anyLeft = true;
+                if (newUrls.length >= QUOTA_LIMIT) break;
+            }
+        }
+    }
 
     if (newUrls.length === 0) {
         console.log('No new URLs to pin.');
         return;
     }
 
-    console.log(`Found ${newUrls.length} new URLs to pin.`);
+    console.log(`Found ${newUrls.length} new URLs to pin (balanced across ${bucketKeys.length} categories).`);
 
     // 3. Get Pinterest Boards
     const boards = await pinterest.getBoards();
@@ -52,9 +82,15 @@ async function autopin() {
     // 4. Process in batches
     for (let i = 0; i < newUrls.length; i += BATCH_SIZE) {
         const batch = newUrls.slice(i, i + BATCH_SIZE);
-        console.log(`Processing batch ${i / BATCH_SIZE + 1}...`);
+        console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}...`);
 
         for (const url of batch) {
+            // Extra guard: never re-pin
+            if (sentSet.has(url)) {
+                console.log(`Skipping already-pinned URL: ${url}`);
+                continue;
+            }
+
             try {
                 // Extract slug and category
                 // Example URL: https://frevector.com/details/abstract-00000002
@@ -70,7 +106,7 @@ async function autopin() {
                     try {
                         const newBoard = await pinterest.createBoard(category, `Free ${category} vectors and images from frevector.com`);
                         boardId = newBoard.id;
-                        boardMap[category.toLowerCase()] = boardId; // Update local map
+                        boardMap[category.toLowerCase()] = boardId;
                         console.log(`Successfully created new board: ${category} (${boardId})`);
                     } catch (createErr) {
                         console.warn(`Could not create board for ${category}, falling back to miscellaneous.`);
@@ -86,15 +122,32 @@ async function autopin() {
                 // Fetch metadata from R2 (via Cloudflare API)
                 const metadata = await fetchMetadata(category, slug);
                 
-                const title = metadata.title || slug;
-                const description = (metadata.keywords || []).join(', ') || category;
+                // FIX A: Use the real title and description from JSON.
+                // Pinterest title max = 100 chars, description max = 500 chars.
+                const title = (metadata.title || slug).substring(0, 100);
+
+                // Use metadata.description if available; otherwise fall back to keywords joined.
+                // Do NOT rewrite the text — only truncate if over Pinterest's 500-char limit.
+                let description = '';
+                if (metadata.description && metadata.description.trim().length > 0) {
+                    description = metadata.description.trim().substring(0, 500);
+                } else if (metadata.keywords && metadata.keywords.length > 0) {
+                    description = metadata.keywords.join(', ').substring(0, 500);
+                } else {
+                    description = category;
+                }
+
+                // Alt text: keywords joined (Pinterest alt_text max = 500 chars)
+                const altText = (metadata.keywords || []).join(', ').substring(0, 500) || category;
+
                 // R2 uses Title Case for category folders
                 const categoryTitle = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
                 const imageUrl = `https://frevector.com/api/asset?key=${encodeURIComponent(categoryTitle + '/' + slug + '/' + slug + '.jpg')}`;
 
-                await pinterest.createPin(boardId, title, description, imageUrl, url);
+                await pinterest.createPin(boardId, title, description, imageUrl, url, altText);
+                sentSet.add(url);
                 sentUrls.push(url);
-                console.log(`Pinned: ${slug}`);
+                console.log(`Pinned: ${slug} | title: "${title.substring(0, 40)}..." | desc: "${description.substring(0, 40)}..."`);
 
                 // Small delay to avoid rate limits
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -129,7 +182,7 @@ async function fetchMetadata(category, slug) {
         console.warn(`Could not fetch metadata for ${slug} (key: ${key}), using defaults.`);
         // Generate a human-readable title from slug
         const readableTitle = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()).replace(/\d+$/, '').trim();
-        return { title: readableTitle || slug, keywords: [category.toLowerCase()] };
+        return { title: readableTitle || slug, description: '', keywords: [category.toLowerCase()] };
     }
 }
 
