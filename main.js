@@ -243,6 +243,10 @@ async function fetchVectors() {
     if (state.isLoading) return;
     state.isLoading = true;
     showLoader(true);
+    
+    // Clear existing grid to prevent showing stale data while loading
+    const grid = document.getElementById('vectorsGrid');
+    if (grid) grid.innerHTML = '';
 
     try {
         const url = new URL('/api/vectors', window.location.origin);

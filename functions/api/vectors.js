@@ -6,7 +6,7 @@
 const CORS_HEADERS = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    "Cache-Control": "public, max-age=60"
+    "Cache-Control": "public, max-age=10"
 };
 
 export async function onRequestGet(context) {
