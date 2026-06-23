@@ -69,6 +69,64 @@ class PinterestAPI {
             throw error;
         }
     }
+
+    async getAllPins() {
+        try {
+            let allPins = [];
+            let bookmark = null;
+            let pageCount = 0;
+            const pageSize = 100;
+
+            while (true) {
+                pageCount++;
+                const params = { page_size: pageSize };
+                if (bookmark) params.bookmark = bookmark;
+
+                const response = await axios.get(`${this.baseUrl}/me/pins`, {
+                    headers: {
+                        'Authorization': `Bearer ${this.accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    params: params
+                });
+
+                if (response.data.items) {
+                    allPins = allPins.concat(response.data.items);
+                }
+
+                // Check if there are more pages
+                if (!response.data.bookmark) break;
+                bookmark = response.data.bookmark;
+            }
+
+            console.log(`Fetched ${allPins.length} pins in ${pageCount} page(s)`);
+            return allPins;
+        } catch (error) {
+            console.error('Error fetching all pins:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
+    async updatePin(pinId, title, description, altText = '') {
+        try {
+            const updateData = {
+                title: title,
+                description: description
+            };
+            if (altText) updateData.alt_text = altText;
+
+            const response = await axios.patch(`${this.baseUrl}/pins/${pinId}`, updateData, {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating pin ${pinId}:`, error.response?.data || error.message);
+            throw error;
+        }
+    }
 }
 
 module.exports = PinterestAPI;
