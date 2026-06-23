@@ -133,7 +133,7 @@ function enrichVector(v) {
         title: v.title || v.name || "",
         // Requirement: ALWAYS use thumbnail in site
         // Changed to use local proxy to avoid R2 public access issues
-        thumbnail: `/api/asset?key=${encodeURIComponent(thumbKey)}`,
+        thumbnail: `https://assets.frevector.com/${thumbKey}`,
         isJpegOnly: isJpegOnly
     };
 }
