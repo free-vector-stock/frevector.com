@@ -244,9 +244,9 @@ async function fetchVectors() {
     state.isLoading = true;
     showLoader(true);
     
-    // Clear existing grid to prevent showing stale data while loading
+    // Dim the grid instead of clearing it to provide visual feedback without jumpiness
     const grid = document.getElementById('vectorsGrid');
-    if (grid) grid.innerHTML = '';
+    if (grid) grid.style.opacity = '0.5';
 
     try {
         const url = new URL('/api/vectors', window.location.origin);
@@ -295,6 +295,8 @@ async function fetchVectors() {
     } finally {
         state.isLoading = false;
         showLoader(false);
+        const grid = document.getElementById('vectorsGrid');
+        if (grid) grid.style.opacity = '1';
     }
 }
 
