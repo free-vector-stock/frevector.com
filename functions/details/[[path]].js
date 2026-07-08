@@ -79,8 +79,8 @@ export async function onRequest(context) {
   // Replace or insert <meta name="description">
   if (/<meta\s+name=["']description["']/i.test(html)) {
     html = html.replace(
-      /(<meta\s+name=["']description["']\s+content=["'])[^"']*["']/i,
-      `$1${escapeHtml(desc)}`
+      /(<meta\s+name=["']description["']\s+content=["'])(?:[^"']*)(["'])/i,
+      `$1${escapeHtml(desc)}$2`
     );
   } else {
     html = html.replace("</head>", `<meta name="description" content="${escapeHtml(desc)}">\n</head>`);
@@ -89,8 +89,8 @@ export async function onRequest(context) {
   // Replace or insert <meta name="keywords">
   if (/<meta\s+name=["']keywords["']/i.test(html)) {
     html = html.replace(
-      /(<meta\s+name=["']keywords["']\s+content=["'])[^"']*["']/i,
-      `$1${escapeHtml(keywords)}`
+      /(<meta\s+name=["']keywords["']\s+content=["'])(?:[^"']*)(["'])/i,
+      `$1${escapeHtml(keywords)}$2`
     );
   } else if (keywords) {
     html = html.replace("</head>", `<meta name="keywords" content="${escapeHtml(keywords)}">\n</head>`);
@@ -105,8 +105,8 @@ export async function onRequest(context) {
   const ogBlock = `
 <meta property="og:title" content="${escapeHtml(pageTitle)}">
 <meta property="og:description" content="${escapeHtml(desc)}">
-<meta property="og:image" content="${thumbUrl}">
-<meta property="og:url" content="${canonical}">
+<meta property="og:image" content="${escapeHtml(thumbUrl)}">
+<meta property="og:url" content="${escapeHtml(canonical)}">
 <meta property="og:type" content="website">`;
   html = html.replace("</head>", `${ogBlock}\n</head>`);
 
