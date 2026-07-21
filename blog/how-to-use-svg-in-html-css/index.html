@@ -27,11 +27,29 @@
         .footer .footer-nav { flex: 1; display: flex; justify-content: flex-end; gap: 15px; }
         @media (max-width: 768px) { .legal-content { margin-top: 80px; padding: 22px; border: none; } }
     </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://frevector.com"},
+            {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://frevector.com/blog"},
+            {"@type": "ListItem", "position": 3, "name": "How To Use Svg In Html Css", "item": "https://frevector.com/blog/how-to-use-svg-in-html-css"}
+        ]
+    }
+    </script>
 </head>
 <body>
     <div class="top-banner"><a href="/" class="banner-logo-link"><img src="/logo.svg" alt="Frevector" class="banner-logo" width="220" height="60"></a></div>
     <main class="legal-content">
         <article>
+        <nav class="breadcrumb" style="font-size:13px;color:#888;margin-bottom:16px;">
+            <a href="/" style="color:#000;text-decoration:none;">Home</a> &rsaquo; 
+            <a href="/blog" style="color:#000;text-decoration:none;">Blog</a> &rsaquo; 
+            <span style="color:#555;">How To Use Svg In Html Css</span>
+        </nav>
+        
             <h1>How to Use SVG Files in HTML and CSS</h1>
             <p>SVG (Scalable Vector Graphics) is a powerful tool for web developers. Unlike raster images, SVGs are part of the DOM, which means you can interact with them just like any other HTML element. Here is how to use them effectively.</p>
             
@@ -46,6 +64,20 @@
             
             <h2>Best Practices</h2>
             <p>Always optimize your SVG files before using them on the web. Tools like SVGO can remove unnecessary metadata and minify the code, significantly reducing file size without affecting the visual quality.</p>
+        <h2>Inline SVG Advantages</h2>
+            <p>When you place SVG code directly in your HTML, you gain the ability to style it with CSS. You can change colors, add hover effects, animate paths, and apply filters — all without additional JavaScript. This makes inline SVG the preferred method for icons and decorative elements that need to interact with the page design.</p>
+            <h2>SVG as an Image Tag</h2>
+            <p>The simplest way to use an SVG is as an image: <code>&lt;img src="icon.svg"&gt;</code>. This approach treats the SVG like any other image file — it's cached by the browser, easy to reference, and works across all browsers. The downside is that you cannot style the SVG internals with CSS when using this method.</p>
+            <h2>CSS Background SVG</h2>
+            <p>SVGs can also be used as CSS background images: <code>background-image: url('pattern.svg')</code>. This is particularly useful for decorative patterns and textures. You can combine this with <code>background-size</code> and <code>background-repeat</code> properties to create seamless tiled backgrounds from <a href="/category/backgrounds">our background collection</a>.</p>
+            <h2>Responsive SVG Techniques</h2>
+            <p>To make SVGs responsive, use <code>viewBox</code> attribute and set width to 100%. The viewBox defines the coordinate system, while the width/height attributes control the rendered size. This ensures your <a href="/category/icons">icons</a> and <a href="/category/logo">logos</a> scale properly across all device sizes without distortion.</p>
+            <h2>Performance Best Practices</h2>
+            <p>For optimal performance, minify your SVG code by removing unnecessary whitespace, comments, and default attributes. Tools like SVGO can automate this process. If you're using many SVG icons, consider creating a sprite sheet or using a font icon system. For large decorative SVGs, lazy loading helps keep initial page load times fast.</p>
+            <h2>Accessibility Considerations</h2>
+            <p>Always add <code>role="img"</code> and <code>aria-label</code> to inline SVGs for screen reader compatibility. Decorative SVGs that don't convey information should have <code>aria-hidden="true"</code>. Title elements inside SVGs provide tooltips and additional context for assistive technologies.</p>
+            <h2>Browser Support</h2>
+            <p>All modern browsers (Chrome, Firefox, Safari, Edge) support SVG natively. Internet Explorer 11 has partial support with some limitations. For legacy browser compatibility, consider providing PNG fallbacks using the <code>&lt;picture&gt;</code> element with SVG as the primary source and PNG as the fallback.</p>
         </article>
     </main>
     <footer class="footer" style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background: #000; z-index: 2000;">

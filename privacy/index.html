@@ -24,10 +24,25 @@
         body { padding-bottom: 0 !important; }
         @media (max-width: 768px) { .legal-content { margin-top: 80px; padding: 22px; border: none; } }
 </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://frevector.com"},
+            {"@type": "ListItem", "position": 2, "name": "Privacy", "item": "https://frevector.com/privacy"}
+        ]
+    }
+    </script>
 </head>
 <body>
     <div class="top-banner"><a href="/" class="banner-logo-link"><img src="/logo.svg" alt="Frevector" class="banner-logo" width="220" height="60"></a></div>
     <main class="legal-content">
+        <nav class="breadcrumb" style="font-size:13px;color:#888;margin-bottom:16px;">
+            <a href="/" style="color:#000;text-decoration:none;">Home</a> &rsaquo; 
+            <span style="color:#555;">Privacy</span>
+        </nav>
         <h1>Privacy Policy — frevector.com</h1>
         <p><strong>Last updated:</strong> June 2026</p>
         <p>frevector.com is committed to protecting your privacy. This Privacy Policy explains what data may be collected when you visit our site and how it is used.</p>

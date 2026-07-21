@@ -24,10 +24,25 @@
         body { padding-bottom: 0 !important; }
         @media (max-width: 768px) { .legal-content { margin-top: 80px; padding: 22px; border: none; } }
 </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://frevector.com"},
+            {"@type": "ListItem", "position": 2, "name": "About", "item": "https://frevector.com/about"}
+        ]
+    }
+    </script>
 </head>
 <body>
     <div class="top-banner"><a href="/" class="banner-logo-link"><img src="/logo.svg" alt="Frevector" class="banner-logo" width="220" height="60"></a></div>
     <main class="legal-content">
+        <nav class="breadcrumb" style="font-size:13px;color:#888;margin-bottom:16px;">
+            <a href="/" style="color:#000;text-decoration:none;">Home</a> &rsaquo; 
+            <span style="color:#555;">About</span>
+        </nav>
         <h1>About Us — frevector.com</h1>
         <p>frevector.com is a free vector graphics platform built for designers, developers, and creative professionals around the world. Our mission is to make high-quality SVG and JPEG vector files accessible to everyone — completely free of charge.</p>
         <p>We serve a wide audience: from students learning design to experienced professionals working on large-scale commercial projects. Whether you need icons, illustrations, backgrounds, or decorative elements, our growing library has something for every project.</p>

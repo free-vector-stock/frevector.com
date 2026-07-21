@@ -778,6 +778,14 @@ function buildVectorSeoText(v) {
         <p>This file is free for both personal and commercial use. You may use it in client projects, commercial products, and publications without paying any fee or providing attribution. Redistribution or reselling of the file as a standalone asset is not permitted.</p>
         <h3>Related Vectors</h3>
         <p>Browse more files in our ${category} category to find additional graphics that complement this design. frevector.com offers thousands of free vectors across dozens of categories, all available for instant download. If you enjoy using frevector.com, consider bookmarking our site and checking back regularly because we add new vectors every week.</p>
+        <h3 style="margin-top:20px;">Frequently Asked Questions</h3>
+        <div class="detail-faq" style="margin-top:8px;">
+            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">What file formats are included in the download?</strong><br>Every download includes an editable SVG file and a JPEG preview image. SVG files can be opened in Adobe Illustrator, Inkscape, or any modern web browser.</div>
+            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Can I use this vector for commercial projects?</strong><br>Yes. All files on frevector.com are free for personal and commercial use without any registration, payment, or attribution requirement.</div>
+            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Do I need to register to download?</strong><br>No. There is no registration, login, or email required. Simply click the download button and the file is yours.</div>
+            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Can I modify the colors and sizes?</strong><br>Absolutely. SVG files are fully editable — you can change colors, resize elements, add text, and combine with other graphics without any quality loss at any scale.</div>
+            <div><strong style="color:#1a5276;">Is it allowed to resell this file?</strong><br>No. You cannot redistribute or resell the raw vector file as a standalone asset. It must be incorporated into a larger design project or product.</div>
+        </div>
     </section>`;
 }
 

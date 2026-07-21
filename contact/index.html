@@ -24,10 +24,25 @@
         body { padding-bottom: 0 !important; }
         @media (max-width: 768px) { .legal-content { margin-top: 80px; padding: 22px; border: none; } }
 </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://frevector.com"},
+            {"@type": "ListItem", "position": 2, "name": "Contact", "item": "https://frevector.com/contact"}
+        ]
+    }
+    </script>
 </head>
 <body>
     <div class="top-banner"><a href="/" class="banner-logo-link"><img src="/logo.svg" alt="Frevector" class="banner-logo" width="220" height="60"></a></div>
     <main class="legal-content">
+        <nav class="breadcrumb" style="font-size:13px;color:#888;margin-bottom:16px;">
+            <a href="/" style="color:#000;text-decoration:none;">Home</a> &rsaquo; 
+            <span style="color:#555;">Contact</span>
+        </nav>
         <h1>Contact — frevector.com</h1><p>Have a question, suggestion, or content removal request? Fill out the form below or send us a direct email.</p><div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;border:1px solid #e9ecef">
             <p style="margin-bottom:10px"><strong>General inquiries:</strong> <code style="background:#eee;padding:2px 6px;border-radius:4px">info@frevector.com</code> 
             <button onclick="copyEmail('info@frevector.com', this)" style="margin-left:10px;padding:4px 12px;font-size:12px;cursor:pointer;background:#1a5276;color:#fff;border:none;border-radius:4px">Copy</button>
@@ -64,6 +79,16 @@
             </div>
             <button type="submit" style="background:#1a5276;color:#fff;border:none;padding:12px 32px;font-size:15px;border-radius:4px;cursor:pointer;font-family:Arial,sans-serif">Send Message</button>
         </form>
+    
+        <h2>General Inquiries</h2>
+        <p>For general questions about frevector.com, our library, or how to use our files, please email us at <a href="mailto:info@frevector.com">info@frevector.com</a>. We aim to respond within 24-48 hours during business days.</p>
+        <h2>Copyright and DMCA</h2>
+        <p>If you believe any content on frevector.com infringes your copyright, please visit our <a href="/dmca">DMCA page</a> for detailed instructions on filing a claim. We take copyright matters seriously and respond to legitimate claims promptly.</p>
+        <h2>Bug Reports and Feature Requests</h2>
+        <p>If you encounter a technical issue or have a suggestion for improving our platform, please include the following information in your message: your browser type and version, the page URL where the issue occurred, and a description of the problem or suggestion.</p>
+        <h2>Collaboration Opportunities</h2>
+        <p>We welcome collaboration proposals from designers, illustrators, and content creators. If you'd like to contribute your vector artwork to our growing library, please send us a portfolio link and a brief description of your work. We're always looking for high-quality additions to our collection.</p>
+
     </main>
     <footer class="footer" style="display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; background: #000; z-index: 2000;">
         <div style="flex: 1; display: flex; justify-content: flex-start;">
