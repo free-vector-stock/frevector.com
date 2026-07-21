@@ -4,7 +4,7 @@
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
-const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'vector eps', 'svg'];
+const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free jpeg', 'vector jpeg', 'svg'];
 
 const CATEGORIES = [
     'Icon', 'Logo', 'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Business', 'Buildings', 'Celebrities',
@@ -124,6 +124,29 @@ const state = {
     ourPicksOffset: 0,
     ourPicksVectors: []
 };
+
+
+// GÖREV 9: Inject JSON-LD schema.org
+function injectSchema(v) {
+    const schema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": v.title || "",
+        "description": v.description || "",
+        "image": v.thumbnail || "",
+        "category": v.category || "",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        }
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+}
 
 function init() {
     setupCategories();
@@ -627,9 +650,15 @@ function openDetailPanel(v, cardEl) {
     // REVİZYON: Tip ve Kategori Fallback Mekanizması
     const displayType = v.isJpegOnly ? 'JPEG' : 'Vector';
     const displayCategory = v.category || 'Unspecified';
-    const fileFormat = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
+    const fileFormat = v.isJpegOnly ? 'JPEG' : 'SVG, JPEG';
 
     panel.innerHTML = `
+        <!-- GÖREV 10: Breadcrumb -->
+        <div class="breadcrumb" style="font-size:12px;color:#888;margin-bottom:8px;">
+            <a href="/" style="color:#000;text-decoration:none;">Home</a> &rsaquo; 
+            <a href="/?category=${escHtml(displayCategory)}" style="color:#000;text-decoration:none;">${escHtml(displayCategory)}</a> &rsaquo; 
+            <span style="color:#555;">${escHtml(v.title.substring(0, 30))}</span>
+        </div>
         <div class="detail-inner">
             <div class="detail-left">
                 <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" width="600" height="600" loading="eager">
@@ -670,8 +699,11 @@ function openDetailPanel(v, cardEl) {
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
+    // GÖREV 2: Load dynamic related vectors
+    loadRelatedVectors(v.category || '', v.name);
     
     // URL'yi güncelle (objects-jpeg-000000000131 takılı kalma sorununu çözer)
+    injectSchema(v);
     const newPath = `/details/${v.name}`;
     if (window.location.pathname !== newPath) {
         window.history.pushState({ slug: v.name }, v.title, newPath);
@@ -679,6 +711,40 @@ function openDetailPanel(v, cardEl) {
     
     // Detay panelini görünür kılmak için her zaman scroll yapalım
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+
+// GÖREV 2: Dynamic related vectors loader
+async function loadRelatedVectors(category, currentSlug) {
+    const container = document.getElementById('related-vectors-container');
+    if (!container) return;
+    try {
+        const res = await fetch(`/api/vectors?category=${encodeURIComponent(category)}&limit=50`);
+        const data = await res.json();
+        let vectors = (data.vectors || []).filter(v => v.name !== currentSlug);
+        vectors.sort(() => Math.random() - 0.5);
+        vectors = vectors.slice(0, 6);
+        if (vectors.length === 0) {
+            // Fallback: get from all vectors
+            const res2 = await fetch(`/api/vectors?limit=50`);
+            const data2 = await res2.json();
+            vectors = (data2.vectors || []).filter(v => v.name !== currentSlug);
+            vectors.sort(() => Math.random() - 0.5);
+            vectors = vectors.slice(0, 6);
+        }
+        container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:8px;">' +
+            vectors.map(v => `
+                <div style="text-align:center;">
+                    <a href="/details/${v.name}">
+                        <img src="${v.thumbnail}" alt="${escHtml(v.title)}" style="width:100%;height:100px;object-fit:cover;border-radius:4px;border:1px solid #eee;" loading="lazy">
+                        <p style="font-size:11px;color:#555;margin-top:4px;line-height:1.3;">${escHtml(v.title.substring(0, 40))}</p>
+                    </a>
+                </div>
+            `).join('') +
+            '</div>';
+    } catch(e) {
+        container.innerHTML = '<p>Browse more <a href="/" style="color:#000;text-decoration:underline;">free vectors</a> in our library.</p>';
+    }
 }
 
 function closeDetailPanel() {
@@ -701,13 +767,13 @@ function buildVectorSeoText(v) {
     const style = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 3).join(', ')) : 'clean and editable';
     const useCases = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 8).join(', ')) : 'websites, social media posts, presentations, print advertisements, packaging, flyers, app icons, and infographics';
     return `<section class="detail-seo-text" style="margin-top:24px;font-size:14px;line-height:1.75;color:#333">
-        <h3>${title} — Free SVG & EPS Download</h3>
-        <p>${title} is a high-quality free vector graphic available for download in SVG and EPS formats. This file is part of our ${category} collection and is suitable for a wide range of design projects, from digital media to print materials.</p>
+        <h3>${title} — Free SVG & JPEG Download</h3>
+        <p>${title} is a high-quality free vector graphic available for download in SVG and JPEG formats. This file is part of our ${category} collection and is suitable for a wide range of design projects, from digital media to print materials.</p>
         <h3>About This File</h3>
         <p>This vector has been prepared in a ${style} style, making it versatile and easy to customize in vector editing applications such as Adobe Illustrator, Inkscape, CorelDRAW, or Affinity Designer. The scalable format ensures that the graphic looks sharp and professional at any size, whether you need a small icon for a mobile app or a large illustration for a poster or banner.</p>
         <p>The file is fully editable. You can change colors, resize elements, add text, or combine it with other graphics to create a unique composition. No quality loss occurs at any resolution because the artwork is delivered in a true vector format.</p>
         <h3>How to Use This Vector</h3>
-        <p>This graphic is ideal for ${useCases}. Simply click the download button to get the file in your preferred format. SVG files can be opened directly in web browsers and most design tools. EPS files are compatible with professional design software and print workflows.</p>
+        <p>This graphic is ideal for ${useCases}. Simply click the download button to get the file in your preferred format. SVG files can be opened directly in web browsers and most design tools. JPEG preview files are provided for quick viewing and reference.</p>
         <h3>License Information</h3>
         <p>This file is free for both personal and commercial use. You may use it in client projects, commercial products, and publications without paying any fee or providing attribution. Redistribution or reselling of the file as a standalone asset is not permitted.</p>
         <h3>Related Vectors</h3>
@@ -732,7 +798,7 @@ function showDownloadPage(v) {
     
     // Update file format in download page
     const dpFormatCell = document.getElementById('dpFileFormat');
-    if (dpFormatCell) dpFormatCell.textContent = v.isJpegOnly ? 'JPEG' : 'EPS, SVG, JPEG';
+    if (dpFormatCell) dpFormatCell.textContent = v.isJpegOnly ? 'JPEG' : 'SVG, JPEG';
 
     const kwBox = document.getElementById('dpKeywords');
     const keywords = [...new Set([...EXTRA_KEYWORDS, ...(v.keywords || [])])];

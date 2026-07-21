@@ -4,7 +4,7 @@
  */
 
 const EXTRA_KEYWORDS = ['free jpeg', 'free', 'jpeg', 'fre'];
-const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free eps', 'vector eps', 'svg'];
+const VECTOR_KEYWORDS = ['free vector', 'free svg', 'free svg icon', 'free jpeg', 'vector jpeg', 'svg'];
 
 const CATEGORIES = [
     'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',

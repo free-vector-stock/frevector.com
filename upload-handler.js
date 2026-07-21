@@ -6,7 +6,7 @@
 class VectorUploadHandler {
   constructor() {
     this.SUPPORTED_FORMATS = ['.json', '.jpg', '.jpeg', '.zip'];
-    this.ZIP_CONTENT_TYPES = ['eps', 'svg', 'ai', 'jpeg', 'jpg'];
+    this.ZIP_CONTENT_TYPES = ['svg', 'ai', 'jpeg', 'jpg'];
     this.MAX_PREVIEW_SIZE = 800; // pixels
     this.PREVIEW_SIZES = [300, 800];
     this.CATEGORIES = [
@@ -76,7 +76,7 @@ class VectorUploadHandler {
         const ext = this.getFileExtension(relativePath).toLowerCase();
         contents.files.push({ name: relativePath, ext });
         
-        if (ext === '.eps') contents.hasEps = true;
+        // format support: svg, ai, jpeg, jpg only
         if (ext === '.svg') contents.hasSvg = true;
         if (ext === '.ai') contents.hasAi = true;
         if (['.jpg', '.jpeg'].includes(ext)) {
