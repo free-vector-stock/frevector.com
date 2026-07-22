@@ -28,7 +28,7 @@ jobs:
       - name: Deploy to Cloudflare Pages
         run: |
           wrangler pages deploy . \
-            --project-name=free-vector-stock \
+            --project-name=frevector-com \
             --branch=main \
             --commit-message="${{ github.event.head_commit.message }}"
         env:
