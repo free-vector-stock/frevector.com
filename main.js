@@ -324,6 +324,13 @@ async function fetchVectors() {
 }
 
 async function fetchOurPicksRandomly() {
+    // SSR Fallback: If SSR data was injected, use it first
+    if (window.__ssrData && window.__ssrData.ourPicks && window.__ssrData.ourPicks.length > 0) {
+        state.ourPicksVectors = window.__ssrData.ourPicks;
+        renderOurPicks();
+        return;
+    }
+
     try {
         const url = new URL('/api/vectors', window.location.origin);
         url.searchParams.set('limit', '100');
@@ -939,8 +946,12 @@ function updatePagination() {
     
     // GÖREV 2: Toplam vektör sayısını güncelle
     const totalCountEl = document.getElementById('totalVectorCount');
-    if (totalCountEl && state.total > 0) {
-        totalCountEl.textContent = `(${state.total.toLocaleString()} free vectors available)`;
+    if (totalCountEl) {
+        // Use SSR data as fallback if API returned 0
+        const displayTotal = (state.total > 0) ? state.total : (window.__ssrData && window.__ssrData.totalCount) || 0;
+        if (displayTotal > 0) {
+            totalCountEl.textContent = `(${displayTotal.toLocaleString()} free vectors available)`;
+        }
     }
 }
 
@@ -952,6 +963,67 @@ function showLoader(show) {
 function escHtml(str) {
     if (!str) return '';
     return str.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// SSR Data: Read server-rendered data if available
+function applySSRData() {
+    // 1. Total vector count from SSR
+    const countEl = document.getElementById('totalVectorCount');
+    if (countEl && countEl.dataset.ssrTotal) {
+        const ssrTotal = parseInt(countEl.dataset.ssrTotal);
+        if (!isNaN(ssrTotal) && ssrTotal > 0) {
+            countEl.textContent = `(${ssrTotal.toLocaleString()} free vectors available)`;
+            // Store for later use
+            if (!window.__ssrData) window.__ssrData = {};
+            window.__ssrData.totalCount = ssrTotal;
+        }
+    }
+
+    // 2. Category and FileSize from SSR (for detail pages)
+    const catEl = document.getElementById('dpCategory');
+    const sizeEl = document.getElementById('dpFileSize');
+    if (catEl && catEl.dataset.ssrCategory) {
+        if (catEl.textContent === '-' || catEl.textContent === 'Unspecified') {
+            catEl.textContent = catEl.dataset.ssrCategory;
+        }
+    }
+    if (sizeEl && sizeEl.dataset.ssrFilesize) {
+        if (sizeEl.textContent === '-' || sizeEl.textContent === 'N/A') {
+            sizeEl.textContent = sizeEl.dataset.ssrFilesize;
+        }
+    }
+
+    // 3. Our Picks SSR data
+    const picksDataEl = document.getElementById('our-picks-ssr-data');
+    if (picksDataEl && picksDataEl.dataset.picks) {
+        try {
+            const picks = JSON.parse(picksDataEl.dataset.picks);
+            if (Array.isArray(picks) && picks.length > 0) {
+                // Build vector objects from SSR data
+                const pickVectors = picks.map(p => ({
+                    name: p.name,
+                    title: p.title,
+                    category: p.category,
+                    fileSize: p.fileSize,
+                    isJpegOnly: p.isJpegOnly || false,
+                    thumbnail: `https://assets.frevector.com/${p.category}/${p.name}/${p.name}.jpg`,
+                    description: '',
+                    keywords: []
+                }));
+                if (!window.__ssrData) window.__ssrData = {};
+                window.__ssrData.ourPicks = pickVectors;
+            }
+        } catch(e) {
+            console.warn('SSR our-picks parse error:', e);
+        }
+    }
+}
+
+// Run SSR data application before init
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { applySSRData(); });
+} else {
+    applySSRData();
 }
 
 document.addEventListener('DOMContentLoaded', init);

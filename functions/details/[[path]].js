@@ -28,6 +28,7 @@ export async function onRequest(context) {
 
   // --- Load vector data (R2 first, KV fallback) ---
   let vector = null;
+  let allVectors = null;
   try {
     let allVectorsRaw = null;
 
@@ -47,7 +48,7 @@ export async function onRequest(context) {
     }
 
     if (allVectorsRaw) {
-      const allVectors = JSON.parse(allVectorsRaw);
+      allVectors = JSON.parse(allVectorsRaw);
       vector = allVectors.find(v => v.name === slug) || null;
     }
   } catch (e) {
@@ -65,6 +66,7 @@ export async function onRequest(context) {
   const desc     = vector.description || `Download ${title} free vector illustration from frevector.com`;
   const keywords = Array.isArray(vector.keywords) ? vector.keywords.join(", ") : (vector.keywords || "");
   const category = vector.category    || "";
+  const fileSize = vector.fileSize    || "N/A";
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
@@ -110,6 +112,87 @@ export async function onRequest(context) {
 <meta property="og:type" content="website">`;
   html = html.replace("</head>", `${ogBlock}\n</head>`);
 
+  // GÖREV 1 SSR FIX: Inject category and fileSize into the HTML data attributes
+  // so client-side JS can read them even when /api/vectors fails
+  html = html.replace(
+    /<div id="totalVectorCount"[^>]*>/,
+    `<div id="totalVectorCount" data-ssr-category="${escapeHtml(category)}" data-ssr-filesize="${escapeHtml(fileSize)}" data-ssr-total="${allVectors ? allVectors.length : 0}">`
+  );
+
+  // GÖREV 1 SSR FIX: Replace the static "Our selections for you" list with dynamic SSR-generated content
+  if (allVectors && allVectors.length > 0) {
+    // Get 6 random vectors from the same category (exclude current vector)
+    const sameCategory = allVectors.filter(v => 
+      v.category === category && v.name !== slug
+    );
+    
+    // If not enough in same category, fill from all vectors
+    let picks = [];
+    if (sameCategory.length >= 6) {
+      // Shuffle and pick 6
+      picks = sameCategory.sort(() => Math.random() - 0.5).slice(0, 6);
+    } else {
+      picks = [...sameCategory];
+      const others = allVectors.filter(v => v.category !== category && v.name !== slug);
+      others.sort(() => Math.random() - 0.5);
+      picks = [...picks, ...others].slice(0, 6);
+    }
+
+    // Hide JPEG only vectors from picks
+    picks = picks.filter(v => !v.isJpegOnly);
+    if (picks.length < 6) {
+      const allOthers = allVectors.filter(v => !v.isJpegOnly && v.name !== slug);
+      const extra = allOthers.sort(() => Math.random() - 0.5);
+      picks = [...picks, ...extra].slice(0, 6);
+    }
+
+    const picksHTML = picks.map(v => {
+      const pickCategory = v.category || "";
+      const pickThumbKey = `${pickCategory}/${v.name}/${v.name}.jpg`;
+      const pickThumbUrl = `https://assets.frevector.com/${pickThumbKey}`;
+      return `
+    <div class="vector-card">
+      <div class="vc-img-wrap">
+        <img class="vc-img" src="${escapeHtml(pickThumbUrl)}" alt="${escapeHtml(v.title || '')}" loading="eager" decoding="async" fetchpriority="high" width="300" height="300">
+        <span class="vc-type-badge vector">VECTOR</span>
+      </div>
+    </div>`;
+    }).join("\n");
+
+    // Replace the static hidden list with SSR-generated dynamic content
+    html = html.replace(
+      /<ul style="display:none;">[\s\S]*?<\/ul>/,
+      `${picksHTML}\n    <!-- SSR-generated our-picks -->`
+    );
+
+    // Also inject a data attribute with the picks info for JS to use
+    const picksData = picks.map(v => JSON.stringify({name: v.name, title: v.title, category: v.category, fileSize: v.fileSize, isJpegOnly: v.isJpegOnly})).join(",");
+    html = html.replace(
+      /(<div class="our-picks-track" id="ourPicksTrack">)/,
+      `$1\n    <div id="our-picks-ssr-data" style="display:none;" data-picks='[${picksData}]'></div>`
+    );
+  }
+
+  // GÖREV 1 SSR FIX: Replace the total vector count text with SSR-rendered value
+  if (allVectors && allVectors.length > 0) {
+    html = html.replace(
+      /\(free vectors available\)/,
+      `(${allVectors.length.toLocaleString()} free vectors available)`
+    );
+  }
+
+  // GÖREV 1 SSR FIX: Inject category and file size into the detail page placeholders
+  // The detail page has dpCategory and dpFileSize placeholders with "-" value
+  // We add data attributes so JS can pre-fill them
+  html = html.replace(
+    /<td id="dpCategory" class="dt-value">-/g,
+    `<td id="dpCategory" class="dt-value" data-ssr-category="${escapeHtml(category)}">${escapeHtml(category)}`
+  );
+  html = html.replace(
+    /<td id="dpFileSize" class="dt-value">-/g,
+    `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`
+  );
+
   // Insert SEO skeleton into <body> — visible to crawlers, hidden visually
   const keywordChips = Array.isArray(vector.keywords)
     ? vector.keywords.map(k => `<span style="display:inline-block;margin:2px 4px;padding:2px 8px;border:1px solid #ccc;border-radius:12px;font-size:12px;">${escapeHtml(k)}</span>`).join("")
@@ -121,8 +204,8 @@ export async function onRequest(context) {
     "@type": "BreadcrumbList",
     "itemListElement": [
       {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://frevector.com/"},
-      {"@type": "ListItem", "position": 2, "name": "${escapeHtml(category)}", "item": "https://frevector.com/?category=${encodeURIComponent(category)}"},
-      {"@type": "ListItem", "position": 3, "name": "${escapeHtml(title)}", "item": "${canonical}"}
+      {"@type": "ListItem", "position": 2, "name": escapeHtml(category), "item": `https://frevector.com/?category=${encodeURIComponent(category)}`},
+      {"@type": "ListItem", "position": 3, "name": escapeHtml(title), "item": canonical}
     ]
   });
 
@@ -130,10 +213,10 @@ export async function onRequest(context) {
   const productSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Product",
-    "name": "${escapeHtml(title)}",
-    "description": "${escapeHtml(desc)}",
-    "image": "${escapeHtml(thumbUrl)}",
-    "category": "${escapeHtml(category)}",
+    "name": escapeHtml(title),
+    "description": escapeHtml(desc),
+    "image": escapeHtml(thumbUrl),
+    "category": escapeHtml(category),
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -142,11 +225,15 @@ export async function onRequest(context) {
     }
   });
 
+  // GÖREV 1 SSR FIX: Add category and fileSize to the SEO skeleton so crawlers see it
+  const seoCategoryInfo = `<div style="margin-top:8px;"><strong>Category:</strong> ${escapeHtml(category)} | <strong>File Size:</strong> ${escapeHtml(fileSize)}</div>`;
+
   const seoBlock = `
 <div id="frevector-seo-skeleton" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
   <h1>${escapeHtml(title)}</h1>
   <p>${escapeHtml(desc)}</p>
   ${keywordChips ? `<div>${keywordChips}</div>` : ""}
+  ${seoCategoryInfo}
   <img src="${thumbUrl}" alt="${escapeHtml(title)}" width="1" height="1">
   <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;">
     <h2 style="font-size:16px;margin-bottom:8px;">Frequently Asked Questions</h2>
