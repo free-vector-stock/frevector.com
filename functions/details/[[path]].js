@@ -193,11 +193,6 @@ export async function onRequest(context) {
     `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`
   );
 
-  // Insert SEO skeleton into <body> — visible to crawlers, hidden visually
-  const keywordChips = Array.isArray(vector.keywords)
-    ? vector.keywords.map(k => `<span style="display:inline-block;margin:2px 4px;padding:2px 8px;border:1px solid #ccc;border-radius:12px;font-size:12px;">${escapeHtml(k)}</span>`).join("")
-    : "";
-
   // GÖREV 10: Breadcrumb JSON-LD
   const breadcrumbSchema = JSON.stringify({
     "@context": "https://schema.org",
@@ -225,27 +220,12 @@ export async function onRequest(context) {
     }
   });
 
-  // GÖREV 1 SSR FIX: Add category and fileSize to the SEO skeleton so crawlers see it
-  const seoCategoryInfo = `<div style="margin-top:8px;"><strong>Category:</strong> ${escapeHtml(category)} | <strong>File Size:</strong> ${escapeHtml(fileSize)}</div>`;
-
-  const seoBlock = `
-<div id="frevector-seo-skeleton" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
-  <h1>${escapeHtml(title)}</h1>
-  <p>${escapeHtml(desc)}</p>
-  ${keywordChips ? `<div>${keywordChips}</div>` : ""}
-  ${seoCategoryInfo}
-  <img src="${thumbUrl}" alt="${escapeHtml(title)}" width="1" height="1">
-  <div style="margin-top:16px;border-top:1px solid #eee;padding-top:12px;">
-    <h2 style="font-size:16px;margin-bottom:8px;">Frequently Asked Questions</h2>
-    <p><strong>Where can I use this file?</strong> This ${escapeHtml(category)} graphic works for web design, mobile apps, social media, print materials, and presentations.</p>
-    <p><strong>Is commercial use allowed?</strong> Yes, all downloads are free for personal and commercial projects without attribution.</p>
-    <p><strong>What formats are included?</strong> Every download includes an SVG file for editing and a JPEG preview image.</p>
-  </div>
-</div>
+  // Inject JSON-LD schemas into <body>
+  const jsonLdBlock = `
 <script type="application/ld+json">${breadcrumbSchema}</script>
 <script type="application/ld+json">${productSchema}</script>`;
 
-  html = html.replace("<body", `${seoBlock}\n<body`);
+  html = html.replace("<body", `${jsonLdBlock}\n<body`);
 
   const headers = new Headers(rootResponse.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");
