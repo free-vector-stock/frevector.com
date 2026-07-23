@@ -44,7 +44,7 @@
         .admin-header img { height: 40px; }
 
         /* STATS BAR */
-        .stats-bar { background: #fff; padding: 15px 20px; border: 1px solid #eee; border-radius: 4px; display: flex; gap: 30px; font-size: 13px; margin-bottom: 20px; font-weight: 600; }
+        .stats-bar { background: #fff; padding: 15px 20px; border: 1px solid #eee; border-radius: 4px; display: flex; gap: 30px; font-size: 13px; margin-bottom: 20px; font-weight: 600; flex-wrap: wrap; }
         .stats-bar div { display: flex; gap: 8px; }
         .stats-bar span { color: var(--blue); font-weight: 700; }
 
@@ -61,13 +61,16 @@
         .btn-blue:hover { background: #2c5aa0; }
         .btn-delete { background: var(--red); color: #fff; border: none; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; font-weight: 600; }
 
+        /* TABLE WRAPPER - mobile horizontal scroll */
+        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
         /* TABLE */
-        table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #eee; border-radius: 4px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #eee; border-radius: 4px; overflow: hidden; min-width: 600px; }
         thead { background: #000; color: #fff; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 12px; }
-        th { font-weight: 600; text-transform: uppercase; }
+        th { font-weight: 600; text-transform: uppercase; white-space: nowrap; }
         tr:hover { background: #f9f9f9; }
-        td img { width: 45px; height: 35px; object-fit: cover; border: 1px solid #eee; border-radius: 3px; }
+        td img.preview-img { width: 45px; height: 35px; object-fit: cover; border: 1px solid #eee; border-radius: 3px; }
 
         /* BADGE */
         .badge { padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
@@ -107,6 +110,7 @@
         .status-box.success { background: #c6f6d5; color: #22543d; }
         .status-box.error { background: #fed7d7; color: #742a2a; }
         .status-box.info { background: #bee3f8; color: #2c5282; }
+        .status-box.warning { background: #fefcbf; color: #744210; }
 
         /* CATEGORY SIDEBAR PANEL */
         .manage-vectors-wrapper { display: flex; gap: 20px; }
@@ -183,6 +187,26 @@
         .image-card-downloads {
             color: #666;
         }
+
+        /* HEALTH SECTION */
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .health-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+        .health-card .health-label { font-size: 12px; color: #666; margin-bottom: 8px; }
+        .health-card .health-value { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+        .health-issues-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #eee; border-radius: 4px; margin-top: 20px; }
+        .health-issues-table th, .health-issues-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 12px; }
+        .health-issues-table thead { background: #000; color: #fff; }
 
         /* RESPONSIVE */
         @media (max-width: 1400px) {
@@ -278,9 +302,11 @@
                 font-size: 12px;
             }
             
-            table { font-size: 11px; }
+            /* Mobile table: horizontal scroll */
+            .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            table { font-size: 11px; min-width: 500px; }
             th, td { padding: 8px 10px; }
-            td img { width: 35px; height: 28px; }
+            td img.preview-img { width: 35px; height: 28px; }
             
             .manage-vectors-wrapper { flex-direction: column; }
             .category-sidebar { 
@@ -312,6 +338,10 @@
             .pagination { gap: 5px; margin-top: 10px; }
             .pagination button { padding: 6px 10px; font-size: 11px; }
             .pagination-info { font-size: 11px; }
+
+            .health-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .health-card { padding: 12px; }
+            .health-card .health-value { font-size: 18px; }
         }
 
         @media (max-width: 480px) {
@@ -333,15 +363,16 @@
             
             table { font-size: 10px; }
             th, td { padding: 6px 8px; }
-            td img { width: 30px; height: 24px; }
+            td img.preview-img { width: 30px; height: 24px; }
             
             .images-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
             .image-card img { height: 70px; }
             
             .stats-bar { font-size: 11px; gap: 5px; padding: 8px 12px; }
             .toolbar input, .toolbar select { font-size: 11px; padding: 6px; }
+
+            .health-grid { grid-template-columns: 1fr 1fr; }
         }
-    
     </style>
 </head>
 <body>
@@ -387,26 +418,31 @@
                         <div>TOTAL CONTENT: <span id="totalVectors">0</span></div>
                         <div>TOTAL DOWNLOADS: <span id="totalDownloads">0</span></div>
                         <div>TOTAL CATEGORIES: <span id="totalCategories">0</span></div>
+                        <div>LAST 24H: <span id="totalDl24h">0</span></div>
+                        <div>THIS MONTH: <span id="totalDlMonth">0</span></div>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th>Vectors</th>
-                                <th>JPEG</th>
-                                <th>Downloads</th>
-                            </tr>
-                        </thead>
-                        <tbody id="catTableBody"></tbody>
-                    </table>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Vectors</th>
+                                    <th>JPEG</th>
+                                    <th>Downloads</th>
+                                </tr>
+                            </thead>
+                            <tbody id="catTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- UPLOAD VECTOR -->
                 <div id="upload" class="admin-section">
                     <div class="upload-box">
                         <h3>Upload New Vectors</h3>
+                        <p style="font-size:12px;color:#666;margin-bottom:20px;">All three files (JSON + JPEG + ZIP) are required per product. Drop files or click to select.</p>
                         <div class="drop-zone" id="drop-zone">
-                            <p>Drop files here or click to select</p>
+                            <p>Drop files here or click to select<br><small style="color:#999;">(JSON + JPEG + ZIP per product)</small></p>
                             <input type="file" id="bulkFileInput" multiple>
                         </div>
                         <button class="btn-blue" id="bulkAnalyzeBtn">Analyze Files</button>
@@ -417,51 +453,84 @@
                             </div>
                             <p id="bulkProgressText" style="margin-top: 10px; font-size: 12px; color: #666;"></p>
                         </div>
+                        <div id="bulkProgressWrapSingle" style="display:none; margin-top: 10px;">
+                            <div style="background: #eee; height: 10px; border-radius: 4px; overflow: hidden;">
+                                <div id="bulkProgressFillSingle" style="background: var(--green); height: 100%; width: 0%; transition: width 0.2s;"></div>
+                            </div>
+                            <p id="bulkProgressTextSingle" style="margin-top: 6px; font-size: 11px; color: #888;"></p>
+                        </div>
                         <div id="uploadStatus" class="status-box" style="display:none; margin-top: 20px;"></div>
+                    </div>
+
+                    <!-- JPEG Upload -->
+                    <div class="upload-box" style="margin-top:20px;">
+                        <h3>Upload JPEG Files</h3>
+                        <p style="font-size:12px;color:#666;margin-bottom:20px;">Upload JPEG-type content (JSON + JPEG + ZIP required).</p>
+                        <div class="drop-zone" id="drop-zone-jpeg">
+                            <p>Drop JPEG files here or click to select<br><small style="color:#999;">(JSON + JPEG + ZIP per product)</small></p>
+                            <input type="file" id="bulkFileInputJpeg" multiple>
+                        </div>
+                        <button class="btn-blue" id="bulkAnalyzeBtnJpeg">Analyze Files</button>
+                        <button class="btn-blue" id="bulkUploadBtnJpeg" style="margin-left: 10px;">Start Upload</button>
+                        <div id="bulkProgressWrapJpeg" style="display:none; margin-top: 20px;">
+                            <div style="background: #eee; height: 20px; border-radius: 4px; overflow: hidden;">
+                                <div id="bulkProgressFillJpeg" style="background: var(--blue); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                            </div>
+                            <p id="bulkProgressTextJpeg" style="margin-top: 10px; font-size: 12px; color: #666;"></p>
+                        </div>
+                        <div id="bulkProgressWrapSingleJpeg" style="display:none; margin-top: 10px;">
+                            <div style="background: #eee; height: 10px; border-radius: 4px; overflow: hidden;">
+                                <div id="bulkProgressFillSingleJpeg" style="background: var(--green); height: 100%; width: 0%; transition: width 0.2s;"></div>
+                            </div>
+                            <p id="bulkProgressTextSingleJpeg" style="margin-top: 6px; font-size: 11px; color: #888;"></p>
+                        </div>
+                        <div id="uploadStatusJpeg" class="status-box" style="display:none; margin-top: 20px;"></div>
                     </div>
                 </div>
 
                 <!-- MANAGE VECTORS -->
                 <div id="manage" class="admin-section">
                     <div class="stats-bar">
-                        <div>Total Downloads (All Time): <span id="totalDlAllTime">0</span></div>
-                        <div>Last 24h: <span id="totalDl24h">0</span></div>
+                        <div>Total Downloads (All Time): <span id="totalDlAllTime">—</span></div>
+                        <div>Last 24h: <span id="totalDl24h" style="color:var(--green)">—</span></div>
                     </div>
                     <div class="toolbar">
                         <input type="text" id="searchManage" placeholder="Search by name, category, keyword...">
                         <select id="filterCategory">
                             <option value="">All Categories</option>
                         </select>
-                        <button class="btn-red" id="bulkDeleteBtn">Delete Selected (0)</button>
-                        <button class="btn-blue" id="bulkDownloadBtn">Download Selected (0)</button>
+                        <button class="btn-red" id="bulkDeleteBtn" disabled>Delete Selected (0)</button>
+                        <button class="btn-blue" id="bulkDownloadBtn" disabled>Download Selected (0)</button>
                     </div>
                     
                     <!-- CATEGORY BROWSER WITH IMAGE PREVIEW -->
                     <div class="manage-vectors-wrapper">
                         <div class="category-sidebar" id="categorySidebar">
-                            <!-- Kategoriler buraya yüklenecek -->
+                            <!-- Categories loaded here -->
                         </div>
                         <div class="images-preview-panel" id="imagesPreviewPanel">
                             <div class="images-grid" id="imagesGrid">
-                                <!-- Görseller buraya yüklenecek -->
+                                <!-- Images loaded here -->
                             </div>
                         </div>
                     </div>
 
-                    <table>
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="selectAllCheckbox"></th>
-                                <th>Thumbnail</th>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Downloads</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="manageTableBody"></tbody>
-                    </table>
+                    <div class="table-wrapper" style="margin-top:20px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllCheckbox"></th>
+                                    <th>Thumbnail</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Downloads ↓</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manageTableBody"></tbody>
+                        </table>
+                    </div>
                     <div class="pagination">
                         <button id="prevManage">← Previous</button>
                         <span class="pagination-info" id="managePaginationInfo">Page 1</span>
@@ -472,31 +541,33 @@
                 <!-- MANAGE JPEG -->
                 <div id="manage-jpeg" class="admin-section">
                     <div class="stats-bar">
-                        <div>Total JPEG Downloads (All Time): <span id="totalDlJpegAllTime">0</span></div>
-                        <div>Last 24h: <span id="totalDlJpeg24h">0</span></div>
+                        <div>Total JPEG Downloads (All Time): <span id="totalDlJpegAllTime">—</span></div>
+                        <div>Last 24h: <span id="totalDlJpeg24h" style="color:var(--green)">—</span></div>
                     </div>
                     <div class="toolbar">
                         <input type="text" id="searchManageJpeg" placeholder="Search by name, category, keyword...">
                         <select id="filterCategoryJpeg">
                             <option value="">All Categories</option>
                         </select>
-                        <button class="btn-red" id="bulkDeleteBtnJpeg">Delete Selected (0)</button>
-                        <button class="btn-blue" id="bulkDownloadBtnJpeg">Download Selected (0)</button>
+                        <button class="btn-red" id="bulkDeleteBtnJpeg" disabled>Delete Selected (0)</button>
+                        <button class="btn-blue" id="bulkDownloadBtnJpeg" disabled>Download Selected (0)</button>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="selectAllCheckboxJpeg"></th>
-                                <th>Thumbnail</th>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Category</th>
-                                <th>Downloads</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="manageTableBodyJpeg"></tbody>
-                    </table>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllCheckboxJpeg"></th>
+                                    <th>Thumbnail</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Downloads ↓</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manageTableBodyJpeg"></tbody>
+                        </table>
+                    </div>
                     <div class="pagination">
                         <button id="prevManageJpeg">← Previous</button>
                         <span class="pagination-info" id="managePaginationInfoJpeg">Page 1</span>
@@ -506,20 +577,56 @@
 
                 <!-- SYSTEM HEALTH -->
                 <div id="health" class="admin-section">
-                    <h2>System Health</h2>
-                    <div id="healthStatus" class="status-box">Loading...</div>
-                    <button class="btn-blue" id="refreshHealthBtn">Refresh Health</button>
-                    <button class="btn-blue" id="verifySyncBtn" style="margin-left: 10px;">Verify Sync</button>
-                    <button class="btn-blue" id="fixCategoriesBtn" style="margin-left: 10px;">Fix Categories</button>
-                    <div style="margin-top: 20px; background: #fff; padding: 20px; border: 1px solid #eee; border-radius: 4px;">
-                        <p>KV Count: <strong id="kvCount">0</strong></p>
-                        <p>R2 Count: <strong id="r2Count">0</strong></p>
+                    <h2 style="margin-bottom:15px;">System Health</h2>
+                    <div id="healthStatus" class="status-box info">Click "Refresh Health" to run a health check.</div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+                        <button class="btn-blue" id="refreshHealthBtn">Refresh Health</button>
+                        <button class="btn-blue" id="verifySyncBtn">Verify Sync</button>
+                        <button class="btn-blue" id="fixCategoriesBtn">Fix Categories</button>
+                    </div>
+
+                    <div class="health-grid">
+                        <div class="health-card">
+                            <div class="health-label">KV Index Count</div>
+                            <div class="health-value" id="kvCount">—</div>
+                        </div>
+                        <div class="health-card">
+                            <div class="health-label">R2 Files (est.)</div>
+                            <div class="health-value" id="r2Count">—</div>
+                        </div>
+                        <div class="health-card">
+                            <div class="health-label">Duplicate Slugs</div>
+                            <div class="health-value" id="healthDuplicates">—</div>
+                        </div>
+                        <div class="health-card">
+                            <div class="health-label">Missing Titles</div>
+                            <div class="health-value" id="healthMissingTitles">—</div>
+                        </div>
+                        <div class="health-card">
+                            <div class="health-label">Category Errors</div>
+                            <div class="health-value" id="healthCategoryErrors">—</div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="health-issues-table">
+                            <thead>
+                                <tr>
+                                    <th>Slug</th>
+                                    <th>Problem</th>
+                                    <th>Fix</th>
+                                </tr>
+                            </thead>
+                            <tbody id="healthIssuesBody">
+                                <tr><td colspan="3" style="text-align:center;padding:20px;color:#666;">Run health check to see issues.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="/functions/admin.js?v=2026061901"></script>
+    <script src="/functions/admin.js?v=2026072301"></script>
 </body>
 </html>

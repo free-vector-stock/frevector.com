@@ -2,6 +2,8 @@
  * Frevector Admin Panel - Frontend Logic
  * Updated for JPEG Support v2026031302
  * UPDATED: Added Category Browser with Image Preview
+ * UPDATED v2026072301: Downloads sort desc, real-time download counts,
+ *   ZIP required validation, brute-force protection, enhanced System Health
  */
 
 const ADMIN_KEY = "vector2026";
@@ -31,6 +33,12 @@ const state = {
 };
 
 let bulkFiles = [];
+
+// ── Brute-force protection ──────────────────────────────────────────────────
+let loginAttempts = 0;
+let loginLockUntil = 0;
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_SECONDS = 30;
 
 document.addEventListener('DOMContentLoaded', async () => {
     const savedKey = sessionStorage.getItem('fv_admin');
@@ -179,12 +187,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function doLogin() {
+    const now = Date.now();
+    if (now < loginLockUntil) {
+        const remaining = Math.ceil((loginLockUntil - now) / 1000);
+        const errEl = document.getElementById('loginError');
+        if (errEl) {
+            errEl.textContent = `Too many attempts. Try again in ${remaining}s.`;
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
     const pw = document.getElementById('loginPassword').value.trim();
     if (pw === ADMIN_KEY) {
+        loginAttempts = 0;
         sessionStorage.setItem('fv_admin', pw);
         showApp();
     } else {
-        document.getElementById('loginError').style.display = 'block';
+        loginAttempts++;
+        const errEl = document.getElementById('loginError');
+        if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+            loginLockUntil = Date.now() + LOCKOUT_SECONDS * 1000;
+            loginAttempts = 0;
+            if (errEl) {
+                errEl.textContent = `Too many failed attempts. Locked for ${LOCKOUT_SECONDS} seconds.`;
+                errEl.style.display = 'block';
+            }
+        } else {
+            if (errEl) {
+                errEl.textContent = `Invalid Password (${loginAttempts}/${MAX_LOGIN_ATTEMPTS} attempts)`;
+                errEl.style.display = 'block';
+            }
+        }
     }
 }
 
@@ -227,6 +261,7 @@ function switchSection(sectionId) {
 async function loadDashboard() {
     const key = sessionStorage.getItem('fv_admin');
     try {
+        // Load vectors list
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
@@ -273,6 +308,17 @@ async function loadDashboard() {
         }
 
         document.getElementById('totalCategories').textContent = Object.keys(catMap).length;
+
+        // Load time-based stats
+        try {
+            const statsRes = await fetch('/api/admin?action=stats', { headers: { 'X-Admin-Key': key } });
+            const statsData = await statsRes.json();
+            const dl24hEl = document.getElementById('totalDl24h');
+            const dlMonthEl = document.getElementById('totalDlMonth');
+            if (dl24hEl) dl24hEl.textContent = statsData.last24h || 0;
+            if (dlMonthEl) dlMonthEl.textContent = statsData.currentMonth || 0;
+        } catch (se) { console.warn('Stats load error:', se); }
+
     } catch (e) { 
         console.error(e);
         const tbody = document.getElementById('catTableBody');
@@ -286,7 +332,10 @@ async function loadManageVectors() {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
-        state.filteredVectors = state.vectors.filter(v => v.contentType !== 'jpeg');
+        // Sort by downloads descending (real-time, from KV index)
+        state.filteredVectors = state.vectors
+            .filter(v => v.contentType !== 'jpeg')
+            .sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
         filterAndRenderManage('vector');
     } catch (e) { console.error(e); }
 }
@@ -297,7 +346,10 @@ async function loadManageJpegs() {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         state.vectors = data.vectors || [];
-        state.filteredJpegs = state.vectors.filter(v => v.contentType === 'jpeg');
+        // Sort by downloads descending
+        state.filteredJpegs = state.vectors
+            .filter(v => v.contentType === 'jpeg')
+            .sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
         filterAndRenderManage('jpeg');
     } catch (e) { console.error(e); }
 }
@@ -383,15 +435,28 @@ function renderImagePreview() {
 function filterAndRenderManage(type = 'vector') {
     if (type === 'vector') {
         let filtered = state.vectors.filter(v => v.contentType !== 'jpeg');
-        const matchesSearch = v => v.name.toLowerCase().includes(state.searchQuery) || (v.title || "").toLowerCase().includes(state.searchQuery);
+        const matchesSearch = v => !state.searchQuery ||
+            v.name.toLowerCase().includes(state.searchQuery) ||
+            (v.title || "").toLowerCase().includes(state.searchQuery) ||
+            (v.category || "").toLowerCase().includes(state.searchQuery) ||
+            (v.keywords || []).join(' ').toLowerCase().includes(state.searchQuery);
         const matchesCat = v => !state.filterCat || v.category === state.filterCat;
-        state.filteredVectors = filtered.filter(v => matchesSearch(v) && matchesCat(v));
+        // Sort by downloads descending
+        state.filteredVectors = filtered
+            .filter(v => matchesSearch(v) && matchesCat(v))
+            .sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
         renderManageTable('vector');
     } else {
         let filtered = state.vectors.filter(v => v.contentType === 'jpeg');
-        const matchesSearch = v => v.name.toLowerCase().includes(state.searchQueryJpeg) || (v.title || "").toLowerCase().includes(state.searchQueryJpeg);
+        const matchesSearch = v => !state.searchQueryJpeg ||
+            v.name.toLowerCase().includes(state.searchQueryJpeg) ||
+            (v.title || "").toLowerCase().includes(state.searchQueryJpeg) ||
+            (v.category || "").toLowerCase().includes(state.searchQueryJpeg);
         const matchesCat = v => !state.filterCatJpeg || v.category === state.filterCatJpeg;
-        state.filteredJpegs = filtered.filter(v => matchesSearch(v) && matchesCat(v));
+        // Sort by downloads descending
+        state.filteredJpegs = filtered
+            .filter(v => matchesSearch(v) && matchesCat(v))
+            .sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
         renderManageTable('jpeg');
     }
 }
@@ -415,7 +480,6 @@ function renderManageTable(type = 'vector') {
         pageItems.forEach(v => {
             const tr = document.createElement('tr');
             const typeLabel = v.contentType === 'jpeg' ? '<span class="badge badge-blue">Jpeg</span>' : '<span class="badge badge-green">Vector</span>';
-            // REVİZYON 2: Thumbnail URL'sini category/id/id-thumb.jpg yapısına göre oluştur
             const cat = v.category || 'Miscellaneous';
             const thumbKey = encodeURIComponent(`${cat}/${v.name}/${v.name}.jpg`);
             const thumbnailUrl = `/api/asset?key=${thumbKey}`;
@@ -551,36 +615,36 @@ async function handleBulkAnalyze(type = 'vector') {
     bulkFiles = [];
     const files = Array.from(input.files);
     
+    // Group files by base name (without extension)
+    const groups = {};
     for (const file of files) {
         const id = file.name.replace(/\.[^.]+$/, '');
-        
-        if (file.name.endsWith('.json')) {
-            const jsonText = await file.text();
-            const lastGroup = bulkFiles[bulkFiles.length - 1];
-            if (lastGroup && lastGroup.id === id) {
-                lastGroup.json = file;
-            } else {
-                bulkFiles.push({ id, json: file, jpeg: null, zip: null });
-            }
-        } else if (file.name.endsWith('.jpg') || file.name.endsWith('.jpeg')) {
-            const lastGroup = bulkFiles[bulkFiles.length - 1];
-            if (lastGroup && lastGroup.id === id) {
-                lastGroup.jpeg = file;
-            } else {
-                bulkFiles.push({ id, json: null, jpeg: file, zip: null });
-            }
-        } else if (file.name.endsWith('.zip')) {
-            const lastGroup = bulkFiles[bulkFiles.length - 1];
-            if (lastGroup && lastGroup.id === id) {
-                lastGroup.zip = file;
-            } else {
-                bulkFiles.push({ id, json: null, jpeg: null, zip: file });
-            }
-        }
+        if (!groups[id]) groups[id] = { id, json: null, jpeg: null, zip: null };
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'json') groups[id].json = file;
+        else if (ext === 'jpg' || ext === 'jpeg') groups[id].jpeg = file;
+        else if (ext === 'zip') groups[id].zip = file;
     }
 
-    const valid = bulkFiles.filter(g => g.json && g.jpeg);
-    alert(`Found ${valid.length} complete file groups (JSON + JPEG)`);
+    bulkFiles = Object.values(groups);
+
+    // Validate: all three files required
+    const valid = bulkFiles.filter(g => g.json && g.jpeg && g.zip);
+    const missingZip = bulkFiles.filter(g => g.json && g.jpeg && !g.zip);
+    const missingJpeg = bulkFiles.filter(g => g.json && !g.jpeg);
+    const missingJson = bulkFiles.filter(g => !g.json);
+
+    let msg = `Found ${valid.length} complete file groups (JSON + JPEG + ZIP).`;
+    if (missingZip.length > 0) {
+        msg += `\n⚠ ${missingZip.length} group(s) missing ZIP: ${missingZip.map(g => g.id).join(', ')}`;
+    }
+    if (missingJpeg.length > 0) {
+        msg += `\n⚠ ${missingJpeg.length} group(s) missing JPEG: ${missingJpeg.map(g => g.id).join(', ')}`;
+    }
+    if (missingJson.length > 0) {
+        msg += `\n⚠ ${missingJson.length} group(s) missing JSON: ${missingJson.map(g => g.id).join(', ')}`;
+    }
+    alert(msg);
 }
 
 async function handleBulkUpload(type = 'vector') {
@@ -596,6 +660,25 @@ async function handleBulkUpload(type = 'vector') {
     const progressTextSingle = document.getElementById(type === 'vector' ? 'bulkProgressTextSingle' : 'bulkProgressTextSingleJpeg');
     const progressFillSingle = document.getElementById(type === 'vector' ? 'bulkProgressFillSingle' : 'bulkProgressFillSingleJpeg');
     const progressWrapSingle = document.getElementById(type === 'vector' ? 'bulkProgressWrapSingle' : 'bulkProgressWrapSingleJpeg');
+
+    // Validate: reject groups missing any file
+    const invalidGroups = bulkFiles.filter(g => !g.json || !g.jpeg || !g.zip);
+    if (invalidGroups.length > 0) {
+        const names = invalidGroups.map(g => {
+            const missing = [];
+            if (!g.json) missing.push('JSON');
+            if (!g.jpeg) missing.push('JPEG');
+            if (!g.zip) missing.push('ZIP');
+            return `${g.id} (missing: ${missing.join(', ')})`;
+        }).join('\n');
+        alert(`Upload rejected. The following groups are incomplete:\n${names}\n\nAll three files (JSON + JPEG + ZIP) are required.`);
+        return;
+    }
+
+    if (bulkFiles.length === 0) {
+        alert('No files to upload. Please analyze files first.');
+        return;
+    }
 
     document.getElementById(btnId).disabled = true;
     document.getElementById(analyzeBtnId).disabled = true;
@@ -614,7 +697,7 @@ async function handleBulkUpload(type = 'vector') {
         const formData = new FormData();
         formData.append('json', group.json);
         formData.append('jpeg', group.jpeg);
-        if (group.zip) formData.append('zip', group.zip);
+        formData.append('zip', group.zip);
 
         try {
             const res = await new Promise((resolve, reject) => {
@@ -658,9 +741,11 @@ async function handleBulkUpload(type = 'vector') {
     if (status) {
         status.className = `status-box ${errors === 0 ? 'success' : 'warning'}`;
         status.textContent = `Bulk upload finished. ${success} uploaded, ${errors} failed.`;
+        status.style.display = 'block';
     }
     
     document.getElementById(analyzeBtnId).disabled = false;
+    document.getElementById(btnId).disabled = false;
     loadDashboard();
     loadManageVectors();
     loadManageJpegs();
@@ -670,24 +755,78 @@ async function handleBulkUpload(type = 'vector') {
 async function loadHealth() {
     const key = sessionStorage.getItem('fv_admin');
     const status = document.getElementById('healthStatus');
-    status.className = 'status-box info';
-    status.textContent = 'Loading system health...';
+    if (status) {
+        status.className = 'status-box info';
+        status.textContent = 'Loading system health...';
+    }
     
     try {
         const res = await fetch('/api/admin', { headers: { 'X-Admin-Key': key } });
         const data = await res.json();
         const vectors = data.vectors || [];
-        document.getElementById('kvCount').textContent = vectors.length;
-        
-        // In a real scenario, we'd fetch R2 count from a dedicated endpoint
-        // For now, we use the KV count as a baseline
-        document.getElementById('r2Count').textContent = vectors.length * 3; 
-        
-        status.className = 'status-box success';
-        status.textContent = 'Health data loaded.';
+
+        // Analyze issues
+        let duplicateSlugs = 0;
+        let missingTitles = 0;
+        let categoryErrors = 0;
+        const slugSet = new Set();
+        const issues = [];
+
+        vectors.forEach(v => {
+            if (slugSet.has(v.name)) {
+                duplicateSlugs++;
+                issues.push({ slug: v.name, problem: 'Duplicate Slug', fix: 'Delete one of the duplicates' });
+            }
+            slugSet.add(v.name);
+
+            if (!v.title || /\d{5,}/.test(v.title)) {
+                missingTitles++;
+                issues.push({ slug: v.name, problem: 'Missing/invalid title', fix: 'Update JSON metadata' });
+            }
+
+            if (!CATEGORIES.includes(v.category)) {
+                categoryErrors++;
+                issues.push({ slug: v.name, problem: `Invalid category: "${v.category}"`, fix: 'Fix category value' });
+            }
+        });
+
+        const kvCountEl = document.getElementById('kvCount');
+        const r2CountEl = document.getElementById('r2Count');
+        const dupEl = document.getElementById('healthDuplicates');
+        const titleEl = document.getElementById('healthMissingTitles');
+        const catEl = document.getElementById('healthCategoryErrors');
+        const issuesEl = document.getElementById('healthIssuesBody');
+
+        if (kvCountEl) kvCountEl.textContent = vectors.length;
+        if (r2CountEl) r2CountEl.textContent = vectors.length * 3;
+        if (dupEl) dupEl.textContent = duplicateSlugs;
+        if (titleEl) titleEl.textContent = missingTitles;
+        if (catEl) catEl.textContent = categoryErrors;
+
+        if (issuesEl) {
+            issuesEl.innerHTML = '';
+            if (issues.length === 0) {
+                issuesEl.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:#38a169;font-weight:600;">✓ No issues detected. System is healthy.</td></tr>';
+            } else {
+                issues.slice(0, 100).forEach(issue => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td><code style="font-size:11px;">${escHtml(issue.slug)}</code></td><td>${escHtml(issue.problem)}</td><td style="color:#666;">${escHtml(issue.fix)}</td>`;
+                    issuesEl.appendChild(tr);
+                });
+            }
+        }
+
+        if (status) {
+            status.className = `status-box ${issues.length === 0 ? 'success' : 'warning'}`;
+            status.textContent = issues.length === 0
+                ? `System healthy. ${vectors.length} items in index.`
+                : `Found ${issues.length} issue(s). ${vectors.length} items in index.`;
+        }
     } catch (e) {
-        status.className = 'status-box error';
-        status.textContent = 'Failed to load health data.';
+        if (status) {
+            status.className = 'status-box error';
+            status.textContent = 'Failed to load health data: ' + e.message;
+        }
     }
 }
 

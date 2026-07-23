@@ -1,10 +1,11 @@
 /**
- * Admin API - FIXED VERSION v3
+ * Admin API - FIXED VERSION v4
  * - Improved batch upload handling
  * - Better error recovery
  * - Optimized KV/R2 operations
  * - Proper timeout handling
  * - UPDATED: Added time-based download stats calculation (Last 24h and Monthly)
+ * - UPDATED v2026072301: Rate limiting / brute-force protection, ZIP required
  */
 
 import { notifyIndexingUpdate } from "../google-indexing.js";
@@ -21,6 +22,42 @@ const VALID_CATEGORIES = [
 const FORBIDDEN_WORDS_JPEG = [
     'free vector', 'free svg', 'free svg icon', 'free jpeg', 'vector jpeg', 'svg'
 ];
+
+// ── Rate limiting (in-memory, resets on Worker restart) ──────────────────────
+const failedAttempts = new Map(); // key: IP → { count, lockUntil }
+const MAX_ATTEMPTS = 10;
+const LOCKOUT_MS = 60 * 1000; // 1 minute
+
+function checkRateLimit(ip) {
+    const now = Date.now();
+    const entry = failedAttempts.get(ip) || { count: 0, lockUntil: 0 };
+    if (now < entry.lockUntil) {
+        const remaining = Math.ceil((entry.lockUntil - now) / 1000);
+        return { blocked: true, remaining };
+    }
+    return { blocked: false, entry };
+}
+
+function recordFailedAttempt(ip) {
+    const now = Date.now();
+    const entry = failedAttempts.get(ip) || { count: 0, lockUntil: 0 };
+    entry.count++;
+    if (entry.count >= MAX_ATTEMPTS) {
+        entry.lockUntil = now + LOCKOUT_MS;
+        entry.count = 0;
+    }
+    failedAttempts.set(ip, entry);
+}
+
+function clearAttempts(ip) {
+    failedAttempts.delete(ip);
+}
+
+function getClientIP(request) {
+    return request.headers.get('CF-Connecting-IP') ||
+           request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+           'unknown';
+}
 
 function authenticate(request) {
   const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization") || "";
@@ -65,7 +102,17 @@ async function uploadWithRetry(r2, key, body, options, retries = 5) {
 
 export async function onRequestGet(context) {
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  const ip = getClientIP(context.request);
+  const rateCheck = checkRateLimit(ip);
+  if (rateCheck.blocked) {
+    return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
+  }
+
+  if (!authenticate(context.request)) {
+    recordFailedAttempt(ip);
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
+  clearAttempts(ip);
   
   try {
     const kv = context.env.VECTOR_DB;
@@ -109,7 +156,17 @@ export async function onRequestGet(context) {
 
 export async function onRequestPost(context) {
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  const ip = getClientIP(context.request);
+  const rateCheck = checkRateLimit(ip);
+  if (rateCheck.blocked) {
+    return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
+  }
+
+  if (!authenticate(context.request)) {
+    recordFailedAttempt(ip);
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
+  clearAttempts(ip);
 
   try {
     const kv = context.env.VECTOR_DB;
@@ -129,6 +186,7 @@ export async function onRequestPost(context) {
 
     if (!jsonFile) return new Response(JSON.stringify({ error: "Missing JSON metadata file" }), { status: 400, headers });
     if (!jpegFile) return new Response(JSON.stringify({ error: "Missing JPEG preview image" }), { status: 400, headers });
+    if (!zipFile)  return new Response(JSON.stringify({ error: "Missing ZIP archive file. All three files (JSON + JPEG + ZIP) are required." }), { status: 400, headers });
 
     // Parse metadata
     let metadata;
@@ -143,7 +201,7 @@ export async function onRequestPost(context) {
     let jpegBuffer, zipBuffer;
     try {
       jpegBuffer = await jpegFile.arrayBuffer();
-      zipBuffer = zipFile ? await zipFile.arrayBuffer() : null;
+      zipBuffer = await zipFile.arrayBuffer();
     } catch (e) {
       console.error("File buffer error:", e);
       return new Response(JSON.stringify({ error: "Error reading file buffers: " + e.message }), { status: 400, headers });
@@ -206,7 +264,7 @@ export async function onRequestPost(context) {
     const uploadResults = await Promise.all([
         uploadWithRetry(r2, r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } }),
         uploadWithRetry(r2, r2JsonKey, JSON.stringify(metadata), { httpMetadata: { contentType: "application/json" } }),
-        zipBuffer ? uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } }) : Promise.resolve({ success: true })
+        uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } })
     ]);
 
     for (const result of uploadResults) {
@@ -216,7 +274,7 @@ export async function onRequestPost(context) {
         }
     }
 
-    const fileSize = zipBuffer ? `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB` : `${(jpegBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
+    const fileSize = `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
     
     const vectorRecord = {
       name: id,
@@ -274,7 +332,18 @@ export async function onRequestPost(context) {
 
 export async function onRequestDelete(context) {
   const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
-  if (!authenticate(context.request)) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  const ip = getClientIP(context.request);
+  const rateCheck = checkRateLimit(ip);
+  if (rateCheck.blocked) {
+    return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
+  }
+
+  if (!authenticate(context.request)) {
+    recordFailedAttempt(ip);
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
+  clearAttempts(ip);
+
   try {
     const kv = context.env.VECTOR_DB;
     const r2 = context.env.VECTOR_ASSETS;
