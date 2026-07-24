@@ -64,13 +64,29 @@ export async function onRequest(context) {
   // --- Build SSR-enriched HTML ---
   const title    = vector.title       || slug;
   const desc     = vector.description || `Download ${title} free vector illustration from frevector.com`;
-  const keywords = Array.isArray(vector.keywords) ? vector.keywords.join(", ") : (vector.keywords || "");
+  const keywords = Array.isArray(vector.keywords) ? vector.keywords.slice(0, 20).join(", ") : (vector.keywords || "");
   const category = vector.category    || "";
   const fileSize = vector.fileSize    || "N/A";
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
   const pageTitle = `${title} — Free Vector Download | frevector.com`;
+
+  // Build smart-truncated meta description (max 160 chars, sentence boundary)
+  function smartTruncate(text, maxLen) {
+    if (text.length <= maxLen) return text;
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    let result = '';
+    for (const s of sentences) {
+      if ((result + s).length <= maxLen) {
+        result += s;
+      } else {
+        break;
+      }
+    }
+    return result.trim() || text.slice(0, maxLen).trim();
+  }
+  const metaDesc = smartTruncate(desc, 160);
 
   // Read HTML shell as text
   let html = await rootResponse.text();
@@ -82,10 +98,10 @@ export async function onRequest(context) {
   if (/<meta\s+name=["']description["']/i.test(html)) {
     html = html.replace(
       /(<meta\s+name=["']description["']\s+content=["'])(?:[^"']*)(["'])/i,
-      `$1${escapeHtml(desc)}$2`
+      `$1${escapeHtml(metaDesc)}$2`
     );
   } else {
-    html = html.replace("</head>", `<meta name="description" content="${escapeHtml(desc)}">\n</head>`);
+    html = html.replace("</head>", `<meta name="description" content="${escapeHtml(metaDesc)}">\n</head>`);
   }
 
   // Replace or insert <meta name="keywords">
@@ -111,6 +127,12 @@ export async function onRequest(context) {
 <meta property="og:url" content="${escapeHtml(canonical)}">
 <meta property="og:type" content="website">`;
   html = html.replace("</head>", `${ogBlock}\n</head>`);
+
+  // GÖREV 2 SSR FIX: Replace static H1 with product title for SEO
+  html = html.replace(
+    /<h1 id="categoryTitle"[^>]*>[^<]*<\/h1>/,
+    `<h1 id="categoryTitle" class="category-title">${escapeHtml(title)}</h1>`
+  );
 
   // GÖREV 1 SSR FIX: Inject category and fileSize into the HTML data attributes
   // so client-side JS can read them even when /api/vectors fails
