@@ -355,18 +355,19 @@ export async function onRequestGet(context) {
     }
 
     // SSR içeriğini HTML'e enjekte et
+    let finalHtml = updatedHtml;
     if (crawlableLinksHtml) {
-        html = html.replace('</body>', `${crawlableLinksHtml}\n</body>`);
+        finalHtml = finalHtml.replace('</body>', `${crawlableLinksHtml}\n</body>`);
         
         // Toplam sayfa sayısını ve vektör sayısını HTML'deki yerlerine de yazalım
         const totalMatch = crawlableLinksHtml.match(/<span id="ssr-total-count">(\d+)<\/span>/);
         const pagesMatch = crawlableLinksHtml.match(/<span id="ssr-total-pages">(\d+)<\/span>/);
         
         if (totalMatch) {
-            html = html.replace(/\(free vectors available\)/, `(${parseInt(totalMatch[1]).toLocaleString()} free vectors available)`);
+            finalHtml = finalHtml.replace(/\(free vectors available\)/, `(${parseInt(totalMatch[1]).toLocaleString()} free vectors available)`);
         }
         if (pagesMatch) {
-            html = html.replace(/\/ 177/, `/ ${pagesMatch[1]}`);
+            finalHtml = finalHtml.replace(/\/ 177/, `/ ${pagesMatch[1]}`);
         }
     }
 
@@ -376,7 +377,7 @@ export async function onRequestGet(context) {
     headers.delete('Cache-Control');
     headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
 
-    return new Response(updatedHtml, {
+    return new Response(finalHtml, {
         status: assetResponse.status,
         statusText: assetResponse.statusText,
         headers: headers,
