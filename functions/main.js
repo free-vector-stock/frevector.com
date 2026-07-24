@@ -225,28 +225,17 @@ const CATEGORY_SEO_DATA = {
 };
 
 export async function onRequestGet(context) {
-    const { request, env } = context;
+    const { request } = context;
     const url = new URL(request.url);
 
     // Only intercept the root path (index.html)
     if (url.pathname !== '/' && url.pathname !== '/index.html') {
-        // Let other routes pass through (handled by static assets or other functions)
         return context.next();
     }
 
-    // Read the static index.html
-    let html;
-    try {
-        // Read from the environment (ASSETS binding) or fall back to fetch
-        const assetUrl = new URL(url.pathname, url.origin);
-        const assetResponse = await env.ASSETS.fetch(assetUrl);
-        html = await assetResponse.text();
-    } catch (e) {
-        // Fallback: fetch the static file
-        const assetUrl = new URL('/index.html', url.origin);
-        const assetResponse = await fetch(assetUrl);
-        html = await assetResponse.text();
-    }
+    // First, get the static HTML response via context.next()
+    const staticResponse = await context.next();
+    const html = await staticResponse.text();
 
     // Parse ?category= from query string
     const categoryParam = url.searchParams.get('category') || '';
@@ -297,13 +286,18 @@ export async function onRequestGet(context) {
             </section>`;
 
     // Replace the old static SEO block with the new dynamic one
-    // Match from <section class="home-seo-content" ... to </section>
     const oldBlockRegex = /<section class="home-seo-content"[^>]*>[\s\S]*?<\/section>/;
     const updatedHtml = html.replace(oldBlockRegex, newSeoBlock);
 
+    // Get original headers, then override Content-Type and remove cache headers
+    const headers = new Headers(staticResponse.headers);
+    headers.set('Content-Type', 'text/html; charset=utf-8');
+    headers.delete('Cache-Control');
+    headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+
     return new Response(updatedHtml, {
-        headers: {
-            'Content-Type': 'text/html; charset=utf-8',
-        },
+        status: staticResponse.status,
+        statusText: staticResponse.statusText,
+        headers: headers,
     });
 }
