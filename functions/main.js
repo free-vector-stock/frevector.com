@@ -1,9 +1,16 @@
 /**
  * frevector.com - SSR Function (Cloudflare Pages)
- * Serve index.html and dynamically replace the SEO content block based on ?category= query parameter.
- * This ensures Google crawler sees category-specific content in the raw HTML response.
+ * Serves the full index.html and dynamically replaces the SEO content block
+ * based on the ?category= query parameter.
+ *
+ * This is the ONLY server-side handler for the root path (/).
+ * It reads the static index.html via the ASSETS binding, replaces
+ * the .home-seo-content section, and returns the modified HTML.
  */
 
+// ═══════════════════════════════════════════════════════════════════
+// SEO DATA — per-category unique content
+// ═══════════════════════════════════════════════════════════════════
 const CATEGORY_SEO_DATA = {
     'all': {
         title: 'Free Vector Graphics for Everyone',
@@ -54,12 +61,26 @@ const CATEGORY_SEO_DATA = {
         p3: 'From startup branding to enterprise communications, our business vector library supports every professional context. All files are free for commercial use, giving businesses of all sizes access to high-quality design assets without licensing fees.',
         popularCats: ['Corporate Icons', 'Infographics', 'Finance', 'Office &amp; Workspace']
     },
-    'Celebrities': {
-        title: 'Free Celebrity Vector Illustrations — SVG &amp; JPEG Downloads',
-        p1: 'Explore our collection of free celebrity vector illustrations featuring stylized portraits, pop culture icons, and entertainment-themed graphics. These vectors capture the essence of famous figures through artistic interpretation, making them ideal for fan art, editorial design, and pop culture projects.',
-        p2: 'Celebrity vectors are popular choices for magazine layouts, event posters, social media content, and entertainment branding. Each illustration is crafted in a distinctive artistic style that balances likeness with creative expression.',
-        p3: 'All celebrity vectors are free for personal and editorial use. Our collection is regularly updated with new portraits and pop culture references, keeping your design toolkit current and culturally relevant.',
-        popularCats: ['Entertainment', 'Music', 'Sports Stars', 'Pop Culture']
+    'Food': {
+        title: 'Free Food Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Satisfy your design appetite with our free food vector graphics collection. Featuring mouth-watering illustrations of cuisines from around the world — from artisan pizzas and fresh salads to exotic street food and gourmet desserts — our food library is a feast for the eyes.',
+        p2: 'Food vectors are indispensable for restaurant menus, food blogs, recipe websites, packaging design, and culinary branding. Each illustration is crafted with appetizing detail and is available in scalable SVG format, ensuring your food graphics look delicious on any medium.',
+        p3: 'Whether you need a simple fruit icon for a health app or a detailed restaurant illustration for a menu cover, our food collection delivers. All vectors are free for commercial use — ideal for restaurants, food brands, and culinary content creators.',
+        popularCats: ['Fruits &amp; Vegetables', 'Restaurant &amp; Dining', 'Snacks &amp; Desserts', 'Drink']
+    },
+    'Nature': {
+        title: 'Free Nature Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Connect with the natural world through our free nature vector graphics collection. Featuring lush botanical illustrations, dramatic landscape scenes, weather phenomena, seasonal foliage, and organic textures, our nature library brings the beauty of the outdoors to your designs.',
+        p2: 'Nature vectors are perfect for eco-friendly branding, wellness products, outdoor lifestyle campaigns, environmental publications, and botanical art prints. Each illustration captures the organic beauty of the natural world in fully scalable vector format.',
+        p3: 'From delicate wildflower arrangements and majestic mountain landscapes to tropical rainforest scenes and serene ocean views, our nature collection spans every biome and season. All vectors are free for commercial use.',
+        popularCats: ['Botanical &amp; Plants', 'Landscapes', 'Weather', 'Animals']
+    },
+    'Miscellaneous': {
+        title: 'Free Miscellaneous Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Discover a diverse collection of free miscellaneous vector graphics that defy easy categorization. This eclectic library includes unique illustrations, novelty designs, decorative elements, and creative assets that add unexpected character to any project.',
+        p2: 'Miscellaneous vectors are the wildcards of the design world — perfect when you need something distinctive that stands apart from conventional categories. Use them for editorial illustrations, creative packaging, unique social media content, and experimental branding.',
+        p3: 'Our miscellaneous collection is a treasure trove of creative surprises, regularly updated with one-of-a-kind designs. All vectors are free for personal and commercial use, giving designers the freedom to explore unconventional creative directions.',
+        popularCats: ['Decorative Elements', 'Novelty', 'Objects', 'Abstract']
     },
     'Drink': {
         title: 'Free Drink Vector Graphics — SVG &amp; JPEG Downloads',
@@ -82,20 +103,6 @@ const CATEGORY_SEO_DATA = {
         p3: 'From minimalist wardrobe icons to elaborate haute couture illustrations, our fashion collection covers every style aesthetic. All vectors are free for commercial use — perfect for boutiques, fashion designers, and style-focused content creators.',
         popularCats: ['Clothing &amp; Apparel', 'Accessories', 'Beauty &amp; Cosmetics', 'Lifestyle']
     },
-    'Food': {
-        title: 'Free Food Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Satisfy your design appetite with our free food vector graphics collection. Featuring mouth-watering illustrations of cuisines from around the world — from artisan pizzas and fresh salads to exotic street food and gourmet desserts — our food library is a feast for the eyes.',
-        p2: 'Food vectors are indispensable for restaurant menus, food blogs, recipe websites, packaging design, and culinary branding. Each illustration is crafted with appetizing detail and is available in scalable SVG format, ensuring your food graphics look delicious on any medium.',
-        p3: 'Whether you need a simple fruit icon for a health app or a detailed restaurant illustration for a menu cover, our food collection delivers. All vectors are free for commercial use — ideal for restaurants, food brands, and culinary content creators.',
-        popularCats: ['Fruits &amp; Vegetables', 'Restaurant &amp; Dining', 'Snacks &amp; Desserts', 'Drink']
-    },
-    'Font': {
-        title: 'Free Font &amp; Typography Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Explore our collection of free font and typography vector graphics featuring decorative lettering, calligraphic elements, alphabet sets, and typographic ornaments. These vectors are ideal for creating custom titles, logotypes, signage, and editorial layouts with a distinctive typographic flair.',
-        p2: 'Typography vectors give designers the flexibility to craft unique text treatments without relying on installed fonts. Use them for poster headlines, wedding invitations, brand wordmarks, and social media graphics — all scalable to any size without quality loss.',
-        p3: 'Our font and typography collection includes hand-lettered scripts, bold display styles, vintage signage alphabets, and modern geometric letterforms. All vectors are free for commercial use, empowering typographers and designers to push creative boundaries.',
-        popularCats: ['Calligraphy', 'Display &amp; Decorative', 'Alphabet Sets', 'Ornaments']
-    },
     'Holidays': {
         title: 'Free Holiday Vector Graphics — SVG &amp; JPEG Downloads',
         p1: 'Celebrate every occasion with our free holiday vector graphics collection. Featuring festive illustrations for Christmas, Halloween, Easter, New Year, Valentine\'s Day, and dozens of other holidays and cultural celebrations, our holiday library keeps your designs seasonally fresh.',
@@ -110,26 +117,68 @@ const CATEGORY_SEO_DATA = {
         p3: 'From simple first-aid icons to detailed anatomical diagrams, our medical collection covers the full spectrum of healthcare design needs. All vectors are free for commercial use, making professional medical illustration accessible to organizations of all sizes.',
         popularCats: ['Healthcare Icons', 'Anatomy', 'Pharmacy', 'Wellness']
     },
-    'Miscellaneous': {
-        title: 'Free Miscellaneous Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Discover a diverse collection of free miscellaneous vector graphics that defy easy categorization. This eclectic library includes unique illustrations, novelty designs, decorative elements, and creative assets that add unexpected character to any project.',
-        p2: 'Miscellaneous vectors are the wildcards of the design world — perfect when you need something distinctive that stands apart from conventional categories. Use them for editorial illustrations, creative packaging, unique social media content, and experimental branding.',
-        p3: 'Our miscellaneous collection is a treasure trove of creative surprises, regularly updated with one-of-a-kind designs. All vectors are free for personal and commercial use, giving designers the freedom to explore unconventional creative directions.',
-        popularCats: ['Decorative Elements', 'Novelty', 'Objects', 'Abstract']
-    },
-    'Nature': {
-        title: 'Free Nature Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Connect with the natural world through our free nature vector graphics collection. Featuring lush botanical illustrations, dramatic landscape scenes, weather phenomena, seasonal foliage, and organic textures, our nature library brings the beauty of the outdoors to your designs.',
-        p2: 'Nature vectors are perfect for eco-friendly branding, wellness products, outdoor lifestyle campaigns, environmental publications, and botanical art prints. Each illustration captures the organic beauty of the natural world in fully scalable vector format.',
-        p3: 'From delicate wildflower arrangements and majestic mountain landscapes to tropical rainforest scenes and serene ocean views, our nature collection spans every biome and season. All vectors are free for commercial use.',
-        popularCats: ['Botanical &amp; Plants', 'Landscapes', 'Weather', 'Animals']
-    },
     'Objects': {
         title: 'Free Object Vector Graphics — SVG &amp; JPEG Downloads',
         p1: 'Find the perfect free object vector for any design project. Our objects collection features everyday items, household goods, tools, gadgets, furniture, and decorative pieces — all rendered as clean, scalable vector illustrations ready for immediate use.',
         p2: 'Object vectors are invaluable for e-commerce product illustrations, instructional diagrams, app interfaces, and editorial design. Each illustration is crafted for visual clarity, making complex objects immediately recognizable at any scale.',
         p3: 'From kitchen utensils and office supplies to vintage collectibles and modern electronics, our objects collection covers the full spectrum of everyday life. All vectors are free for personal and commercial use with no registration required.',
         popularCats: ['Household Items', 'Tools &amp; Equipment', 'Electronics', 'Furniture']
+    },
+    'Sports': {
+        title: 'Free Sports Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Score big with our free sports vector graphics collection. Featuring dynamic athlete illustrations, sports equipment icons, team emblems, stadium scenes, and action-packed compositions across dozens of sports disciplines — from football and basketball to tennis and swimming.',
+        p2: 'Sports vectors are essential for team branding, sports event posters, fitness app design, athletic wear graphics, and sports journalism. Each illustration captures the energy and dynamism of athletic competition in crisp, scalable vector format.',
+        p3: 'Whether you need a simple football icon for a sports app or a detailed stadium illustration for an event poster, our sports collection delivers. All vectors are free for commercial use — perfect for sports organizations, fitness brands, and athletic content creators.',
+        popularCats: ['Ball Sports', 'Athletics &amp; Track', 'Water Sports', 'Outdoor']
+    },
+    'Technology': {
+        title: 'Free Technology Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Power up your designs with our free technology vector graphics collection. Featuring computer hardware, mobile devices, circuit board patterns, cybersecurity icons, artificial intelligence visuals, and digital interface elements, our tech library keeps your designs cutting-edge.',
+        p2: 'Technology vectors are essential for software company branding, tech startup marketing, cybersecurity communications, app design, and digital innovation campaigns. Each graphic is designed to convey precision, innovation, and forward-thinking in scalable vector format.',
+        p3: 'From vintage computing nostalgia to futuristic AI and robotics imagery, our technology collection spans the full arc of digital innovation. All vectors are free for commercial use — perfect for tech companies, developers, and digital content creators.',
+        popularCats: ['Computers &amp; Devices', 'Cybersecurity', 'AI &amp; Robotics', 'Science']
+    },
+    'Transportation': {
+        title: 'Free Transportation Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Navigate your designs with our free transportation vector graphics collection. Featuring cars, trucks, motorcycles, aircraft, ships, trains, bicycles, and futuristic vehicles, our transportation library covers every mode of travel from city streets to outer space.',
+        p2: 'Transportation vectors are essential for automotive branding, travel app design, logistics company marketing, urban planning materials, and transportation journalism. Each vehicle illustration is crafted with technical detail and stylistic flair in scalable vector format.',
+        p3: 'From vintage automobiles and classic aircraft to electric vehicles and hyperloop concepts, our transportation collection spans the history and future of human mobility. All vectors are free for commercial use.',
+        popularCats: ['Automobiles', 'Aviation', 'Maritime', 'Urban Transport']
+    },
+    'Vintage': {
+        title: 'Free Vintage Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Travel back in time with our free vintage vector graphics collection. Featuring retro illustrations, antique ornaments, Art Deco patterns, Victorian engravings, mid-century modern designs, and nostalgic Americana, our vintage library adds timeless character to contemporary projects.',
+        p2: 'Vintage vectors are perfect for craft brewery branding, artisan product packaging, retro-themed events, antique shop marketing, and nostalgic editorial design. Each illustration captures the distinctive aesthetic of its era with authentic detail.',
+        p3: 'From 1920s Art Deco elegance to 1970s psychedelic patterns and 1950s Americana charm, our vintage collection spans a century of design history. All vectors are free for commercial use — perfect for brands seeking timeless, character-rich design assets.',
+        popularCats: ['Art Deco', 'Retro &amp; Mid-Century', 'Victorian &amp; Antique', 'Objects']
+    },
+    'Buildings': {
+        title: 'Free Building &amp; Architecture Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Construct stunning designs with our free building and architecture vector graphics collection. Featuring iconic landmarks, architectural details, urban skylines, historical buildings, modern structures, and construction site illustrations, our buildings library supports architects, urban planners, and real estate brands.',
+        p2: 'Building vectors are essential for real estate marketing, architectural firm portfolios, urban development presentations, travel and tourism content, and city planning materials. Each illustration captures architectural character with precision and artistic flair.',
+        p3: 'From ancient temples and medieval castles to modernist skyscrapers and futuristic concept buildings, our architecture collection spans the full history of human construction. All vectors are free for commercial use.',
+        popularCats: ['Landmarks', 'Urban Skylines', 'Historical Architecture', 'Outdoor']
+    },
+    'Font': {
+        title: 'Free Font &amp; Typography Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Explore our collection of free font and typography vector graphics featuring decorative lettering, calligraphic elements, alphabet sets, and typographic ornaments. These vectors are ideal for creating custom titles, logotypes, signage, and editorial layouts with a distinctive typographic flair.',
+        p2: 'Typography vectors give designers the flexibility to craft unique text treatments without relying on installed fonts. Use them for poster headlines, wedding invitations, brand wordmarks, and social media graphics — all scalable to any size without quality loss.',
+        p3: 'Our font and typography collection includes hand-lettered scripts, bold display styles, vintage signage alphabets, and modern geometric letterforms. All vectors are free for commercial use, empowering typographers and designers to push creative boundaries.',
+        popularCats: ['Calligraphy', 'Display &amp; Decorative', 'Alphabet Sets', 'Ornaments']
+    },
+    'Symbols': {
+        title: 'Free Symbol Vector Graphics — SVG &amp; JPEG Downloads',
+        p1: 'Communicate universally with our free symbol vector graphics collection. Featuring international signs, cultural emblems, religious symbols, mathematical notation, warning icons, and universal pictograms, our symbols library transcends language barriers.',
+        p2: 'Symbol vectors are essential for wayfinding systems, international communications, cultural publications, educational materials, and universal design projects. Each symbol is crafted for maximum clarity and immediate recognition across diverse audiences.',
+        p3: 'From traffic signs and safety symbols to cultural emblems and mathematical operators, our symbols collection covers the full spectrum of visual communication. All vectors are free for commercial use, supporting clear and universal design worldwide.',
+        popularCats: ['Signs &amp; Wayfinding', 'Cultural &amp; Religious', 'Mathematical', 'Logo']
+    },
+    'Celebrities': {
+        title: 'Free Celebrity Vector Illustrations — SVG &amp; JPEG Downloads',
+        p1: 'Explore our collection of free celebrity vector illustrations featuring stylized portraits, pop culture icons, and entertainment-themed graphics. These vectors capture the essence of famous figures through artistic interpretation, making them ideal for fan art, editorial design, and pop culture projects.',
+        p2: 'Celebrity vectors are popular choices for magazine layouts, event posters, social media content, and entertainment branding. Each illustration is crafted in a distinctive artistic style that balances likeness with creative expression.',
+        p3: 'All celebrity vectors are free for personal and editorial use. Our collection is regularly updated with new portraits and pop culture references, keeping your design toolkit current and culturally relevant.',
+        popularCats: ['Entertainment', 'Music', 'Sports Stars', 'Pop Culture']
     },
     'Outdoor': {
         title: 'Free Outdoor Vector Graphics — SVG &amp; JPEG Downloads',
@@ -152,40 +201,12 @@ const CATEGORY_SEO_DATA = {
         p3: 'From microscopic cell structures to vast cosmic landscapes, our science collection spans every scientific discipline. All vectors are free for commercial use, supporting science education and communication at every level.',
         popularCats: ['Biology &amp; Medicine', 'Chemistry', 'Physics &amp; Space', 'Technology']
     },
-    'Sports': {
-        title: 'Free Sports Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Score big with our free sports vector graphics collection. Featuring dynamic athlete illustrations, sports equipment icons, team emblems, stadium scenes, and action-packed compositions across dozens of sports disciplines — from football and basketball to tennis and swimming.',
-        p2: 'Sports vectors are essential for team branding, sports event posters, fitness app design, athletic wear graphics, and sports journalism. Each illustration captures the energy and dynamism of athletic competition in crisp, scalable vector format.',
-        p3: 'Whether you need a simple football icon for a sports app or a detailed stadium illustration for an event poster, our sports collection delivers. All vectors are free for commercial use — perfect for sports organizations, fitness brands, and athletic content creators.',
-        popularCats: ['Ball Sports', 'Athletics &amp; Track', 'Water Sports', 'Outdoor']
-    },
-    'Symbols': {
-        title: 'Free Symbol Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Communicate universally with our free symbol vector graphics collection. Featuring international signs, cultural emblems, religious symbols, mathematical notation, warning icons, and universal pictograms, our symbols library transcends language barriers.',
-        p2: 'Symbol vectors are essential for wayfinding systems, international communications, cultural publications, educational materials, and universal design projects. Each symbol is crafted for maximum clarity and immediate recognition across diverse audiences.',
-        p3: 'From traffic signs and safety symbols to cultural emblems and mathematical operators, our symbols collection covers the full spectrum of visual communication. All vectors are free for commercial use, supporting clear and universal design worldwide.',
-        popularCats: ['Signs &amp; Wayfinding', 'Cultural &amp; Religious', 'Mathematical', 'Logo']
-    },
-    'Technology': {
-        title: 'Free Technology Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Power up your designs with our free technology vector graphics collection. Featuring computer hardware, mobile devices, circuit board patterns, cybersecurity icons, artificial intelligence visuals, and digital interface elements, our tech library keeps your designs cutting-edge.',
-        p2: 'Technology vectors are essential for software company branding, tech startup marketing, cybersecurity communications, app design, and digital innovation campaigns. Each graphic is designed to convey precision, innovation, and forward-thinking in scalable vector format.',
-        p3: 'From vintage computing nostalgia to futuristic AI and robotics imagery, our technology collection spans the full arc of digital innovation. All vectors are free for commercial use — perfect for tech companies, developers, and digital content creators.',
-        popularCats: ['Computers &amp; Devices', 'Cybersecurity', 'AI &amp; Robotics', 'Science']
-    },
     'The Arts': {
         title: 'Free Arts &amp; Culture Vector Graphics — SVG &amp; JPEG Downloads',
         p1: 'Celebrate creativity with our free arts and culture vector graphics collection. Featuring fine art references, musical instruments, theatrical imagery, dance illustrations, film and cinema graphics, and cultural heritage designs, our arts library honors human creative expression.',
         p2: 'Arts vectors are perfect for cultural institution branding, event posters, music venue design, arts education materials, and creative industry communications. Each illustration captures the passion and artistry of human cultural achievement.',
         p3: 'From classical music and ballet to street art and contemporary performance, our arts collection spans the full spectrum of human creativity. All vectors are free for commercial use, supporting arts organizations and creative professionals worldwide.',
         popularCats: ['Music &amp; Instruments', 'Visual Arts', 'Performing Arts', 'Film &amp; Cinema']
-    },
-    'Transportation': {
-        title: 'Free Transportation Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Navigate your designs with our free transportation vector graphics collection. Featuring cars, trucks, motorcycles, aircraft, ships, trains, bicycles, and futuristic vehicles, our transportation library covers every mode of travel from city streets to outer space.',
-        p2: 'Transportation vectors are essential for automotive branding, travel app design, logistics company marketing, urban planning materials, and transportation journalism. Each vehicle illustration is crafted with technical detail and stylistic flair in scalable vector format.',
-        p3: 'From vintage automobiles and classic aircraft to electric vehicles and hyperloop concepts, our transportation collection spans the history and future of human mobility. All vectors are free for commercial use.',
-        popularCats: ['Automobiles', 'Aviation', 'Maritime', 'Urban Transport']
     },
     'Industrial': {
         title: 'Free Industrial Vector Graphics — SVG &amp; JPEG Downloads',
@@ -207,40 +228,28 @@ const CATEGORY_SEO_DATA = {
         p2: 'Religion vectors are used in faith community communications, religious publication design, cultural heritage projects, interfaith dialogue materials, and spiritual wellness branding. Each illustration is crafted with cultural sensitivity and artistic respect.',
         p3: 'From ancient sacred symbols to contemporary spiritual iconography, our religion collection represents the rich diversity of human spiritual expression. All vectors are free for personal and commercial use.',
         popularCats: ['Sacred Symbols', 'Religious Architecture', 'Ceremonies', 'Symbols']
-    },
-    'Vintage': {
-        title: 'Free Vintage Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Travel back in time with our free vintage vector graphics collection. Featuring retro illustrations, antique ornaments, Art Deco patterns, Victorian engravings, mid-century modern designs, and nostalgic Americana, our vintage library adds timeless character to contemporary projects.',
-        p2: 'Vintage vectors are perfect for craft brewery branding, artisan product packaging, retro-themed events, antique shop marketing, and nostalgic editorial design. Each illustration captures the distinctive aesthetic of its era with authentic detail.',
-        p3: 'From 1920s Art Deco elegance to 1970s psychedelic patterns and 1950s Americana charm, our vintage collection spans a century of design history. All vectors are free for commercial use — perfect for brands seeking timeless, character-rich design assets.',
-        popularCats: ['Art Deco', 'Retro &amp; Mid-Century', 'Victorian &amp; Antique', 'Objects']
-    },
-    'Buildings': {
-        title: 'Free Building &amp; Architecture Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Construct stunning designs with our free building and architecture vector graphics collection. Featuring iconic landmarks, architectural details, urban skylines, historical buildings, modern structures, and construction site illustrations, our buildings library supports architects, urban planners, and real estate brands.',
-        p2: 'Building vectors are essential for real estate marketing, architectural firm portfolios, urban development presentations, travel and tourism content, and city planning materials. Each illustration captures architectural character with precision and artistic flair.',
-        p3: 'From ancient temples and medieval castles to modernist skyscrapers and futuristic concept buildings, our architecture collection spans the full history of human construction. All vectors are free for commercial use.',
-        popularCats: ['Landmarks', 'Urban Skylines', 'Historical Architecture', 'Outdoor']
     }
 };
 
+// ═══════════════════════════════════════════════════════════════════
+// HANDLER
+// ═══════════════════════════════════════════════════════════════════
 export async function onRequestGet(context) {
-    const { request } = context;
+    const { request, env } = context;
     const url = new URL(request.url);
 
-    // Only intercept the root path (index.html)
+    // Only intercept the root path
     if (url.pathname !== '/' && url.pathname !== '/index.html') {
         return context.next();
     }
 
-    // First, get the static HTML response via context.next()
-    const staticResponse = await context.next();
-    const html = await staticResponse.text();
+    // Fetch the static index.html via the ASSETS binding
+    const assetUrl = new URL(url.pathname, url.origin);
+    const assetResponse = await env.ASSETS.fetch(assetUrl);
+    let html = await assetResponse.text();
 
-    // Parse ?category= from query string
+    // Determine category from query param
     const categoryParam = url.searchParams.get('category') || '';
-
-    // Match against known categories (case-insensitive)
     let matchedKey = 'all';
     if (categoryParam) {
         const catLower = categoryParam.toLowerCase();
@@ -254,7 +263,7 @@ export async function onRequestGet(context) {
 
     const seoData = CATEGORY_SEO_DATA[matchedKey] || CATEGORY_SEO_DATA['all'];
 
-    // Build the dynamic SEO block HTML
+    // Build the dynamic SEO block
     const popularCatsHtml = seoData.popularCats.map(c => `<li>${c}</li>`).join('');
     const newSeoBlock = `<section class="home-seo-content" style="padding:24px 0 32px;max-width:100%;margin:24px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee">
               <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${seoData.title}</h2>
@@ -285,19 +294,19 @@ export async function onRequestGet(context) {
               </div>
             </section>`;
 
-    // Replace the old static SEO block with the new dynamic one
+    // Replace the static SEO block
     const oldBlockRegex = /<section class="home-seo-content"[^>]*>[\s\S]*?<\/section>/;
     const updatedHtml = html.replace(oldBlockRegex, newSeoBlock);
 
-    // Get original headers, then override Content-Type and remove cache headers
-    const headers = new Headers(staticResponse.headers);
+    // Return with proper headers
+    const headers = new Headers(assetResponse.headers);
     headers.set('Content-Type', 'text/html; charset=utf-8');
     headers.delete('Cache-Control');
     headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
 
     return new Response(updatedHtml, {
-        status: staticResponse.status,
-        statusText: staticResponse.statusText,
+        status: assetResponse.status,
+        statusText: assetResponse.statusText,
         headers: headers,
     });
 }
