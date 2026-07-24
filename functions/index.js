@@ -298,6 +298,78 @@ export async function onRequestGet(context) {
     const oldBlockRegex = /<section class="home-seo-content"[^>]*>[\s\S]*?<\/section>/;
     const updatedHtml = html.replace(oldBlockRegex, newSeoBlock);
 
+    // --- GÖREV 3/4: CRAWLABILITY FIX ---
+    // Sadece crawler'lar için (veya SEO için) görünür, normal kullanıcıdan gizli gerçek linkler ekliyoruz.
+    // Bu sayede Googlebot /details/ sayfalarını keşfedebilir ve pagination'ı takip edebilir.
+    let crawlableLinksHtml = '';
+    try {
+        const r2 = env.VECTOR_ASSETS;
+        const r2Object = await r2.get("all_vectors.json");
+        if (r2Object) {
+            const allVectors = JSON.parse(await r2Object.text());
+            let filtered = allVectors;
+            
+            // Kategori filtresi
+            if (categoryParam && categoryParam !== 'all') {
+                const catLower = categoryParam.toLowerCase();
+                filtered = allVectors.filter(v => (v.category || "").toLowerCase() === catLower);
+            }
+            
+            // Sadece vektörleri göster (JPEG'leri gizle - main.js ile uyumlu)
+            filtered = filtered.filter(v => v.contentType !== 'jpeg');
+            
+            // Sayfalama (Limit 24 - main.js ile uyumlu)
+            const limit = 24;
+            const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+            const total = filtered.length;
+            const totalPages = Math.ceil(total / limit);
+            const offset = (page - 1) * limit;
+            const pageVectors = filtered.slice(offset, offset + limit);
+            
+            // Ürün linklerini oluştur
+            const productLinks = pageVectors.map(v => `<li><a href="/details/${v.name}">${v.title || v.name}</a></li>`).join('');
+            
+            // Sayfalama linklerini oluştur
+            let paginationLinks = '';
+            if (page > 1) {
+                const prevUrl = new URL(url.toString());
+                prevUrl.searchParams.set('page', page - 1);
+                paginationLinks += `<a href="${prevUrl.pathname}${prevUrl.search}">Previous Page</a> `;
+            }
+            if (page < totalPages) {
+                const nextUrl = new URL(url.toString());
+                nextUrl.searchParams.set('page', page + 1);
+                paginationLinks += `<a href="${nextUrl.pathname}${nextUrl.search}">Next Page</a>`;
+            }
+            
+            crawlableLinksHtml = `
+            <div id="seo-crawl-links" style="display:none !important;" aria-hidden="true">
+                <ul>${productLinks}</ul>
+                <div class="seo-pagination">${paginationLinks}</div>
+                <span id="ssr-total-count">${total}</span>
+                <span id="ssr-total-pages">${totalPages}</span>
+            </div>`;
+        }
+    } catch (e) {
+        console.error("SSR Link generation failed:", e);
+    }
+
+    // SSR içeriğini HTML'e enjekte et
+    if (crawlableLinksHtml) {
+        html = html.replace('</body>', `${crawlableLinksHtml}\n</body>`);
+        
+        // Toplam sayfa sayısını ve vektör sayısını HTML'deki yerlerine de yazalım
+        const totalMatch = crawlableLinksHtml.match(/<span id="ssr-total-count">(\d+)<\/span>/);
+        const pagesMatch = crawlableLinksHtml.match(/<span id="ssr-total-pages">(\d+)<\/span>/);
+        
+        if (totalMatch) {
+            html = html.replace(/\(free vectors available\)/, `(${parseInt(totalMatch[1]).toLocaleString()} free vectors available)`);
+        }
+        if (pagesMatch) {
+            html = html.replace(/\/ 177/, `/ ${pagesMatch[1]}`);
+        }
+    }
+
     // Return with proper headers
     const headers = new Headers(assetResponse.headers);
     headers.set('Content-Type', 'text/html; charset=utf-8');

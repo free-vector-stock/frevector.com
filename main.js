@@ -103,6 +103,24 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:6px;"><strong>3. Can I use the files for my clients?</strong><br>Yes. They can be used in commercial projects. However, the file itself cannot be provided as a separate product.</p>
             <p><strong>4. Can I upload the files to another site?</strong><br>No. Redistribution is not permitted.</p>
         `
+    },
+    privacy: {
+        title: 'Privacy Policy',
+        content: `
+            <h2 style="margin-bottom:16px;">Privacy Policy</h2>
+            <p style="margin-bottom:12px;">At Frevector.com, we respect your privacy and are committed to protecting any information we may collect while operating our website.</p>
+            <h3 style="margin-bottom:8px;margin-top:16px;">1. Information We Collect</h3>
+            <p style="margin-bottom:12px;">We do not require registration or personal information to download files. However, like most websites, we collect non-personally-identifying information such as browser type, language preference, and the date and time of each visitor request.</p>
+            <h3 style="margin-bottom:8px;margin-top:16px;">2. Cookies</h3>
+            <p style="margin-bottom:12px;">We use cookies to help us identify and track visitors, their usage of Frevector.com, and their website access preferences. We also use third-party cookies from Google AdSense to serve advertisements based on a user's prior visits to our website or other websites.</p>
+            <h3 style="margin-bottom:8px;margin-top:16px;">3. Advertisements</h3>
+            <p style="margin-bottom:12px;">Ads appearing on our website may be delivered to users by advertising partners, who may set cookies. These cookies allow the ad server to recognize your computer each time they send you an online advertisement to compile information about you or others who use your computer.</p>
+            <h3 style="margin-bottom:8px;margin-top:16px;">4. Analytics</h3>
+            <p style="margin-bottom:12px;">We may use third-party service providers like Google Analytics to monitor and analyze the use of our service.</p>
+            <h3 style="margin-bottom:8px;margin-top:16px;">5. External Links</h3>
+            <p style="margin-bottom:12px;">Our website may contain links to external sites that are not operated by us. We strongly advise you to review the Privacy Policy of every site you visit.</p>
+            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a>.</p>
+        `
     }
 };
 
