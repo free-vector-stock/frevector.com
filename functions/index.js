@@ -392,7 +392,7 @@ export async function onRequestGet(context) {
         finalHtml = finalHtml.replace(/<span class="page-total" id="pageTotal">\/ \d+<\/span>/,
             `<span class="page-total" id="pageTotal">/ ${totalPagesSSR}</span>`);
         
-        // prevBtn href'ini güncelle (kategori parametresini koru)
+        // prevBtn href'ini güncelle (kategori parametresini koru - her durumda)
         if (ssrPage > 1) {
             const prevPage = ssrPage - 1;
             const prevHref = prevPage === 1 
@@ -402,26 +402,41 @@ export async function onRequestGet(context) {
                 /id="prevBtn" class="pag-btn" href="[^"]*"/,
                 `id="prevBtn" class="pag-btn" href="${prevHref}"`
             );
-        } else if (categoryParam && categoryParam !== 'all') {
-            // Page 1: prev is disabled but update href for SEO
-            const prevHref = `/?category=${encodeURIComponent(categoryParam)}`;
-            finalHtml = finalHtml.replace(
-                /id="prevBtn" class="pag-btn" href="[^"]*"/,
-                `id="prevBtn" class="pag-btn" href="${prevHref}"`
-            );
+        }
+        // Page 1 veya kategori sayfası: prev href'ini kategori koruyacak şekilde güncelle
+        if (categoryParam && categoryParam !== 'all') {
+            const prevHref = (ssrPage <= 1) ? `/?category=${encodeURIComponent(categoryParam)}` : '';
+            if (prevHref && !finalHtml.includes(`id="prevBtn" class="pag-btn" href="${prevHref}"`)) {
+                finalHtml = finalHtml.replace(
+                    /id="prevBtn" class="pag-btn" href="[^"]*"/,
+                    `id="prevBtn" class="pag-btn" href="${prevHref}"`
+                );
+            }
         }
         
-        // nextBtn href'ini güncelle (kategori parametresini koru)
+        // nextBtn href'ini güncelle (kategori parametresini koru - her durumda)
         if (ssrPage < totalPagesSSR) {
             finalHtml = finalHtml.replace(
                 /id="nextBtn" class="pag-btn" href="[^"]*"/,
                 `id="nextBtn" class="pag-btn" href="/?page=${ssrPage + 1}${catParam}"`
             );
-        } else if (categoryParam && categoryParam !== 'all') {
-            // Last page: next is disabled but update href for SEO
+        }
+        // Last page veya kategori sayfası: next href'ini kategori koruyacak şekilde güncelle
+        if (categoryParam && categoryParam !== 'all') {
+            const nextHref = (ssrPage >= totalPagesSSR) ? `/?page=${totalPagesSSR}${catParam}` : '';
+            if (nextHref && !finalHtml.includes(`id="nextBtn" class="pag-btn" href="${nextHref}"`)) {
+                finalHtml = finalHtml.replace(
+                    /id="nextBtn" class="pag-btn" href="[^"]*"/,
+                    `id="nextBtn" class="pag-btn" href="${nextHref}"`
+                );
+            }
+        }
+        // Page 1 ve kategori varsa: next href'e kategori ekle
+        if (ssrPage === 1 && categoryParam && categoryParam !== 'all' && totalPagesSSR > 1) {
+            const nextHref = `/?page=2${catParam}`;
             finalHtml = finalHtml.replace(
                 /id="nextBtn" class="pag-btn" href="[^"]*"/,
-                `id="nextBtn" class="pag-btn" href="/?page=${totalPagesSSR}${catParam}"`
+                `id="nextBtn" class="pag-btn" href="${nextHref}"`
             );
         }
     }
