@@ -296,72 +296,10 @@ export async function onRequestGet(context) {
 
     // Replace the static SEO block
     const oldBlockRegex = /<section class="home-seo-content"[^>]*>[\s\S]*?<\/section>/;
-    const updatedHtml = html.replace(oldBlockRegex, newSeoBlock);
-
-    // --- GÖREV 3/4: CRAWLABILITY FIX ---
-    // Sadece crawler'lar için (veya SEO için) görünür, normal kullanıcıdan gizli gerçek linkler ekliyoruz.
-    // Bu sayede Googlebot /details/ sayfalarını keşfedebilir ve pagination'ı takip edebilir.
-    let crawlableLinksHtml = '';
-    try {
-        const r2 = env.VECTOR_ASSETS;
-        const r2Object = await r2.get("all_vectors.json");
-        if (r2Object) {
-            const allVectors = JSON.parse(await r2Object.text());
-            let filtered = allVectors;
-            
-            // Kategori filtresi
-            if (categoryParam && categoryParam !== 'all') {
-                const catLower = categoryParam.toLowerCase();
-                filtered = allVectors.filter(v => (v.category || "").toLowerCase() === catLower);
-            }
-            
-            // Sadece vektörleri göster (JPEG'leri gizle - main.js ile uyumlu)
-            filtered = filtered.filter(v => v.contentType !== 'jpeg');
-            
-            // Sayfalama (Limit 24 - main.js ile uyumlu)
-            const limit = 24;
-            const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
-            const total = filtered.length;
-            const totalPages = Math.ceil(total / limit);
-            const offset = (page - 1) * limit;
-            const pageVectors = filtered.slice(offset, offset + limit);
-            
-            // Link sayısını makul bir seviyeye indir (örn. 12 link)
-            let displayVectors = pageVectors.slice(0, 12);
-            
-            // Eğer kategori belirtilmişse, sadece o kategoriden takviye yap (başka kategoriden ekleme YAPMA)
-            if (displayVectors.length < 12 && categoryParam && categoryParam !== 'all') {
-                const fallbackVectors = filtered
-                    .filter(v => !displayVectors.find(dv => dv.name === v.name))
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 12 - displayVectors.length);
-                displayVectors = [...displayVectors, ...fallbackVectors];
-            }
-            
-            // Link stilini iyileştir (chip/etiket görünümü)
-            const styledProductLinks = displayVectors.map(v => `
-                <li style="margin:0;">
-                    <a href="/details/${v.name}" style="display:inline-block; padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; font-size:12px; color:#333; text-decoration:none; white-space:nowrap; transition:all 0.2s;">
-                        ${v.title ? (v.title.length > 30 ? v.title.substring(0, 30) + '...' : v.title) : v.name}
-                    </a>
-                </li>`).join('');
-            
-            crawlableLinksHtml = `
-            <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="background:#fff; border:1px solid #eee; border-radius:12px; font-family:Arial,sans-serif; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:24px;">
-                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:10px;">${styledProductLinks}</ul>
-            </div>`;
-        }
-    } catch (e) {
-        console.error("SSR Link generation failed:", e);
-    }
+    const updatedHtml = html.replace(oldBlockRegex, newSeoBlock);    let crawlableLinksHtml = '';
 
     // SSR içeriğini HTML'e enjekte et
-    let finalHtml = updatedHtml;
-    if (crawlableLinksHtml) {
-        // Footer'ın hemen üzerine enjekte et, ancak ana içerik alanının içinde kalması için main-container bitişinden önce deneyelim
-        if (finalHtml.includes('</main>')) {
-             finalHtml = finalHtml.replace('</main>', `${crawlableLinksHtml}\n</main>`);
-        } else if (finalHtml.includes('<footer')) {
+    let finalHtml = updatedHtml; else if (finalHtml.includes('<footer')) {
             finalHtml = finalHtml.replace('<footer', `${crawlableLinksHtml}\n<footer`);
         } else {
             finalHtml = finalHtml.replace('</body>', `${crawlableLinksHtml}\n</body>`);
