@@ -498,7 +498,7 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
     display: flex;
     align-items: center;
     gap: 3px;
-    font-size: 9px;
+    font-size: 11px;
     color: var(--gray-text);
     white-space: nowrap;
     cursor: default;
@@ -511,7 +511,7 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
 .vc-stat-item.vc-stat-like.liked { color: #e74c3c; }
 .vc-stat-item.vc-stat-share { cursor: pointer; transition: color 0.15s; }
 .vc-stat-item.vc-stat-share:hover { color: #2980b9; }
-.vc-stat-icon { font-size: 10px; line-height: 1; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
+.vc-stat-icon { font-size: 13px; line-height: 1; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
 .detail-stats-bar {
     display: flex;
     align-items: center;
@@ -523,14 +523,14 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
     flex-wrap: wrap;
     position: relative;
 }
-.detail-stat-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; cursor: default; }
+.detail-stat-item { display: flex; align-items: center; gap: 6px; font-size: 15px; color: #555; cursor: default; }
 .detail-stat-item.detail-stat-downloads { font-weight: 700; color: #1a1a1a; }
 .detail-stat-item.detail-stat-like { cursor: pointer; transition: color 0.15s; }
 .detail-stat-item.detail-stat-like:hover { color: #e74c3c; }
 .detail-stat-item.detail-stat-like.liked { color: #e74c3c; }
 .detail-stat-item.detail-stat-share { cursor: pointer; transition: color 0.15s; }
 .detail-stat-item.detail-stat-share:hover { color: #2980b9; }
-.detail-stat-icon { font-size: 16px; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
+.detail-stat-icon { font-size: 20px; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
 .share-popup {
     position: fixed;
     background: var(--white);
@@ -551,9 +551,9 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
 .our-picks-track .vc-stats-bar { display: none; }
 @media (max-width: 768px) {
     .vc-stats-bar { padding: 3px 5px; gap: 1px; }
-    .vc-stat-item { font-size: 8px; gap: 2px; }
-    .vc-stat-icon { font-size: 9px; }
+    .vc-stat-item { font-size: 10px; gap: 2px; }
+    .vc-stat-icon { font-size: 11px; }
     .detail-stats-bar { gap: 12px; padding: 10px 0; }
-    .detail-stat-item { font-size: 12px; }
-    .detail-stat-icon { font-size: 14px; }
+    .detail-stat-item { font-size: 14px; }
+    .detail-stat-icon { font-size: 18px; }
 }
