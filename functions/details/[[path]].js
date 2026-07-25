@@ -182,10 +182,10 @@ export async function onRequest(context) {
     </a>`;
     }).join("\n");
 
-    // Replace the static hidden list with SSR-generated visible content
+    // Inject SSR-generated visible picks cards into the track
     html = html.replace(
-      /<ul style="display:none;">[\s\S]*?<\/ul>/,
-      `<div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
+      /(<div class="our-picks-track" id="ourPicksTrack">)/,
+      `$1\n    <div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
     );
 
     // Also inject a data attribute with the picks info for JS to use
