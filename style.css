@@ -543,8 +543,9 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
     flex-direction: column;
     gap: 6px;
     min-width: 160px;
-    bottom: 100%;
-    left: 0;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
 }
 .share-popup a { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #333; text-decoration: none; padding: 5px 8px; border-radius: 4px; transition: background 0.1s; }
 .share-popup a:hover { background: #f5f5f5; }
