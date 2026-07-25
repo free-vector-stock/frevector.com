@@ -392,6 +392,32 @@ export async function onRequestGet(context) {
         }
         if (pagesMatch) {
             finalHtml = finalHtml.replace(/\/ 177/, `/ ${pagesMatch[1]}`);
+            finalHtml = finalHtml.replace(/\/ \d+/, `/ ${pagesMatch[1]}`);
+        }
+        // SSR: page parametresine göre pageNumber span'ını güncelle
+        const ssrPage = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+        if (ssrPage > 1) {
+            finalHtml = finalHtml.replace(
+                /<span id="pageNumber" class="page-num">\d+<\/span>/,
+                `<span id="pageNumber" class="page-num">${ssrPage}</span>`
+            );
+            // prevBtn href'ini güncelle
+            if (ssrPage > 1) {
+                const prevPage = ssrPage - 1;
+                const prevHref = prevPage === 1 ? '/' : `/?page=${prevPage}`;
+                finalHtml = finalHtml.replace(
+                    /id="prevBtn" class="pag-btn" href="[^"]*"/,
+                    `id="prevBtn" class="pag-btn" href="${prevHref}"`
+                );
+            }
+            // nextBtn href'ini güncelle
+            const totalPagesSSR = pagesMatch ? parseInt(pagesMatch[1]) : 1;
+            if (ssrPage < totalPagesSSR) {
+                finalHtml = finalHtml.replace(
+                    /id="nextBtn" class="pag-btn" href="[^"]*"/,
+                    `id="nextBtn" class="pag-btn" href="/?page=${ssrPage + 1}"`
+                );
+            }
         }
     }
 
