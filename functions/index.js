@@ -348,7 +348,6 @@ export async function onRequestGet(context) {
             
             crawlableLinksHtml = `
             <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="background:#fff; border:1px solid #eee; border-radius:12px; font-family:Arial,sans-serif; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:24px;">
-                <h3 style="font-size:18px; color:#1a5276; margin:0 0 15px 0; font-weight:700; border-bottom:2px solid #1a5276; display:inline-block; padding-bottom:5px;">Related Vectors</h3>
                 <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:10px;">${styledProductLinks}</ul>
             </div>`;
         }

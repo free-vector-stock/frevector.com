@@ -998,9 +998,6 @@ function openDetailPanel(v, cardEl) {
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
-    // GÖREV 2: Load dynamic related vectors
-    loadRelatedVectors(v.category || '', v.name);
-    
     // URL'yi güncelle (objects-jpeg-000000000131 takılı kalma sorununu çözer)
     injectSchema(v);
     const newPath = `/details/${v.name}`;
@@ -1012,36 +1009,6 @@ function openDetailPanel(v, cardEl) {
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-
-// GÖREV 2: Dynamic related vectors loader — ONLY shows vectors from the SAME category, no fallback to other categories
-async function loadRelatedVectors(category, currentSlug) {
-    const container = document.getElementById('related-vectors-container');
-    if (!container) return;
-    if (!category || category === '' || category === 'all') return;
-    try {
-        const res = await fetch(`/api/vectors?category=${encodeURIComponent(category)}&limit=50&type=vector`);
-        const data = await res.json();
-        let vectors = (data.vectors || []).filter(v => v.name !== currentSlug);
-        vectors.sort(() => Math.random() - 0.5);
-        vectors = vectors.slice(0, 6);
-        if (vectors.length === 0) {
-            container.innerHTML = '';
-            return;
-        }
-        container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:8px;">' +
-            vectors.map(v => `
-                <div style="text-align:center;">
-                    <a href="/details/${v.name}">
-                        <img src="${v.thumbnail}" alt="${escHtml(v.title)}" style="width:100%;height:100px;object-fit:cover;border-radius:4px;border:1px solid #eee;" loading="lazy">
-                        <p style="font-size:11px;color:#555;margin-top:4px;line-height:1.3;">${escHtml(v.title.substring(0, 40))}</p>
-                    </a>
-                </div>
-            `).join('') +
-            '</div>';
-    } catch(e) {
-        container.innerHTML = '';
-    }
-}
 
 function closeDetailPanel() {
     const panel = document.getElementById('detailPanel');
@@ -1072,8 +1039,6 @@ function buildVectorSeoText(v) {
         <p>This graphic is ideal for ${useCases}. Simply click the download button to get the file in your preferred format. SVG files can be opened directly in web browsers and most design tools. JPEG preview files are provided for quick viewing and reference.</p>
         <h3>License Information</h3>
         <p>This file is free for both personal and commercial use. You may use it in client projects, commercial products, and publications without paying any fee or providing attribution. Redistribution or reselling of the file as a standalone asset is not permitted.</p>
-        <h3>Related Vectors</h3>
-        <p>Browse more files in our ${category} category to find additional graphics that complement this design. frevector.com offers thousands of free vectors across dozens of categories, all available for instant download. If you enjoy using frevector.com, consider bookmarking our site and checking back regularly because we add new vectors every week.</p>
         <h3 style="margin-top:20px;">Frequently Asked Questions</h3>
         <div class="detail-faq" style="margin-top:8px;">
             <div style="margin-bottom:10px;"><strong style="color:#1a5276;">What file formats are included in the download?</strong><br>Every download includes an editable SVG file and a JPEG preview image. SVG files can be opened in Adobe Illustrator, Inkscape, or any modern web browser.</div>
