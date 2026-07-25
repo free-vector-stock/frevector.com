@@ -299,86 +299,41 @@ export async function onRequestGet(context) {
     const updatedHtml = html.replace(oldBlockRegex, newSeoBlock);    let crawlableLinksHtml = '';
 
     // SSR içeriğini HTML'e enjekte et
-    let finalHtml = updatedHtml; else if (finalHtml.includes('<footer')) {
-            finalHtml = finalHtml.replace('<footer', `${crawlableLinksHtml}\n<footer`);
-        } else {
-            finalHtml = finalHtml.replace('</body>', `${crawlableLinksHtml}\n</body>`);
-        }
-        
-                // Toplam sayfa sayısını ve vektör sayısını HTML'deki yerlerine de yazalım
-        const totalMatch = crawlableLinksHtml.match(/data-total="(\d+)"/);
-        const pagesMatch = crawlableLinksHtml.match(/data-pages="(\d+)"/);
-        if (totalMatch) {
-            finalHtml = finalHtml.replace(/\(free vectors available\)/, `(${parseInt(totalMatch[1]).toLocaleString()} free vectors available)`);
-        }
-        if (pagesMatch) {
-            finalHtml = finalHtml.replace(/\/ 177/, `/ ${pagesMatch[1]}`);
-            finalHtml = finalHtml.replace(/\/ \d+/, `/ ${pagesMatch[1]}`);
-        }
-        // SSR: page parametresine göre pageNumber span'ını güncelle
-        const ssrPage = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
-        const catParam = (categoryParam && categoryParam !== 'all') ? `&category=${encodeURIComponent(categoryParam)}` : '';
-        const totalPagesSSR = pagesMatch ? parseInt(pagesMatch[1]) : 1;
-        
-        // Update page number display
+    let finalHtml = updatedHtml;
+    
+    // SSR: page parametresine göre pageNumber span'ını güncelle
+    const ssrPage = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+    const catParam = (categoryParam && categoryParam !== 'all') ? `&category=${encodeURIComponent(categoryParam)}` : '';
+    
+    // Update page number display
+    finalHtml = finalHtml.replace(
+        /<span id="pageNumber" class="page-num">\d+<\/span>/,
+        `<span id="pageNumber" class="page-num">${ssrPage}</span>`
+    );
+
+    // prevBtn href'ini güncelle
+    if (ssrPage > 1) {
+        const prevPage = ssrPage - 1;
+        const prevHref = prevPage === 1 
+            ? (categoryParam && categoryParam !== 'all' ? `/?category=${encodeURIComponent(categoryParam)}` : '/')
+            : `/?page=${prevPage}${catParam}`;
         finalHtml = finalHtml.replace(
-            /<span id="pageNumber" class="page-num">\d+<\/span>/,
-            `<span id="pageNumber" class="page-num">${ssrPage}</span>`
+            /id="prevBtn" class="pag-btn" href="[^"]*"/,
+            `id="prevBtn" class="pag-btn" href="${prevHref}"`
         );
-        // Update total page count
-        finalHtml = finalHtml.replace(/<span class="page-total" id="pageTotal">\/ \d+<\/span>/,
-            `<span class="page-total" id="pageTotal">/ ${totalPagesSSR}</span>`);
-        
-        // prevBtn href'ini güncelle (kategori parametresini koru - her durumda)
-        if (ssrPage > 1) {
-            const prevPage = ssrPage - 1;
-            const prevHref = prevPage === 1 
-                ? (categoryParam && categoryParam !== 'all' ? `/?category=${encodeURIComponent(categoryParam)}` : '/')
-                : `/?page=${prevPage}${catParam}`;
-            finalHtml = finalHtml.replace(
-                /id="prevBtn" class="pag-btn" href="[^"]*"/,
-                `id="prevBtn" class="pag-btn" href="${prevHref}"`
-            );
-        }
-        // Page 1 veya kategori sayfası: prev href'ini kategori koruyacak şekilde güncelle
-        if (categoryParam && categoryParam !== 'all') {
-            const prevHref = (ssrPage <= 1) ? `/?category=${encodeURIComponent(categoryParam)}` : '';
-            if (prevHref && !finalHtml.includes(`id="prevBtn" class="pag-btn" href="${prevHref}"`)) {
-                finalHtml = finalHtml.replace(
-                    /id="prevBtn" class="pag-btn" href="[^"]*"/,
-                    `id="prevBtn" class="pag-btn" href="${prevHref}"`
-                );
-            }
-        }
-        
-        // nextBtn href'ini güncelle (kategori parametresini koru - her durumda)
-        if (ssrPage < totalPagesSSR) {
-            finalHtml = finalHtml.replace(
-                /id="nextBtn" class="pag-btn" href="[^"]*"/,
-                `id="nextBtn" class="pag-btn" href="/?page=${ssrPage + 1}${catParam}"`
-            );
-        }
-        // Last page veya kategori sayfası: next href'ini kategori koruyacak şekilde güncelle
-        if (categoryParam && categoryParam !== 'all') {
-            const nextHref = (ssrPage >= totalPagesSSR) ? `/?page=${totalPagesSSR}${catParam}` : '';
-            if (nextHref && !finalHtml.includes(`id="nextBtn" class="pag-btn" href="${nextHref}"`)) {
-                finalHtml = finalHtml.replace(
-                    /id="nextBtn" class="pag-btn" href="[^"]*"/,
-                    `id="nextBtn" class="pag-btn" href="${nextHref}"`
-                );
-            }
-        }
-        // Page 1 ve kategori varsa: next href'e kategori ekle
-        if (ssrPage === 1 && categoryParam && categoryParam !== 'all' && totalPagesSSR > 1) {
-            const nextHref = `/?page=2${catParam}`;
-            finalHtml = finalHtml.replace(
-                /id="nextBtn" class="pag-btn" href="[^"]*"/,
-                `id="nextBtn" class="pag-btn" href="${nextHref}"`
-            );
-        }
+    } else if (categoryParam && categoryParam !== 'all') {
+        finalHtml = finalHtml.replace(
+            /id="prevBtn" class="pag-btn" href="[^"]*"/,
+            `id="prevBtn" class="pag-btn" href="/?category=${encodeURIComponent(categoryParam)}"`
+        );
     }
 
-    // Return with proper headers
+    // nextBtn href'ini güncelle
+    finalHtml = finalHtml.replace(
+        /id="nextBtn" class="pag-btn" href="[^"]*"/,
+        `id="nextBtn" class="pag-btn" href="/?page=${ssrPage + 1}${catParam}"`
+    );
+
     const headers = new Headers(assetResponse.headers);
     headers.set('Content-Type', 'text/html; charset=utf-8');
     headers.delete('Cache-Control');
