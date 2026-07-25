@@ -1257,11 +1257,22 @@ function updatePagination() {
             const prevUrl = new URL(window.location.href);
             prevUrl.searchParams.set('page', state.currentPage - 1);
             if (state.currentPage - 1 === 1) prevUrl.searchParams.delete('page');
+            // GÖREV 1 FIX: Kategori parametresini koru
+            if (state.selectedCategory && state.selectedCategory !== 'all') {
+                prevUrl.searchParams.set('category', state.selectedCategory);
+            } else {
+                prevUrl.searchParams.delete('category');
+            }
             prevBtnEl.href = prevUrl.pathname + (prevUrl.search || '');
             prevBtnEl.style.opacity = '1';
             prevBtnEl.style.pointerEvents = 'auto';
         } else {
-            prevBtnEl.href = window.location.pathname;
+            // GÖREV 1 FIX: İlk sayfaya dönerken de kategori parametresini koru
+            const homeUrl = new URL(window.location.origin);
+            if (state.selectedCategory && state.selectedCategory !== 'all') {
+                homeUrl.searchParams.set('category', state.selectedCategory);
+            }
+            prevBtnEl.href = homeUrl.pathname + (homeUrl.search || '');
             prevBtnEl.style.opacity = '0.4';
             prevBtnEl.style.pointerEvents = 'none';
         }
@@ -1271,12 +1282,24 @@ function updatePagination() {
         if (state.currentPage < state.totalPages) {
             const nextUrl = new URL(window.location.href);
             nextUrl.searchParams.set('page', state.currentPage + 1);
+            // GÖREV 1 FIX: Kategori parametresini koru
+            if (state.selectedCategory && state.selectedCategory !== 'all') {
+                nextUrl.searchParams.set('category', state.selectedCategory);
+            } else {
+                nextUrl.searchParams.delete('category');
+            }
             nextBtnEl.href = nextUrl.pathname + nextUrl.search;
             nextBtnEl.style.opacity = '1';
             nextBtnEl.style.pointerEvents = 'auto';
         } else {
             const lastUrl = new URL(window.location.href);
             lastUrl.searchParams.set('page', state.totalPages);
+            // GÖREV 1 FIX: Kategori parametresini koru
+            if (state.selectedCategory && state.selectedCategory !== 'all') {
+                lastUrl.searchParams.set('category', state.selectedCategory);
+            } else {
+                lastUrl.searchParams.delete('category');
+            }
             nextBtnEl.href = lastUrl.pathname + lastUrl.search;
             nextBtnEl.style.opacity = '0.4';
             nextBtnEl.style.pointerEvents = 'none';
