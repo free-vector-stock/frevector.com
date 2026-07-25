@@ -327,7 +327,16 @@ export async function onRequestGet(context) {
             const pageVectors = filtered.slice(offset, offset + limit);
             
             // Link sayısını makul bir seviyeye indir (örn. 12 link)
-            const displayVectors = pageVectors.slice(0, 12);
+            let displayVectors = pageVectors.slice(0, 12);
+            
+            // Eğer kategori boşsa veya link sayısı azsa, genel vektörlerden takviye yap (TÜM sayfalarda görünmesi için)
+            if (displayVectors.length < 12) {
+                const fallbackVectors = allVectors
+                    .filter(v => v.contentType !== 'jpeg' && !displayVectors.find(dv => dv.name === v.name))
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 12 - displayVectors.length);
+                displayVectors = [...displayVectors, ...fallbackVectors];
+            }
             
             // Link stilini iyileştir (chip/etiket görünümü)
             const styledProductLinks = displayVectors.map(v => `
