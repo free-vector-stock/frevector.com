@@ -481,3 +481,81 @@ img {
 body {
   backface-visibility: hidden;
 }
+
+/* =========================
+GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
+========================= */
+.vc-stats-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    gap: 2px;
+}
+.vc-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    color: var(--gray-text);
+    white-space: nowrap;
+    cursor: default;
+    flex: 1;
+    justify-content: center;
+}
+.vc-stat-item.vc-stat-downloads { font-weight: 700; color: #1a1a1a; }
+.vc-stat-item.vc-stat-like { cursor: pointer; transition: color 0.15s; }
+.vc-stat-item.vc-stat-like:hover { color: #e74c3c; }
+.vc-stat-item.vc-stat-like.liked { color: #e74c3c; }
+.vc-stat-item.vc-stat-share { cursor: pointer; transition: color 0.15s; }
+.vc-stat-item.vc-stat-share:hover { color: #2980b9; }
+.vc-stat-icon { font-size: 10px; line-height: 1; }
+.detail-stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 8px 0;
+    flex-wrap: wrap;
+    position: relative;
+}
+.detail-stat-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; cursor: default; }
+.detail-stat-item.detail-stat-downloads { font-weight: 700; color: #1a1a1a; }
+.detail-stat-item.detail-stat-like { cursor: pointer; transition: color 0.15s; }
+.detail-stat-item.detail-stat-like:hover { color: #e74c3c; }
+.detail-stat-item.detail-stat-like.liked { color: #e74c3c; }
+.detail-stat-item.detail-stat-share { cursor: pointer; transition: color 0.15s; }
+.detail-stat-item.detail-stat-share:hover { color: #2980b9; }
+.detail-stat-icon { font-size: 16px; }
+.share-popup {
+    position: absolute;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    padding: 8px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 160px;
+    bottom: 100%;
+    left: 0;
+}
+.share-popup a { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #333; text-decoration: none; padding: 5px 8px; border-radius: 4px; transition: background 0.1s; }
+.share-popup a:hover { background: #f5f5f5; }
+.share-popup .share-copy-btn { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #333; padding: 5px 8px; border-radius: 4px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; transition: background 0.1s; }
+.share-popup .share-copy-btn:hover { background: #f5f5f5; }
+.our-picks-track .vc-stats-bar { display: none; }
+@media (max-width: 768px) {
+    .vc-stats-bar { padding: 3px 5px; gap: 1px; }
+    .vc-stat-item { font-size: 8px; gap: 2px; }
+    .vc-stat-icon { font-size: 9px; }
+    .detail-stats-bar { gap: 12px; padding: 10px 0; }
+    .detail-stat-item { font-size: 12px; }
+    .detail-stat-icon { font-size: 14px; }
+}

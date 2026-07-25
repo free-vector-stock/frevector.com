@@ -713,7 +713,10 @@ function renderVectors() {
                 <div class="vc-keywords">${escHtml([...new Set([...(v.keywords || [])])].join(', '))}</div>
             </div>
         `;
+        card.dataset.statsSlug = v.name;
         card.onclick = () => openDetailPanel(v, card);
+        // GÖREV 1: Stats bar ekle
+        if (typeof attachStatsBarToCard === 'function') attachStatsBarToCard(card, v);
         grid.appendChild(card);
     });
 }
@@ -998,6 +1001,8 @@ function openDetailPanel(v, cardEl) {
 
     document.getElementById('mainDownloadBtn').onclick = () => showDownloadPage(v);
     document.getElementById('mainCloseBtn').onclick = closeDetailPanel;
+    // GÖREV 1: Detay paneline stats bar ekle
+    if (typeof attachStatsBarToDetailPanel === 'function') attachStatsBarToDetailPanel(panel, v);
     // URL'yi güncelle (objects-jpeg-000000000131 takılı kalma sorununu çözer)
     injectSchema(v);
     const newPath = `/details/${v.name}`;
@@ -1343,3 +1348,220 @@ if (document.readyState === 'loading') {
 document.addEventListener('DOMContentLoaded', init);
 
 /* ULTRA PERFORMANCE PATCH v1 REMOVED - Native browser optimizations used instead */
+
+/* =========================
+GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
+========================= */
+
+// Sayıyı kısalt: 1200 → 1.2K
+function fmtCount(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(n);
+}
+
+// localStorage'dan like durumunu oku/yaz
+function isLiked(slug) {
+    try { return localStorage.getItem('liked_' + slug) === '1'; } catch(e) { return false; }
+}
+function setLiked(slug, val) {
+    try { if (val) localStorage.setItem('liked_' + slug, '1'); else localStorage.removeItem('liked_' + slug); } catch(e) {}
+}
+
+// Kart için stats bar HTML'i oluştur (küçük kart)
+function buildCardStatsBar(slug, views, downloads, likes) {
+    const likedClass = isLiked(slug) ? ' liked' : '';
+    const heartIcon = isLiked(slug) ? '❤' : '🤍';
+    return `<div class="vc-stats-bar" data-slug="${escHtml(slug)}">
+        <span class="vc-stat-item vc-stat-views" title="Views"><span class="vc-stat-icon">👁</span><span class="vc-stat-num">${fmtCount(views)}</span></span>
+        <span class="vc-stat-item vc-stat-downloads" title="Downloads"><span class="vc-stat-icon">⬇</span><span class="vc-stat-num">${fmtCount(downloads)}</span></span>
+        <span class="vc-stat-item vc-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">${heartIcon}</span><span class="vc-stat-num">${fmtCount(likes)}</span></span>
+        <span class="vc-stat-item vc-stat-share" title="Share" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">🔗</span></span>
+    </div>`;
+}
+
+// Detay paneli için stats bar HTML'i oluştur (büyük)
+function buildDetailStatsBar(slug, views, downloads, likes) {
+    const likedClass = isLiked(slug) ? ' liked' : '';
+    const heartIcon = isLiked(slug) ? '❤' : '🤍';
+    return `<div class="detail-stats-bar" id="detailStatsBar" data-slug="${escHtml(slug)}">
+        <span class="detail-stat-item detail-stat-views" title="Views"><span class="detail-stat-icon">👁</span><span class="detail-stat-num">${fmtCount(views)}</span> views</span>
+        <span class="detail-stat-item detail-stat-downloads" title="Downloads"><span class="detail-stat-icon">⬇</span><span class="detail-stat-num">${fmtCount(downloads)}</span> downloads</span>
+        <span class="detail-stat-item detail-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}" id="detailLikeBtn"><span class="detail-stat-icon">${heartIcon}</span><span class="detail-stat-num">${fmtCount(likes)}</span> likes</span>
+        <span class="detail-stat-item detail-stat-share" title="Share" data-slug="${escHtml(slug)}" id="detailShareBtn"><span class="detail-stat-icon">🔗</span> Share</span>
+    </div>`;
+}
+
+// Stats'ı API'den çek ve karta uygula
+async function loadAndApplyCardStats(slug, statsBarEl) {
+    try {
+        const res = await fetch(`/api/stats?slug=${encodeURIComponent(slug)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const numEl = statsBarEl.querySelector('.vc-stat-views .vc-stat-num');
+        const dlEl = statsBarEl.querySelector('.vc-stat-downloads .vc-stat-num');
+        const likeEl = statsBarEl.querySelector('.vc-stat-like .vc-stat-num');
+        if (numEl) numEl.textContent = fmtCount(data.views || 0);
+        if (dlEl) dlEl.textContent = fmtCount(data.downloads || 0);
+        if (likeEl) likeEl.textContent = fmtCount(data.likes || 0);
+        // Update heart icon
+        const heartIconEl = statsBarEl.querySelector('.vc-stat-like .vc-stat-icon');
+        const likeItemEl = statsBarEl.querySelector('.vc-stat-like');
+        if (isLiked(slug)) {
+            if (heartIconEl) heartIconEl.textContent = '❤';
+            if (likeItemEl) likeItemEl.classList.add('liked');
+        }
+    } catch(e) {}
+}
+
+// View sayacını artır
+async function trackView(slug) {
+    try {
+        await fetch(`/api/view?slug=${encodeURIComponent(slug)}`, { method: 'POST' });
+    } catch(e) {}
+}
+
+// Like toggle
+async function toggleLike(slug, likeItemEl, numEl, iconEl) {
+    const currently = isLiked(slug);
+    const action = currently ? 'unlike' : 'like';
+    try {
+        const res = await fetch(`/api/like?slug=${encodeURIComponent(slug)}&action=${action}`, { method: 'POST' });
+        if (!res.ok) return;
+        const data = await res.json();
+        setLiked(slug, !currently);
+        if (numEl) numEl.textContent = fmtCount(data.likes || 0);
+        if (iconEl) iconEl.textContent = !currently ? '❤' : '🤍';
+        if (likeItemEl) {
+            if (!currently) likeItemEl.classList.add('liked');
+            else likeItemEl.classList.remove('liked');
+        }
+    } catch(e) {}
+}
+
+// Share popup göster/gizle
+function showSharePopup(slug, anchorEl) {
+    // Mevcut popup varsa kapat
+    const existing = document.querySelector('.share-popup');
+    if (existing) { existing.remove(); return; }
+    const url = `${window.location.origin}/details/${slug}`;
+    const popup = document.createElement('div');
+    popup.className = 'share-popup';
+    popup.innerHTML = `
+        <button class="share-copy-btn" data-url="${escHtml(url)}">📋 Copy Link</button>
+        <a href="https://wa.me/?text=${encodeURIComponent(url)}" target="_blank" rel="noopener">💬 WhatsApp</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener">📘 Facebook</a>
+        <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">🐦 X / Twitter</a>
+        <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">📌 Pinterest</a>
+    `;
+    // Position relative to anchor
+    const parent = anchorEl.closest('.detail-stats-bar, .vc-stats-bar');
+    if (parent) {
+        parent.style.position = 'relative';
+        parent.appendChild(popup);
+    } else {
+        anchorEl.style.position = 'relative';
+        anchorEl.appendChild(popup);
+    }
+    popup.querySelector('.share-copy-btn').addEventListener('click', function() {
+        navigator.clipboard.writeText(this.dataset.url).then(() => {
+            this.textContent = '✅ Copied!';
+            setTimeout(() => popup.remove(), 1200);
+        }).catch(() => {
+            this.textContent = '✅ Copied!';
+            setTimeout(() => popup.remove(), 1200);
+        });
+    });
+    // Close on outside click
+    setTimeout(() => {
+        document.addEventListener('click', function closePopup(e) {
+            if (!popup.contains(e.target)) {
+                popup.remove();
+                document.removeEventListener('click', closePopup);
+            }
+        });
+    }, 10);
+}
+
+// Kart oluşturulduğunda stats bar ekle ve event listener bağla
+function attachStatsBarToCard(card, v) {
+    const slug = v.name;
+    // Stats bar HTML ekle (başlangıçta 0 değerleriyle, sonra API'den güncellenir)
+    const statsHtml = buildCardStatsBar(slug, 0, v.downloads || 0, 0);
+    card.insertAdjacentHTML('beforeend', statsHtml);
+    const statsBar = card.querySelector('.vc-stats-bar');
+    if (!statsBar) return;
+    // Asenkron olarak gerçek değerleri yükle
+    loadAndApplyCardStats(slug, statsBar);
+    // Like tıklama
+    const likeItem = statsBar.querySelector('.vc-stat-like');
+    if (likeItem) {
+        likeItem.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const numEl = this.querySelector('.vc-stat-num');
+            const iconEl = this.querySelector('.vc-stat-icon');
+            toggleLike(slug, this, numEl, iconEl);
+        });
+    }
+    // Share tıklama
+    const shareItem = statsBar.querySelector('.vc-stat-share');
+    if (shareItem) {
+        shareItem.addEventListener('click', function(e) {
+            e.stopPropagation();
+            showSharePopup(slug, this);
+        });
+    }
+}
+
+// Detay paneline stats bar ekle
+function attachStatsBarToDetailPanel(panel, v) {
+    const slug = v.name;
+    // Download butonunun üstüne ekle
+    const downloadBtnContainer = panel.querySelector('#mainDownloadBtn');
+    if (!downloadBtnContainer) return;
+    const statsHtml = buildDetailStatsBar(slug, 0, v.downloads || 0, 0);
+    downloadBtnContainer.closest('div').insertAdjacentHTML('beforebegin', statsHtml);
+    // API'den gerçek değerleri yükle
+    (async () => {
+        try {
+            const res = await fetch(`/api/stats?slug=${encodeURIComponent(slug)}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            const bar = panel.querySelector('#detailStatsBar');
+            if (!bar) return;
+            const viewsNum = bar.querySelector('.detail-stat-views .detail-stat-num');
+            const dlNum = bar.querySelector('.detail-stat-downloads .detail-stat-num');
+            const likeNum = bar.querySelector('.detail-stat-like .detail-stat-num');
+            if (viewsNum) viewsNum.textContent = fmtCount(data.views || 0);
+            if (dlNum) dlNum.textContent = fmtCount(data.downloads || 0);
+            if (likeNum) likeNum.textContent = fmtCount(data.likes || 0);
+            // Heart icon
+            const heartIcon = bar.querySelector('.detail-stat-like .detail-stat-icon');
+            const likeBtn = bar.querySelector('#detailLikeBtn');
+            if (isLiked(slug)) {
+                if (heartIcon) heartIcon.textContent = '❤';
+                if (likeBtn) likeBtn.classList.add('liked');
+            }
+        } catch(e) {}
+    })();
+    // View artır
+    trackView(slug);
+    // Like tıklama
+    const likeBtn = panel.querySelector('#detailLikeBtn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const numEl = this.querySelector('.detail-stat-num');
+            const iconEl = this.querySelector('.detail-stat-icon');
+            toggleLike(slug, this, numEl, iconEl);
+        });
+    }
+    // Share tıklama
+    const shareBtn = panel.querySelector('#detailShareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            showSharePopup(slug, this);
+        });
+    }
+}
