@@ -185,6 +185,16 @@ function injectSchema(v) {
 }
 
 function init() {
+    // URL'den başlangıç page ve category parametrelerini oku
+    const initUrlParams = new URLSearchParams(window.location.search);
+    const initPage = parseInt(initUrlParams.get('page') || '1');
+    if (initPage > 1) state.currentPage = initPage;
+    const initCat = initUrlParams.get('category') || '';
+    if (initCat) {
+        const catLower = initCat.toLowerCase();
+        const matchedCat = CATEGORIES.find(c => c.toLowerCase() === catLower);
+        if (matchedCat) state.selectedCategory = matchedCat;
+    }
     setupCategories();
     setupEventListeners();
     setupModalHandlers();
@@ -1227,11 +1237,11 @@ function setupEventListeners() {
     
     const prevBtn = document.getElementById('prevBtn');
     if (prevBtn) {
-        prevBtn.onclick = () => { if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
+        prevBtn.onclick = (e) => { e.preventDefault(); if (state.currentPage > 1) { state.currentPage--; fetchVectors(); } };
     }
     const nextBtn = document.getElementById('nextBtn');
     if (nextBtn) {
-        nextBtn.onclick = () => { if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
+        nextBtn.onclick = (e) => { e.preventDefault(); if (state.currentPage < state.totalPages) { state.currentPage++; fetchVectors(); } };
     }
 }
 
@@ -1240,7 +1250,50 @@ function updatePagination() {
     if (pageNumber) pageNumber.textContent = state.currentPage;
     const pageTotal = document.getElementById('pageTotal');
     if (pageTotal) pageTotal.textContent = `/ ${state.totalPages}`;
-    
+    // Pagination href'lerini güncelle (SEO için gerçek linkler, JS için preventDefault)
+    const prevBtnEl = document.getElementById('prevBtn');
+    if (prevBtnEl) {
+        if (state.currentPage > 1) {
+            const prevUrl = new URL(window.location.href);
+            prevUrl.searchParams.set('page', state.currentPage - 1);
+            if (state.currentPage - 1 === 1) prevUrl.searchParams.delete('page');
+            prevBtnEl.href = prevUrl.pathname + (prevUrl.search || '');
+            prevBtnEl.style.opacity = '1';
+            prevBtnEl.style.pointerEvents = 'auto';
+        } else {
+            prevBtnEl.href = window.location.pathname;
+            prevBtnEl.style.opacity = '0.4';
+            prevBtnEl.style.pointerEvents = 'none';
+        }
+    }
+    const nextBtnEl = document.getElementById('nextBtn');
+    if (nextBtnEl) {
+        if (state.currentPage < state.totalPages) {
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set('page', state.currentPage + 1);
+            nextBtnEl.href = nextUrl.pathname + nextUrl.search;
+            nextBtnEl.style.opacity = '1';
+            nextBtnEl.style.pointerEvents = 'auto';
+        } else {
+            const lastUrl = new URL(window.location.href);
+            lastUrl.searchParams.set('page', state.totalPages);
+            nextBtnEl.href = lastUrl.pathname + lastUrl.search;
+            nextBtnEl.style.opacity = '0.4';
+            nextBtnEl.style.pointerEvents = 'none';
+        }
+    }
+    // URL'yi güncelle (tarayıcı geçmişi için)
+    if (!window.location.pathname.startsWith('/details/')) {
+        const currentUrl = new URL(window.location.href);
+        if (state.currentPage > 1) {
+            currentUrl.searchParams.set('page', state.currentPage);
+        } else {
+            currentUrl.searchParams.delete('page');
+        }
+        if (window.location.search !== currentUrl.search) {
+            window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search || ''));
+        }
+    }
     // GÖREV 2: Toplam vektör sayısını güncelle
     const totalCountEl = document.getElementById('totalVectorCount');
     if (totalCountEl) {
