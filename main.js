@@ -1371,7 +1371,7 @@ function setLiked(slug, val) {
 // Kart için stats bar HTML'i oluştur (küçük kart)
 function buildCardStatsBar(slug, views, downloads, likes) {
     const likedClass = isLiked(slug) ? ' liked' : '';
-    const heartIcon = isLiked(slug) ? '❤' : '🤍';
+    const heartIcon = isLiked(slug) ? '❤' : '♡';
     return `<div class="vc-stats-bar" data-slug="${escHtml(slug)}">
         <span class="vc-stat-item vc-stat-views" title="Views"><span class="vc-stat-icon">👁</span><span class="vc-stat-num">${fmtCount(views)}</span></span>
         <span class="vc-stat-item vc-stat-downloads" title="Downloads"><span class="vc-stat-icon">⬇</span><span class="vc-stat-num">${fmtCount(downloads)}</span></span>
@@ -1383,7 +1383,7 @@ function buildCardStatsBar(slug, views, downloads, likes) {
 // Detay paneli için stats bar HTML'i oluştur (büyük)
 function buildDetailStatsBar(slug, views, downloads, likes) {
     const likedClass = isLiked(slug) ? ' liked' : '';
-    const heartIcon = isLiked(slug) ? '❤' : '🤍';
+    const heartIcon = isLiked(slug) ? '❤' : '♡';
     return `<div class="detail-stats-bar" id="detailStatsBar" data-slug="${escHtml(slug)}">
         <span class="detail-stat-item detail-stat-views" title="Views"><span class="detail-stat-icon">👁</span><span class="detail-stat-num">${fmtCount(views)}</span> views</span>
         <span class="detail-stat-item detail-stat-downloads" title="Downloads"><span class="detail-stat-icon">⬇</span><span class="detail-stat-num">${fmtCount(downloads)}</span> downloads</span>
@@ -1431,7 +1431,7 @@ async function toggleLike(slug, likeItemEl, numEl, iconEl) {
         const data = await res.json();
         setLiked(slug, !currently);
         if (numEl) numEl.textContent = fmtCount(data.likes || 0);
-        if (iconEl) iconEl.textContent = !currently ? '❤' : '🤍';
+        if (iconEl) iconEl.textContent = !currently ? '❤' : '♡';
         if (likeItemEl) {
             if (!currently) likeItemEl.classList.add('liked');
             else likeItemEl.classList.remove('liked');
@@ -1454,15 +1454,11 @@ function showSharePopup(slug, anchorEl) {
         <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">🐦 X / Twitter</a>
         <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">📌 Pinterest</a>
     `;
-    // Position relative to anchor
-    const parent = anchorEl.closest('.detail-stats-bar, .vc-stats-bar');
-    if (parent) {
-        parent.style.position = 'relative';
-        parent.appendChild(popup);
-    } else {
-        anchorEl.style.position = 'relative';
-        anchorEl.appendChild(popup);
-    }
+    // Fixed position: popup'u body'ye ekle ve buton konumuna göre yerleştir
+    document.body.appendChild(popup);
+    const rect = anchorEl.getBoundingClientRect();
+    popup.style.top = (rect.bottom + 4) + 'px';
+    popup.style.right = (window.innerWidth - rect.right) + 'px';
     popup.querySelector('.share-copy-btn').addEventListener('click', function() {
         navigator.clipboard.writeText(this.dataset.url).then(() => {
             this.textContent = '✅ Copied!';
