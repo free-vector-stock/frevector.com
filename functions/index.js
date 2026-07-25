@@ -329,10 +329,10 @@ export async function onRequestGet(context) {
             // Link sayısını makul bir seviyeye indir (örn. 12 link)
             let displayVectors = pageVectors.slice(0, 12);
             
-            // Eğer kategori boşsa veya link sayısı azsa, genel vektörlerden takviye yap (TÜM sayfalarda görünmesi için)
-            if (displayVectors.length < 12) {
-                const fallbackVectors = allVectors
-                    .filter(v => v.contentType !== 'jpeg' && !displayVectors.find(dv => dv.name === v.name))
+            // Eğer kategori belirtilmişse, sadece o kategoriden takviye yap (başka kategoriden ekleme YAPMA)
+            if (displayVectors.length < 12 && categoryParam && categoryParam !== 'all') {
+                const fallbackVectors = filtered
+                    .filter(v => !displayVectors.find(dv => dv.name === v.name))
                     .sort(() => 0.5 - Math.random())
                     .slice(0, 12 - displayVectors.length);
                 displayVectors = [...displayVectors, ...fallbackVectors];
@@ -346,26 +346,10 @@ export async function onRequestGet(context) {
                     </a>
                 </li>`).join('');
             
-            // Sayfalama linklerini oluştur
-            let paginationLinks = '';
-            if (page > 1) {
-                const prevUrl = new URL(url.toString());
-                prevUrl.searchParams.set('page', page - 1);
-                paginationLinks += `<a href="${prevUrl.pathname}${prevUrl.search}" style="color:#007bff; text-decoration:none; font-weight:bold; font-size:13px;">Previous Page</a> `;
-            }
-            if (page < totalPages) {
-                const nextUrl = new URL(url.toString());
-                nextUrl.searchParams.set('page', page + 1);
-                paginationLinks += `<a href="${nextUrl.pathname}${nextUrl.search}" style="color:#007bff; text-decoration:none; font-weight:bold; font-size:13px;">Next Page</a>`;
-            }
-            
             crawlableLinksHtml = `
             <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="background:#fff; border:1px solid #eee; border-radius:12px; font-family:Arial,sans-serif; box-shadow:0 2px 10px rgba(0,0,0,0.05); padding:24px;">
                 <h3 style="font-size:18px; color:#1a5276; margin:0 0 15px 0; font-weight:700; border-bottom:2px solid #1a5276; display:inline-block; padding-bottom:5px;">Related Vectors</h3>
                 <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:10px;">${styledProductLinks}</ul>
-                <div class="seo-pagination" style="margin-top:25px; padding-top:20px; border-top:1px solid #eee; display:flex; gap:20px; align-items:center;">
-                    ${paginationLinks}
-                </div>
             </div>`;
         }
     } catch (e) {

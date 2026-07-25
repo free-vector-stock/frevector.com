@@ -670,23 +670,8 @@ async function fetchOurPicksRandomly() {
                 }
             }
 
-            // GÖREV 1: Fallback Mekanizması
-            // Eğer seçili kategoride yeterli görsel yoksa (örneğin 20'den az), diğer kategorilerden popüler görselleri ekle
-            if (picks.length < 20) {
-                const fallbackUrl = new URL('/api/vectors', window.location.origin);
-                fallbackUrl.searchParams.set('limit', '50'); // Genelden 50 tane çekelim
-                if (HIDE_JPEG) fallbackUrl.searchParams.set('type', 'vector');
-                
-                const fallbackRes = await fetch(fallbackUrl);
-                if (fallbackRes.ok) {
-                    const fallbackData = await fallbackRes.json();
-                    const fallbackVectors = (fallbackData.vectors || []).filter(fv => 
-                        !picks.find(pv => pv.name === fv.name) // Mevcutları tekrar ekleme
-                    );
-                    // Eksik olanı genelden tamamla (toplam 40'a kadar veya bulabildiğin kadar)
-                    picks = [...picks, ...fallbackVectors].slice(0, 40);
-                }
-            }
+            // GÖREV 1: ONLY show vectors from the SAME category — NO fallback to other categories
+            // picks already filtered by category above, no cross-category fallback
             
             picks.sort(() => Math.random() - 0.5);
             state.ourPicksVectors = picks;
@@ -1028,23 +1013,20 @@ function openDetailPanel(v, cardEl) {
 }
 
 
-// GÖREV 2: Dynamic related vectors loader
+// GÖREV 2: Dynamic related vectors loader — ONLY shows vectors from the SAME category, no fallback to other categories
 async function loadRelatedVectors(category, currentSlug) {
     const container = document.getElementById('related-vectors-container');
     if (!container) return;
+    if (!category || category === '' || category === 'all') return;
     try {
-        const res = await fetch(`/api/vectors?category=${encodeURIComponent(category)}&limit=50`);
+        const res = await fetch(`/api/vectors?category=${encodeURIComponent(category)}&limit=50&type=vector`);
         const data = await res.json();
         let vectors = (data.vectors || []).filter(v => v.name !== currentSlug);
         vectors.sort(() => Math.random() - 0.5);
         vectors = vectors.slice(0, 6);
         if (vectors.length === 0) {
-            // Fallback: get from all vectors
-            const res2 = await fetch(`/api/vectors?limit=50`);
-            const data2 = await res2.json();
-            vectors = (data2.vectors || []).filter(v => v.name !== currentSlug);
-            vectors.sort(() => Math.random() - 0.5);
-            vectors = vectors.slice(0, 6);
+            container.innerHTML = '';
+            return;
         }
         container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:8px;">' +
             vectors.map(v => `
@@ -1057,7 +1039,7 @@ async function loadRelatedVectors(category, currentSlug) {
             `).join('') +
             '</div>';
     } catch(e) {
-        container.innerHTML = '<p>Browse more <a href="/" style="color:#000;text-decoration:underline;">free vectors</a> in our library.</p>';
+        container.innerHTML = '';
     }
 }
 

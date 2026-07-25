@@ -143,30 +143,13 @@ export async function onRequest(context) {
 
   // GÖREV 1 SSR FIX: Replace the static "Our selections for you" list with dynamic SSR-generated content
   if (allVectors && allVectors.length > 0) {
-    // Get 6 random vectors from the same category (exclude current vector)
+    // Get 6 random vectors from the SAME category only (exclude current vector, exclude JPEG-only)
     const sameCategory = allVectors.filter(v => 
-      v.category === category && v.name !== slug
+      v.category === category && v.name !== slug && !v.isJpegOnly
     );
     
-    // If not enough in same category, fill from all vectors
-    let picks = [];
-    if (sameCategory.length >= 6) {
-      // Shuffle and pick 6
-      picks = sameCategory.sort(() => Math.random() - 0.5).slice(0, 6);
-    } else {
-      picks = [...sameCategory];
-      const others = allVectors.filter(v => v.category !== category && v.name !== slug);
-      others.sort(() => Math.random() - 0.5);
-      picks = [...picks, ...others].slice(0, 6);
-    }
-
-    // Hide JPEG only vectors from picks
-    picks = picks.filter(v => !v.isJpegOnly);
-    if (picks.length < 6) {
-      const allOthers = allVectors.filter(v => !v.isJpegOnly && v.name !== slug);
-      const extra = allOthers.sort(() => Math.random() - 0.5);
-      picks = [...picks, ...extra].slice(0, 6);
-    }
+    // ONLY pick from same category — no fallback to other categories
+    let picks = sameCategory.sort(() => Math.random() - 0.5).slice(0, 6);
 
     const picksHTML = picks.map(v => {
       const pickCategory = v.category || "";
