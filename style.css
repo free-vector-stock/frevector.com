@@ -293,9 +293,9 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 }
 
 .pagination-nav { display: flex; align-items: center; gap: 12px; }
-.pag-btn { background: none; border: 1px solid var(--border); padding: 6px 12px; cursor: pointer; border-radius: 3px; font-weight: bold; font-size: 12px; }
+.pag-btn { background: none; border: 1px solid var(--border); padding: 6px 12px; cursor: pointer; border-radius: 3px; font-weight: bold; font-size: 12px; color: #000; }
 .page-num { font-weight: bold; font-size: 14px; }
-.page-total { color: var(--gray-text); font-size: 12px; }
+.page-total { color: #000; font-size: 12px; }
 
 /* FOOTER */
 .footer { 
