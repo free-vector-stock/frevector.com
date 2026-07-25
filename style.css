@@ -511,7 +511,7 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
 .vc-stat-item.vc-stat-like.liked { color: #e74c3c; }
 .vc-stat-item.vc-stat-share { cursor: pointer; transition: color 0.15s; }
 .vc-stat-item.vc-stat-share:hover { color: #2980b9; }
-.vc-stat-icon { font-size: 10px; line-height: 1; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
+.vc-stat-icon { font-size: 10px; line-height: 1; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
 .detail-stats-bar {
     display: flex;
     align-items: center;
@@ -530,7 +530,7 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
 .detail-stat-item.detail-stat-like.liked { color: #e74c3c; }
 .detail-stat-item.detail-stat-share { cursor: pointer; transition: color 0.15s; }
 .detail-stat-item.detail-stat-share:hover { color: #2980b9; }
-.detail-stat-icon { font-size: 16px; font-family: 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
+.detail-stat-icon { font-size: 16px; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
 .share-popup {
     position: fixed;
     background: var(--white);
