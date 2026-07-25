@@ -1254,14 +1254,12 @@ function updatePagination() {
     const prevBtnEl = document.getElementById('prevBtn');
     if (prevBtnEl) {
         if (state.currentPage > 1) {
-            const prevUrl = new URL(window.location.href);
+            const prevUrl = new URL(window.location.origin);
             prevUrl.searchParams.set('page', state.currentPage - 1);
             if (state.currentPage - 1 === 1) prevUrl.searchParams.delete('page');
             // GÖREV 1 FIX: Kategori parametresini koru
             if (state.selectedCategory && state.selectedCategory !== 'all') {
                 prevUrl.searchParams.set('category', state.selectedCategory);
-            } else {
-                prevUrl.searchParams.delete('category');
             }
             prevBtnEl.href = prevUrl.pathname + (prevUrl.search || '');
             prevBtnEl.style.opacity = '1';
@@ -1280,25 +1278,21 @@ function updatePagination() {
     const nextBtnEl = document.getElementById('nextBtn');
     if (nextBtnEl) {
         if (state.currentPage < state.totalPages) {
-            const nextUrl = new URL(window.location.href);
+            const nextUrl = new URL(window.location.origin);
             nextUrl.searchParams.set('page', state.currentPage + 1);
             // GÖREV 1 FIX: Kategori parametresini koru
             if (state.selectedCategory && state.selectedCategory !== 'all') {
                 nextUrl.searchParams.set('category', state.selectedCategory);
-            } else {
-                nextUrl.searchParams.delete('category');
             }
             nextBtnEl.href = nextUrl.pathname + nextUrl.search;
             nextBtnEl.style.opacity = '1';
             nextBtnEl.style.pointerEvents = 'auto';
         } else {
-            const lastUrl = new URL(window.location.href);
+            const lastUrl = new URL(window.location.origin);
             lastUrl.searchParams.set('page', state.totalPages);
             // GÖREV 1 FIX: Kategori parametresini koru
             if (state.selectedCategory && state.selectedCategory !== 'all') {
                 lastUrl.searchParams.set('category', state.selectedCategory);
-            } else {
-                lastUrl.searchParams.delete('category');
             }
             nextBtnEl.href = lastUrl.pathname + lastUrl.search;
             nextBtnEl.style.opacity = '0.4';
