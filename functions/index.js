@@ -351,10 +351,10 @@ export async function onRequestGet(context) {
             }
             
             crawlableLinksHtml = `
-            <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="margin:40px 0; padding:20px; background:#f9f9f9; border-top:1px solid #eee; font-family:Arial,sans-serif; clear:both;">
-                <h3 style="font-size:16px; color:#333; margin:0 0 15px 0; font-weight:600;">Related Vectors</h3>
-                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px;">${styledProductLinks}</ul>
-                <div class="seo-pagination" style="margin-top:20px; padding-top:15px; border-top:1px solid #eee; display:flex; gap:15px;">
+            <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="margin:40px auto; padding:24px; background:#fff; border:1px solid #eee; border-radius:12px; font-family:Arial,sans-serif; clear:both; max-width:1200px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                <h3 style="font-size:18px; color:#1a5276; margin:0 0 15px 0; font-weight:700; border-bottom:2px solid #1a5276; display:inline-block; padding-bottom:5px;">Related Vectors</h3>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:10px;">${styledProductLinks}</ul>
+                <div class="seo-pagination" style="margin-top:25px; padding-top:20px; border-top:1px solid #eee; display:flex; gap:20px; align-items:center;">
                     ${paginationLinks}
                 </div>
             </div>`;
@@ -366,8 +366,10 @@ export async function onRequestGet(context) {
     // SSR içeriğini HTML'e enjekte et
     let finalHtml = updatedHtml;
     if (crawlableLinksHtml) {
-        // Footer'ın hemen üzerine veya ana içeriğin sonuna enjekte et
-        if (finalHtml.includes('<footer')) {
+        // Footer'ın hemen üzerine enjekte et, ancak ana içerik alanının içinde kalması için main-container bitişinden önce deneyelim
+        if (finalHtml.includes('</main>')) {
+             finalHtml = finalHtml.replace('</main>', `${crawlableLinksHtml}\n</main>`);
+        } else if (finalHtml.includes('<footer')) {
             finalHtml = finalHtml.replace('<footer', `${crawlableLinksHtml}\n<footer`);
         } else {
             finalHtml = finalHtml.replace('</body>', `${crawlableLinksHtml}\n</body>`);
