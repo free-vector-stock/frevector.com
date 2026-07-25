@@ -82,7 +82,7 @@ const MODAL_CONTENTS = {
         content: `
             <h2 style="margin-bottom:16px;">Contact</h2>
             <p style="margin-bottom:12px;">If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p>
-            <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
+            <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000;text-decoration:underline;">hakankacar2014@gmail.com</a></p>
             <p style="margin-bottom:16px;">Frevector prioritizes clear and transparent communication with its users.</p>
             <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
             <h3 style="margin-bottom:8px;">Copyright Notice</h3>
@@ -95,7 +95,7 @@ const MODAL_CONTENTS = {
                 <li>A statement regarding the accuracy of your claim</li>
             </ul>
             <p style="margin-bottom:12px;">Upon review, if deemed appropriate, the relevant content will be removed.</p>
-            <p><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
+            <p><strong>Contact:</strong> <a href="mailto:hakankacar2014@gmail.com" style="color:#000;text-decoration:underline;">hakankacar2014@gmail.com</a></p>
             <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
             <h3 style="margin-bottom:8px;">Frequently Asked Questions</h3>
             <p style="margin-bottom:6px;"><strong>1. Are the files free?</strong><br>Yes. Files can be used for free in personal and commercial projects.</p>
@@ -119,7 +119,7 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:12px;">We may use third-party service providers like Google Analytics to monitor and analyze the use of our service.</p>
             <h3 style="margin-bottom:8px;margin-top:16px;">5. External Links</h3>
             <p style="margin-bottom:12px;">Our website may contain links to external sites that are not operated by us. We strongly advise you to review the Privacy Policy of every site you visit.</p>
-            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@frevector.com">info@frevector.com</a>.</p>
+            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a>.</p>
         `
     },
     dmca: {
@@ -137,7 +137,7 @@ const MODAL_CONTENTS = {
                 <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.</li>
                 <li>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
             </ul>
-            <p>Please send your DMCA notice to: <a href="mailto:info@frevector.com">info@frevector.com</a></p>
+            <p>Please send your DMCA notice to: <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>
         `
     }
 };
