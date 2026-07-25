@@ -182,17 +182,12 @@ export async function onRequest(context) {
     </a>`;
     }).join("\n");
 
-    // Inject SSR-generated visible picks cards into the track
-    html = html.replace(
-      /(<div class="our-picks-track" id="ourPicksTrack">)/,
-      `$1\n    <div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
-    );
-
     // Also inject a data attribute with the picks info for JS to use
     const picksData = picks.map(v => JSON.stringify({name: v.name, title: v.title, category: v.category, fileSize: v.fileSize, isJpegOnly: v.isJpegOnly})).join(",");
+    // Inject both SSR-generated visible picks cards and data attribute into the track
     html = html.replace(
       /(<div class="our-picks-track" id="ourPicksTrack">)/,
-      `$1\n    <div id="our-picks-ssr-data" data-picks='[${picksData}]' style="position:absolute;width:0;height:0;overflow:hidden;"></div>`
+      `$1\n    <div id="our-picks-ssr-data" data-picks='[${picksData}]' style="position:absolute;width:0;height:0;overflow:hidden;"></div>\n    <div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
     );
   }
 
