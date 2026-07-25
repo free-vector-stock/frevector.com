@@ -380,31 +380,49 @@ export async function onRequestGet(context) {
         }
         // SSR: page parametresine göre pageNumber span'ını güncelle
         const ssrPage = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+        const catParam = (categoryParam && categoryParam !== 'all') ? `&category=${encodeURIComponent(categoryParam)}` : '';
+        const totalPagesSSR = pagesMatch ? parseInt(pagesMatch[1]) : 1;
+        
+        // Update page number display
+        finalHtml = finalHtml.replace(
+            /<span id="pageNumber" class="page-num">\d+<\/span>/,
+            `<span id="pageNumber" class="page-num">${ssrPage}</span>`
+        );
+        // Update total page count
+        finalHtml = finalHtml.replace(/<span class="page-total" id="pageTotal">\/ \d+<\/span>/,
+            `<span class="page-total" id="pageTotal">/ ${totalPagesSSR}</span>`);
+        
+        // prevBtn href'ini güncelle (kategori parametresini koru)
         if (ssrPage > 1) {
+            const prevPage = ssrPage - 1;
+            const prevHref = prevPage === 1 
+                ? (categoryParam && categoryParam !== 'all' ? `/?category=${encodeURIComponent(categoryParam)}` : '/')
+                : `/?page=${prevPage}${catParam}`;
             finalHtml = finalHtml.replace(
-                /<span id="pageNumber" class="page-num">\d+<\/span>/,
-                `<span id="pageNumber" class="page-num">${ssrPage}</span>`
+                /id="prevBtn" class="pag-btn" href="[^"]*"/,
+                `id="prevBtn" class="pag-btn" href="${prevHref}"`
             );
-            // prevBtn href'ini güncelle (kategori parametresini koru)
-            const catParam = (categoryParam && categoryParam !== 'all') ? `&category=${encodeURIComponent(categoryParam)}` : '';
-            if (ssrPage > 1) {
-                const prevPage = ssrPage - 1;
-                const prevHref = prevPage === 1 
-                    ? (categoryParam && categoryParam !== 'all' ? `/?category=${encodeURIComponent(categoryParam)}` : '/')
-                    : `/?page=${prevPage}${catParam}`;
-                finalHtml = finalHtml.replace(
-                    /id="prevBtn" class="pag-btn" href="[^"]*"/,
-                    `id="prevBtn" class="pag-btn" href="${prevHref}"`
-                );
-            }
-            // nextBtn href'ini güncelle (kategori parametresini koru)
-            const totalPagesSSR = pagesMatch ? parseInt(pagesMatch[1]) : 1;
-            if (ssrPage < totalPagesSSR) {
-                finalHtml = finalHtml.replace(
-                    /id="nextBtn" class="pag-btn" href="[^"]*"/,
-                    `id="nextBtn" class="pag-btn" href="/?page=${ssrPage + 1}${catParam}"`
-                );
-            }
+        } else if (categoryParam && categoryParam !== 'all') {
+            // Page 1: prev is disabled but update href for SEO
+            const prevHref = `/?category=${encodeURIComponent(categoryParam)}`;
+            finalHtml = finalHtml.replace(
+                /id="prevBtn" class="pag-btn" href="[^"]*"/,
+                `id="prevBtn" class="pag-btn" href="${prevHref}"`
+            );
+        }
+        
+        // nextBtn href'ini güncelle (kategori parametresini koru)
+        if (ssrPage < totalPagesSSR) {
+            finalHtml = finalHtml.replace(
+                /id="nextBtn" class="pag-btn" href="[^"]*"/,
+                `id="nextBtn" class="pag-btn" href="/?page=${ssrPage + 1}${catParam}"`
+            );
+        } else if (categoryParam && categoryParam !== 'all') {
+            // Last page: next is disabled but update href for SEO
+            finalHtml = finalHtml.replace(
+                /id="nextBtn" class="pag-btn" href="[^"]*"/,
+                `id="nextBtn" class="pag-btn" href="/?page=${totalPagesSSR}${catParam}"`
+            );
         }
     }
 
