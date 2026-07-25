@@ -326,27 +326,37 @@ export async function onRequestGet(context) {
             const offset = (page - 1) * limit;
             const pageVectors = filtered.slice(offset, offset + limit);
             
-            // Ürün linklerini oluştur
-            const productLinks = pageVectors.map(v => `<li><a href="/details/${v.name}">${v.title || v.name}</a></li>`).join('');
+            // Link sayısını makul bir seviyeye indir (örn. 12 link)
+            const displayVectors = pageVectors.slice(0, 12);
+            
+            // Link stilini iyileştir (chip/etiket görünümü)
+            const styledProductLinks = displayVectors.map(v => `
+                <li style="margin:0;">
+                    <a href="/details/${v.name}" style="display:inline-block; padding:6px 12px; background:#fff; border:1px solid #ddd; border-radius:20px; font-size:12px; color:#333; text-decoration:none; white-space:nowrap; transition:all 0.2s;">
+                        ${v.title ? (v.title.length > 30 ? v.title.substring(0, 30) + '...' : v.title) : v.name}
+                    </a>
+                </li>`).join('');
             
             // Sayfalama linklerini oluştur
             let paginationLinks = '';
             if (page > 1) {
                 const prevUrl = new URL(url.toString());
                 prevUrl.searchParams.set('page', page - 1);
-                paginationLinks += `<a href="${prevUrl.pathname}${prevUrl.search}">Previous Page</a> `;
+                paginationLinks += `<a href="${prevUrl.pathname}${prevUrl.search}" style="color:#007bff; text-decoration:none; font-weight:bold; font-size:13px;">Previous Page</a> `;
             }
             if (page < totalPages) {
                 const nextUrl = new URL(url.toString());
                 nextUrl.searchParams.set('page', page + 1);
-                paginationLinks += `<a href="${nextUrl.pathname}${nextUrl.search}">Next Page</a>`;
+                paginationLinks += `<a href="${nextUrl.pathname}${nextUrl.search}" style="color:#007bff; text-decoration:none; font-weight:bold; font-size:13px;">Next Page</a>`;
             }
             
             crawlableLinksHtml = `
-            <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="margin-top:24px; padding:16px; background:#f8f9fa; border-radius:8px; border:1px solid #e9ecef;">
-                <h3 style="font-size:14px; color:#555; margin:0 0 10px 0; font-weight:600;">Related Vectors</h3>
-                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:6px;">${productLinks}</ul>
-                <div class="seo-pagination" style="margin-top:12px; padding-top:10px; border-top:1px solid #dee2e6;">${paginationLinks}</div>
+            <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="margin:40px 0; padding:20px; background:#f9f9f9; border-top:1px solid #eee; font-family:Arial,sans-serif; clear:both;">
+                <h3 style="font-size:16px; color:#333; margin:0 0 15px 0; font-weight:600;">Related Vectors</h3>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:8px;">${styledProductLinks}</ul>
+                <div class="seo-pagination" style="margin-top:20px; padding-top:15px; border-top:1px solid #eee; display:flex; gap:15px;">
+                    ${paginationLinks}
+                </div>
             </div>`;
         }
     } catch (e) {
@@ -356,7 +366,12 @@ export async function onRequestGet(context) {
     // SSR içeriğini HTML'e enjekte et
     let finalHtml = updatedHtml;
     if (crawlableLinksHtml) {
-        finalHtml = finalHtml.replace('</body>', `${crawlableLinksHtml}\n</body>`);
+        // Footer'ın hemen üzerine veya ana içeriğin sonuna enjekte et
+        if (finalHtml.includes('<footer')) {
+            finalHtml = finalHtml.replace('<footer', `${crawlableLinksHtml}\n<footer`);
+        } else {
+            finalHtml = finalHtml.replace('</body>', `${crawlableLinksHtml}\n</body>`);
+        }
         
                 // Toplam sayfa sayısını ve vektör sayısını HTML'deki yerlerine de yazalım
         const totalMatch = crawlableLinksHtml.match(/data-total="(\d+)"/);
