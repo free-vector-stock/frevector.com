@@ -173,25 +173,26 @@ export async function onRequest(context) {
       const pickThumbKey = `${pickCategory}/${v.name}/${v.name}.jpg`;
       const pickThumbUrl = `https://assets.frevector.com/${pickThumbKey}`;
       return `
-    <div class="vector-card">
+    <a href="/details/${v.name}" class="vector-card" style="text-decoration:none;">
       <div class="vc-img-wrap">
         <img class="vc-img" src="${escapeHtml(pickThumbUrl)}" alt="${escapeHtml(v.title || '')}" loading="eager" decoding="async" fetchpriority="high" width="300" height="300">
         <span class="vc-type-badge vector">VECTOR</span>
       </div>
-    </div>`;
+      <div style="font-size:11px; color:#555; padding:4px 0 0 0; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(v.title || v.name)}</div>
+    </a>`;
     }).join("\n");
 
-    // Replace the static hidden list with SSR-generated dynamic content
+    // Replace the static hidden list with SSR-generated visible content
     html = html.replace(
       /<ul style="display:none;">[\s\S]*?<\/ul>/,
-      `${picksHTML}\n    <!-- SSR-generated our-picks -->`
+      `<div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
     );
 
     // Also inject a data attribute with the picks info for JS to use
     const picksData = picks.map(v => JSON.stringify({name: v.name, title: v.title, category: v.category, fileSize: v.fileSize, isJpegOnly: v.isJpegOnly})).join(",");
     html = html.replace(
       /(<div class="our-picks-track" id="ourPicksTrack">)/,
-      `$1\n    <div id="our-picks-ssr-data" style="display:none;" data-picks='[${picksData}]'></div>`
+      `$1\n    <div id="our-picks-ssr-data" data-picks='[${picksData}]' style="position:absolute;width:0;height:0;overflow:hidden;"></div>`
     );
   }
 

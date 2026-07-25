@@ -343,11 +343,10 @@ export async function onRequestGet(context) {
             }
             
             crawlableLinksHtml = `
-            <div id="seo-crawl-links" style="display:none !important;" aria-hidden="true">
-                <ul>${productLinks}</ul>
-                <div class="seo-pagination">${paginationLinks}</div>
-                <span id="ssr-total-count">${total}</span>
-                <span id="ssr-total-pages">${totalPages}</span>
+            <div id="seo-crawl-links" data-total="${total}" data-pages="${totalPages}" style="margin-top:24px; padding:16px; background:#f8f9fa; border-radius:8px; border:1px solid #e9ecef;">
+                <h3 style="font-size:14px; color:#555; margin:0 0 10px 0; font-weight:600;">Related Vectors</h3>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:6px;">${productLinks}</ul>
+                <div class="seo-pagination" style="margin-top:12px; padding-top:10px; border-top:1px solid #dee2e6;">${paginationLinks}</div>
             </div>`;
         }
     } catch (e) {
@@ -359,10 +358,9 @@ export async function onRequestGet(context) {
     if (crawlableLinksHtml) {
         finalHtml = finalHtml.replace('</body>', `${crawlableLinksHtml}\n</body>`);
         
-        // Toplam sayfa sayısını ve vektör sayısını HTML'deki yerlerine de yazalım
-        const totalMatch = crawlableLinksHtml.match(/<span id="ssr-total-count">(\d+)<\/span>/);
-        const pagesMatch = crawlableLinksHtml.match(/<span id="ssr-total-pages">(\d+)<\/span>/);
-        
+                // Toplam sayfa sayısını ve vektör sayısını HTML'deki yerlerine de yazalım
+        const totalMatch = crawlableLinksHtml.match(/data-total="(\d+)"/);
+        const pagesMatch = crawlableLinksHtml.match(/data-pages="(\d+)"/);
         if (totalMatch) {
             finalHtml = finalHtml.replace(/\(free vectors available\)/, `(${parseInt(totalMatch[1]).toLocaleString()} free vectors available)`);
         }

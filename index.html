@@ -125,9 +125,9 @@ window.addEventListener("scroll", () => {
             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                 <div id="totalVectorCount" style="font-size: 13px; color: var(--gray-text); font-weight: 600;">(free vectors available)</div>
                 <div class="pagination-nav">
-                    <button id="prevBtn" class="pag-btn">&#8249; Previous</button>
+                    <a id="prevBtn" class="pag-btn" href="?page=1" rel="prev">&#8249; Previous</a>
                     <span id="pageNumber" class="page-num">1</span>
-                    <button id="nextBtn" class="pag-btn">Next &#8250;</button>
+                    <a id="nextBtn" class="pag-btn" href="?page=2" rel="next">Next &#8250;</a>
                     <span class="page-total" id="pageTotal">/ 177</span>
                 </div>
             </div>
@@ -143,15 +143,7 @@ window.addEventListener("scroll", () => {
             </div>
             <div class="our-picks-track-wrap">
                 <div class="our-picks-track" id="ourPicksTrack">
-                    <!-- Statik HTML Listesi (SEO ve JS kapalıyken görünüm için) -->
-                    <ul style="display:none;">
-                        <li><a href="/details/abstract-00000001">Abstract Background Vector</a></li>
-                        <li><a href="/details/business-00000001">Business Icons Collection</a></li>
-                        <li><a href="/details/technology-00000001">Technology Icon Set</a></li>
-                        <li><a href="/details/nature-00000001">Nature Illustration Pack</a></li>
-                        <li><a href="/details/social-media-00000001">Social Media Icons SVG</a></li>
-                        <li><a href="/details/geometric-00000001">Geometric Pattern Vector</a></li>
-                    </ul>
+                    <!-- SSR picks cards injected here -->
                 </div>
             </div>
         </section>
