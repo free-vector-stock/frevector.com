@@ -121,6 +121,24 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:12px;">Our website may contain links to external sites that are not operated by us. We strongly advise you to review the Privacy Policy of every site you visit.</p>
             <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a>.</p>
         `
+    },
+    dmca: {
+        title: 'DMCA',
+        content: `
+            <h2 style="margin-bottom:16px;">DMCA Notice</h2>
+            <p style="margin-bottom:12px;">Frevector.com respects the intellectual property rights of others. If you believe that your copyrighted work has been copied in a way that constitutes copyright infringement and is accessible on this site, you may notify our copyright agent, as set forth in the Digital Millennium Copyright Act of 1998 (DMCA).</p>
+            <h3 style="margin-bottom:8px;margin-top:16px;">DMCA Notice of Alleged Infringement</h3>
+            <p style="margin-bottom:12px;">To be effective under the DMCA, your notice must include the following:</p>
+            <ul style="margin-left:20px;margin-bottom:12px;">
+                <li>A physical or electronic signature of a person authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
+                <li>Identification of the copyrighted work claimed to have been infringed.</li>
+                <li>Identification of the material that is claimed to be infringing and that is to be removed.</li>
+                <li>Information reasonably sufficient to permit the service provider to contact you, such as an address, telephone number, and, if available, an email address.</li>
+                <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.</li>
+                <li>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
+            </ul>
+            <p>Please send your DMCA notice to: <a href="mailto:hakankacar2014@gmail.com">hakankacar2014@gmail.com</a></p>
+        `
     }
 };
 
