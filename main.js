@@ -32,6 +32,7 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:12px;">All files can be used in both personal and commercial projects.</p>
             <p style="margin-bottom:12px;"><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>
             <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>
+<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
         `
     },
 
@@ -75,6 +76,7 @@ const MODAL_CONTENTS = {
                 <li>Sharing within bulk content archives</li>
             </ul>
             <p>The Frevector license allows designs to be used in end-user projects. It does not allow the sharing of the file itself.</p>
+<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> | <strong>DMCA:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a></p>
         `
     },
     contact: {
@@ -84,6 +86,8 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:12px;">If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p>
             <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
             <p style="margin-bottom:16px;">Frevector prioritizes clear and transparent communication with its users.</p>
+<p style="margin-bottom:10px;"><strong>General inquiries:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
+<p style="margin-bottom:16px;"><strong>DMCA requests:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a></p>
             <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
             <h3 style="margin-bottom:8px;">Copyright Notice</h3>
             <p style="margin-bottom:12px;">Frevector values original production and respects copyrights. The content on the site has been prepared by Frevector artists. Nevertheless, if you believe that any content infringes your copyright, please contact us.</p>
