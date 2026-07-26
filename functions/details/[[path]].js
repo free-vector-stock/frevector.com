@@ -194,6 +194,43 @@ export async function onRequest(context) {
     `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`
   );
 
+  // ============================================================
+  // GÖREV 1 (YENİ): Ürün detay sayfalarında şablon içerikleri gizle,
+  // ürüne özgü açıklama bloğunu body'e ekle
+  // Ana sayfa (/) bu koda girmez — sadece /details/{slug} için çalışır
+  // ============================================================
+
+  // 1. home-seo-content section'ını gizle (display:none ile — silmiyoruz, sadece gizliyoruz)
+  //    Bu sayede ana sayfada hâlâ görünür kalır, ürün sayfalarında görünmez
+  html = html.replace(
+    /(<section class="home-seo-content"[^>]*)(style="[^"]*")/,
+    `$1style="display:none;"`
+  );
+  // Eğer style attribute yoksa (olası varyant için)
+  html = html.replace(
+    /(<section class="home-seo-content")(?!\s+style=)/,
+    `$1 style="display:none;"`
+  );
+
+  // 2. Ürüne özgü açıklama bloğunu h1'in hemen altına ekle
+  //    Bu blok sadece ürün detay sayfalarında görünür
+  const categoryDisplay = escapeHtml(category || "Vector");
+  const uniqueDescBlock = `
+<section class="product-unique-content" style="padding:16px 0 20px;max-width:100%;margin:12px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee;">
+  <p style="font-size:14px;line-height:1.7;margin-bottom:8px;">${escapeHtml(desc)}</p>
+  <p style="font-size:13px;color:#555;margin:0;">
+    <strong>Category:</strong> ${categoryDisplay} &nbsp;|&nbsp;
+    <strong>Format:</strong> SVG &amp; JPEG &nbsp;|&nbsp;
+    <strong>License:</strong> Free for Personal &amp; Commercial Use
+  </p>
+</section>`;
+
+  // h1'in hemen arkasına ekle
+  html = html.replace(
+    /(<h1 id="categoryTitle"[^>]*>[^<]*<\/h1>)/,
+    `$1\n${uniqueDescBlock}`
+  );
+
   // GÖREV 10: Breadcrumb JSON-LD
   const breadcrumbSchema = JSON.stringify({
     "@context": "https://schema.org",
