@@ -32,7 +32,7 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:12px;">All files can be used in both personal and commercial projects.</p>
             <p style="margin-bottom:12px;"><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>
             <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>
-<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
+<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
         `
     },
 
@@ -76,7 +76,7 @@ const MODAL_CONTENTS = {
                 <li>Sharing within bulk content archives</li>
             </ul>
             <p>The Frevector license allows designs to be used in end-user projects. It does not allow the sharing of the file itself.</p>
-<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> | <strong>DMCA:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a></p>
+<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button> | <strong>DMCA:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
         `
     },
     contact: {
@@ -84,10 +84,10 @@ const MODAL_CONTENTS = {
         content: `
             <h2 style="margin-bottom:16px;">Contact</h2>
             <p style="margin-bottom:12px;">If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p>
-            <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
+            <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
             <p style="margin-bottom:16px;">Frevector prioritizes clear and transparent communication with its users.</p>
-<p style="margin-bottom:10px;"><strong>General inquiries:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
-<p style="margin-bottom:16px;"><strong>DMCA requests:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a></p>
+<p style="margin-bottom:10px;"><strong>General inquiries:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+<p style="margin-bottom:16px;"><strong>DMCA requests:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
             <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
             <h3 style="margin-bottom:8px;">Copyright Notice</h3>
             <p style="margin-bottom:12px;">Frevector values original production and respects copyrights. The content on the site has been prepared by Frevector artists. Nevertheless, if you believe that any content infringes your copyright, please contact us.</p>
@@ -99,7 +99,7 @@ const MODAL_CONTENTS = {
                 <li>A statement regarding the accuracy of your claim</li>
             </ul>
             <p style="margin-bottom:12px;">Upon review, if deemed appropriate, the relevant content will be removed.</p>
-            <p><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a></p>
+            <p><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
             <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
             <h3 style="margin-bottom:8px;">Frequently Asked Questions</h3>
             <p style="margin-bottom:6px;"><strong>1. Are the files free?</strong><br>Yes. Files can be used for free in personal and commercial projects.</p>
@@ -123,7 +123,7 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:12px;">We may use third-party service providers like Google Analytics to monitor and analyze the use of our service.</p>
             <h3 style="margin-bottom:8px;margin-top:16px;">5. External Links</h3>
             <p style="margin-bottom:12px;">Our website may contain links to external sites that are not operated by us. We strongly advise you to review the Privacy Policy of every site you visit.</p>
-            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@frevector.com">info@frevector.com</a>.</p>
+            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@frevector.com">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button>.</p>
         `
     },
     dmca: {
@@ -141,7 +141,7 @@ const MODAL_CONTENTS = {
                 <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.</li>
                 <li>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
             </ul>
-            <p>Please send your DMCA notice to: <a href="mailto:dmca@frevector.com">dmca@frevector.com</a></p>
+            <p>Please send your DMCA notice to: <a href="mailto:dmca@frevector.com">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
         `
     }
 };
@@ -1129,6 +1129,10 @@ function setupModalHandlers() {
             if (!content) return;
             document.getElementById('infoModalBody').innerHTML = content.content;
             document.getElementById('infoModal').style.display = 'flex';
+            // Ensure links inside modal work
+            document.getElementById('infoModalBody').querySelectorAll('a[href^="mailto:"]').forEach(link => {
+                link.onclick = (e) => { e.stopPropagation(); };
+            });
         };
     });
 
@@ -1138,6 +1142,10 @@ function setupModalHandlers() {
         if (MODAL_CONTENTS[hash]) {
             document.getElementById('infoModalBody').innerHTML = MODAL_CONTENTS[hash].content;
             document.getElementById('infoModal').style.display = 'flex';
+            // Ensure links inside modal work
+            document.getElementById('infoModalBody').querySelectorAll('a[href^="mailto:"]').forEach(link => {
+                link.onclick = (e) => { e.stopPropagation(); };
+            });
         }
     };
     window.addEventListener('hashchange', handleHash);
