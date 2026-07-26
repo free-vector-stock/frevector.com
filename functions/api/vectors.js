@@ -80,9 +80,16 @@ export async function onRequestGet(context) {
             });
         }
 
-        // Sort
+        // Sort: the default All Categories listing prioritizes the most downloaded vectors.
         if (sort === "oldest") {
             allVectors.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+        } else if (sort === "newest") {
+            allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        } else if (sort === "downloads" || (!sort && !search && !fetchAllForSlug && (!category || category === "all"))) {
+            allVectors.sort((a, b) => {
+                const downloadDifference = (Number(b.downloads) || 0) - (Number(a.downloads) || 0);
+                return downloadDifference || (new Date(b.date || 0) - new Date(a.date || 0));
+            });
         } else {
             allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
         }
