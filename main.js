@@ -1512,7 +1512,7 @@ function buildCardStatsBar(slug, views, downloads, likes) {
     const heartIcon = isLiked(slug) ? '❤' : '♡';
     return `<div class="vc-stats-bar" data-slug="${escHtml(slug)}">
         <span class="vc-stat-item vc-stat-views" title="Views"><span class="vc-stat-icon">👁</span><span class="vc-stat-num">${fmtCount(views)}</span></span>
-        <span class="vc-stat-item vc-stat-downloads" title="Downloads"><span class="vc-stat-icon">⬇</span><span class="vc-stat-num">${fmtCount(downloads)}</span></span>
+        <span class="vc-stat-item vc-stat-downloads" title="Downloads"><span class="vc-stat-icon">⤓</span><span class="vc-stat-num">${fmtCount(downloads)}</span></span>
         <span class="vc-stat-item vc-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">${heartIcon}</span><span class="vc-stat-num">${fmtCount(likes)}</span></span>
         <span class="vc-stat-item vc-stat-share" title="Share" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">🔗</span></span>
     </div>`;
@@ -1524,7 +1524,7 @@ function buildDetailStatsBar(slug, views, downloads, likes) {
     const heartIcon = isLiked(slug) ? '❤' : '♡';
     return `<div class="detail-stats-bar" id="detailStatsBar" data-slug="${escHtml(slug)}">
         <span class="detail-stat-item detail-stat-views" title="Views"><span class="detail-stat-icon">👁</span><span class="detail-stat-num">${fmtCount(views)}</span> views</span>
-        <span class="detail-stat-item detail-stat-downloads" title="Downloads"><span class="detail-stat-icon">⬇</span><span class="detail-stat-num">${fmtCount(downloads)}</span> downloads</span>
+        <span class="detail-stat-item detail-stat-downloads" title="Downloads"><span class="detail-stat-icon">⤓</span><span class="detail-stat-num">${fmtCount(downloads)}</span> downloads</span>
         <span class="detail-stat-item detail-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}" id="detailLikeBtn"><span class="detail-stat-icon">${heartIcon}</span><span class="detail-stat-num">${fmtCount(likes)}</span> likes</span>
         <span class="detail-stat-item detail-stat-share" title="Share" data-slug="${escHtml(slug)}" id="detailShareBtn"><span class="detail-stat-icon">🔗</span> Share</span>
     </div>`;
