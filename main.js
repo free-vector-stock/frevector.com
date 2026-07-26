@@ -86,7 +86,9 @@ const MODAL_CONTENTS = {
             <p style="margin-bottom:16px;">If you have any questions or feedback regarding Frevector.com, please use the form below or contact us via email.</p>
             
             <form id="contactForm" class="contact-form">
-                <input type="hidden" name="access_key" value="0908a1a5-e017-425a-b317-6772714a5e01">
+                <input type="hidden" name="access_key" value="ea41e256-7609-4c09-913e-d7c4ffd454fe">
+                <input type="hidden" name="from_name" value="Frevector Contact Form">
+                <input type="hidden" name="subject" value="New Message from Frevector.com">
                 <div class="contact-form-group">
                     <label class="contact-form-label">Name</label>
                     <input type="text" name="name" class="contact-form-input" placeholder="Your Name" required>
