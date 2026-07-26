@@ -1133,20 +1133,24 @@ function setupDownloadPageHandlers() {
 
 function setupModalHandlers() {
     // GÖREV: Send Email butonlarını düzelt (Email Obfuscation engelini aş)
-    document.querySelectorAll('a.send-email-btn, a[href^="mailto:"]').forEach(link => {
+    document.querySelectorAll('a.send-email-btn, a[href*="email-protection"], a[href^="mailto:"]').forEach(link => {
         link.onclick = (e) => {
-            e.stopPropagation();
+            const realEmail = link.dataset.email;
+            if (realEmail) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = 'mailto:' + realEmail;
+                return false;
+            }
+            // Fallback: mailto linki bozulmuşsa ama data-email yoksa (link textinden dene)
             const href = link.getAttribute('href');
-            if (href && href.startsWith('mailto:')) {
-                // Email obfuscation tarafından bozulmuş olabilir, temizle
-                const email = href.replace('mailto:', '').split('?')[0];
-                if (email.includes('[email protected]')) {
-                    // Eğer bozulmuşsa linkin textinden veya data attribute'dan kurtarmaya çalış
-                    const realEmail = link.innerText.includes('@') ? link.innerText : (link.dataset.email || '');
-                    if (realEmail) {
-                        window.location.href = 'mailto:' + realEmail;
-                        return false;
-                    }
+            if (href && (href.includes('email-protection') || href.includes('[email protected]'))) {
+                const textEmail = link.innerText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+                if (textEmail) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = 'mailto:' + textEmail[0];
+                    return false;
                 }
             }
         };
