@@ -323,7 +323,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 
 /* MOBİL GÖRÜNÜM */
 @media (max-width: 768px) {
-    body { overflow-y: auto; }
+    body { overflow-y: auto; height: auto; overflow-x: hidden; }
     
     .top-banner { position: static; }
     .header { 
@@ -407,7 +407,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     
     .category-title { font-size: 18px; margin-bottom: 16px; }
     
-    .vectors-grid { grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+    .vectors-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
     .vector-card { border-radius: 6px; }
     .vc-img-wrap { aspect-ratio: 16/9; }
     
