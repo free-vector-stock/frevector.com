@@ -1132,6 +1132,26 @@ function setupDownloadPageHandlers() {
 }
 
 function setupModalHandlers() {
+    // GÖREV: Send Email butonlarını düzelt (Email Obfuscation engelini aş)
+    document.querySelectorAll('a.send-email-btn, a[href^="mailto:"]').forEach(link => {
+        link.onclick = (e) => {
+            e.stopPropagation();
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('mailto:')) {
+                // Email obfuscation tarafından bozulmuş olabilir, temizle
+                const email = href.replace('mailto:', '').split('?')[0];
+                if (email.includes('[email protected]')) {
+                    // Eğer bozulmuşsa linkin textinden veya data attribute'dan kurtarmaya çalış
+                    const realEmail = link.innerText.includes('@') ? link.innerText : (link.dataset.email || '');
+                    if (realEmail) {
+                        window.location.href = 'mailto:' + realEmail;
+                        return false;
+                    }
+                }
+            }
+        };
+    });
+
     document.querySelectorAll('.modal-trigger').forEach(btn => {
         btn.onclick = (e) => {
             // e.preventDefault() removed to allow hash to appear in URL
