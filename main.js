@@ -82,25 +82,34 @@ const MODAL_CONTENTS = {
     contact: {
         title: 'Contact',
         content: `
-            <h2 style="margin-bottom:16px;">Contact</h2>
-            <p style="margin-bottom:12px;">If you have any questions or feedback regarding Frevector.com, please get in touch with us.</p>
-            <p style="margin-bottom:16px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-            <p style="margin-bottom:16px;">Frevector prioritizes clear and transparent communication with its users.</p>
-<p style="margin-bottom:10px;"><strong>General inquiries:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-<p style="margin-bottom:16px;"><strong>DMCA requests:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
-            <h3 style="margin-bottom:8px;">Copyright Notice</h3>
-            <p style="margin-bottom:12px;">Frevector values original production and respects copyrights. The content on the site has been prepared by Frevector artists. Nevertheless, if you believe that any content infringes your copyright, please contact us.</p>
-            <p style="margin-bottom:8px;">The notification must include the following:</p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Information proving you are the copyright owner</li>
-                <li>A link to the content you believe is infringing</li>
-                <li>Your contact information</li>
-                <li>A statement regarding the accuracy of your claim</li>
-            </ul>
-            <p style="margin-bottom:12px;">Upon review, if deemed appropriate, the relevant content will be removed.</p>
-            <p><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+            <h2 style="margin-bottom:16px;">Contact Us</h2>
+            <p style="margin-bottom:16px;">If you have any questions or feedback regarding Frevector.com, please use the form below or contact us via email.</p>
+            
+            <form id="contactForm" class="contact-form">
+                <input type="hidden" name="access_key" value="0908a1a5-e017-425a-b317-6772714a5e01">
+                <div class="contact-form-group">
+                    <label class="contact-form-label">Name</label>
+                    <input type="text" name="name" class="contact-form-input" placeholder="Your Name" required>
+                </div>
+                <div class="contact-form-group">
+                    <label class="contact-form-label">Email</label>
+                    <input type="email" name="email" class="contact-form-input" placeholder="Your Email Address" required>
+                </div>
+                <div class="contact-form-group">
+                    <label class="contact-form-label">Message</label>
+                    <textarea name="message" class="contact-form-textarea" placeholder="How can we help you?" required></textarea>
+                </div>
+                <button type="submit" class="contact-form-submit">SEND MESSAGE</button>
+                <div id="contactFormStatus" class="contact-form-status"></div>
+            </form>
+
+            <div style="margin-top:24px;">
+                <p style="margin-bottom:10px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+                <p style="margin-bottom:10px;"><strong>General inquiries:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+                <p style="margin-bottom:10px;"><strong>DMCA requests:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+            </div>
+
+            <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
             <h3 style="margin-bottom:8px;">Frequently Asked Questions</h3>
             <p style="margin-bottom:6px;"><strong>1. Are the files free?</strong><br>Yes. Files can be used for free in personal and commercial projects.</p>
             <p style="margin-bottom:6px;"><strong>2. Can I sell the files?</strong><br>No. Selling or redistributing the files is prohibited.</p>
@@ -1133,6 +1142,52 @@ function setupModalHandlers() {
             document.getElementById('infoModalBody').querySelectorAll('a[href^="mailto:"]').forEach(link => {
                 link.onclick = (e) => { e.stopPropagation(); };
             });
+
+            // Handle Contact Form Submission
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const status = document.getElementById('contactFormStatus');
+                    const submitBtn = contactForm.querySelector('.contact-form-submit');
+                    
+                    status.textContent = "Sending...";
+                    status.className = "contact-form-status";
+                    status.style.display = "block";
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = "0.5";
+
+                    const formData = new FormData(contactForm);
+                    const object = Object.fromEntries(formData);
+                    const json = JSON.stringify(object);
+
+                    try {
+                        const response = await fetch('https://api.web3forms.com/submit', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: json
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            status.textContent = "Your message has been sent successfully! We will get back to you soon.";
+                            status.className = "contact-form-status success";
+                            contactForm.reset();
+                        } else {
+                            status.textContent = result.message || "Something went wrong. Please try again.";
+                            status.className = "contact-form-status error";
+                        }
+                    } catch (error) {
+                        status.textContent = "Error sending message. Please check your connection.";
+                        status.className = "contact-form-status error";
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = "1";
+                    }
+                };
+            }
         };
     });
 
@@ -1146,6 +1201,52 @@ function setupModalHandlers() {
             document.getElementById('infoModalBody').querySelectorAll('a[href^="mailto:"]').forEach(link => {
                 link.onclick = (e) => { e.stopPropagation(); };
             });
+
+            // Handle Contact Form Submission
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const status = document.getElementById('contactFormStatus');
+                    const submitBtn = contactForm.querySelector('.contact-form-submit');
+                    
+                    status.textContent = "Sending...";
+                    status.className = "contact-form-status";
+                    status.style.display = "block";
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = "0.5";
+
+                    const formData = new FormData(contactForm);
+                    const object = Object.fromEntries(formData);
+                    const json = JSON.stringify(object);
+
+                    try {
+                        const response = await fetch('https://api.web3forms.com/submit', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: json
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            status.textContent = "Your message has been sent successfully! We will get back to you soon.";
+                            status.className = "contact-form-status success";
+                            contactForm.reset();
+                        } else {
+                            status.textContent = result.message || "Something went wrong. Please try again.";
+                            status.className = "contact-form-status error";
+                        }
+                    } catch (error) {
+                        status.textContent = "Error sending message. Please check your connection.";
+                        status.className = "contact-form-status error";
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = "1";
+                    }
+                };
+            }
         }
     };
     window.addEventListener('hashchange', handleHash);
