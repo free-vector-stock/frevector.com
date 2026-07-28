@@ -313,7 +313,7 @@ export async function onRequestGet(context) {
 
     // GÖREV 3: ?lang=X parametreli URL'lerde hreflang kontrolü
     const currentPath = url.pathname === '/index.html' ? '/' : url.pathname;
-    const catQuery = categoryParam ? `category=${encodeURIComponent(categoryParam)}` : '';
+    const catQuery = (categoryParam && categoryParam !== 'all') ? `category=${encodeURIComponent(categoryParam)}` : '';
     const pageQuery = ssrPage > 1 ? `page=${ssrPage}` : '';
     const queryParts = [catQuery, pageQuery].filter(Boolean).join('&');
     const baseCanonical = `https://frevector.com${currentPath}${queryParts ? `?${queryParts}` : ''}`;
