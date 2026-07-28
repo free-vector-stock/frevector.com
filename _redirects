@@ -1,4 +1,4 @@
-/details/:slug/ /details/:slug 301
+/details/*/ /details/:splat 301
 /privacy-policy /privacy/ 301
 /privacy /privacy/ 301
 
