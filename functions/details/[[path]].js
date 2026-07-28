@@ -126,6 +126,14 @@ export async function onRequest(context) {
     html = html.replace("</head>", `<link rel="canonical" href="${canonical}">\n</head>`);
   }
 
+  // GÖREV 3: ?lang=X parametreli URL'lerde hreflang kontrolü
+  const hreflangTags = `
+<link rel="alternate" hreflang="en" href="${canonical}?lang=en">
+<link rel="alternate" hreflang="x-default" href="${canonical}">`;
+  if (!html.includes('hreflang=')) {
+    html = html.replace("</head>", `${hreflangTags}\n</head>`);
+  }
+
   // Open Graph tags
   const ogBlock = `
 <meta property="og:title" content="${escapeHtml(pageTitle)}">

@@ -296,13 +296,43 @@ export async function onRequestGet(context) {
 
     // Replace the static SEO block
     const oldBlockRegex = /<section class="home-seo-content"[^>]*>[\s\S]*?<\/section>/;
-    const updatedHtml = html.replace(oldBlockRegex, newSeoBlock);    let crawlableLinksHtml = '';
+    let updatedHtml = html.replace(oldBlockRegex, newSeoBlock);
+
+    // GÖREV 2: ?page=N parametreli URL'lerde noindex kontrolü
+    // Eğer sayfa 1'den büyükse Google'ın bu sayfaları indekslemesini istemiyoruz (kopya içerik/low value pagination)
+    const ssrPage = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+    if (ssrPage > 1) {
+        if (/<meta\s+name=["']robots["']/i.test(updatedHtml)) {
+            updatedHtml = updatedHtml.replace(
+                /(<meta\s+name=["']robots["']\s+content=["'])(?:[^"']*)(["'])/i,
+                `$1noindex, follow$2`
+            );
+        } else {
+            updatedHtml = updatedHtml.replace('</head>', `<meta name="robots" content="noindex, follow">\n</head>`);
+        }
+    }
+
+    // GÖREV 3: ?lang=X parametreli URL'lerde hreflang kontrolü
+    // Site şu an sadece İngilizce (en) hizmet veriyor, ancak URL'lerde ?lang=en parametresi gelirse 
+    // veya başka diller için hazırlık amaçlı hreflang etiketlerini ekliyoruz.
+    const langParam = url.searchParams.get('lang') || 'en';
+    const currentPath = url.pathname === '/index.html' ? '/' : url.pathname;
+    const baseCanonical = `https://frevector.com${currentPath}${categoryParam ? `?category=${encodeURIComponent(categoryParam)}` : ''}`;
+    
+    const hreflangTags = `
+<link rel="alternate" hreflang="en" href="${baseCanonical}${baseCanonical.includes('?') ? '&' : '?'}lang=en">
+<link rel="alternate" hreflang="x-default" href="${baseCanonical}">`;
+
+    if (!updatedHtml.includes('hreflang=')) {
+        updatedHtml = updatedHtml.replace('</head>', `${hreflangTags}\n</head>`);
+    }
+
+    let crawlableLinksHtml = '';
 
     // SSR içeriğini HTML'e enjekte et
     let finalHtml = updatedHtml;
     
-    // SSR: page parametresine göre pageNumber span'ını güncelle
-    const ssrPage = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+    // SSR: page parametresine göre pageNumber span'ını güncelle (yukarıda hesaplandı)
     const catParam = (categoryParam && categoryParam !== 'all') ? `&category=${encodeURIComponent(categoryParam)}` : '';
     
     // Update page number display
