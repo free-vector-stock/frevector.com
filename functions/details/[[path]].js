@@ -114,8 +114,15 @@ export async function onRequest(context) {
     html = html.replace("</head>", `<meta name="keywords" content="${escapeHtml(keywords)}">\n</head>`);
   }
 
-  // Insert canonical if not present
-  if (!/<link\s+rel=["']canonical["']/i.test(html)) {
+  // GÖREV 1: Canonical tag — her /details/{slug} sayfası kendi URL'ini işaret etmeli (self-referencing)
+  if (/<link\s+rel=["']canonical["']/i.test(html)) {
+    // Mevcut canonical varsa doğru URL ile güncelle
+    html = html.replace(
+      /(<link\s+rel=["']canonical["']\s+href=["'])[^"']*(["'])/i,
+      `$1${canonical}$2`
+    );
+  } else {
+    // Canonical yoksa </head> öncesine ekle
     html = html.replace("</head>", `<link rel="canonical" href="${canonical}">\n</head>`);
   }
 

@@ -334,6 +334,28 @@ export async function onRequestGet(context) {
         `id="nextBtn" class="pag-btn" href="/?page=${ssrPage + 1}${catParam}"`
     );
 
+    // GÖREV 1: Canonical tag — ana sayfa ve kategori sayfaları için dinamik self-referencing canonical
+    // Kural: her sayfa kendi URL'ini canonical olarak işaret etmeli
+    let canonicalUrl;
+    if (categoryParam && categoryParam !== 'all') {
+        // Kategori sayfası: /?category=X (sayfalama dahil değil — kategori ana sayfası canonical)
+        canonicalUrl = `https://frevector.com/?category=${encodeURIComponent(categoryParam)}`;
+    } else {
+        // Ana sayfa: her zaman https://frevector.com/
+        canonicalUrl = 'https://frevector.com/';
+    }
+    if (/<link\s+rel=["']canonical["']/i.test(finalHtml)) {
+        // Mevcut canonical varsa güncelle
+        finalHtml = finalHtml.replace(
+            /(<link\s+rel=["']canonical["']\s+href=["'])[^"']*(["'])/i,
+            `$1${canonicalUrl}$2`
+        );
+    } else {
+        // Canonical yoksa </head> öncesine ekle
+        finalHtml = finalHtml.replace('</head>', `<link rel="canonical" href="${canonicalUrl}">
+</head>`);
+    }
+
     const headers = new Headers(assetResponse.headers);
     headers.set('Content-Type', 'text/html; charset=utf-8');
     headers.delete('Cache-Control');
