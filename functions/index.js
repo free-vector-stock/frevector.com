@@ -78,7 +78,7 @@ const CATEGORY_SEO_DATA = {
     'Miscellaneous': {
         title: 'Free Miscellaneous Vector Graphics — SVG &amp; JPEG Downloads',
         p1: 'Discover a diverse collection of free miscellaneous vector graphics that defy easy categorization. This eclectic library includes unique illustrations, novelty designs, decorative elements, and creative assets that add unexpected character to any project.',
-        p2: 'Miscellaneous vectors are the wildcards of the design world — perfect when you need something distinctive that stands apart from conventional categories. Use them for editorial illustrations, creative packaging, unique social media content, and experimental branding.',
+        p2: 'Miscellaneous vectors are the wildcards of the design world — perfect when you need something distinctive that apart from conventional categories. Use them for editorial illustrations, creative packaging, unique social media content, and experimental branding.',
         p3: 'Our miscellaneous collection is a treasure trove of creative surprises, regularly updated with one-of-a-kind designs. All vectors are free for personal and commercial use, giving designers the freedom to explore unconventional creative directions.',
         popularCats: ['Decorative Elements', 'Novelty', 'Objects', 'Abstract']
     },
@@ -112,8 +112,8 @@ const CATEGORY_SEO_DATA = {
     },
     'Medical': {
         title: 'Free Medical Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Support healthcare communication with our free medical vector graphics collection. Featuring anatomical illustrations, medical equipment icons, healthcare symbols, pharmaceutical graphics, and wellness imagery, our medical library serves healthcare professionals, publishers, and health-focused brands.',
-        p2: 'Medical vectors are essential for hospital websites, health apps, medical publications, pharmaceutical branding, and patient education materials. Each graphic is designed for clarity and accuracy, helping communicate complex health information visually.',
+        p1: 'Support healthcare communication with our free medical vector graphics collection. Featuring anatomical illustrations, medical equipment icons, healthcare symbols, pharmacy elements, and wellness visuals, our medical library supports healthcare providers, researchers, and wellness brands.',
+        p2: 'Medical vectors are perfect for healthcare apps, medical websites, pharmaceutical packaging, health education materials, and wellness publications. Each graphic is designed for professional clarity and visual impact in scalable vector format.',
         p3: 'From simple first-aid icons to detailed anatomical diagrams, our medical collection covers the full spectrum of healthcare design needs. All vectors are free for commercial use, making professional medical illustration accessible to organizations of all sizes.',
         popularCats: ['Healthcare Icons', 'Anatomy', 'Pharmacy', 'Wellness']
     },
@@ -224,7 +224,7 @@ const CATEGORY_SEO_DATA = {
     },
     'Religion': {
         title: 'Free Religion &amp; Spirituality Vector Graphics — SVG &amp; JPEG Downloads',
-        p1: 'Honor diverse spiritual traditions with our free religion and spirituality vector graphics collection. Featuring sacred symbols, religious architecture, ceremonial objects, spiritual motifs, and cultural heritage designs from world religions and spiritual traditions.',
+        p1: 'Explore the visual heritage of faith with our free religion and spirituality vector graphics collection. Featuring sacred symbols, religious architecture, ceremonial objects, and spiritual illustrations from world traditions, our religion library supports faith-based organizations and cultural publications.',
         p2: 'Religion vectors are used in faith community communications, religious publication design, cultural heritage projects, interfaith dialogue materials, and spiritual wellness branding. Each illustration is crafted with cultural sensitivity and artistic respect.',
         p3: 'From ancient sacred symbols to contemporary spiritual iconography, our religion collection represents the rich diversity of human spiritual expression. All vectors are free for personal and commercial use.',
         popularCats: ['Sacred Symbols', 'Religious Architecture', 'Ceremonies', 'Symbols']
@@ -296,43 +296,37 @@ export async function onRequestGet(context) {
 
     // Replace the static SEO block
     const oldBlockRegex = /<section class="home-seo-content"[^>]*>[\s\S]*?<\/section>/;
-    let updatedHtml = html.replace(oldBlockRegex, newSeoBlock);
+    let finalHtml = html.replace(oldBlockRegex, newSeoBlock);
 
     // GÖREV 2: ?page=N parametreli URL'lerde noindex kontrolü
-    // Eğer sayfa 1'den büyükse Google'ın bu sayfaları indekslemesini istemiyoruz (kopya içerik/low value pagination)
     const ssrPage = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
     if (ssrPage > 1) {
-        if (/<meta\s+name=["']robots["']/i.test(updatedHtml)) {
-            updatedHtml = updatedHtml.replace(
+        if (/<meta\s+name=["']robots["']/i.test(finalHtml)) {
+            finalHtml = finalHtml.replace(
                 /(<meta\s+name=["']robots["']\s+content=["'])(?:[^"']*)(["'])/i,
                 `$1noindex, follow$2`
             );
         } else {
-            updatedHtml = updatedHtml.replace('</head>', `<meta name="robots" content="noindex, follow">\n</head>`);
+            finalHtml = finalHtml.replace('</head>', `<meta name="robots" content="noindex, follow">\n</head>`);
         }
     }
 
     // GÖREV 3: ?lang=X parametreli URL'lerde hreflang kontrolü
-    // Site şu an sadece İngilizce (en) hizmet veriyor, ancak URL'lerde ?lang=en parametresi gelirse 
-    // veya başka diller için hazırlık amaçlı hreflang etiketlerini ekliyoruz.
-    const langParam = url.searchParams.get('lang') || 'en';
     const currentPath = url.pathname === '/index.html' ? '/' : url.pathname;
-    const baseCanonical = `https://frevector.com${currentPath}${categoryParam ? `?category=${encodeURIComponent(categoryParam)}` : ''}`;
+    const catQuery = categoryParam ? `category=${encodeURIComponent(categoryParam)}` : '';
+    const pageQuery = ssrPage > 1 ? `page=${ssrPage}` : '';
+    const queryParts = [catQuery, pageQuery].filter(Boolean).join('&');
+    const baseCanonical = `https://frevector.com${currentPath}${queryParts ? `?${queryParts}` : ''}`;
     
     const hreflangTags = `
 <link rel="alternate" hreflang="en" href="${baseCanonical}${baseCanonical.includes('?') ? '&' : '?'}lang=en">
 <link rel="alternate" hreflang="x-default" href="${baseCanonical}">`;
 
-    if (!updatedHtml.includes('hreflang=')) {
-        updatedHtml = updatedHtml.replace('</head>', `${hreflangTags}\n</head>`);
+    if (!finalHtml.includes('hreflang=')) {
+        finalHtml = finalHtml.replace('</head>', `${hreflangTags}\n</head>`);
     }
 
-    let crawlableLinksHtml = '';
-
-    // SSR içeriğini HTML'e enjekte et
-    let finalHtml = updatedHtml;
-    
-    // SSR: page parametresine göre pageNumber span'ını güncelle (yukarıda hesaplandı)
+    // SSR: page parametresine göre pageNumber span'ını güncelle
     const catParam = (categoryParam && categoryParam !== 'all') ? `&category=${encodeURIComponent(categoryParam)}` : '';
     
     // Update page number display
@@ -365,25 +359,19 @@ export async function onRequestGet(context) {
     );
 
     // GÖREV 1: Canonical tag — ana sayfa ve kategori sayfaları için dinamik self-referencing canonical
-    // Kural: her sayfa kendi URL'ini canonical olarak işaret etmeli
     let canonicalUrl;
     if (categoryParam && categoryParam !== 'all') {
-        // Kategori sayfası: /?category=X (sayfalama dahil değil — kategori ana sayfası canonical)
         canonicalUrl = `https://frevector.com/?category=${encodeURIComponent(categoryParam)}`;
     } else {
-        // Ana sayfa: her zaman https://frevector.com/
         canonicalUrl = 'https://frevector.com/';
     }
     if (/<link\s+rel=["']canonical["']/i.test(finalHtml)) {
-        // Mevcut canonical varsa güncelle
         finalHtml = finalHtml.replace(
             /(<link\s+rel=["']canonical["']\s+href=["'])[^"']*(["'])/i,
             `$1${canonicalUrl}$2`
         );
     } else {
-        // Canonical yoksa </head> öncesine ekle
-        finalHtml = finalHtml.replace('</head>', `<link rel="canonical" href="${canonicalUrl}">
-</head>`);
+        finalHtml = finalHtml.replace('</head>', `<link rel="canonical" href="${canonicalUrl}">\n</head>`);
     }
 
     const headers = new Headers(assetResponse.headers);
