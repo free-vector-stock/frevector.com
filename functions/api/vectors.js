@@ -83,8 +83,16 @@ export async function onRequestGet(context) {
         // Sort
         if (sort === "oldest") {
             allVectors.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
-        } else {
+        } else if (sort === "newest") {
             allVectors.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+        } else {
+            // Default sort: By download count (descending), then by date (descending)
+            allVectors.sort((a, b) => {
+                const dlA = parseInt(a.downloads) || 0;
+                const dlB = parseInt(b.downloads) || 0;
+                if (dlB !== dlA) return dlB - dlA;
+                return new Date(b.date || 0) - new Date(a.date || 0);
+            });
         }
 
         const total = allVectors.length;
