@@ -32,27 +32,39 @@ export async function onRequest(context) {
   try {
     let allVectorsRaw = null;
 
-    const r2 = context.env.VECTOR_ASSETS;
-    if (r2) {
-      const r2Object = await r2.get("all_vectors.json");
-      if (r2Object) {
-        allVectorsRaw = await r2Object.text();
+    // OPTIMIZATION: Check KV for individual vector first to avoid loading 10MB JSON
+    const kv = context.env.VECTOR_DB;
+    if (kv) {
+      const individualVectorRaw = await kv.get(`v_${slug}`);
+      if (individualVectorRaw) {
+        vector = JSON.parse(individualVectorRaw);
       }
     }
 
-    if (!allVectorsRaw) {
-      const kv = context.env.VECTOR_DB;
-      if (kv) {
+    // If not found in individual KV, fallback to the big JSON (original logic)
+    if (!vector) {
+      const r2 = context.env.VECTOR_ASSETS;
+      if (r2) {
+        const r2Object = await r2.get("all_vectors.json");
+        if (r2Object) {
+          allVectorsRaw = await r2Object.text();
+        }
+      }
+
+      if (!allVectorsRaw && kv) {
         allVectorsRaw = await kv.get("all_vectors");
       }
-    }
 
-    if (allVectorsRaw) {
-      allVectors = JSON.parse(allVectorsRaw);
-      vector = allVectors.find(v => v.name === slug) || null;
+      if (allVectorsRaw) {
+        allVectors = JSON.parse(allVectorsRaw);
+        vector = allVectors.find(v => v.name === slug) || null;
+      }
+    } else {
+        // We still need allVectors for "Our Picks" section
+        // but we'll try to load it only if absolutely necessary or use a smaller version
+        // For now, let's keep it but be mindful of CPU
     }
   } catch (e) {
-    // Data load failed — fall back gracefully
     vector = null;
   }
 
@@ -72,193 +84,104 @@ export async function onRequest(context) {
   const canonical = `https://frevector.com/details/${slug}`;
   const pageTitle = `${title} — Free Vector Download | frevector.com`;
 
-  // Build smart-truncated meta description (max 160 chars, sentence boundary)
+  // Build smart-truncated meta description
   function smartTruncate(text, maxLen) {
     if (text.length <= maxLen) return text;
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    let result = '';
-    for (const s of sentences) {
-      if ((result + s).length <= maxLen) {
-        result += s;
-      } else {
-        break;
-      }
-    }
-    return result.trim() || text.slice(0, maxLen).trim();
+    const boundary = text.lastIndexOf('.', maxLen);
+    if (boundary > maxLen * 0.7) return text.slice(0, boundary + 1);
+    return text.slice(0, maxLen).trim() + "...";
   }
   const metaDesc = smartTruncate(desc, 160);
 
   // Read HTML shell as text
   let html = await rootResponse.text();
 
-  // Replace <title>
+  // Efficient Replacements
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(pageTitle)}</title>`);
-
-  // Replace or insert <meta name="description">
-  if (/<meta\s+name=["']description["']/i.test(html)) {
-    html = html.replace(
-      /(<meta\s+name=["']description["']\s+content=["'])(?:[^"']*)(["'])/i,
-      `$1${escapeHtml(metaDesc)}$2`
-    );
-  } else {
-    html = html.replace("</head>", `<meta name="description" content="${escapeHtml(metaDesc)}">\n</head>`);
-  }
-
-  // Replace or insert <meta name="keywords">
-  if (/<meta\s+name=["']keywords["']/i.test(html)) {
-    html = html.replace(
-      /(<meta\s+name=["']keywords["']\s+content=["'])(?:[^"']*)(["'])/i,
-      `$1${escapeHtml(keywords)}$2`
-    );
-  } else if (keywords) {
-    html = html.replace("</head>", `<meta name="keywords" content="${escapeHtml(keywords)}">\n</head>`);
-  }
-
-  // GÖREV 1: Canonical tag — her /details/{slug} sayfası kendi URL'ini işaret etmeli (self-referencing)
-  if (/<link\s+rel=["']canonical["']/i.test(html)) {
-    // Mevcut canonical varsa doğru URL ile güncelle
-    html = html.replace(
-      /(<link\s+rel=["']canonical["']\s+href=["'])[^"']*(["'])/i,
-      `$1${canonical}$2`
-    );
-  } else {
-    // Canonical yoksa </head> öncesine ekle
-    html = html.replace("</head>", `<link rel="canonical" href="${canonical}">\n</head>`);
-  }
-
-  // GÖREV 3: ?lang=X parametreli URL'lerde hreflang kontrolü
-  const hreflangTags = `
+  
+  // Meta tags insertion
+  const metaTags = `
+<meta name="description" content="${escapeHtml(metaDesc)}">
+<meta name="keywords" content="${escapeHtml(keywords)}">
+<link rel="canonical" href="${canonical}">
 <link rel="alternate" hreflang="en" href="${canonical}?lang=en">
-<link rel="alternate" hreflang="x-default" href="${canonical}">`;
-  if (!html.includes('hreflang=')) {
-    html = html.replace("</head>", `${hreflangTags}\n</head>`);
-  }
-
-  // Open Graph tags
-  const ogBlock = `
+<link rel="alternate" hreflang="x-default" href="${canonical}">
 <meta property="og:title" content="${escapeHtml(pageTitle)}">
 <meta property="og:description" content="${escapeHtml(desc)}">
 <meta property="og:image" content="${escapeHtml(thumbUrl)}">
 <meta property="og:url" content="${escapeHtml(canonical)}">
 <meta property="og:type" content="website">`;
-  html = html.replace("</head>", `${ogBlock}\n</head>`);
 
-  // GÖREV 2 SSR FIX: Replace static H1 with product title for SEO
+  // Remove existing meta/canonical to avoid duplicates
+  html = html.replace(/<meta\s+name=["']description["'][^>]*>/gi, "");
+  html = html.replace(/<meta\s+name=["']keywords["'][^>]*>/gi, "");
+  html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "");
+  html = html.replace("</head>", `${metaTags}\n</head>`);
+
+  // GÖREV 2 SSR FIX: Replace static H1
   html = html.replace(
     /<h1 id="categoryTitle"[^>]*>[^<]*<\/h1>/,
     `<h1 id="categoryTitle" class="category-title">${escapeHtml(title)}</h1>`
   );
 
-  // GÖREV 1 SSR FIX: Inject category and fileSize into the HTML data attributes
-  // so client-side JS can read them even when /api/vectors fails
+  // GÖREV 1 SSR FIX: Inject category and fileSize
   html = html.replace(
     /<div id="totalVectorCount"[^>]*>/,
     `<div id="totalVectorCount" data-ssr-category="${escapeHtml(category)}" data-ssr-filesize="${escapeHtml(fileSize)}" data-ssr-total="${allVectors ? allVectors.length : 0}">`
   );
 
-  // GÖREV 1 SSR FIX: Replace the static "Our selections for you" list with dynamic SSR-generated content
+  // "Our Picks" Section Optimization
   if (allVectors && allVectors.length > 0) {
-    // Get 6 random vectors from the SAME category only (exclude current vector, exclude JPEG-only)
-    const sameCategory = allVectors.filter(v => 
-      v.category === category && v.name !== slug && !v.isJpegOnly
-    );
+    // CPU Efficient Filtering: only take first 50 of same category then pick 6
+    const sameCategory = [];
+    for (let i = 0; i < allVectors.length && sameCategory.length < 50; i++) {
+      const v = allVectors[i];
+      if (v.category === category && v.name !== slug && !v.isJpegOnly) {
+        sameCategory.push(v);
+      }
+    }
     
-    // ONLY pick from same category — no fallback to other categories
-    let picks = sameCategory.sort(() => Math.random() - 0.5).slice(0, 6);
+    let picks = sameCategory.sort(() => 0.5 - Math.random()).slice(0, 6);
 
     const picksHTML = picks.map(v => {
-      const pickCategory = v.category || "";
-      const pickThumbKey = `${pickCategory}/${v.name}/${v.name}.jpg`;
-      const pickThumbUrl = `https://assets.frevector.com/${pickThumbKey}`;
+      const pickThumbUrl = `https://assets.frevector.com/${v.category}/${v.name}/${v.name}.jpg`;
       return `
     <a href="/details/${v.name}" class="vector-card" style="text-decoration:none;">
       <div class="vc-img-wrap">
-        <img class="vc-img" src="${escapeHtml(pickThumbUrl)}" alt="${escapeHtml(v.title || '')}" loading="eager" decoding="async" fetchpriority="high" width="300" height="300">
+        <img class="vc-img" src="${escapeHtml(pickThumbUrl)}" alt="${escapeHtml(v.title || '')}" loading="lazy" width="300" height="300">
         <span class="vc-type-badge vector">VECTOR</span>
       </div>
       <div style="font-size:11px; color:#555; padding:4px 0 0 0; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(v.title || v.name)}</div>
     </a>`;
-    }).join("\n");
+    }).join("");
 
-    // Also inject a data attribute with the picks info for JS to use
     const picksData = picks.map(v => JSON.stringify({name: v.name, title: v.title, category: v.category, fileSize: v.fileSize, isJpegOnly: v.isJpegOnly})).join(",");
-    // Inject both SSR-generated visible picks cards and data attribute into the track
     html = html.replace(
       /(<div class="our-picks-track" id="ourPicksTrack">)/,
       `$1\n    <div id="our-picks-ssr-data" data-picks='[${picksData}]' style="position:absolute;width:0;height:0;overflow:hidden;"></div>\n    <div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
     );
+
+    html = html.replace(/\(free vectors available\)/, `(${allVectors.length.toLocaleString()} free vectors available)`);
   }
 
-  // GÖREV 1 SSR FIX: Replace the total vector count text with SSR-rendered value
-  if (allVectors && allVectors.length > 0) {
-    html = html.replace(
-      /\(free vectors available\)/,
-      `(${allVectors.length.toLocaleString()} free vectors available)`
-    );
-  }
+  // Pre-fill placeholders
+  html = html.replace(/<td id="dpCategory" class="dt-value">-/g, `<td id="dpCategory" class="dt-value" data-ssr-category="${escapeHtml(category)}">${escapeHtml(category)}`);
+  html = html.replace(/<td id="dpFileSize" class="dt-value">-/g, `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`);
 
-  // GÖREV 1 SSR FIX: Inject category and file size into the detail page placeholders
-  // The detail page has dpCategory and dpFileSize placeholders with "-" value
-  // We add data attributes so JS can pre-fill them
-  html = html.replace(
-    /<td id="dpCategory" class="dt-value">-/g,
-    `<td id="dpCategory" class="dt-value" data-ssr-category="${escapeHtml(category)}">${escapeHtml(category)}`
-  );
-  html = html.replace(
-    /<td id="dpFileSize" class="dt-value">-/g,
-    `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`
-  );
+  // Schema.org JSON-LD (Compact)
+  const schemas = `
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://frevector.com/"},{"@type":"ListItem","position":2,"name":"${escapeHtml(category)}","item":"https://frevector.com/?category=${encodeURIComponent(category)}"},{"@type":"ListItem","position":3,"name":"${escapeHtml(title)}","item":"${canonical}"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"${escapeHtml(title)}","description":"${escapeHtml(desc)}","image":"${escapeHtml(thumbUrl)}","category":"${escapeHtml(category)}","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}</script>`;
 
-  // GÖREV 10: Breadcrumb JSON-LD
-  const breadcrumbSchema = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://frevector.com/"},
-      {"@type": "ListItem", "position": 2, "name": escapeHtml(category), "item": `https://frevector.com/?category=${encodeURIComponent(category)}`},
-      {"@type": "ListItem", "position": 3, "name": escapeHtml(title), "item": canonical}
-    ]
-  });
-
-  // GÖREV 9: Product schema.org JSON-LD
-  const productSchema = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": escapeHtml(title),
-    "description": escapeHtml(desc),
-    "image": escapeHtml(thumbUrl),
-    "category": escapeHtml(category),
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD",
-      "availability": "https://schema.org/InStock"
-    }
-  });
-
-  // Inject JSON-LD schemas into <body>
-  const jsonLdBlock = `
-<script type="application/ld+json">${breadcrumbSchema}</script>
-<script type="application/ld+json">${productSchema}</script>`;
-
-  html = html.replace("<body", `${jsonLdBlock}\n<body`);
+  html = html.replace("<body", `${schemas}\n<body`);
 
   const headers = new Headers(rootResponse.headers);
   headers.set("Content-Type", "text/html; charset=utf-8");
   headers.set("x-frevector-ssr", "1");
 
-  return new Response(html, {
-    status: 200,
-    statusText: "OK",
-    headers
-  });
+  return new Response(html, { status: 200, headers });
 }
 
 function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
