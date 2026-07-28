@@ -30,15 +30,16 @@ export async function onRequestGet(context) {
         const sort = url.searchParams.get("sort") || "";
         const type = url.searchParams.get("type") || ""; // 'vector', 'jpeg', or empty for all
 
-        // Try to get all_vectors from R2 first (optimized)
-        let allVectorsRaw;
-        const r2Object = await r2.get("all_vectors.json");
-        if (r2Object) {
-            allVectorsRaw = await r2Object.text();
-        } else {
-            // Fallback to KV if R2 is not yet populated
-            const kv = context.env.VECTOR_DB;
-            allVectorsRaw = await kv.get("all_vectors");
+        // Get all_vectors from KV first to ensure latest download counts are used for sorting
+        const kv = context.env.VECTOR_DB;
+        let allVectorsRaw = await kv.get("all_vectors");
+        
+        if (!allVectorsRaw) {
+            // Fallback to R2 if KV is empty
+            const r2Object = await r2.get("all_vectors.json");
+            if (r2Object) {
+                allVectorsRaw = await r2Object.text();
+            }
         }
 
         if (!allVectorsRaw) {
