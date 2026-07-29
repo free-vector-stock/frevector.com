@@ -39,7 +39,8 @@ async function syncSitemap(env) {
     }
 
     const thumbKey = encodeURIComponent(name + '/thumb.jpg');
-    xml += '  <url>\n    <loc>https://frevector.com/details/' + name + '</loc>\n    <lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod>\n    <image:image>\n      <image:loc>https://frevector.com/api/asset?key=' + thumbKey + '</image:loc>\n    </image:image>\n  </url>\n';
+    const itemLastmod = (v.date ? v.date.split('T')[0] : new Date().toISOString().split('T')[0]);
+    xml += '  <url>\n    <loc>https://frevector.com/details/' + name + '</loc>\n    <lastmod>' + itemLastmod + '</lastmod>\n    <image:image>\n      <image:loc>https://frevector.com/api/asset?key=' + thumbKey + '</image:loc>\n    </image:image>\n  </url>\n';
     addedCount++;
   }
   xml += '</urlset>';
