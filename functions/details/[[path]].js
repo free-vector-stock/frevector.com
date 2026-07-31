@@ -175,7 +175,9 @@ export async function onRequest(context) {
       `$1\n    <div id="our-picks-ssr-data" data-picks='[${picksData}]' style="position:absolute;width:0;height:0;overflow:hidden;"></div>\n    <div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
     );
 
-    html = html.replace(/\(free vectors available\)/, `(${allVectors.length.toLocaleString()} free vectors available)`);
+    if (allVectors) {
+      html = html.replace(/\(free vectors available\)/, `(${allVectors.length.toLocaleString()} free vectors available)`);
+    }
   }
 
   // Pre-fill placeholders
