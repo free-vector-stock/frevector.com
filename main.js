@@ -1025,6 +1025,10 @@ function openDetailPanel(v, cardEl) {
         window.history.pushState({ slug: v.name }, v.title, newPath);
     }
     
+    // GÖREV 1: SPA geçişlerinde boilerplate'i gizle
+    const seoContent = document.querySelector('.home-seo-content');
+    if (seoContent) seoContent.style.display = 'none';
+    
     // Detay panelini görünür kılmak için her zaman scroll yapalım
     panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -1039,6 +1043,10 @@ function closeDetailPanel() {
     if (window.location.pathname.startsWith('/details/')) {
         window.history.pushState({}, 'Frevector', '/');
     }
+
+    // GÖREV 1: SPA geçişlerinde boilerplate'i tekrar göster
+    const seoContent = document.querySelector('.home-seo-content');
+    if (seoContent) seoContent.style.display = 'block';
     
     state.openedVector = null;
     state.openedCardEl = null;
