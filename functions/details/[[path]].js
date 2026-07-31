@@ -59,10 +59,6 @@ export async function onRequest(context) {
         allVectors = JSON.parse(allVectorsRaw);
         vector = allVectors.find(v => v.name === slug) || null;
       }
-    } else {
-        // We still need allVectors for "Our Picks" section
-        // but we'll try to load it only if absolutely necessary or use a smaller version
-        // For now, let's keep it but be mindful of CPU
     }
   } catch (e) {
     vector = null;
@@ -99,18 +95,17 @@ export async function onRequest(context) {
   // Efficient Replacements
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(pageTitle)}</title>`);
   
-  // Meta tags insertion
+  // Meta tags insertion (GÖREV 2: Removed hreflang tags)
   const metaTags = `
 <meta name="description" content="${escapeHtml(metaDesc)}">
 <meta name="keywords" content="${escapeHtml(keywords)}">
 <link rel="canonical" href="${canonical}">
-<link rel="alternate" hreflang="en" href="${canonical}?lang=en">
-<link rel="alternate" hreflang="x-default" href="${canonical}">
 <meta property="og:title" content="${escapeHtml(pageTitle)}">
 <meta property="og:description" content="${escapeHtml(desc)}">
 <meta property="og:image" content="${escapeHtml(thumbUrl)}">
 <meta property="og:url" content="${escapeHtml(canonical)}">
-<meta property="og:type" content="website">`;
+<meta property="og:type" content="website">
+<style>.home-seo-content { display: none !important; }</style>`;
 
   // Remove existing meta/canonical to avoid duplicates
   html = html.replace(/<meta\s+name=["']description["'][^>]*>/gi, "");
@@ -129,6 +124,25 @@ export async function onRequest(context) {
     /<div id="totalVectorCount"[^>]*>/,
     `<div id="totalVectorCount" data-ssr-category="${escapeHtml(category)}" data-ssr-filesize="${escapeHtml(fileSize)}" data-ssr-total="${allVectors ? allVectors.length : 0}">`
   );
+
+  // GÖREV 1: Inject product-unique-content and hide home-seo-content
+  const productUniqueContent = `
+            <section class="product-unique-content" style="padding:24px 0 32px;max-width:100%;margin:24px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee">
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${escapeHtml(title)} - Vector Details</h2>
+                <p style="font-size:14px;line-height:1.7;margin-bottom:20px">${escapeHtml(desc)}</p>
+                <div style="background:#f9f9f9; padding:20px; border-radius:8px; border:1px solid #eee;">
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555; width:150px;">FILE FORMAT</td><td style="color:#2c3e50;">SVG & JPEG</td></tr>
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">CATEGORY</td><td style="color:#2c3e50;">${escapeHtml(category)}</td></tr>
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">RESOLUTION</td><td style="color:#2c3e50;">High Quality / Fully Scalable</td></tr>
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">LICENSE</td><td style="color:#2c3e50;">Free for Personal & Commercial Use</td></tr>
+                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">FILE SIZE</td><td style="color:#2c3e50;">${escapeHtml(fileSize)}</td></tr>
+                    </table>
+                </div>
+            </section>`;
+
+  // Inject unique content before the home-seo-content section
+  html = html.replace(/<section class="home-seo-content"/, `${productUniqueContent}\n            <section class="home-seo-content"`);
 
   // "Our Picks" Section Optimization
   if (allVectors && allVectors.length > 0) {
