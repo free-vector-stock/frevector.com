@@ -111,6 +111,7 @@ export async function onRequest(context) {
   html = html.replace(/<meta\s+name=["']description["'][^>]*>/gi, "");
   html = html.replace(/<meta\s+name=["']keywords["'][^>]*>/gi, "");
   html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "");
+  html = html.replace(/<link\s+rel=["']alternate["'][^>]*hreflang[^>]*>/gi, "");
   html = html.replace("</head>", `${metaTags}\n</head>`);
 
   // GÖREV 2 SSR FIX: Replace static H1
