@@ -185,10 +185,9 @@ export async function onRequest(context) {
   html = html.replace(/<td id="dpCategory" class="dt-value">-/g, `<td id="dpCategory" class="dt-value" data-ssr-category="${escapeHtml(category)}">${escapeHtml(category)}`);
   html = html.replace(/<td id="dpFileSize" class="dt-value">-/g, `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`);
 
-  // Schema.org JSON-LD (Compact)
+  // Schema.org JSON-LD (Compact) — Product/Offer schema kaldırıldı (GÖREV 1)
   const schemas = `
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://frevector.com/"},{"@type":"ListItem","position":2,"name":"${escapeHtml(category)}","item":"https://frevector.com/?category=${encodeURIComponent(category)}"},{"@type":"ListItem","position":3,"name":"${escapeHtml(title)}","item":"${canonical}"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"${escapeHtml(title)}","description":"${escapeHtml(desc)}","image":"${escapeHtml(thumbUrl)}","category":"${escapeHtml(category)}","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}</script>`;
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://frevector.com/"},{"@type":"ListItem","position":2,"name":"${escapeHtml(category)}","item":"https://frevector.com/?category=${encodeURIComponent(category)}"},{"@type":"ListItem","position":3,"name":"${escapeHtml(title)}","item":"${canonical}"}]}</script>`;
 
   html = html.replace("<body", `${schemas}\n<body`);
 
