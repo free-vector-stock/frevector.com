@@ -177,27 +177,7 @@ const state = {
 };
 
 
-// GÖREV 9: Inject JSON-LD schema.org
-function injectSchema(v) {
-    const schema = {
-        "@context": "https://schema.org",
-        "@type": "Product",
-        "name": v.title || "",
-        "description": v.description || "",
-        "image": v.thumbnail || "",
-        "category": v.category || "",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "availability": "https://schema.org/InStock"
-        }
-    };
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify(schema);
-    document.head.appendChild(script);
-}
+
 
 function init() {
     // URL'den başlangıç page ve category parametrelerini oku
@@ -1019,7 +999,7 @@ function openDetailPanel(v, cardEl) {
     // GÖREV 1: Detay paneline stats bar ekle
     if (typeof attachStatsBarToDetailPanel === 'function') attachStatsBarToDetailPanel(panel, v);
     // URL'yi güncelle (objects-jpeg-000000000131 takılı kalma sorununu çözer)
-    injectSchema(v);
+
     const newPath = `/details/${v.name}`;
     if (window.location.pathname !== newPath) {
         window.history.pushState({ slug: v.name }, v.title, newPath);
