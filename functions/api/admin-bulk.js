@@ -2,7 +2,7 @@
  * Admin Bulk API - Specialized for high-volume uploads
  * - Supports skipIndexUpdate to avoid 503 errors
  * - Supports finalize-bulk to update index once
- * - ADIM 4: Kalıcı çözüm - Metadata zenginleştirme mekanizması
+ * - ADIM 4: Kalıcı çözüm - Metadata zenginleştirme mekanizması DEVRE DIŞI (Sıfır Yorum Kuralı)
  */
 
 import { notifyIndexingUpdate } from "../google-indexing.js";
@@ -36,74 +36,12 @@ function resolveCategory(raw, id) {
 }
 
 /**
- * ADIM 4: Metadata zenginleştirme mekanizması
- * Eğer yüklenen JSON kısa/jenerik ise, otomatik olarak benzersiz keywords/description oluştur
+ * ADIM 4: Metadata zenginleştirme mekanizması - GÜNCELLENDİ
+ * Sıfır Yorum / Sıfır Zenginleştirme Kuralı: Veriyi olduğu gibi bırakır.
  */
 function enrichMetadata(metadata, productName, category) {
-    const enriched = { ...metadata };
-    
-    // Keywords zenginleştirmesi
-    if (Array.isArray(enriched.keywords)) {
-        // Eğer keywords 3'ten az veya hepsi jenerik ise
-        const isGeneric = enriched.keywords.length <= 3 && 
-                         enriched.keywords.every(k => ['icon', 'vector', 'illustration', 'design'].includes(k.toLowerCase()));
-        
-        if (isGeneric || enriched.keywords.length < 5) {
-            // Title'dan anahtar kelimeler çıkar
-            const titleWords = (enriched.title || productName)
-                .toLowerCase()
-                .split(/[\s\-_]+/)
-                .filter(w => w.length > 3 && !['vector', 'illustration', 'design', 'graphic'].includes(w));
-            
-            // Ürün adından kelimeler çıkar
-            const nameWords = productName.split('-').filter(w => w.length > 2);
-            
-            // Benzersiz keywords oluştur
-            let newKeywords = [...new Set([
-                ...enriched.keywords,
-                ...titleWords.slice(0, 5),
-                ...nameWords,
-                category.toLowerCase(),
-                'vector',
-                'illustration'
-            ])];
-            
-            // Hash-based unique identifier ekle (ürüne benzersiz)
-            const hashValue = productName.split('').reduce((a, b) => {
-                a = ((a << 5) - a) + b.charCodeAt(0);
-                return a & a;
-            }, 0);
-            newKeywords.push(`${category.toLowerCase()}-${Math.abs(hashValue).toString(16).slice(0, 4)}`);
-            
-            // En az 10, max 15 keyword
-            while (newKeywords.length < 10) {
-                newKeywords.push(`variant-${newKeywords.length}`);
-            }
-            
-            enriched.keywords = newKeywords.slice(0, 15);
-        }
-    }
-    
-    // Description zenginleştirmesi
-    if (!enriched.description || enriched.description.length < 50) {
-        const descriptions = [
-            `Professional ${category.toLowerCase()} vector design for ${productName}. High-quality graphic asset suitable for web, mobile, and print applications.`,
-            `Versatile ${category.toLowerCase()} illustration for ${productName}. Perfect for UI/UX design projects and digital interfaces.`,
-            `Clean and modern ${category.toLowerCase()} vector for ${productName}. Ideal for creative projects and digital media.`,
-            `Scalable ${category.toLowerCase()} graphic design for ${productName}. Optimized for all screen sizes and resolutions.`,
-            `Professional ${category.toLowerCase()} asset for ${productName}. Suitable for various design and development projects.`
-        ];
-        
-        // Ürün adından hash ile deterministic seçim yap (her ürün için tutarlı)
-        const hashValue = productName.split('').reduce((a, b) => {
-            a = ((a << 5) - a) + b.charCodeAt(0);
-            return a & a;
-        }, 0);
-        const descIndex = Math.abs(hashValue) % descriptions.length;
-        enriched.description = descriptions[descIndex];
-    }
-    
-    return enriched;
+    // Şartname Gereği: Hiçbir zenginleştirme yapılmaz, orijinal veri korunur.
+    return metadata;
 }
 
 async function uploadWithRetry(r2, key, body, options, retries = 5) {
@@ -212,7 +150,7 @@ export async function onRequestPost(context) {
     }
     if (category === "Miscellaneous") category = resolveCategory(rawCat.split('-')[0], id);
 
-    // ADIM 4: Metadata zenginleştir
+    // ADIM 4: Metadata zenginleştir (FONKSİYON ARTIK HİÇBİR ŞEY YAPMIYOR)
     metadata = enrichMetadata(metadata, id, category);
 
     const r2JpgKey = `${category}/${id}/${id}.jpg`;
