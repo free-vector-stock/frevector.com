@@ -78,11 +78,17 @@ export async function onRequest(context) {
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
-  const pageTitle = `${title} — Free Vector Download frevector.com`;
-  // Ensure no duplicate "Free Vector" in title (if title already contains it)
-  const finalPageTitle = pageTitle.includes("Free Vector Free Vector") 
-    ? pageTitle.replace("Free Vector Free Vector", "Free Vector")
-    : pageTitle;
+  // Smart title building: avoid "Free Vector" duplication
+  // If title already contains "Free Vector", use "Download" suffix instead
+  let pageTitle;
+  if (title.includes("Free Vector") || title.includes("free vector")) {
+    // Title already has "Free Vector", so use minimal suffix
+    pageTitle = `${title} — Download frevector.com`;
+  } else {
+    // Title doesn't have "Free Vector", so add full suffix
+    pageTitle = `${title} — Free Vector Download frevector.com`;
+  }
+  const finalPageTitle = pageTitle;
 
   // Build smart-truncated meta description
   function smartTruncate(text, maxLen) {
