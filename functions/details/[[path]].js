@@ -92,18 +92,18 @@ export async function onRequest(context) {
 
   // Build smart-truncated meta description (word-boundary safe)
   function smartTruncate(text, maxLen) {
-    if (text.length <= maxLen) return text;
-    // First try to cut at a sentence boundary (.)
-    const sentenceBoundary = text.lastIndexOf('.', maxLen);
-    if (sentenceBoundary > maxLen * 0.8) return text.slice(0, sentenceBoundary + 1);
+    if (!text || text.length <= maxLen) return text;
     
-    // Fallback: cut at the last space before maxLen to avoid breaking words
-    const lastSpace = text.lastIndexOf(' ', maxLen);
-    if (lastSpace > 0) {
+    // Attempt to cut at the last space within maxLen - 3 (to account for "...")
+    const cutAt = maxLen - 3;
+    const lastSpace = text.lastIndexOf(' ', cutAt);
+    
+    if (lastSpace > cutAt * 0.7) {
       return text.slice(0, lastSpace).trim() + "...";
     }
-    // Ultimate fallback if no space found (very rare)
-    return text.slice(0, maxLen).trim() + "...";
+    
+    // Fallback: cut at exactly cutAt
+    return text.slice(0, cutAt).trim() + "...";
   }
   const metaDesc = smartTruncate(desc, 160);
 
