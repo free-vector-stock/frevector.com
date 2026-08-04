@@ -78,7 +78,11 @@ export async function onRequest(context) {
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
-  const pageTitle = `${title} Free Vector Download frevector.com`;
+  const pageTitle = `${title} — Free Vector Download frevector.com`;
+  // Ensure no duplicate "Free Vector" in title (if title already contains it)
+  const finalPageTitle = pageTitle.includes("Free Vector Free Vector") 
+    ? pageTitle.replace("Free Vector Free Vector", "Free Vector")
+    : pageTitle;
 
   // Build smart-truncated meta description
   function smartTruncate(text, maxLen) {
@@ -93,7 +97,7 @@ export async function onRequest(context) {
   let html = await rootResponse.text();
 
   // Efficient Replacements
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(pageTitle)}</title>`);
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(finalPageTitle)}</title>`);
   
   // Meta tags insertion (GÖREV 2: Removed hreflang tags)
   const metaTags = `
@@ -105,7 +109,7 @@ export async function onRequest(context) {
 <meta property="og:image" content="${escapeHtml(thumbUrl)}">
 <meta property="og:url" content="${escapeHtml(canonical)}">
 <meta property="og:type" content="website">
-<style>.home-seo-content { display: none !important; }</style>`;
+`;
 
   // Remove existing meta/canonical to avoid duplicates
   html = html.replace(/<meta\s+name=["']description["'][^>]*>/gi, "");
@@ -142,8 +146,8 @@ export async function onRequest(context) {
  </div>
  </section>`;
 
-  // Inject unique content before the home-seo-content section
-  html = html.replace(/<section class="home-seo-content"/, `${productUniqueContent}\n <section class="home-seo-content"`);
+  // Inject unique content (home-seo-content removed from /details/ pages)
+  html = html.replace(/<section class="home-seo-content"[^>]*>[\s\S]*?<\/section>/, productUniqueContent);
 
   // "Our Picks" Section Optimization
   if (allVectors && allVectors.length > 0) {

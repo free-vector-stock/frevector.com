@@ -44,7 +44,7 @@
 let lastScroll = 0;
 window.addEventListener("scroll", () => {
  const now = performance.now();
- if (now lastScroll < 16) return;
+ if (now - lastScroll < 16) return;
   lastScroll = now;
 }, { passive: true });
 </script>
