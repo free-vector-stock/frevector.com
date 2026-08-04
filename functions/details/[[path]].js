@@ -62,7 +62,8 @@ export async function onRequest(context) {
 
       if (allVectorsRaw) {
         allVectors = JSON.parse(allVectorsRaw);
-        vector = allVectors.find(v => v.name === slug) || null;
+        // FIX: Some vectors might use 'slug' instead of 'name' in JSON, check both
+        vector = allVectors.find(v => v.name === slug || v.slug === slug) || null;
       }
     }
   } catch (e) {
