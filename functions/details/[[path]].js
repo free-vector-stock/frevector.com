@@ -26,52 +26,39 @@ export async function onRequest(context) {
     });
   }
 
-  // --- Load vector data (R2 first, KV fallback) ---
+  // --- Load vector data (KV first, R2 fallback) ---
+  // SYNC FIX: Using the same logic as /api/vectors to ensure SSR matches Client-side
   let vector = null;
   let allVectors = null;
   try {
     let allVectorsRaw = null;
-
-    // OPTIMIZATION: Check KV for individual vector first to avoid loading 10MB JSON
     const kv = context.env.VECTOR_DB;
+    const r2 = context.env.VECTOR_ASSETS;
+
+    // 1. Get all_vectors from KV first (most up-to-date)
     if (kv) {
-      const individualVectorRaw = await kv.get(`v_${slug}`);
-      if (individualVectorRaw) {
-        vector = JSON.parse(individualVectorRaw);
+      allVectorsRaw = await kv.get("all_vectors");
+    }
+
+    // 2. Fallback to R2 if KV is empty
+    if (!allVectorsRaw && r2) {
+      const r2Object = await r2.get("all_vectors.json");
+      if (r2Object) {
+        allVectorsRaw = await r2Object.text();
       }
     }
 
-    // If not found in individual KV, fallback to the big JSON (original logic)
-    if (!vector) {
-      // FIX: Check KV first for 'all_vectors' as it's more likely to be up-to-date than R2
-      const kv = context.env.VECTOR_DB;
-      if (kv) {
-        allVectorsRaw = await kv.get("all_vectors");
-      }
-
-      // Fallback to R2 only if KV is empty
-      if (!allVectorsRaw) {
-        const r2 = context.env.VECTOR_ASSETS;
-        if (r2) {
-          const r2Object = await r2.get("all_vectors.json");
-          if (r2Object) {
-            allVectorsRaw = await r2Object.text();
-          }
-        }
-      }
-
-      if (allVectorsRaw) {
-        allVectors = JSON.parse(allVectorsRaw);
-        // FIX: Some vectors might use 'slug' instead of 'name' in JSON, check both
-        vector = allVectors.find(v => v.name === slug || v.slug === slug) || null;
-      }
+    if (allVectorsRaw) {
+      allVectors = JSON.parse(allVectorsRaw);
+      // Find vector by name or slug
+      vector = allVectors.find(v => v.name === slug || v.slug === slug) || null;
     }
   } catch (e) {
     vector = null;
   }
 
   // If slug not found return 404
-  if (!vector) { // SSR DATA SOURCE OPTIMIZATION
+  if (!vector) {
     return new Response("404 | Vector not found", { status: 404 });
   }
 
@@ -84,6 +71,7 @@ export async function onRequest(context) {
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
+  
   // Smart title building: avoid "Free Vector" duplication
   // If title already contains "Free Vector", use "Download" suffix instead
   let pageTitle;
@@ -114,7 +102,7 @@ export async function onRequest(context) {
     if (lastSpace > 0) {
       let truncated = text.slice(0, lastSpace).trim();
       
-      // Remove trailing connectors or symbols like "—", "and", "with", "Free", etc.
+      // Remove trailing connectors or symbols like "—", "-", "and", "with", "for", "the", "a", "an", "is", "are", "Free", "free"
       const connectors = ["—", "-", "and", "with", "for", "the", "a", "an", "is", "are", "Free", "free"];
       let words = truncated.split(/\s+/);
       while (words.length > 0 && connectors.includes(words[words.length - 1])) {
@@ -140,7 +128,7 @@ export async function onRequest(context) {
   // Efficient Replacements
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(finalPageTitle)}</title>`);
   
-  // Meta tags insertion (GÖREV 2: Removed hreflang tags)
+  // Meta tags insertion
   const metaTags = `
 <meta name="description" content="${escapeHtml(metaDesc)}">
 <meta name="keywords" content="${escapeHtml(keywords)}">
@@ -159,19 +147,19 @@ export async function onRequest(context) {
   html = html.replace(/<link\s+rel=["']alternate["'][^>]*hreflang[^>]*>/gi, "");
   html = html.replace("</head>", `${metaTags}\n</head>`);
 
-  // GÖREV 2 SSR FIX: Replace static H1
+  // SSR FIX: Replace static H1
   html = html.replace(
     /<h1 id="categoryTitle"[^>]*>[^<]*<\/h1>/,
     `<h1 id="categoryTitle" class="category-title">${escapeHtml(title)}</h1>`
   );
 
-  // GÖREV 1 SSR FIX: Inject category and fileSize
+  // SSR FIX: Inject category and fileSize
   html = html.replace(
     /<div id="totalVectorCount"[^>]*>/,
     `<div id="totalVectorCount" data-ssr-category="${escapeHtml(category)}" data-ssr-filesize="${escapeHtml(fileSize)}" data-ssr-total="${allVectors ? allVectors.length : 0}">`
   );
 
-  // GÖREV 1: Inject product-unique-content and hide home-seo-content
+  // Inject product-unique-content and hide home-seo-content
   const productUniqueContent = `
  <section class="product-unique-content" style="padding:24px 0 32px;max-width:100%;margin:24px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee">
  <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${escapeHtml(title)} - Vector Details</h2>
@@ -230,7 +218,7 @@ export async function onRequest(context) {
   html = html.replace(/<td id="dpCategory" class="dt-value">-/g, `<td id="dpCategory" class="dt-value" data-ssr-category="${escapeHtml(category)}">${escapeHtml(category)}`);
   html = html.replace(/<td id="dpFileSize" class="dt-value">-/g, `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`);
 
-  // Schema.org JSON-LD (Compact) | Product/Offer schema kaldırıldı (GÖREV 1)
+  // Schema.org JSON-LD (Compact)
   const schemas = `
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://frevector.com/"},{"@type":"ListItem","position":2,"name":"${escapeHtml(category)}","item":"https://frevector.com/?category=${encodeURIComponent(category)}"},{"@type":"ListItem","position":3,"name":"${escapeHtml(title)}","item":"${canonical}"}]}</script>`;
 
