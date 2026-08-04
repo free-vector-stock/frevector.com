@@ -90,19 +90,38 @@ export async function onRequest(context) {
   }
   const finalPageTitle = pageTitle;
 
-  // Build smart-truncated meta description (word-boundary safe)
+  // Build smart-truncated meta description (meaningful boundary safe)
   function smartTruncate(text, maxLen) {
     if (!text || text.length <= maxLen) return text;
     
-    // We want to cut at around 150-155 chars to be safe for SEO
-    const targetLen = Math.min(maxLen, 155);
+    const targetLen = Math.min(maxLen, 160);
     const cutAt = targetLen - 3;
     
-    // Find the last space before cutAt
-    const lastSpace = text.lastIndexOf(' ', cutAt);
+    // 1. Try to cut at the last sentence boundary (.) within the limit
+    const lastDot = text.lastIndexOf('.', cutAt);
+    if (lastDot > cutAt * 0.6) {
+      return text.slice(0, lastDot + 1).trim();
+    }
     
+    // 2. Try to cut at a word boundary, but avoid trailing connectors/symbols
+    let lastSpace = text.lastIndexOf(' ', cutAt);
     if (lastSpace > 0) {
-      return text.slice(0, lastSpace).trim() + "...";
+      let truncated = text.slice(0, lastSpace).trim();
+      
+      // Remove trailing connectors or symbols like "—", "and", "with", "Free", etc.
+      const connectors = ["—", "-", "and", "with", "for", "the", "a", "an", "is", "are", "Free", "free"];
+      let words = truncated.split(/\s+/);
+      while (words.length > 0 && connectors.includes(words[words.length - 1])) {
+        words.pop();
+      }
+      truncated = words.join(" ");
+      
+      // If truncation left us with something too short, just use the last space
+      if (truncated.length < cutAt * 0.5) {
+        return text.slice(0, lastSpace).trim() + "...";
+      }
+      
+      return truncated + "...";
     }
     
     return text.slice(0, cutAt).trim() + "...";
