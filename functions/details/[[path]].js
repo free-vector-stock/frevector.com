@@ -94,15 +94,17 @@ export async function onRequest(context) {
   function smartTruncate(text, maxLen) {
     if (!text || text.length <= maxLen) return text;
     
-    // Attempt to cut at the last space within maxLen - 3 (to account for "...")
-    const cutAt = maxLen - 3;
+    // We want to cut at around 150-155 chars to be safe for SEO
+    const targetLen = Math.min(maxLen, 155);
+    const cutAt = targetLen - 3;
+    
+    // Find the last space before cutAt
     const lastSpace = text.lastIndexOf(' ', cutAt);
     
-    if (lastSpace > cutAt * 0.7) {
+    if (lastSpace > 0) {
       return text.slice(0, lastSpace).trim() + "...";
     }
     
-    // Fallback: cut at exactly cutAt
     return text.slice(0, cutAt).trim() + "...";
   }
   const metaDesc = smartTruncate(desc, 160);
