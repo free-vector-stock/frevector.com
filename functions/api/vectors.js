@@ -139,7 +139,7 @@ function enrichVector(v) {
 
     return {
         ...v,
-        title: v.title || v.name || "",
+        title: v.title || v.name.replace(/-\d+$/, "").replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
         // Requirement: ALWAYS use thumbnail in site
         // Changed to use local proxy to avoid R2 public access issues
         thumbnail: `https://assets.frevector.com/${thumbKey}`,

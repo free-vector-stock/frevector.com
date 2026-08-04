@@ -66,11 +66,11 @@ export async function onRequest(context) {
 
   // If slug not found return 404
   if (!vector) {
-    return new Response("404 — Vector not found", { status: 404 });
+    return new Response("404 | Vector not found", { status: 404 });
   }
 
   // --- Build SSR-enriched HTML ---
-  const title    = vector.title       || slug;
+  const title    = vector.title       || slug.replace(/-\d+$/, "").replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
   const desc     = vector.description || `Download ${title} free vector illustration from frevector.com`;
   const keywords = Array.isArray(vector.keywords) ? vector.keywords.slice(0, 20).join(", ") : (vector.keywords || "");
   const category = vector.category    || "";
@@ -78,7 +78,7 @@ export async function onRequest(context) {
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
-  const pageTitle = `${title} — Free Vector Download | frevector.com`;
+  const pageTitle = `${title} | Free Vector Download | frevector.com`;
 
   // Build smart-truncated meta description
   function smartTruncate(text, maxLen) {
@@ -185,7 +185,7 @@ export async function onRequest(context) {
   html = html.replace(/<td id="dpCategory" class="dt-value">-/g, `<td id="dpCategory" class="dt-value" data-ssr-category="${escapeHtml(category)}">${escapeHtml(category)}`);
   html = html.replace(/<td id="dpFileSize" class="dt-value">-/g, `<td id="dpFileSize" class="dt-value" data-ssr-filesize="${escapeHtml(fileSize)}">${escapeHtml(fileSize)}`);
 
-  // Schema.org JSON-LD (Compact) — Product/Offer schema kaldırıldı (GÖREV 1)
+  // Schema.org JSON-LD (Compact) | Product/Offer schema kaldırıldı (GÖREV 1)
   const schemas = `
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://frevector.com/"},{"@type":"ListItem","position":2,"name":"${escapeHtml(category)}","item":"https://frevector.com/?category=${encodeURIComponent(category)}"},{"@type":"ListItem","position":3,"name":"${escapeHtml(title)}","item":"${canonical}"}]}</script>`;
 

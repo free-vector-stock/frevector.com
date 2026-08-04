@@ -22,7 +22,7 @@ export async function onRequestPost(context) {
         const throttleKey = `view_throttle:${slug}:${ip}`;
         const throttled = await kv.get(throttleKey);
         if (throttled) {
-            // Already counted recently — return current count without incrementing
+            // Already counted recently | return current count without incrementing
             const current = await kv.get(`views_count:${slug}`);
             return new Response(JSON.stringify({ views: parseInt(current) || 0, throttled: true }), { status: 200, headers: CORS_HEADERS });
         }

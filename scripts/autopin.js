@@ -129,7 +129,7 @@ async function autopin() {
                 const title = (metadata.title || slug).substring(0, 100);
 
                 // Use metadata.description if available; otherwise fall back to keywords joined.
-                // Do NOT rewrite the text — only truncate if over Pinterest's 500-char limit.
+                // Do NOT rewrite the text | only truncate if over Pinterest's 500-char limit.
                 let description = '';
                 if (metadata.description && metadata.description.trim().length > 0) {
                     description = metadata.description.trim().substring(0, 500);
