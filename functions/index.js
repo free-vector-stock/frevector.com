@@ -337,7 +337,7 @@ export async function onRequestGet(context) {
 
     // prevBtn href'ini güncelle
  if (ssrPage > 1) {
- const prevPage = ssrPage 1;
+ const prevPage = ssrPage - 1;
  const prevHref = prevPage === 1 
  ? (categoryParam && categoryParam !== 'all' ? `/?category=${encodeURIComponent(categoryParam)}` : '/')
  : `/?page=${prevPage}${catParam}`;
