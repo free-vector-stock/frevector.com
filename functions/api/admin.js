@@ -1,11 +1,11 @@
 /**
- * Admin API FIXED VERSION v4
- * Improved batch upload handling
- * Better error recovery
- * Optimized KV/R2 operations
- * Proper timeout handling
- * UPDATED: Added time-based download stats calculation (Last 24h and Monthly)
- * UPDATED v2026072301: Rate limiting / brute-force protection, ZIP required
+ * Admin API - FIXED VERSION v4
+ * - Improved batch upload handling
+ * - Better error recovery
+ * - Optimized KV/R2 operations
+ * - Proper timeout handling
+ * - UPDATED: Added time-based download stats calculation (Last 24h and Monthly)
+ * - UPDATED v2026072301: Rate limiting / brute-force protection, ZIP required
  */
 
 import { notifyIndexingUpdate } from "../google-indexing.js";
@@ -13,14 +13,14 @@ import { notifyIndexingUpdate } from "../google-indexing.js";
 const ADMIN_PASSWORD = "vector2026";
 
 const VALID_CATEGORIES = [
- 'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
- 'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous',
- 'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports',
- 'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
+    'Abstract', 'Animals', 'The Arts', 'Backgrounds', 'Fashion', 'Buildings', 'Business', 'Celebrities',
+    'Education', 'Food', 'Drink', 'Medical', 'Holidays', 'Industrial', 'Interiors', 'Miscellaneous',
+    'Nature', 'Objects', 'Outdoor', 'People', 'Religion', 'Science', 'Symbols', 'Sports',
+    'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
 ];
 
 const FORBIDDEN_WORDS_JPEG = [
- 'free vector', 'free svg', 'free svg icon', 'free jpeg', 'vector jpeg', 'svg'
+    'free vector', 'free svg', 'free svg icon', 'free jpeg', 'vector jpeg', 'svg'
 ];
 
 // ── Rate limiting (in-memory, resets on Worker restart) ──────────────────────
@@ -29,363 +29,363 @@ const MAX_ATTEMPTS = 10;
 const LOCKOUT_MS = 60 * 1000; // 1 minute
 
 function checkRateLimit(ip) {
- const now = Date.now();
- const entry = failedAttempts.get(ip) || { count: 0, lockUntil: 0 };
- if (now < entry.lockUntil) {
- const remaining = Math.ceil((entry.lockUntil now) / 1000);
- return { blocked: true, remaining };
- }
- return { blocked: false, entry };
+    const now = Date.now();
+    const entry = failedAttempts.get(ip) || { count: 0, lockUntil: 0 };
+    if (now < entry.lockUntil) {
+        const remaining = Math.ceil((entry.lockUntil - now) / 1000);
+        return { blocked: true, remaining };
+    }
+    return { blocked: false, entry };
 }
 
 function recordFailedAttempt(ip) {
- const now = Date.now();
- const entry = failedAttempts.get(ip) || { count: 0, lockUntil: 0 };
- entry.count++;
- if (entry.count >= MAX_ATTEMPTS) {
- entry.lockUntil = now + LOCKOUT_MS;
- entry.count = 0;
- }
- failedAttempts.set(ip, entry);
+    const now = Date.now();
+    const entry = failedAttempts.get(ip) || { count: 0, lockUntil: 0 };
+    entry.count++;
+    if (entry.count >= MAX_ATTEMPTS) {
+        entry.lockUntil = now + LOCKOUT_MS;
+        entry.count = 0;
+    }
+    failedAttempts.set(ip, entry);
 }
 
 function clearAttempts(ip) {
- failedAttempts.delete(ip);
+    failedAttempts.delete(ip);
 }
 
 function getClientIP(request) {
- return request.headers.get('CF-Connecting-IP') ||
- request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
- 'unknown';
+    return request.headers.get('CF-Connecting-IP') ||
+           request.headers.get('X-Forwarded-For')?.split(',')[0]?.trim() ||
+           'unknown';
 }
 
 function authenticate(request) {
- const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization") || "";
- const key = authHeader.replace("Bearer ", "").trim();
- const url = new URL(request.url);
- const urlKey = url.searchParams.get("key");
- return key === ADMIN_PASSWORD || urlKey === ADMIN_PASSWORD;
+  const authHeader = request.headers.get("X-Admin-Key") || request.headers.get("Authorization") || "";
+  const key = authHeader.replace("Bearer ", "").trim();
+  const url = new URL(request.url);
+  const urlKey = url.searchParams.get("key");
+  return key === ADMIN_PASSWORD || urlKey === ADMIN_PASSWORD;
 }
 
 function resolveCategory(raw, id) {
- if (!raw) return "Miscellaneous";
- const s = raw.toString().trim().toLowerCase();
- 
- const specialCats = {
- 'arts': 'The Arts',
- 'thearts': 'The Arts',
- 'the-arts': 'The Arts'
- };
- 
- if (specialCats[s]) return specialCats[s];
+    if (!raw) return "Miscellaneous";
+    const s = raw.toString().trim().toLowerCase();
+    
+    const specialCats = {
+        'arts': 'The Arts',
+        'thearts': 'The Arts',
+        'the-arts': 'The Arts'
+    };
+    
+    if (specialCats[s]) return specialCats[s];
 
- for (const cat of VALID_CATEGORIES) {
- if (cat.toLowerCase() === s) return cat;
- }
- return "Miscellaneous";
+    for (const cat of VALID_CATEGORIES) {
+        if (cat.toLowerCase() === s) return cat;
+    }
+    return "Miscellaneous";
 }
 
 // Retry wrapper for R2 operations with exponential backoff
 async function uploadWithRetry(r2, key, body, options, retries = 5) {
- for (let i = 0; i < retries; i++) {
- try {
- await r2.put(key, body, options);
- return { success: true };
- } catch (e) {
- console.error(`R2 upload attempt ${i+1}/${retries} failed for ${key}:`, e.message);
- if (i === retries 1) return { success: false, error: e.message };
- const delay = Math.min(1000 * Math.pow(2, i), 10000);
- await new Promise(r => setTimeout(r, delay));
- }
- }
+  for (let i = 0; i < retries; i++) {
+    try {
+      await r2.put(key, body, options);
+      return { success: true };
+    } catch (e) {
+      console.error(`R2 upload attempt ${i+1}/${retries} failed for ${key}:`, e.message);
+      if (i === retries - 1) return { success: false, error: e.message };
+      const delay = Math.min(1000 * Math.pow(2, i), 10000);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
 }
 
 export async function onRequestGet(context) {
- const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
- const ip = getClientIP(context.request);
- const rateCheck = checkRateLimit(ip);
- if (rateCheck.blocked) {
- return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
- }
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+  const ip = getClientIP(context.request);
+  const rateCheck = checkRateLimit(ip);
+  if (rateCheck.blocked) {
+    return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
+  }
 
- if (!authenticate(context.request)) {
- recordFailedAttempt(ip);
- return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
- }
- clearAttempts(ip);
- 
- try {
- const kv = context.env.VECTOR_DB;
- const url = new URL(context.request.url);
- const action = url.searchParams.get("action");
+  if (!authenticate(context.request)) {
+    recordFailedAttempt(ip);
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
+  clearAttempts(ip);
+  
+  try {
+    const kv = context.env.VECTOR_DB;
+    const url = new URL(context.request.url);
+    const action = url.searchParams.get("action");
 
- if (action === "stats") {
- const now = new Date();
- const currentMonth = now.toISOString().substring(0, 7); // YYYY-MM
- 
- // Get monthly downloads
- const monthKey = `dl_stats:month:${currentMonth}`;
- const monthCount = await kv.get(monthKey);
+    if (action === "stats") {
+        const now = new Date();
+        const currentMonth = now.toISOString().substring(0, 7); // YYYY-MM
+        
+        // Get monthly downloads
+        const monthKey = `dl_stats:month:${currentMonth}`;
+        const monthCount = await kv.get(monthKey);
 
- // Get last 24 hours downloads (sum of last 24 hourly keys)
- let last24hCount = 0;
- const hourPromises = [];
- for (let i = 0; i < 24; i++) {
- const d = new Date(now.getTime() (i * 60 * 60 * 1000));
- const hourStr = d.toISOString().substring(0, 13);
- hourPromises.push(kv.get(`dl_stats:hour:${hourStr}`));
- }
- const hourResults = await Promise.all(hourPromises);
- last24hCount = hourResults.reduce((sum, val) => sum + (parseInt(val) || 0), 0);
+        // Get last 24 hours downloads (sum of last 24 hourly keys)
+        let last24hCount = 0;
+        const hourPromises = [];
+        for (let i = 0; i < 24; i++) {
+            const d = new Date(now.getTime() - (i * 60 * 60 * 1000));
+            const hourStr = d.toISOString().substring(0, 13);
+            hourPromises.push(kv.get(`dl_stats:hour:${hourStr}`));
+        }
+        const hourResults = await Promise.all(hourPromises);
+        last24hCount = hourResults.reduce((sum, val) => sum + (parseInt(val) || 0), 0);
 
- return new Response(JSON.stringify({
- last24h: last24hCount,
- currentMonth: parseInt(monthCount) || 0,
- monthName: now.toLocaleString('en-US', { month: 'long' })
- }), { status: 200, headers });
- }
+        return new Response(JSON.stringify({
+            last24h: last24hCount,
+            currentMonth: parseInt(monthCount) || 0,
+            monthName: now.toLocaleString('en-US', { month: 'long' })
+        }), { status: 200, headers });
+    }
 
- const allVectorsRaw = await kv.get("all_vectors");
- const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
- return new Response(JSON.stringify({ vectors: allVectors }), { status: 200, headers });
- } catch (e) {
- console.error("GET error:", e);
- return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
- }
+    const allVectorsRaw = await kv.get("all_vectors");
+    const allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+    return new Response(JSON.stringify({ vectors: allVectors }), { status: 200, headers });
+  } catch (e) {
+    console.error("GET error:", e);
+    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+  }
 }
 
 export async function onRequestPost(context) {
- const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
- const ip = getClientIP(context.request);
- const rateCheck = checkRateLimit(ip);
- if (rateCheck.blocked) {
- return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
- }
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+  const ip = getClientIP(context.request);
+  const rateCheck = checkRateLimit(ip);
+  if (rateCheck.blocked) {
+    return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
+  }
 
- if (!authenticate(context.request)) {
- recordFailedAttempt(ip);
- return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
- }
- clearAttempts(ip);
+  if (!authenticate(context.request)) {
+    recordFailedAttempt(ip);
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
+  clearAttempts(ip);
 
- try {
- const kv = context.env.VECTOR_DB;
- const r2 = context.env.VECTOR_ASSETS;
- 
- let formData;
- try {
- formData = await context.request.formData();
- } catch (e) {
- console.error("FormData parsing error:", e);
- return new Response(JSON.stringify({ error: "Invalid form data: " + e.message }), { status: 400, headers });
- }
+  try {
+    const kv = context.env.VECTOR_DB;
+    const r2 = context.env.VECTOR_ASSETS;
+    
+    let formData;
+    try {
+      formData = await context.request.formData();
+    } catch (e) {
+      console.error("FormData parsing error:", e);
+      return new Response(JSON.stringify({ error: "Invalid form data: " + e.message }), { status: 400, headers });
+    }
 
- const jsonFile = formData.get("json");
- const jpegFile = formData.get("jpeg");
- const zipFile = formData.get("zip");
+    const jsonFile = formData.get("json");
+    const jpegFile = formData.get("jpeg");
+    const zipFile  = formData.get("zip");
 
- if (!jsonFile) return new Response(JSON.stringify({ error: "Missing JSON metadata file" }), { status: 400, headers });
- if (!jpegFile) return new Response(JSON.stringify({ error: "Missing JPEG preview image" }), { status: 400, headers });
- if (!zipFile) return new Response(JSON.stringify({ error: "Missing ZIP archive file. All three files (JSON + JPEG + ZIP) are required." }), { status: 400, headers });
+    if (!jsonFile) return new Response(JSON.stringify({ error: "Missing JSON metadata file" }), { status: 400, headers });
+    if (!jpegFile) return new Response(JSON.stringify({ error: "Missing JPEG preview image" }), { status: 400, headers });
+    if (!zipFile)  return new Response(JSON.stringify({ error: "Missing ZIP archive file. All three files (JSON + JPEG + ZIP) are required." }), { status: 400, headers });
 
- // Parse metadata
- let metadata;
- try {
- const jsonText = await jsonFile.text();
- metadata = JSON.parse(jsonText);
- } catch (e) {
- console.error("JSON parsing error:", e);
- return new Response(JSON.stringify({ error: "Invalid JSON: " + e.message }), { status: 400, headers });
- }
+    // Parse metadata
+    let metadata;
+    try {
+      const jsonText = await jsonFile.text();
+      metadata = JSON.parse(jsonText);
+    } catch (e) {
+      console.error("JSON parsing error:", e);
+      return new Response(JSON.stringify({ error: "Invalid JSON: " + e.message }), { status: 400, headers });
+    }
 
- let jpegBuffer, zipBuffer;
- try {
- jpegBuffer = await jpegFile.arrayBuffer();
- zipBuffer = await zipFile.arrayBuffer();
- } catch (e) {
- console.error("File buffer error:", e);
- return new Response(JSON.stringify({ error: "Error reading file buffers: " + e.message }), { status: 400, headers });
- }
- 
- const id = jsonFile.name.replace(/\.json$/, "").trim();
- if (!id) return new Response(JSON.stringify({ error: "Invalid JSON filename" }), { status: 400, headers });
- 
- const isJpegFromFilename = id.toLowerCase().includes('-jpeg-');
- const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
+    let jpegBuffer, zipBuffer;
+    try {
+      jpegBuffer = await jpegFile.arrayBuffer();
+      zipBuffer = await zipFile.arrayBuffer();
+    } catch (e) {
+      console.error("File buffer error:", e);
+      return new Response(JSON.stringify({ error: "Error reading file buffers: " + e.message }), { status: 400, headers });
+    }
+    
+    const id = jsonFile.name.replace(/\.json$/, "").trim();
+    if (!id) return new Response(JSON.stringify({ error: "Invalid JSON filename" }), { status: 400, headers });
+    
+    const isJpegFromFilename = id.toLowerCase().includes('-jpeg-');
+    const contentTypeToSet = isJpegFromFilename ? 'jpeg' : 'vector';
 
- // Improved category extraction
- let rawCat = id.toLowerCase();
- if (rawCat.includes('-jpeg-')) {
- rawCat = rawCat.split('-jpeg-')[0];
- }
- 
- let category = "Miscellaneous";
- const sortedCategories = [...VALID_CATEGORIES].sort((a, b) => b.length a.length);
- for (const cat of sortedCategories) {
- const catLower = cat.toLowerCase().replace(/\s+/g, '');
- const catHyphen = cat.toLowerCase().replace(/\s+/g, '-');
- if (rawCat.startsWith(catLower) || rawCat.startsWith(catHyphen)) {
- category = cat;
- break;
- }
- }
- 
- if (category === "Miscellaneous") {
- const parts = rawCat.split('-');
- category = resolveCategory(parts[0], id);
- }
+    // Improved category extraction
+    let rawCat = id.toLowerCase();
+    if (rawCat.includes('-jpeg-')) {
+        rawCat = rawCat.split('-jpeg-')[0];
+    }
+    
+    let category = "Miscellaneous";
+    const sortedCategories = [...VALID_CATEGORIES].sort((a, b) => b.length - a.length);
+    for (const cat of sortedCategories) {
+        const catLower = cat.toLowerCase().replace(/\s+/g, '');
+        const catHyphen = cat.toLowerCase().replace(/\s+/g, '-');
+        if (rawCat.startsWith(catLower) || rawCat.startsWith(catHyphen)) {
+            category = cat;
+            break;
+        }
+    }
+    
+    if (category === "Miscellaneous") {
+        const parts = rawCat.split('-');
+        category = resolveCategory(parts[0], id);
+    }
 
- const title = (metadata.title || id).trim();
- const description = (metadata.description || "").trim();
- let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
+    const title = (metadata.title || id).trim();
+    const description = (metadata.description || "").trim();
+    let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
 
- const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free jpeg', 'free jpeg', 'free', 'fre', 'vector jpeg', 'svg', 'jpeg'];
- const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
- 
- const prefixKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
- keywords = [...new Set([...prefixKeywords, ...keywords])];
+    const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free jpeg', 'free jpeg', 'free', 'fre', 'vector jpeg', 'svg', 'jpeg'];
+    const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
+    
+    const prefixKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
+    keywords = [...new Set([...prefixKeywords, ...keywords])];
 
- if (contentTypeToSet === 'jpeg') {
- const fullText = (title + " " + description + " " + keywords.join(" ")).toLowerCase();
- for (const word of FORBIDDEN_WORDS_JPEG) {
- if (fullText.includes(word)) {
- return new Response(JSON.stringify({ error: `Forbidden word in JPEG metadata: "${word}"` }), { status: 400, headers });
- }
- }
- }
+    if (contentTypeToSet === 'jpeg') {
+        const fullText = (title + " " + description + " " + keywords.join(" ")).toLowerCase();
+        for (const word of FORBIDDEN_WORDS_JPEG) {
+            if (fullText.includes(word)) {
+                return new Response(JSON.stringify({ error: `Forbidden word in JPEG metadata: "${word}"` }), { status: 400, headers });
+            }
+        }
+    }
 
- const r2JpgKey = `${category}/${id}/${id}.jpg`;
- const r2ZipKey = `${category}/${id}/${id}.zip`;
- const r2JsonKey = `${category}/${id}/${id}.json`;
+    const r2JpgKey = `${category}/${id}/${id}.jpg`;
+    const r2ZipKey = `${category}/${id}/${id}.zip`;
+    const r2JsonKey = `${category}/${id}/${id}.json`;
 
- console.log(`Uploading ${id} to category ${category}...`);
+    console.log(`Uploading ${id} to category ${category}...`);
 
- // Upload files to R2 with retry
- const uploadResults = await Promise.all([
- uploadWithRetry(r2, r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } }),
- uploadWithRetry(r2, r2JsonKey, JSON.stringify(metadata), { httpMetadata: { contentType: "application/json" } }),
- uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } })
- ]);
+    // Upload files to R2 with retry
+    const uploadResults = await Promise.all([
+        uploadWithRetry(r2, r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } }),
+        uploadWithRetry(r2, r2JsonKey, JSON.stringify(metadata), { httpMetadata: { contentType: "application/json" } }),
+        uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } })
+    ]);
 
- for (const result of uploadResults) {
- if (!result.success) {
- console.error("R2 upload failed:", result.error);
- return new Response(JSON.stringify({ error: "R2 upload failed: " + result.error }), { status: 500, headers });
- }
- }
+    for (const result of uploadResults) {
+        if (!result.success) {
+            console.error("R2 upload failed:", result.error);
+            return new Response(JSON.stringify({ error: "R2 upload failed: " + result.error }), { status: 500, headers });
+        }
+    }
 
- const fileSize = `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
- 
- const vectorRecord = {
- name: id,
- category: category,
- title: title,
- description: description,
- keywords: keywords,
- date: new Date().toISOString(),
- downloads: 0,
- fileSize: fileSize,
- contentType: contentTypeToSet
- };
+    const fileSize = `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
+    
+    const vectorRecord = {
+      name: id,
+      category: category,
+      title: title,
+      description: description,
+      keywords: keywords,
+      date: new Date().toISOString(),
+      downloads: 0,
+      fileSize: fileSize,
+      contentType: contentTypeToSet
+    };
 
- // Update index in KV
- const allVectorsRaw = await kv.get("all_vectors");
- let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
- 
- const existingIndex = allVectors.findIndex(v => v.name === id);
- if (existingIndex > -1) {
- allVectors[existingIndex] = vectorRecord;
- } else {
- allVectors.unshift(vectorRecord);
- }
- 
- const updatedRaw = JSON.stringify(allVectors);
- 
- // Write to both KV and R2
- try {
- await Promise.all([
- kv.put("all_vectors", updatedRaw),
- r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
- ]);
- } catch (e) {
- console.error("KV/R2 index update error:", e);
- return new Response(JSON.stringify({ error: "Index update failed: " + e.message }), { status: 500, headers });
- }
+    // Update index in KV
+    const allVectorsRaw = await kv.get("all_vectors");
+    let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+    
+    const existingIndex = allVectors.findIndex(v => v.name === id);
+    if (existingIndex > -1) {
+        allVectors[existingIndex] = vectorRecord;
+    } else {
+        allVectors.unshift(vectorRecord);
+    }
+    
+    const updatedRaw = JSON.stringify(allVectors);
+    
+    // Write to both KV and R2
+    try {
+      await Promise.all([
+          kv.put("all_vectors", updatedRaw),
+          r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
+      ]);
+    } catch (e) {
+      console.error("KV/R2 index update error:", e);
+      return new Response(JSON.stringify({ error: "Index update failed: " + e.message }), { status: 500, headers });
+    }
 
- try {
- await notifyIndexingUpdate(context.env, [`https://frevector.com/details/${encodeURIComponent(id)}`], "URL_UPDATED");
- } catch (indexingError) {
- console.error("Google Indexing API notify failed:", indexingError.message);
- }
+    try {
+      await notifyIndexingUpdate(context.env, [`https://frevector.com/details/${encodeURIComponent(id)}`], "URL_UPDATED");
+    } catch (indexingError) {
+      console.error("Google Indexing API notify failed:", indexingError.message);
+    }
 
- console.log(`Successfully uploaded ${id}`);
- return new Response(JSON.stringify({ 
- success: true, 
- vector: vectorRecord,
- message: `Successfully uploaded ${id}`
- }), { status: 200, headers });
- } catch (e) {
- console.error("Upload error:", e);
- return new Response(JSON.stringify({ error: "Server error: " + e.message }), { status: 500, headers });
- }
+    console.log(`Successfully uploaded ${id}`);
+    return new Response(JSON.stringify({ 
+        success: true, 
+        vector: vectorRecord,
+        message: `Successfully uploaded ${id}`
+    }), { status: 200, headers });
+  } catch (e) {
+    console.error("Upload error:", e);
+    return new Response(JSON.stringify({ error: "Server error: " + e.message }), { status: 500, headers });
+  }
 }
 
 export async function onRequestDelete(context) {
- const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
- const ip = getClientIP(context.request);
- const rateCheck = checkRateLimit(ip);
- if (rateCheck.blocked) {
- return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
- }
+  const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
+  const ip = getClientIP(context.request);
+  const rateCheck = checkRateLimit(ip);
+  if (rateCheck.blocked) {
+    return new Response(JSON.stringify({ error: `Too many requests. Try again in ${rateCheck.remaining}s.` }), { status: 429, headers });
+  }
 
- if (!authenticate(context.request)) {
- recordFailedAttempt(ip);
- return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
- }
- clearAttempts(ip);
+  if (!authenticate(context.request)) {
+    recordFailedAttempt(ip);
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers });
+  }
+  clearAttempts(ip);
 
- try {
- const kv = context.env.VECTOR_DB;
- const r2 = context.env.VECTOR_ASSETS;
- const url = new URL(context.request.url);
- const slug = url.searchParams.get("slug");
- 
- if (!slug) return new Response(JSON.stringify({ error: "Missing slug parameter" }), { status: 400, headers });
+  try {
+    const kv = context.env.VECTOR_DB;
+    const r2 = context.env.VECTOR_ASSETS;
+    const url = new URL(context.request.url);
+    const slug = url.searchParams.get("slug");
+    
+    if (!slug) return new Response(JSON.stringify({ error: "Missing slug parameter" }), { status: 400, headers });
 
- const allVectorsRaw = await kv.get("all_vectors");
- let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
- const vector = allVectors.find(v => v.name === slug);
- 
- if (!vector) return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers });
+    const allVectorsRaw = await kv.get("all_vectors");
+    let allVectors = allVectorsRaw ? JSON.parse(allVectorsRaw) : [];
+    const vector = allVectors.find(v => v.name === slug);
+    
+    if (!vector) return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers });
 
- const category = vector.category || 'Miscellaneous';
- 
- await Promise.all([
- r2.delete(`${category}/${slug}/${slug}.jpg`),
- r2.delete(`${category}/${slug}/${slug}.zip`),
- r2.delete(`${category}/${slug}/${slug}.json`)
- ]);
+    const category = vector.category || 'Miscellaneous';
+    
+    await Promise.all([
+        r2.delete(`${category}/${slug}/${slug}.jpg`),
+        r2.delete(`${category}/${slug}/${slug}.zip`),
+        r2.delete(`${category}/${slug}/${slug}.json`)
+    ]);
 
- allVectors = allVectors.filter(v => v.name !== slug);
- const updatedRaw = JSON.stringify(allVectors);
- 
- await Promise.all([
- kv.put("all_vectors", updatedRaw),
- r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
- ]);
+    allVectors = allVectors.filter(v => v.name !== slug);
+    const updatedRaw = JSON.stringify(allVectors);
+    
+    await Promise.all([
+        kv.put("all_vectors", updatedRaw),
+        r2.put("all_vectors.json", updatedRaw, { httpMetadata: { contentType: "application/json" } })
+    ]);
 
- try {
- await notifyIndexingUpdate(context.env, [`https://frevector.com/details/${encodeURIComponent(slug)}`], "URL_DELETED");
- } catch (indexingError) {
- console.error("Google Indexing API delete notify failed:", indexingError.message);
- }
+    try {
+      await notifyIndexingUpdate(context.env, [`https://frevector.com/details/${encodeURIComponent(slug)}`], "URL_DELETED");
+    } catch (indexingError) {
+      console.error("Google Indexing API delete notify failed:", indexingError.message);
+    }
 
- return new Response(JSON.stringify({ 
- success: true, 
- message: `Successfully deleted ${slug}`
- }), { status: 200, headers });
- } catch (e) {
- console.error("Delete error:", e);
- return new Response(JSON.stringify({ error: "Server error: " + e.message }), { status: 500, headers });
- }
+    return new Response(JSON.stringify({ 
+        success: true, 
+        message: `Successfully deleted ${slug}`
+    }), { status: 200, headers });
+  } catch (e) {
+    console.error("Delete error:", e);
+    return new Response(JSON.stringify({ error: "Server error: " + e.message }), { status: 500, headers });
+  }
 }
