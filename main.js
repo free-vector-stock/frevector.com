@@ -17,143 +17,143 @@ const MODAL_CONTENTS = {
     about: {
         title: 'About Us',
         content: `
-            <h2 style="margin-bottom:16px;">About Us</h2>
-            <p style="margin-bottom:12px;">Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
-            <p style="margin-bottom:12px;">The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
-            <p style="margin-bottom:12px;">Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
-            <p style="margin-bottom:12px;">Frevector.com includes the following content:</p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Vector illustrations</li>
-                <li>Icon sets</li>
-                <li>Logo design elements</li>
-                <li>Graphic elements</li>
-                <li>Various design resources</li>
-            </ul>
-            <p style="margin-bottom:12px;">All files can be used in both personal and commercial projects.</p>
-            <p style="margin-bottom:12px;"><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>
-            <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>
+ <h2 style="margin-bottom:16px;">About Us</h2>
+ <p style="margin-bottom:12px;">Frevector.com is an independent design platform established to provide access to original resources in the field of graphic design.</p>
+ <p style="margin-bottom:12px;">The platform is managed by a team producing within its own in-house studio. All designs on the site are created exclusively by Frevector artists. Content is never sourced, copied, or rearranged from other platforms. Each work is built from scratch and undergoes an original production process.</p>
+ <p style="margin-bottom:12px;">Every design is shared only after passing through the stages of idea development, sketching, vector editing, technical adjustments, and quality control. Our goal is to create a growing graphic archive that can be used with confidence over time.</p>
+ <p style="margin-bottom:12px;">Frevector.com includes the following content:</p>
+ <ul style="margin-left:20px;margin-bottom:12px;">
+ <li>Vector illustrations</li>
+ <li>Icon sets</li>
+ <li>Logo design elements</li>
+ <li>Graphic elements</li>
+ <li>Various design resources</li>
+ </ul>
+ <p style="margin-bottom:12px;">All files can be used in both personal and commercial projects.</p>
+ <p style="margin-bottom:12px;"><strong>Our only rule is this:</strong> Files cannot be redistributed, uploaded to other platforms, sold, or reshared as part of a package.</p>
+ <p>Frevector is a platform that values labor, original production, and an ethical approach to design.</p>
 <p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-        `
+ `
     },
 
     terms: {
         title: 'Terms of Service',
         content: `
-            <h2 style="margin-bottom:16px;">Terms of Service</h2>
-            <p style="margin-bottom:12px;">Every visitor using Frevector.com is deemed to have accepted the following terms.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">1. Content Ownership</h3>
-            <p style="margin-bottom:12px;">All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">2. Right of Use</h3>
-            <p style="margin-bottom:12px;">Downloaded files can be used in personal and commercial projects. The user may edit the files for their own projects and incorporate them into their work.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">3. Prohibited Uses</h3>
-            <p style="margin-bottom:8px;">The following actions are prohibited:</p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Redistributing files</li>
-                <li>Uploading to other sites</li>
-                <li>Selling files digitally or physically</li>
-                <li>Sharing as an archive, package, or collection</li>
-                <li>Presenting Frevector content as a resource on other platforms</li>
-            </ul>
-            <h3 style="margin-bottom:8px;margin-top:16px;">4. Liability</h3>
-            <p style="margin-bottom:12px;">Frevector cannot be held responsible for any direct or indirect damages arising from the use of the content. Technical malfunctions or temporary access issues may occur on the platform from time to time.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">5. Right to Change</h3>
-            <p style="margin-bottom:16px;">Frevector reserves the right to update the terms of service and site content as necessary.</p>
-            <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
-            <h3 style="margin-bottom:8px;">License Description</h3>
-            <p style="margin-bottom:8px;">All designs on Frevector are original works prepared by Frevector artists.</p>
-            <p style="margin-bottom:8px;"><strong>Usage Permission:</strong></p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Can be used in personal projects</li>
-                <li>Can be used in commercial projects</li>
-                <li>Can be edited and integrated into projects</li>
-            </ul>
-            <p style="margin-bottom:8px;"><strong>Prohibitions:</strong></p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>Sharing files as-is</li>
-                <li>Redistribution</li>
-                <li>Selling</li>
-                <li>Presenting as a resource on other sites</li>
-                <li>Sharing within bulk content archives</li>
-            </ul>
-            <p>The Frevector license allows designs to be used in end-user projects. It does not allow the sharing of the file itself.</p>
-<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button> | <strong>DMCA:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-        `
+ <h2 style="margin-bottom:16px;">Terms of Service</h2>
+ <p style="margin-bottom:12px;">Every visitor using Frevector.com is deemed to have accepted the following terms.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">1. Content Ownership</h3>
+ <p style="margin-bottom:12px;">All graphic designs on the site are original works prepared by Frevector artists. All rights belong to Frevector.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">2. Right of Use</h3>
+ <p style="margin-bottom:12px;">Downloaded files can be used in personal and commercial projects. The user may edit the files for their own projects and incorporate them into their work.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">3. Prohibited Uses</h3>
+ <p style="margin-bottom:8px;">The following actions are prohibited:</p>
+ <ul style="margin-left:20px;margin-bottom:12px;">
+ <li>Redistributing files</li>
+ <li>Uploading to other sites</li>
+ <li>Selling files digitally or physically</li>
+ <li>Sharing as an archive, package, or collection</li>
+ <li>Presenting Frevector content as a resource on other platforms</li>
+ </ul>
+ <h3 style="margin-bottom:8px;margin-top:16px;">4. Liability</h3>
+ <p style="margin-bottom:12px;">Frevector cannot be held responsible for any direct or indirect damages arising from the use of the content. Technical malfunctions or temporary access issues may occur on the platform from time to time.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">5. Right to Change</h3>
+ <p style="margin-bottom:16px;">Frevector reserves the right to update the terms of service and site content as necessary.</p>
+ <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+ <h3 style="margin-bottom:8px;">License Description</h3>
+ <p style="margin-bottom:8px;">All designs on Frevector are original works prepared by Frevector artists.</p>
+ <p style="margin-bottom:8px;"><strong>Usage Permission:</strong></p>
+ <ul style="margin-left:20px;margin-bottom:12px;">
+ <li>Can be used in personal projects</li>
+ <li>Can be used in commercial projects</li>
+ <li>Can be edited and integrated into projects</li>
+ </ul>
+ <p style="margin-bottom:8px;"><strong>Prohibitions:</strong></p>
+ <ul style="margin-left:20px;margin-bottom:12px;">
+ <li>Sharing files as-is</li>
+ <li>Redistribution</li>
+ <li>Selling</li>
+ <li>Presenting as a resource on other sites</li>
+ <li>Sharing within bulk content archives</li>
+ </ul>
+ <p>The Frevector license allows designs to be used in end-user projects. It does not allow the sharing of the file itself.</p>
+<p style="margin-top:20px;"><strong>Contact:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button> <strong>DMCA:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+ `
     },
     contact: {
         title: 'Contact',
         content: `
-            <h2 style="margin-bottom:16px;">Contact Us</h2>
-            <p style="margin-bottom:16px;">If you have any questions or feedback regarding Frevector.com, please use the form below or contact us via email.</p>
-            
-            <form id="contactForm" class="contact-form">
-                <input type="hidden" name="access_key" value="ea41e256-7609-4c09-913e-d7c4ffd454fe">
-                <input type="hidden" name="from_name" value="Frevector Contact Form">
-                <input type="hidden" name="subject" value="New Message from Frevector.com">
-                <div class="contact-form-group">
-                    <label class="contact-form-label">Name</label>
-                    <input type="text" name="name" class="contact-form-input" placeholder="Your Name" required>
-                </div>
-                <div class="contact-form-group">
-                    <label class="contact-form-label">Email</label>
-                    <input type="email" name="email" class="contact-form-input" placeholder="Your Email Address" required>
-                </div>
-                <div class="contact-form-group">
-                    <label class="contact-form-label">Message</label>
-                    <textarea name="message" class="contact-form-textarea" placeholder="How can we help you?" required></textarea>
-                </div>
-                <button type="submit" class="contact-form-submit">SEND MESSAGE</button>
-                <div id="contactFormStatus" class="contact-form-status"></div>
-            </form>
+ <h2 style="margin-bottom:16px;">Contact Us</h2>
+ <p style="margin-bottom:16px;">If you have any questions or feedback regarding Frevector.com, please use the form below or contact us via email.</p>
+ 
+ <form id="contactForm" class="contact-form">
+ <input type="hidden" name="access_key" value="ea41e256-7609-4c09-913e-d7c4ffd454fe">
+ <input type="hidden" name="from_name" value="Frevector Contact Form">
+ <input type="hidden" name="subject" value="New Message from Frevector.com">
+ <div class="contact-form-group">
+ <label class="contact-form-label">Name</label>
+ <input type="text" name="name" class="contact-form-input" placeholder="Your Name" required>
+ </div>
+ <div class="contact-form-group">
+ <label class="contact-form-label">Email</label>
+ <input type="email" name="email" class="contact-form-input" placeholder="Your Email Address" required>
+ </div>
+ <div class="contact-form-group">
+ <label class="contact-form-label">Message</label>
+ <textarea name="message" class="contact-form-textarea" placeholder="How can we help you?" required></textarea>
+ </div>
+ <button type="submit" class="contact-form-submit">SEND MESSAGE</button>
+ <div id="contactFormStatus" class="contact-form-status"></div>
+ </form>
 
-            <div style="margin-top:24px;">
-                <p style="margin-bottom:10px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-                <p style="margin-bottom:10px;"><strong>General inquiries:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-                <p style="margin-bottom:10px;"><strong>DMCA requests:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-            </div>
+ <div style="margin-top:24px;">
+ <p style="margin-bottom:10px;"><strong>Email:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+ <p style="margin-bottom:10px;"><strong>General inquiries:</strong> <a href="mailto:info@frevector.com" style="color:#000;text-decoration:underline;">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+ <p style="margin-bottom:10px;"><strong>DMCA requests:</strong> <a href="mailto:dmca@frevector.com" style="color:#000;text-decoration:underline;">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+ </div>
 
-            <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
-            <h3 style="margin-bottom:8px;">Frequently Asked Questions</h3>
-            <p style="margin-bottom:6px;"><strong>1. Are the files free?</strong><br>Yes. Files can be used for free in personal and commercial projects.</p>
-            <p style="margin-bottom:6px;"><strong>2. Can I sell the files?</strong><br>No. Selling or redistributing the files is prohibited.</p>
-            <p style="margin-bottom:6px;"><strong>3. Can I use the files for my clients?</strong><br>Yes. They can be used in commercial projects. However, the file itself cannot be provided as a separate product.</p>
-            <p><strong>4. Can I upload the files to another site?</strong><br>No. Redistribution is not permitted.</p>
-        `
+ <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+ <h3 style="margin-bottom:8px;">Frequently Asked Questions</h3>
+ <p style="margin-bottom:6px;"><strong>1. Are the files free?</strong><br>Yes. Files can be used for free in personal and commercial projects.</p>
+ <p style="margin-bottom:6px;"><strong>2. Can I sell the files?</strong><br>No. Selling or redistributing the files is prohibited.</p>
+ <p style="margin-bottom:6px;"><strong>3. Can I use the files for my clients?</strong><br>Yes. They can be used in commercial projects. However, the file itself cannot be provided as a separate product.</p>
+ <p><strong>4. Can I upload the files to another site?</strong><br>No. Redistribution is not permitted.</p>
+ `
     },
     privacy: {
         title: 'Privacy Policy',
         content: `
-            <h2 style="margin-bottom:16px;">Privacy Policy</h2>
-            <p style="margin-bottom:12px;">At Frevector.com, we respect your privacy and are committed to protecting any information we may collect while operating our website.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">1. Information We Collect</h3>
-            <p style="margin-bottom:12px;">We do not require registration or personal information to download files. However, like most websites, we collect non-personally-identifying information such as browser type, language preference, and the date and time of each visitor request.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">2. Cookies</h3>
-            <p style="margin-bottom:12px;">We use cookies to help us identify and track visitors, their usage of Frevector.com, and their website access preferences. We also use third-party cookies from Google AdSense to serve advertisements based on a user's prior visits to our website or other websites.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">3. Advertisements</h3>
-            <p style="margin-bottom:12px;">Ads appearing on our website may be delivered to users by advertising partners, who may set cookies. These cookies allow the ad server to recognize your computer each time they send you an online advertisement to compile information about you or others who use your computer.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">4. Analytics</h3>
-            <p style="margin-bottom:12px;">We may use third-party service providers like Google Analytics to monitor and analyze the use of our service.</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">5. External Links</h3>
-            <p style="margin-bottom:12px;">Our website may contain links to external sites that are not operated by us. We strongly advise you to review the Privacy Policy of every site you visit.</p>
-            <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@frevector.com">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button>.</p>
-        `
+ <h2 style="margin-bottom:16px;">Privacy Policy</h2>
+ <p style="margin-bottom:12px;">At Frevector.com, we respect your privacy and are committed to protecting any information we may collect while operating our website.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">1. Information We Collect</h3>
+ <p style="margin-bottom:12px;">We do not require registration or personal information to download files. However, like most websites, we collect non-personally-identifying information such as browser type, language preference, and the date and time of each visitor request.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">2. Cookies</h3>
+ <p style="margin-bottom:12px;">We use cookies to help us identify and track visitors, their usage of Frevector.com, and their website access preferences. We also use third-party cookies from Google AdSense to serve advertisements based on a user's prior visits to our website or other websites.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">3. Advertisements</h3>
+ <p style="margin-bottom:12px;">Ads appearing on our website may be delivered to users by advertising partners, who may set cookies. These cookies allow the ad server to recognize your computer each time they send you an online advertisement to compile information about you or others who use your computer.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">4. Analytics</h3>
+ <p style="margin-bottom:12px;">We may use third-party service providers like Google Analytics to monitor and analyze the use of our service.</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">5. External Links</h3>
+ <p style="margin-bottom:12px;">Our website may contain links to external sites that are not operated by us. We strongly advise you to review the Privacy Policy of every site you visit.</p>
+ <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@frevector.com">info@frevector.com</a> <button onclick="navigator.clipboard.writeText('info@frevector.com');alert('Copied!')" style="margin-left:4px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button>.</p>
+ `
     },
     dmca: {
         title: 'DMCA',
         content: `
-            <h2 style="margin-bottom:16px;">DMCA Notice</h2>
-            <p style="margin-bottom:12px;">Frevector.com respects the intellectual property rights of others. If you believe that your copyrighted work has been copied in a way that constitutes copyright infringement and is accessible on this site, you may notify our copyright agent, as set forth in the Digital Millennium Copyright Act of 1998 (DMCA).</p>
-            <h3 style="margin-bottom:8px;margin-top:16px;">DMCA Notice of Alleged Infringement</h3>
-            <p style="margin-bottom:12px;">To be effective under the DMCA, your notice must include the following:</p>
-            <ul style="margin-left:20px;margin-bottom:12px;">
-                <li>A physical or electronic signature of a person authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
-                <li>Identification of the copyrighted work claimed to have been infringed.</li>
-                <li>Identification of the material that is claimed to be infringing and that is to be removed.</li>
-                <li>Information reasonably sufficient to permit the service provider to contact you, such as an address, telephone number, and, if available, an email address.</li>
-                <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.</li>
-                <li>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
-            </ul>
-            <p>Please send your DMCA notice to: <a href="mailto:dmca@frevector.com">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
-        `
+ <h2 style="margin-bottom:16px;">DMCA Notice</h2>
+ <p style="margin-bottom:12px;">Frevector.com respects the intellectual property rights of others. If you believe that your copyrighted work has been copied in a way that constitutes copyright infringement and is accessible on this site, you may notify our copyright agent, as set forth in the Digital Millennium Copyright Act of 1998 (DMCA).</p>
+ <h3 style="margin-bottom:8px;margin-top:16px;">DMCA Notice of Alleged Infringement</h3>
+ <p style="margin-bottom:12px;">To be effective under the DMCA, your notice must include the following:</p>
+ <ul style="margin-left:20px;margin-bottom:12px;">
+ <li>A physical or electronic signature of a person authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
+ <li>Identification of the copyrighted work claimed to have been infringed.</li>
+ <li>Identification of the material that is claimed to be infringing and that is to be removed.</li>
+ <li>Information reasonably sufficient to permit the service provider to contact you, such as an address, telephone number, and, if available, an email address.</li>
+ <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or the law.</li>
+ <li>A statement that the information in the notification is accurate, and under penalty of perjury, that you are authorized to act on behalf of the owner of an exclusive right that is allegedly infringed.</li>
+ </ul>
+ <p>Please send your DMCA notice to: <a href="mailto:dmca@frevector.com">dmca@frevector.com</a> <button onclick="navigator.clipboard.writeText('dmca@frevector.com');alert('Copied!')" style="margin-left:8px;padding:2px 6px;font-size:11px;cursor:pointer;background:#f5f5f5;border:1px solid #ccc;border-radius:3px;">Copy</button></p>
+ `
     }
 };
 
@@ -536,31 +536,31 @@ function updateSEOBlock() {
     const totalText = total > 0 ? `Browse <strong>${total.toLocaleString()} free ${cat !== 'all' ? cat.toLowerCase() + ' ' : ''}vector files</strong>` : `Browse <strong>our free vector files</strong>`;
 
     seoSection.innerHTML = `
-        <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${data.title}</h2>
-        <p style="font-size:14px;line-height:1.7;margin-bottom:10px">${data.p1}</p>
-        <p style="font-size:14px;line-height:1.7;margin-bottom:10px">${data.p2}</p>
-        <p style="font-size:14px;line-height:1.7">${data.p3}</p>
-        <p style="margin-top:10px;font-size:14px;color:#666;">
-            ${totalText} across <strong>25+ categories</strong> | all free for personal and commercial use. No registration required.
-        </p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:20px;margin-top:24px">
-            <div>
-                <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a5276">Popular Categories</h3>
-                <ul style="font-size:13px;line-height:1.6;margin:0;padding-left:18px">
-                    ${data.popularCats.map(c => `<li>${c}</li>`).join('')}
-                </ul>
-            </div>
-            <div>
-                <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a5276">Why Choose Us?</h3>
-                <ul style="font-size:13px;line-height:1.6;margin:0;padding-left:18px">
-                    <li>100% Free Downloads</li>
-                    <li>Personal &amp; Commercial Use</li>
-                    <li>High-Quality SVG &amp; JPEG</li>
-                    <li>No Registration Required</li>
-                </ul>
-            </div>
-        </div>
-    `;
+ <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${data.title}</h2>
+ <p style="font-size:14px;line-height:1.7;margin-bottom:10px">${data.p1}</p>
+ <p style="font-size:14px;line-height:1.7;margin-bottom:10px">${data.p2}</p>
+ <p style="font-size:14px;line-height:1.7">${data.p3}</p>
+ <p style="margin-top:10px;font-size:14px;color:#666;">
+ ${totalText} across <strong>25+ categories</strong> all free for personal and commercial use. No registration required.
+ </p>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:20px;margin-top:24px">
+ <div>
+ <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a5276">Popular Categories</h3>
+ <ul style="font-size:13px;line-height:1.6;margin:0;padding-left:18px">
+ ${data.popularCats.map(c => `<li>${c}</li>`).join('')}
+ </ul>
+ </div>
+ <div>
+ <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1a5276">Why Choose Us?</h3>
+ <ul style="font-size:13px;line-height:1.6;margin:0;padding-left:18px">
+ <li>100% Free Downloads</li>
+ <li>Personal &amp; Commercial Use</li>
+ <li>High-Quality SVG &amp; JPEG</li>
+ <li>No Registration Required</li>
+ </ul>
+ </div>
+ </div>
+ `;
 }
 
 async function fetchVectors() {
@@ -699,15 +699,15 @@ function renderVectors() {
         const fetchPriority = index < 12 ? 'high' : 'low';
 
         card.innerHTML = `
-            <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" fetchpriority="${fetchPriority}" decoding="async" width="300" height="300">
-                ${typeLabel}
-            </div>
-            <div class="vc-info">
-                <div class="vc-description">${escHtml(v.description || "")}</div>
-                <div class="vc-keywords">${escHtml([...new Set([...(v.keywords || [])])].join(', '))}</div>
-            </div>
-        `;
+ <div class="vc-img-wrap">
+ <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" fetchpriority="${fetchPriority}" decoding="async" width="300" height="300">
+ ${typeLabel}
+ </div>
+ <div class="vc-info">
+ <div class="vc-description">${escHtml(v.description || "")}</div>
+ <div class="vc-keywords">${escHtml([...new Set([...(v.keywords || [])])].join(', '))}</div>
+ </div>
+ `;
         card.dataset.statsSlug = v.name;
         card.onclick = () => openDetailPanel(v, card);
         // GÖREV 1: Stats bar ekle
@@ -748,11 +748,11 @@ function renderOurPicks() {
         const loadingAttr = index < 15 ? 'eager' : 'lazy';
 
         card.innerHTML = `
-            <div class="vc-img-wrap">
-                <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async" fetchpriority="${index < 5 ? 'high' : 'auto'}" width="300" height="300">
-                ${typeLabel}
-            </div>
-        `;
+ <div class="vc-img-wrap">
+ <img class="vc-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" loading="${loadingAttr}" decoding="async" fetchpriority="${index < 5 ? 'high' : 'auto'}" width="300" height="300">
+ ${typeLabel}
+ </div>
+ `;
         card.onclick = () => {
             // "Our Picks" görselleri için özel davranış: Önce ana ekranda (detay paneli) açılacak
             // scrollIntoView'ı burada engelliyoruz çünkü sayfa kaymasını istemiyoruz
@@ -950,39 +950,39 @@ function openDetailPanel(v, cardEl) {
     const fileFormat = v.isJpegOnly ? 'JPEG' : 'SVG, JPEG';
 
     panel.innerHTML = `
-        <!-- GÖREV 10: Breadcrumb -->
-        <div class="breadcrumb" style="font-size:12px;color:#888;margin-bottom:8px;">
-            <a href="/" style="color:#000;text-decoration:none;">Home</a> &rsaquo; 
-            <a href="/?category=${escHtml(displayCategory)}" style="color:#000;text-decoration:none;">${escHtml(displayCategory)}</a> &rsaquo; 
-            <span style="color:#555;">${escHtml(v.title.substring(0, 30))}</span>
-        </div>
-        <div class="detail-inner">
-            <div class="detail-left">
-                <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" width="600" height="600" loading="eager">
-                <table class="detail-table">
-                    <tr><td class="dt-label">TYPE</td><td class="dt-value">${displayType}</td></tr>
-                    <tr><td class="dt-label">CATEGORY</td><td class="dt-value">${escHtml(displayCategory)}</td></tr>
-                    <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
-                    <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
-                    <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
-                    <tr><td class="dt-label">FILE SIZE</td><td class="dt-value">${v.fileSize || 'N/A'}</td></tr>
-                </table>
-            </div>
-            <div class="detail-right">
-                <h2 class="detail-title">${escHtml(v.title)}</h2>
-                <p class="detail-desc">${escHtml(v.description || "")}</p>
-                <div class="detail-keywords">
-                    ${keywords.map(kw => `<span class="kw-tag">${escHtml(kw)}</span>`).join('')}
-                </div>
-                ${buildVectorSeoText(v)}
-                <div style="margin-top: 20px; display: flex; gap: 12px;">
-                    <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
+ <!-- GÖREV 10: Breadcrumb -->
+ <div class="breadcrumb" style="font-size:12px;color:#888;margin-bottom:8px;">
+ <a href="/" style="color:#000;text-decoration:none;">Home</a> &rsaquo; 
+ <a href="/?category=${escHtml(displayCategory)}" style="color:#000;text-decoration:none;">${escHtml(displayCategory)}</a> &rsaquo; 
+ <span style="color:#555;">${escHtml(v.title.substring(0, 30))}</span>
+ </div>
+ <div class="detail-inner">
+ <div class="detail-left">
+ <img class="detail-img" src="${v.thumbnail}" alt="${escHtml(v.title)}" width="600" height="600" loading="eager">
+ <table class="detail-table">
+ <tr><td class="dt-label">TYPE</td><td class="dt-value">${displayType}</td></tr>
+ <tr><td class="dt-label">CATEGORY</td><td class="dt-value">${escHtml(displayCategory)}</td></tr>
+ <tr><td class="dt-label">FILE FORMAT</td><td class="dt-value">${fileFormat}</td></tr>
+ <tr><td class="dt-label">RESOLUTION</td><td class="dt-value">High Quality / Fully Scalable</td></tr>
+ <tr><td class="dt-label">LICENSE</td><td class="dt-value">Free for Personal &amp; Commercial Use</td></tr>
+ <tr><td class="dt-label">FILE SIZE</td><td class="dt-value">${v.fileSize || 'N/A'}</td></tr>
+ </table>
+ </div>
+ <div class="detail-right">
+ <h2 class="detail-title">${escHtml(v.title)}</h2>
+ <p class="detail-desc">${escHtml(v.description || "")}</p>
+ <div class="detail-keywords">
+ ${keywords.map(kw => `<span class="kw-tag">${escHtml(kw)}</span>`).join('')}
+ </div>
+ ${buildVectorSeoText(v)}
+ <div style="margin-top: 20px; display: flex; gap: 12px;">
+ <button class="download-btn" id="mainDownloadBtn">DOWNLOAD</button>
 
-                    <button class="detail-close-btn" id="mainCloseBtn">Close</button>
-                </div>
-            </div>
-        </div>
-    `;
+ <button class="detail-close-btn" id="mainCloseBtn">Close</button>
+ </div>
+ </div>
+ </div>
+ `;
 
     const grid = document.getElementById('vectorsGrid');
     
@@ -1038,24 +1038,24 @@ function buildVectorSeoText(v) {
     const style = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 3).join(', ')) : 'clean and editable';
     const useCases = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 8).join(', ')) : 'websites, social media posts, presentations, print advertisements, packaging, flyers, app icons, and infographics';
     return `<section class="detail-seo-text" style="margin-top:24px;font-size:14px;line-height:1.75;color:#333">
-        <h3>${title} | Free SVG & JPEG Download</h3>
-        <p>${title} is a high-quality free vector graphic available for download in SVG and JPEG formats. This file is part of our ${category} collection and is suitable for a wide range of design projects, from digital media to print materials.</p>
-        <h3>About This File</h3>
-        <p>This vector has been prepared in a ${style} style, making it versatile and easy to customize in vector editing applications such as vector design software, free vector editor, vector graphics software, or professional vector tool. The scalable format ensures that the graphic looks sharp and professional at any size, whether you need a small icon for a mobile app or a large illustration for a poster or banner.</p>
-        <p>The file is fully editable. You can change colors, resize elements, add text, or combine it with other graphics to create a unique composition. No quality loss occurs at any resolution because the artwork is delivered in a true vector format.</p>
-        <h3>How to Use This Vector</h3>
-        <p>This graphic is ideal for ${useCases}. Simply click the download button to get the file in your preferred format. SVG files can be opened directly in web browsers and most design tools. JPEG preview files are provided for quick viewing and reference.</p>
-        <h3>License Information</h3>
-        <p>This file is free for both personal and commercial use. You may use it in client projects, commercial products, and publications without paying any fee or providing attribution. Redistribution or reselling of the file as a standalone asset is not permitted.</p>
-        <h3 style="margin-top:20px;">Frequently Asked Questions</h3>
-        <div class="detail-faq" style="margin-top:8px;">
-            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">What file formats are included in the download?</strong><br>Every download includes an editable SVG file and a JPEG preview image. SVG files can be opened in vector design software, free vector editor, or any modern web browser.</div>
-            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Can I use this vector for commercial projects?</strong><br>Yes. All files on frevector.com are free for personal and commercial use without any registration, payment, or attribution requirement.</div>
-            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Do I need to register to download?</strong><br>No. There is no registration, login, or email required. Simply click the download button and the file is yours.</div>
-            <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Can I modify the colors and sizes?</strong><br>Absolutely. SVG files are fully editable | you can change colors, resize elements, add text, and combine with other graphics without any quality loss at any scale.</div>
-            <div><strong style="color:#1a5276;">Is it allowed to resell this file?</strong><br>No. You cannot redistribute or resell the raw vector file as a standalone asset. It must be incorporated into a larger design project or product.</div>
-        </div>
-    </section>`;
+ <h3>${title} Free SVG & JPEG Download</h3>
+ <p>${title} is a high-quality free vector graphic available for download in SVG and JPEG formats. This file is part of our ${category} collection and is suitable for a wide range of design projects, from digital media to print materials.</p>
+ <h3>About This File</h3>
+ <p>This vector has been prepared in a ${style} style, making it versatile and easy to customize in vector editing applications such as vector design software, free vector editor, vector graphics software, or professional vector tool. The scalable format ensures that the graphic looks sharp and professional at any size, whether you need a small icon for a mobile app or a large illustration for a poster or banner.</p>
+ <p>The file is fully editable. You can change colors, resize elements, add text, or combine it with other graphics to create a unique composition. No quality loss occurs at any resolution because the artwork is delivered in a true vector format.</p>
+ <h3>How to Use This Vector</h3>
+ <p>This graphic is ideal for ${useCases}. Simply click the download button to get the file in your preferred format. SVG files can be opened directly in web browsers and most design tools. JPEG preview files are provided for quick viewing and reference.</p>
+ <h3>License Information</h3>
+ <p>This file is free for both personal and commercial use. You may use it in client projects, commercial products, and publications without paying any fee or providing attribution. Redistribution or reselling of the file as a standalone asset is not permitted.</p>
+ <h3 style="margin-top:20px;">Frequently Asked Questions</h3>
+ <div class="detail-faq" style="margin-top:8px;">
+ <div style="margin-bottom:10px;"><strong style="color:#1a5276;">What file formats are included in the download?</strong><br>Every download includes an editable SVG file and a JPEG preview image. SVG files can be opened in vector design software, free vector editor, or any modern web browser.</div>
+ <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Can I use this vector for commercial projects?</strong><br>Yes. All files on frevector.com are free for personal and commercial use without any registration, payment, or attribution requirement.</div>
+ <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Do I need to register to download?</strong><br>No. There is no registration, login, or email required. Simply click the download button and the file is yours.</div>
+ <div style="margin-bottom:10px;"><strong style="color:#1a5276;">Can I modify the colors and sizes?</strong><br>Absolutely. SVG files are fully editable you can change colors, resize elements, add text, and combine with other graphics without any quality loss at any scale.</div>
+ <div><strong style="color:#1a5276;">Is it allowed to resell this file?</strong><br>No. You cannot redistribute or resell the raw vector file as a standalone asset. It must be incorporated into a larger design project or product.</div>
+ </div>
+ </section>`;
 }
 
 function showDownloadPage(v) {
@@ -1499,11 +1499,11 @@ function buildCardStatsBar(slug, views, downloads, likes) {
     const likedClass = isLiked(slug) ? ' liked' : '';
     const heartIcon = isLiked(slug) ? '❤' : '♡';
     return `<div class="vc-stats-bar" data-slug="${escHtml(slug)}">
-        <span class="vc-stat-item vc-stat-views" title="Views"><span class="vc-stat-icon">👁</span><span class="vc-stat-num">${fmtCount(views)}</span></span>
-        <span class="vc-stat-item vc-stat-downloads" title="Downloads"><span class="vc-stat-icon">⬇</span><span class="vc-stat-num">${fmtCount(downloads)}</span></span>
-        <span class="vc-stat-item vc-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">${heartIcon}</span><span class="vc-stat-num">${fmtCount(likes)}</span></span>
-        <span class="vc-stat-item vc-stat-share" title="Share" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">🔗</span></span>
-    </div>`;
+ <span class="vc-stat-item vc-stat-views" title="Views"><span class="vc-stat-icon">👁</span><span class="vc-stat-num">${fmtCount(views)}</span></span>
+ <span class="vc-stat-item vc-stat-downloads" title="Downloads"><span class="vc-stat-icon">⬇</span><span class="vc-stat-num">${fmtCount(downloads)}</span></span>
+ <span class="vc-stat-item vc-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">${heartIcon}</span><span class="vc-stat-num">${fmtCount(likes)}</span></span>
+ <span class="vc-stat-item vc-stat-share" title="Share" data-slug="${escHtml(slug)}"><span class="vc-stat-icon">🔗</span></span>
+ </div>`;
 }
 
 // Detay paneli için stats bar HTML'i oluştur (büyük)
@@ -1511,11 +1511,11 @@ function buildDetailStatsBar(slug, views, downloads, likes) {
     const likedClass = isLiked(slug) ? ' liked' : '';
     const heartIcon = isLiked(slug) ? '❤' : '♡';
     return `<div class="detail-stats-bar" id="detailStatsBar" data-slug="${escHtml(slug)}">
-        <span class="detail-stat-item detail-stat-views" title="Views"><span class="detail-stat-icon">👁</span><span class="detail-stat-num">${fmtCount(views)}</span> views</span>
-        <span class="detail-stat-item detail-stat-downloads" title="Downloads"><span class="detail-stat-icon">⬇</span><span class="detail-stat-num">${fmtCount(downloads)}</span> downloads</span>
-        <span class="detail-stat-item detail-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}" id="detailLikeBtn"><span class="detail-stat-icon">${heartIcon}</span><span class="detail-stat-num">${fmtCount(likes)}</span> likes</span>
-        <span class="detail-stat-item detail-stat-share" title="Share" data-slug="${escHtml(slug)}" id="detailShareBtn"><span class="detail-stat-icon">🔗</span> Share</span>
-    </div>`;
+ <span class="detail-stat-item detail-stat-views" title="Views"><span class="detail-stat-icon">👁</span><span class="detail-stat-num">${fmtCount(views)}</span> views</span>
+ <span class="detail-stat-item detail-stat-downloads" title="Downloads"><span class="detail-stat-icon">⬇</span><span class="detail-stat-num">${fmtCount(downloads)}</span> downloads</span>
+ <span class="detail-stat-item detail-stat-like${likedClass}" title="Like" data-slug="${escHtml(slug)}" id="detailLikeBtn"><span class="detail-stat-icon">${heartIcon}</span><span class="detail-stat-num">${fmtCount(likes)}</span> likes</span>
+ <span class="detail-stat-item detail-stat-share" title="Share" data-slug="${escHtml(slug)}" id="detailShareBtn"><span class="detail-stat-icon">🔗</span> Share</span>
+ </div>`;
 }
 
 // Stats'ı API'den çek ve karta uygula
@@ -1574,12 +1574,12 @@ function showSharePopup(slug, anchorEl) {
     const popup = document.createElement('div');
     popup.className = 'share-popup';
     popup.innerHTML = `
-        <button class="share-copy-btn" data-url="${escHtml(url)}">📋 Copy Link</button>
-        <a href="https://wa.me/?text=${encodeURIComponent(url)}" target="_blank" rel="noopener">💬 WhatsApp</a>
-        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener">📘 Facebook</a>
-        <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">🐦 X / Twitter</a>
-        <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">📌 Pinterest</a>
-    `;
+ <button class="share-copy-btn" data-url="${escHtml(url)}">📋 Copy Link</button>
+ <a href="https://wa.me/?text=${encodeURIComponent(url)}" target="_blank" rel="noopener">💬 WhatsApp</a>
+ <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener">📘 Facebook</a>
+ <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">🐦 X / Twitter</a>
+ <a href="https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">📌 Pinterest</a>
+ `;
     // Fixed position: popup'u body'ye ekle ve buton konumuna göre yerleştir
     document.body.appendChild(popup);
     const rect = anchorEl.getBoundingClientRect();

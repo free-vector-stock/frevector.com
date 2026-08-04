@@ -78,7 +78,7 @@ export async function onRequest(context) {
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
-  const pageTitle = `${title} | Free Vector Download | frevector.com`;
+  const pageTitle = `${title} Free Vector Download frevector.com`;
 
   // Build smart-truncated meta description
   function smartTruncate(text, maxLen) {
@@ -128,22 +128,22 @@ export async function onRequest(context) {
 
   // GÖREV 1: Inject product-unique-content and hide home-seo-content
   const productUniqueContent = `
-            <section class="product-unique-content" style="padding:24px 0 32px;max-width:100%;margin:24px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee">
-                <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${escapeHtml(title)} - Vector Details</h2>
-                <p style="font-size:14px;line-height:1.7;margin-bottom:20px">${escapeHtml(desc)}</p>
-                <div style="background:#f9f9f9; padding:20px; border-radius:8px; border:1px solid #eee;">
-                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555; width:150px;">FILE FORMAT</td><td style="color:#2c3e50;">SVG & JPEG</td></tr>
-                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">CATEGORY</td><td style="color:#2c3e50;">${escapeHtml(category)}</td></tr>
-                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">RESOLUTION</td><td style="color:#2c3e50;">High Quality / Fully Scalable</td></tr>
-                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">LICENSE</td><td style="color:#2c3e50;">Free for Personal & Commercial Use</td></tr>
-                        <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">FILE SIZE</td><td style="color:#2c3e50;">${escapeHtml(fileSize)}</td></tr>
-                    </table>
-                </div>
-            </section>`;
+ <section class="product-unique-content" style="padding:24px 0 32px;max-width:100%;margin:24px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee">
+ <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${escapeHtml(title)} - Vector Details</h2>
+ <p style="font-size:14px;line-height:1.7;margin-bottom:20px">${escapeHtml(desc)}</p>
+ <div style="background:#f9f9f9; padding:20px; border-radius:8px; border:1px solid #eee;">
+ <table style="width:100%; border-collapse:collapse; font-size:13px;">
+ <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555; width:150px;">FILE FORMAT</td><td style="color:#2c3e50;">SVG & JPEG</td></tr>
+ <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">CATEGORY</td><td style="color:#2c3e50;">${escapeHtml(category)}</td></tr>
+ <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">RESOLUTION</td><td style="color:#2c3e50;">High Quality / Fully Scalable</td></tr>
+ <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">LICENSE</td><td style="color:#2c3e50;">Free for Personal & Commercial Use</td></tr>
+ <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555;">FILE SIZE</td><td style="color:#2c3e50;">${escapeHtml(fileSize)}</td></tr>
+ </table>
+ </div>
+ </section>`;
 
   // Inject unique content before the home-seo-content section
-  html = html.replace(/<section class="home-seo-content"/, `${productUniqueContent}\n            <section class="home-seo-content"`);
+  html = html.replace(/<section class="home-seo-content"/, `${productUniqueContent}\n <section class="home-seo-content"`);
 
   // "Our Picks" Section Optimization
   if (allVectors && allVectors.length > 0) {
@@ -161,19 +161,19 @@ export async function onRequest(context) {
     const picksHTML = picks.map(v => {
       const pickThumbUrl = `https://assets.frevector.com/${v.category}/${v.name}/${v.name}.jpg`;
       return `
-    <a href="/details/${v.name}" class="vector-card" style="text-decoration:none;">
-      <div class="vc-img-wrap">
-        <img class="vc-img" src="${escapeHtml(pickThumbUrl)}" alt="${escapeHtml(v.title || '')}" loading="lazy" width="300" height="300">
-        <span class="vc-type-badge vector">VECTOR</span>
-      </div>
-      <div style="font-size:11px; color:#555; padding:4px 0 0 0; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(v.title || v.name)}</div>
-    </a>`;
+ <a href="/details/${v.name}" class="vector-card" style="text-decoration:none;">
+ <div class="vc-img-wrap">
+ <img class="vc-img" src="${escapeHtml(pickThumbUrl)}" alt="${escapeHtml(v.title || '')}" loading="lazy" width="300" height="300">
+ <span class="vc-type-badge vector">VECTOR</span>
+ </div>
+ <div style="font-size:11px; color:#555; padding:4px 0 0 0; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(v.title || v.name)}</div>
+ </a>`;
     }).join("");
 
     const picksData = picks.map(v => JSON.stringify({name: v.name, title: v.title, category: v.category, fileSize: v.fileSize, isJpegOnly: v.isJpegOnly})).join(",");
     html = html.replace(
       /(<div class="our-picks-track" id="ourPicksTrack">)/,
-      `$1\n    <div id="our-picks-ssr-data" data-picks='[${picksData}]' style="position:absolute;width:0;height:0;overflow:hidden;"></div>\n    <div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
+      `$1\n <div id="our-picks-ssr-data" data-picks='[${picksData}]' style="position:absolute;width:0;height:0;overflow:hidden;"></div>\n <div class="our-picks-static-list" style="display:flex; flex-wrap:wrap; gap:8px; padding:12px 0;">${picksHTML}</div>`
     );
 
     if (allVectors) {
