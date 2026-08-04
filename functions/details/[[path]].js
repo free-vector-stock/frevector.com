@@ -90,11 +90,19 @@ export async function onRequest(context) {
   }
   const finalPageTitle = pageTitle;
 
-  // Build smart-truncated meta description
+  // Build smart-truncated meta description (word-boundary safe)
   function smartTruncate(text, maxLen) {
     if (text.length <= maxLen) return text;
-    const boundary = text.lastIndexOf('.', maxLen);
-    if (boundary > maxLen * 0.7) return text.slice(0, boundary + 1);
+    // First try to cut at a sentence boundary (.)
+    const sentenceBoundary = text.lastIndexOf('.', maxLen);
+    if (sentenceBoundary > maxLen * 0.8) return text.slice(0, sentenceBoundary + 1);
+    
+    // Fallback: cut at the last space before maxLen to avoid breaking words
+    const lastSpace = text.lastIndexOf(' ', maxLen);
+    if (lastSpace > 0) {
+      return text.slice(0, lastSpace).trim() + "...";
+    }
+    // Ultimate fallback if no space found (very rare)
     return text.slice(0, maxLen).trim() + "...";
   }
   const metaDesc = smartTruncate(desc, 160);
