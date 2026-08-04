@@ -43,16 +43,21 @@ export async function onRequest(context) {
 
     // If not found in individual KV, fallback to the big JSON (original logic)
     if (!vector) {
-      const r2 = context.env.VECTOR_ASSETS;
-      if (r2) {
-        const r2Object = await r2.get("all_vectors.json");
-        if (r2Object) {
-          allVectorsRaw = await r2Object.text();
-        }
+      // FIX: Check KV first for 'all_vectors' as it's more likely to be up-to-date than R2
+      const kv = context.env.VECTOR_DB;
+      if (kv) {
+        allVectorsRaw = await kv.get("all_vectors");
       }
 
-      if (!allVectorsRaw && kv) {
-        allVectorsRaw = await kv.get("all_vectors");
+      // Fallback to R2 only if KV is empty
+      if (!allVectorsRaw) {
+        const r2 = context.env.VECTOR_ASSETS;
+        if (r2) {
+          const r2Object = await r2.get("all_vectors.json");
+          if (r2Object) {
+            allVectorsRaw = await r2Object.text();
+          }
+        }
       }
 
       if (allVectorsRaw) {
@@ -65,7 +70,7 @@ export async function onRequest(context) {
   }
 
   // If slug not found return 404
-  if (!vector) {
+  if (!vector) { // SSR DATA SOURCE OPTIMIZATION
     return new Response("404 | Vector not found", { status: 404 });
   }
 
