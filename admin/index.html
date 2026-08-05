@@ -150,9 +150,9 @@
  <div id="loginScreen">
  <div class="login-box">
  <h2>Frevector Admin</h2>
- <form id="loginForm">
+ <form id="loginForm" onsubmit="return false;">
  <input type="password" id="loginPassword" placeholder="Password" required>
- <button type="submit">Login</button>
+ <button type="button" id="loginBtn" onclick="performLogin()">Login</button>
  <p id="loginError">Invalid password. Please try again.</p>
  </form>
  </div>
@@ -319,20 +319,34 @@
  'Technology', 'Transportation', 'Vintage', 'Logo', 'Font', 'Icon'
  ];
 
- // INIT
- document.addEventListener('DOMContentLoaded', () => {
- if (sessionStorage.getItem('fv_admin') === ADMIN_KEY) showApp();
- 
- document.getElementById('loginForm').onsubmit = (e) => {
- e.preventDefault();
+ window.performLogin = () => {
  const pw = document.getElementById('loginPassword').value;
  if (pw === ADMIN_KEY) {
+ try {
  sessionStorage.setItem('fv_admin', ADMIN_KEY);
+ } catch (e) { console.error("Storage error:", e); }
  showApp();
  } else {
  document.getElementById('loginError').style.display = 'block';
  }
  };
+
+ // INIT
+ document.addEventListener('DOMContentLoaded', () => {
+ if (sessionStorage.getItem('fv_admin') === ADMIN_KEY) showApp();
+ 
+ const loginForm = document.getElementById('loginForm');
+ if (loginForm) {
+ loginForm.addEventListener('submit', (e) => {
+ e.preventDefault();
+ performLogin();
+ });
+ }
+ 
+ // Enter tuşu desteği
+ document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+ if (e.key === 'Enter') performLogin();
+ });
 
  document.getElementById('logoutBtn').onclick = () => {
  sessionStorage.removeItem('fv_admin');
