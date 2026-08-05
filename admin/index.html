@@ -436,7 +436,7 @@
 
  function renderTable() {
  const tbody = document.getElementById('manageTableBody');
- const start = (state.page 1) * state.limit;
+ const start = (state.page - 1) * state.limit;
  const end = start + state.limit;
  const pageItems = state.filtered.slice(start, end);
 
