@@ -386,11 +386,16 @@
  document.getElementById('prevPage').onclick = () => { if (state.page > 1) { state.page--; renderTable(); } };
  document.getElementById('nextPage').onclick = () => { if (state.page < Math.ceil(state.filtered.length / state.limit)) { state.page++; renderTable(); } };
 
-            // Upload
+            // Upload (drag & drop + click to select + analyze + upload)
             const dropZone = document.getElementById('dropZone');
             const fileInput = document.getElementById('fileInput');
             dropZone.onclick = () => fileInput.click();
- fileInput.onchange = () => handleFiles(fileInput.files);
+            dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#f0f7ff'; };
+            dropZone.ondragleave = () => { dropZone.style.backgroundColor = ''; };
+            dropZone.ondrop = (e) => { e.preventDefault(); dropZone.style.backgroundColor = ''; if (e.dataTransfer.files.length > 0) { fileInput.files = e.dataTransfer.files; handleFiles(fileInput.files); } };
+            fileInput.onchange = () => handleFiles(fileInput.files);
+            document.getElementById('analyzeBtn').onclick = () => handleAnalyze();
+            document.getElementById('uploadBtn').onclick = () => handleUpload();
  
  // Health
  document.getElementById('runHealthBtn').onclick = runHealthCheck;
@@ -544,9 +549,73 @@
  }
  }
 
- // Placeholder for file handling (as implemented in previous versions)
+ // Upload file handling (grouping + analyze + upload)
+ let pendingGroups = [];
+ function groupFiles(files) {
+ const groups = {};
+ Array.from(files).forEach(f => {
+ const id = f.name.replace(/\.[^.]+$/, '');
+ if (!groups[id]) groups[id] = { id, json: null, jpeg: null, zip: null };
+ const ext = f.name.split('.').pop().toLowerCase();
+ if (ext === 'json') groups[id].json = f;
+ else if (ext === 'jpg' || ext === 'jpeg') groups[id].jpeg = f;
+ else if (ext === 'zip') groups[id].zip = f;
+ });
+ return Object.values(groups);
+ }
  function handleFiles(files) {
- alert(`${files.length} files selected. Click Analyze to proceed.`);
+ if (!files || files.length === 0) return;
+ pendingGroups = groupFiles(files);
+ const complete = pendingGroups.filter(g => g.json && g.jpeg && g.zip);
+ let msg = `${files.length} dosya seçildi. ${complete.length} tam grup (JSON + JPEG + ZIP) bulundu. Analyze Files ile analiz edin.`;
+ const missingZip = pendingGroups.filter(g => g.json && g.jpeg && !g.zip);
+ const missingJpeg = pendingGroups.filter(g => g.json && !g.jpeg);
+ const missingJson = pendingGroups.filter(g => !g.json);
+ if (missingZip.length) msg += `\n⚠ ${missingZip.length} grupta ZIP eksik: ${missingZip.map(g => g.id).join(', ')}`;
+ if (missingJpeg.length) msg += `\n⚠ ${missingJpeg.length} grupta JPEG eksik: ${missingJpeg.map(g => g.id).join(', ')}`;
+ if (missingJson.length) msg += `\n⚠ ${missingJson.length} grupta JSON eksik: ${missingJson.map(g => g.id).join(', ')}`;
+ alert(msg);
+ }
+ function handleAnalyze() {
+ if (pendingGroups.length === 0) { alert('Önce dosyaları seçin veya sürükleyip bırakın.'); return; }
+ handleFiles(pendingGroups.flatMap(g => [g.json, g.jpeg, g.zip].filter(Boolean)));
+ }
+ async function handleUpload() {
+ const complete = pendingGroups.filter(g => g.json && g.jpeg && g.zip);
+ if (complete.length === 0) { alert('Yüklenecek tam grup yok. Önce JSON + JPEG + ZIP dosyalarını seçin/sürükleyin.'); return; }
+ const key = sessionStorage.getItem('fv_admin') || localStorage.getItem('fv_admin');
+ const statusEl = document.getElementById('uploadStatus');
+ const progressWrap = document.getElementById('progressWrap');
+ const progressFill = document.getElementById('progressFill');
+ const progressText = document.getElementById('progressText');
+ progressWrap.style.display = 'block';
+ if (statusEl) statusEl.textContent = '';
+ let success = 0, errors = 0;
+ for (let i = 0; i < complete.length; i++) {
+ const group = complete[i];
+ progressText.textContent = `${group.id} yükleniyor (${i + 1}/${complete.length})...`;
+ progressFill.style.width = `${Math.round((i / complete.length) * 100)}%`;
+ const formData = new FormData();
+ formData.append('json', group.json);
+ formData.append('jpeg', group.jpeg);
+ formData.append('zip', group.zip);
+ try {
+ const res = await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Key': key }, body: formData });
+ if (res.ok) { success++; } else {
+ const errText = await res.text();
+ console.warn(`Upload failed for ${group.id}:`, res.status, errText);
+ errors++;
+ }
+ } catch (e) {
+ console.error(e);
+ errors++;
+ }
+ }
+ progressFill.style.width = '100%';
+ progressText.textContent = `Yükleme tamamlandı: ${success} başarılı, ${errors} başarısız.`;
+ if (statusEl) { statusEl.textContent = `Bulk upload finished. ${success} uploaded, ${errors} failed.`; statusEl.style.display = 'block'; }
+ pendingGroups = [];
+ loadData();
  }
  </script>
 </body>
