@@ -593,23 +593,26 @@
  let success = 0, errors = 0;
  for (let i = 0; i < complete.length; i++) {
  const group = complete[i];
- progressText.textContent = `${group.id} yükleniyor (${i + 1}/${complete.length})...`;
+ progressText.textContent = `${group.id} yükleniyor/güncelleniyor (${i + 1}/${complete.length})...`;
  progressFill.style.width = `${Math.round((i / complete.length) * 100)}%`;
  const formData = new FormData();
  formData.append('json', group.json);
  formData.append('jpeg', group.jpeg);
  formData.append('zip', group.zip);
- try {
- const res = await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Key': key }, body: formData });
- if (res.ok) { success++; } else {
- const errText = await res.text();
- console.warn(`Upload failed for ${group.id}:`, res.status, errText);
- errors++;
- }
- } catch (e) {
- console.error(e);
- errors++;
- }
+	 try {
+	 const res = await fetch('/api/admin', { method: 'POST', headers: { 'X-Admin-Key': key }, body: formData });
+	 if (res.ok) { 
+	 const data = await res.json().catch(() => ({}));
+	 success++; 
+	 } else {
+	 const errText = await res.text();
+	 console.warn(`Upload failed for ${group.id}:`, res.status, errText);
+	 errors++;
+	 }
+	 } catch (e) {
+	 console.error(e);
+	 errors++;
+	 }
  }
  progressFill.style.width = '100%';
  progressText.textContent = `Yükleme tamamlandı: ${success} başarılı, ${errors} başarısız.`;
