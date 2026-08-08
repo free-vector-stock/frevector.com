@@ -239,11 +239,12 @@ export async function onRequestPost(context) {
     const description = (metadata.description || "").trim();
     let keywords = Array.isArray(metadata.keywords) ? metadata.keywords : (metadata.keywords || "").split(",").map(k => k.trim()).filter(Boolean);
 
-    const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free jpeg', 'free jpeg', 'free', 'fre', 'vector jpeg', 'svg', 'jpeg'];
+    const VECTOR_KEYWORDS_TO_ADD = ['free vector', 'free svg', 'free svg icon', 'free jpeg'];
     const JPEG_KEYWORDS_TO_ADD = ['free jpeg', 'free', 'fre', 'jpeg'];
     
-    const prefixKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
-    keywords = [...new Set([...prefixKeywords, ...keywords])];
+    const additionalKeywords = contentTypeToSet === 'jpeg' ? JPEG_KEYWORDS_TO_ADD : VECTOR_KEYWORDS_TO_ADD;
+    keywords = [...new Set([...keywords, ...additionalKeywords])];
+    metadata.keywords = keywords;
 
     if (contentTypeToSet === 'jpeg') {
         const fullText = (title + " " + description + " " + keywords.join(" ")).toLowerCase();

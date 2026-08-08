@@ -125,6 +125,17 @@ export async function onRequest(context) {
   // Read HTML shell as text
   let html = await rootResponse.text();
 
+  // Product-detail pages must keep footer and cookie banner in normal document flow.
+  // This is intentionally scoped to the SSR detail template and leaves the shared shell unchanged.
+  html = html.replace(
+    /(<footer[^>]*style="[^"]*)position:\s*fixed;\s*bottom:\s*0;\s*left:\s*0;\s*width:\s*100%;\s*height:\s*52px;/i,
+    '$1position:relative;bottom:auto;left:auto;width:100%;height:auto;min-height:52px;box-sizing:border-box;'
+  );
+  html = html.replace(
+    /(<div\s+id="cookie-banner"[^>]*style="[^"]*)position:\s*fixed;\s*bottom:\s*52px;\s*left:\s*0;\s*right:\s*0;/i,
+    '$1position:relative;bottom:auto;left:auto;right:auto;width:100%;box-sizing:border-box;'
+  );
+
   // Efficient Replacements
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(finalPageTitle)}</title>`);
   
