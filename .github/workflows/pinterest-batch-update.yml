@@ -34,6 +34,7 @@ jobs:
 
       - name: Update Refresh Token Secret (if refreshed)
         if: steps.refresh_token.outputs.refresh_token != ''
+        continue-on-error: true
         run: |
           echo "Updating PINTEREST_REFRESH_TOKEN secret..."
           echo "${{ steps.refresh_token.outputs.refresh_token }}" | gh secret set PINTEREST_REFRESH_TOKEN --repo ${{ github.repository }}
