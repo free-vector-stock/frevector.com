@@ -248,6 +248,7 @@
  <button class="btn-main" id="uploadBtn" style="background: #3182ce;">Start Upload</button>
  </div>
  <div id="uploadStatus" class="status-msg"></div>
+ <div id="uploadFailures" class="status-msg" style="display:none; color:#b91c1c; white-space:pre-wrap;"></div>
  <div class="progress-wrap" id="progressWrap" style="display:none">
  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
  <p class="progress-text" id="progressText">Processing...</p>
@@ -588,9 +589,12 @@
  const progressWrap = document.getElementById('progressWrap');
  const progressFill = document.getElementById('progressFill');
  const progressText = document.getElementById('progressText');
+ const failureListEl = document.getElementById('uploadFailures');
  progressWrap.style.display = 'block';
  if (statusEl) statusEl.textContent = '';
+ if (failureListEl) { failureListEl.textContent = ''; failureListEl.style.display = 'none'; }
  let success = 0, errors = 0;
+ const failed = [];
  for (let i = 0; i < complete.length; i++) {
  const group = complete[i];
  progressText.textContent = `${group.id} yükleniyor/güncelleniyor (${i + 1}/${complete.length})...`;
@@ -604,19 +608,30 @@
 	 if (res.ok) { 
 	 const data = await res.json().catch(() => ({}));
 	 success++; 
-	 } else {
-	 const errText = await res.text();
-	 console.warn(`Upload failed for ${group.id}:`, res.status, errText);
-	 errors++;
-	 }
-	 } catch (e) {
-	 console.error(e);
-	 errors++;
-	 }
+   } else {
+   const errText = await res.text();
+   let reason = errText || `HTTP ${res.status}`;
+   try {
+    const parsed = JSON.parse(errText);
+    reason = parsed.error || parsed.message || reason;
+   } catch (parseError) {}
+   console.warn(`Upload failed for ${group.id}:`, res.status, reason);
+   failed.push({ name: group.id, reason });
+   errors++;
+   }
+   } catch (e) {
+   console.error(e);
+   failed.push({ name: group.id, reason: e.message || 'Network error' });
+   errors++;
+   }
  }
  progressFill.style.width = '100%';
  progressText.textContent = `Yükleme tamamlandı: ${success} başarılı, ${errors} başarısız.`;
  if (statusEl) { statusEl.textContent = `Bulk upload finished. ${success} uploaded, ${errors} failed.`; statusEl.style.display = 'block'; }
+ if (failureListEl && failed.length) {
+  failureListEl.textContent = `Failed files (${failed.length}):\n` + failed.map(item => `${item.name}: ${item.reason}`).join('\n');
+  failureListEl.style.display = 'block';
+ }
  pendingGroups = [];
  loadData();
  }
