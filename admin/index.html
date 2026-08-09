@@ -629,7 +629,7 @@
  progressText.textContent = `Yükleme tamamlandı: ${success} başarılı, ${errors} başarısız.`;
  if (statusEl) { statusEl.textContent = `Bulk upload finished. ${success} uploaded, ${errors} failed.`; statusEl.style.display = 'block'; }
  if (failureListEl && failed.length) {
-  failureListEl.textContent = `Failed files (${failed.length}):\n` + failed.map(item => `${item.name}: ${item.reason}`).join('\n');
+  failureListEl.textContent = failed.map(item => item.name).join('\n');
   failureListEl.style.display = 'block';
  }
  pendingGroups = [];
