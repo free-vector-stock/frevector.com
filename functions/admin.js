@@ -744,6 +744,11 @@ async function handleBulkUpload(type = 'vector') {
             failed.push({ name: group.id, reason: e.message || 'Network error' });
             console.error(e); 
         }
+
+        // Throttle between sequential groups; never starts before the previous request has completed.
+        if (i < bulkFiles.length - 1) {
+            await new Promise(r => setTimeout(r, 750));
+        }
     }
 
     if (progressFill) progressFill.style.width = '100%';
