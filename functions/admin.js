@@ -652,6 +652,7 @@ async function handleBulkUpload(type = 'vector') {
     const btnId = type === 'vector' ? 'bulkUploadBtn' : 'bulkUploadBtnJpeg';
     const analyzeBtnId = type === 'vector' ? 'bulkAnalyzeBtn' : 'bulkAnalyzeBtnJpeg';
     const statusId = type === 'vector' ? 'uploadStatus' : 'uploadStatusJpeg';
+    const failureList = document.getElementById(type === 'vector' ? 'uploadFailures' : 'uploadFailuresJpeg');
     
     const progressText = document.getElementById(type === 'vector' ? 'bulkProgressText' : 'bulkProgressTextJpeg');
     const progressFill = document.getElementById(type === 'vector' ? 'bulkProgressFill' : 'bulkProgressFillJpeg');
@@ -682,11 +683,16 @@ async function handleBulkUpload(type = 'vector') {
 
     document.getElementById(btnId).disabled = true;
     document.getElementById(analyzeBtnId).disabled = true;
+    if (failureList) {
+        failureList.textContent = '';
+        failureList.style.display = 'none';
+    }
     if (progressWrap) progressWrap.style.display = 'block';
     if (progressWrapSingle) progressWrapSingle.style.display = 'block';
     
     let success = 0;
     let errors = 0;
+    const failed = [];
     for (let i = 0; i < bulkFiles.length; i++) {
         const group = bulkFiles[i];
         if (progressText) progressText.textContent = `Processing ${group.id} (${i+1}/${bulkFiles.length})...`;
@@ -714,8 +720,13 @@ async function handleBulkUpload(type = 'vector') {
                 };
 
                 xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) resolve({ ok: true });
-                    else resolve({ ok: false, status: xhr.status });
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve({ ok: true });
+                    } else {
+                        let details = {};
+                        try { details = JSON.parse(xhr.responseText || '{}'); } catch (_) { /* keep status-only reason */ }
+                        resolve({ ok: false, status: xhr.status, error: details.error });
+                    }
                 };
                 xhr.onerror = () => reject(new Error('Network error'));
                 xhr.send(formData);
@@ -725,10 +736,12 @@ async function handleBulkUpload(type = 'vector') {
                 success++;
             } else {
                 errors++;
-                console.warn(`Upload failed for ${group.id}:`, res.status);
+                failed.push({ name: group.id, reason: res.error || `HTTP ${res.status}` });
+                console.warn(`Upload failed for ${group.id}:`, res.status, res.error || '');
             }
         } catch (e) { 
             errors++;
+            failed.push({ name: group.id, reason: e.message || 'Network error' });
             console.error(e); 
         }
     }
@@ -742,6 +755,19 @@ async function handleBulkUpload(type = 'vector') {
         status.className = `status-box ${errors === 0 ? 'success' : 'warning'}`;
         status.textContent = `Bulk upload finished. ${success} uploaded, ${errors} failed.`;
         status.style.display = 'block';
+    }
+    if (failureList && failed.length > 0) {
+        const heading = document.createElement('strong');
+        heading.textContent = 'Failed files:';
+        const list = document.createElement('ul');
+        list.style.margin = '8px 0 0 20px';
+        failed.forEach(item => {
+            const row = document.createElement('li');
+            row.textContent = item.reason ? `${item.name} — ${item.reason}` : item.name;
+            list.appendChild(row);
+        });
+        failureList.append(heading, list);
+        failureList.style.display = 'block';
     }
     
     document.getElementById(analyzeBtnId).disabled = false;
