@@ -624,12 +624,17 @@
    failed.push({ name: group.id, reason: e.message || 'Network error' });
    errors++;
    }
+
+   // Wait after each completed group before starting the next request.
+   if (i < complete.length - 1) {
+    await new Promise(r => setTimeout(r, 750));
+   }
  }
  progressFill.style.width = '100%';
  progressText.textContent = `Yükleme tamamlandı: ${success} başarılı, ${errors} başarısız.`;
  if (statusEl) { statusEl.textContent = `Bulk upload finished. ${success} uploaded, ${errors} failed.`; statusEl.style.display = 'block'; }
  if (failureListEl && failed.length) {
-  failureListEl.textContent = failed.map(item => item.name).join('\n');
+  failureListEl.textContent = failed.map(item => `${item.name} — ${item.reason || 'Unknown error'}`).join('\n');
   failureListEl.style.display = 'block';
  }
  pendingGroups = [];
