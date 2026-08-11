@@ -247,6 +247,11 @@
  <button class="btn-main" id="analyzeBtn">Analyze Files</button>
  <button class="btn-main" id="uploadBtn" style="background: #3182ce;">Start Upload</button>
  </div>
+ <div class="watermark-control" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0 6px; padding:12px; border:1px solid #dbeafe; border-radius:4px; background:#f8fbff;">
+  <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;"><input type="checkbox" id="watermarkToggle" checked> Preview watermark</label>
+  <span id="watermarkHint" style="font-size:12px; color:#4b5563;">Only frevector.com is shown on public previews. Original files remain unchanged.</span>
+ </div>
+ <div id="watermarkStatus" class="status-msg" style="display:none"></div>
  <div id="uploadStatus" class="status-msg"></div>
  <div id="uploadFailures" class="status-msg" style="display:none; color:#b91c1c; white-space:pre-wrap;"></div>
  <div class="progress-wrap" id="progressWrap" style="display:none">
@@ -397,6 +402,7 @@
             fileInput.onchange = () => handleFiles(fileInput.files);
             document.getElementById('analyzeBtn').onclick = () => handleAnalyze();
             document.getElementById('uploadBtn').onclick = () => handleUpload();
+            document.getElementById('watermarkToggle').onchange = updateWatermarkSetting;
  
  // Health
  document.getElementById('runHealthBtn').onclick = runHealthCheck;
@@ -406,6 +412,49 @@
  document.getElementById('loginScreen').style.display = 'none';
  document.getElementById('adminApp').style.display = 'block';
  loadData();
+ loadWatermarkSetting();
+ }
+
+ async function loadWatermarkSetting() {
+ const toggle = document.getElementById('watermarkToggle');
+ const hint = document.getElementById('watermarkHint');
+ if (!toggle || !hint) return;
+ try {
+ const key = sessionStorage.getItem('fv_admin') || localStorage.getItem('fv_admin');
+ const res = await fetch('/api/watermark-settings', { headers: { 'X-Admin-Key': key } });
+ if (!res.ok) throw new Error('Unable to load watermark setting');
+ const data = await res.json();
+ toggle.checked = data.enabled !== false;
+ hint.textContent = toggle.checked ? 'Only frevector.com is shown on public previews. Original files remain unchanged.' : 'Public previews are currently shown without a watermark. Original files remain unchanged.';
+ } catch (error) {
+ console.warn(error);
+ hint.textContent = 'Watermark setting could not be loaded. Upload and original files are unchanged.';
+ }
+ }
+
+ async function updateWatermarkSetting(event) {
+ const toggle = event.target;
+ const status = document.getElementById('watermarkStatus');
+ const hint = document.getElementById('watermarkHint');
+ const previous = !toggle.checked;
+ toggle.disabled = true;
+ try {
+ const key = sessionStorage.getItem('fv_admin') || localStorage.getItem('fv_admin');
+ const res = await fetch('/api/watermark-settings', { method: 'POST', headers: { 'X-Admin-Key': key, 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: toggle.checked }) });
+ const data = await res.json();
+ if (!res.ok) throw new Error(data.error || 'Unable to update watermark setting');
+ hint.textContent = data.enabled ? 'Only frevector.com is shown on public previews. Original files remain unchanged.' : 'Public previews are currently shown without a watermark. Original files remain unchanged.';
+ status.textContent = data.enabled ? 'Preview watermark enabled.' : 'Preview watermark disabled.';
+ status.style.display = 'block';
+ status.style.color = '';
+ } catch (error) {
+ toggle.checked = previous;
+ status.textContent = error.message || 'Watermark setting could not be updated.';
+ status.style.display = 'block';
+ status.style.color = '#b91c1c';
+ } finally {
+ toggle.disabled = false;
+ }
  }
 
  async function loadData() {
