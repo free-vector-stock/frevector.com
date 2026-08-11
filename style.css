@@ -52,6 +52,15 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .search-icon-btn:hover { background: #333; }
 .sort-filter { border: 1px solid var(--border); padding: 7px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; background: var(--white); color: #1a1a1a; white-space: nowrap; flex-shrink: 0; }
 
+/* COOKIE BANNER — fixed top bars are 104px on desktop */
+#cookie-banner {
+    position: relative;
+    z-index: 1200;
+    margin-top: 104px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 /* SABIT DÜZEN - SIDEBAR (KATEGORİLER) */
 .main-container { 
     display: flex; 
@@ -326,6 +335,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     body { overflow-y: auto; height: auto; overflow-x: hidden; }
     
     .top-banner { position: static; }
+    #cookie-banner { margin-top: 0; }
     .header { 
         position: static; 
         margin-left: 0; 
