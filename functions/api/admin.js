@@ -9,6 +9,7 @@
  */
 
 import { notifyIndexingUpdate } from "../google-indexing.js";
+import { createWatermarkedPreview, previewKeyFor } from "../watermark-preview.js";
 
 const ADMIN_PASSWORD = "vector2026";
 
@@ -258,21 +259,35 @@ export async function onRequestPost(context) {
     const r2JpgKey = `${category}/${id}/${id}.jpg`;
     const r2ZipKey = `${category}/${id}/${id}.zip`;
     const r2JsonKey = `${category}/${id}/${id}.json`;
+    const r2PreviewKey = previewKeyFor(r2JpgKey);
 
     console.log(`Uploading ${id} to category ${category}...`);
 
-    // Upload files to R2 with retry
+    // Preserve the ZIP-external source JPEG, JSON and ZIP exactly as uploaded.
     const uploadResults = await Promise.all([
         uploadWithRetry(r2, r2JpgKey, jpegBuffer, { httpMetadata: { contentType: "image/jpeg" } }),
         uploadWithRetry(r2, r2JsonKey, JSON.stringify(metadata), { httpMetadata: { contentType: "application/json" } }),
         uploadWithRetry(r2, r2ZipKey, zipBuffer, { httpMetadata: { contentType: "application/zip" } })
     ]);
-
     for (const result of uploadResults) {
         if (!result.success) {
             console.error("R2 upload failed:", result.error);
             return new Response(JSON.stringify({ error: "R2 upload failed: " + result.error }), { status: 500, headers });
         }
+    }
+
+    // Create a separate 750px-high watermarked preview from the ZIP-external source JPEG.
+    // This never edits the source JPEG or any file inside the ZIP.
+    try {
+        await createWatermarkedPreview({
+            r2,
+            sourceKey: r2JpgKey,
+            previewKey: r2PreviewKey,
+            origin: new URL(context.request.url).origin
+        });
+    } catch (previewError) {
+        console.error("Preview copy generation failed:", previewError.message);
+        return new Response(JSON.stringify({ error: "Preview copy generation failed: " + previewError.message }), { status: 502, headers });
     }
 
     const fileSize = `${(zipBuffer.byteLength / (1024 * 1024)).toFixed(1)} MB`;
@@ -286,7 +301,10 @@ export async function onRequestPost(context) {
       date: new Date().toISOString(),
       downloads: 0,
       fileSize: fileSize,
-      contentType: contentTypeToSet
+      contentType: contentTypeToSet,
+      previewKey: r2PreviewKey,
+      previewReady: true,
+      previewHeight: 750
     };
 
     // Update index in KV
@@ -364,7 +382,8 @@ export async function onRequestDelete(context) {
     await Promise.all([
         r2.delete(`${category}/${slug}/${slug}.jpg`),
         r2.delete(`${category}/${slug}/${slug}.zip`),
-        r2.delete(`${category}/${slug}/${slug}.json`)
+        r2.delete(`${category}/${slug}/${slug}.json`),
+        r2.delete(previewKeyFor(`${category}/${slug}/${slug}.jpg`))
     ]);
 
     allVectors = allVectors.filter(v => v.name !== slug);

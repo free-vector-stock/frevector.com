@@ -249,7 +249,7 @@
  </div>
  <div class="watermark-control" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0 6px; padding:12px; border:1px solid #dbeafe; border-radius:4px; background:#f8fbff;">
   <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;"><input type="checkbox" id="watermarkToggle" checked> Preview watermark</label>
-  <span id="watermarkHint" style="font-size:12px; color:#4b5563;">Only frevector.com is shown on public previews. Original files remain unchanged.</span>
+  <span id="watermarkHint" style="font-size:12px; color:#4b5563;">Only frevector.com is shown on separate public previews up to 750px high. Original JPEG and ZIP files remain unchanged.</span>
  </div>
  <div id="watermarkStatus" class="status-msg" style="display:none"></div>
  <div id="uploadStatus" class="status-msg"></div>
@@ -425,10 +425,10 @@
  if (!res.ok) throw new Error('Unable to load watermark setting');
  const data = await res.json();
  toggle.checked = data.enabled !== false;
- hint.textContent = toggle.checked ? 'Only frevector.com is shown on public previews. Original files remain unchanged.' : 'Public previews are currently shown without a watermark. Original files remain unchanged.';
+ hint.textContent = toggle.checked ? 'Only frevector.com is shown on separate public previews up to 750px high. Original JPEG and ZIP files remain unchanged.' : 'Public previews are currently shown without a watermark. The 750px preview copies and original files remain unchanged.';
  } catch (error) {
  console.warn(error);
- hint.textContent = 'Watermark setting could not be loaded. Upload and original files are unchanged.';
+ hint.textContent = 'Watermark setting could not be loaded. Upload, 750px preview copies, and original files are unchanged.';
  }
  }
 
@@ -443,7 +443,7 @@
  const res = await fetch('/api/watermark-settings', { method: 'POST', headers: { 'X-Admin-Key': key, 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: toggle.checked }) });
  const data = await res.json();
  if (!res.ok) throw new Error(data.error || 'Unable to update watermark setting');
- hint.textContent = data.enabled ? 'Only frevector.com is shown on public previews. Original files remain unchanged.' : 'Public previews are currently shown without a watermark. Original files remain unchanged.';
+ hint.textContent = data.enabled ? 'Only frevector.com is shown on separate public previews up to 750px high. Original JPEG and ZIP files remain unchanged.' : 'Public previews are currently shown without a watermark. The 750px preview copies and original files remain unchanged.';
  status.textContent = data.enabled ? 'Preview watermark enabled.' : 'Preview watermark disabled.';
  status.style.display = 'block';
  status.style.color = '';
