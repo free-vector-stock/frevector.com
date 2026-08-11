@@ -4,7 +4,7 @@
  */
 
 const SETTING_KEY = 'preview_watermark_enabled';
-const PUBLIC_ASSET_ORIGIN = 'https://assets.frevector.com';
+const PREVIEW_ASSET_ENDPOINT = 'https://frevector.com/api/asset?key=';
 const DEFAULT_DIMENSIONS = { width: 1200, height: 800 };
 
 function isAllowedPreviewKey(key) {
@@ -12,7 +12,7 @@ function isAllowedPreviewKey(key) {
 }
 
 function publicAssetUrl(key) {
-  return `${PUBLIC_ASSET_ORIGIN}/${key.split('/').map(encodeURIComponent).join('/')}`;
+  return `${PREVIEW_ASSET_ENDPOINT}${encodeURIComponent(key)}`;
 }
 
 function readJpegDimensions(buffer) {
