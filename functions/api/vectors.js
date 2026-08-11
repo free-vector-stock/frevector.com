@@ -47,14 +47,12 @@ export async function onRequestGet(context) {
         }
 
         let allVectors = JSON.parse(allVectorsRaw);
-        // Default is enabled; only preview URLs change, never the original R2 objects.
-        const watermarkEnabled = (await kv.get('preview_watermark_enabled')) !== 'false';
 
         // Single vector detail
         if (slug) {
             const vector = allVectors.find(v => v.name === slug);
             if (!vector) return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers: CORS_HEADERS });
-            const response = new Response(JSON.stringify(enrichVector(vector, watermarkEnabled)), { status: 200, headers: CORS_HEADERS });
+            const response = new Response(JSON.stringify(enrichVector(vector)), { status: 200, headers: CORS_HEADERS });
             context.waitUntil(cache.put(context.request, response.clone()));
             return response;
         }
@@ -112,7 +110,7 @@ export async function onRequestGet(context) {
         }
 
         const result = {
-            vectors: pageVectors.map(vector => enrichVector(vector, watermarkEnabled)),
+            vectors: pageVectors.map(enrichVector),
             total,
             page: validPage,
             totalPages,
@@ -131,7 +129,7 @@ export async function onRequestGet(context) {
     }
 }
 
-function enrichVector(v, watermarkEnabled) {
+function enrichVector(v) {
     const id = v.name;
     const category = v.category || "Miscellaneous";
     
@@ -144,9 +142,7 @@ function enrichVector(v, watermarkEnabled) {
         title: v.title || v.name.replace(/-\d+$/, "").replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
         // Requirement: ALWAYS use thumbnail in site
         // Changed to use local proxy to avoid R2 public access issues
-        thumbnail: watermarkEnabled
-            ? `https://frevector.com/api/preview?key=${encodeURIComponent(thumbKey)}`
-            : `https://assets.frevector.com/${thumbKey}`,
+        thumbnail: `https://assets.frevector.com/${thumbKey}`,
         isJpegOnly: isJpegOnly
     };
 }
