@@ -1,12 +1,12 @@
 /**
- * POST /api/watermark-previews?cursor=0&limit=25
+ * POST /api/watermark-previews?cursor=0&limit=50
  * Creates separate 750px watermarked preview JPEG copies from ZIP-external source JPEGs.
  * The endpoint is admin-authenticated, bounded, resumable, and never overwrites source JPEG/ZIP/JSON.
  */
 import { createWatermarkedPreview, previewKeyFor } from '../watermark-preview.js';
 
 const ADMIN_PASSWORD = 'vector2026';
-const MAX_LIMIT = 25;
+const MAX_LIMIT = 50;
 
 function authenticate(request) {
   const authHeader = request.headers.get('X-Admin-Key') || request.headers.get('Authorization') || '';
