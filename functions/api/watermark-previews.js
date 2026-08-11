@@ -1,16 +1,21 @@
 /**
- * POST /api/watermark-previews?cursor=0&limit=50
- * Creates separate 750px watermarked preview JPEG copies from ZIP-external source JPEGs.
- * The endpoint is admin-authenticated, bounded, resumable, and never overwrites source JPEG/ZIP/JSON.
+ * POST /api/watermark-previews?cursor=<R2 cursor>
+ * Scans current R2 objects, creates separate 750px watermarked previews from ZIP-external JPEGs,
+ * and never rewrites source JPEG, ZIP, JSON, or the all_vectors index during migration.
  */
 import { createWatermarkedPreview, previewKeyFor } from '../watermark-preview.js';
 
 const ADMIN_PASSWORD = 'vector2026';
-const MAX_LIMIT = 50;
+const PAGE_LIMIT = 200;
+const COMPLETE_KEY = 'preview_copy_migration_complete';
 
 function authenticate(request) {
   const authHeader = request.headers.get('X-Admin-Key') || request.headers.get('Authorization') || '';
   return authHeader.replace('Bearer ', '').trim() === ADMIN_PASSWORD;
+}
+
+function isSourceJpeg(key) {
+  return /\.jpe?g$/i.test(key) && !/-preview-wm\.jpe?g$/i.test(key) && key.split('/').length === 3;
 }
 
 export async function onRequestPost(context) {
@@ -18,49 +23,35 @@ export async function onRequestPost(context) {
   if (!authenticate(context.request)) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
 
   const url = new URL(context.request.url);
-  const cursor = Math.max(0, parseInt(url.searchParams.get('cursor') || '0', 10));
-  const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(url.searchParams.get('limit') || '5', 10)));
-  const kv = context.env.VECTOR_DB;
+  const cursor = url.searchParams.get('cursor') || undefined;
   const r2 = context.env.VECTOR_ASSETS;
-  const raw = await kv.get('all_vectors');
-  let records = raw ? JSON.parse(raw) : [];
-  const total = records.length;
-  const end = Math.min(total, cursor + limit);
-  const outcomes = [];
-  let changed = false;
+  const kv = context.env.VECTOR_DB;
+  const listed = await r2.list({ cursor, limit: PAGE_LIMIT });
+  const sourceKeys = listed.objects.map(item => item.key).filter(isSourceJpeg);
 
-  const jobs = [];
-  for (let index = cursor; index < end; index++) {
-    jobs.push((async () => {
-      const record = records[index];
-      const category = record.category || 'Miscellaneous';
-      const sourceKey = `${category}/${record.name}/${record.name}.jpg`;
-      const previewKey = record.previewKey || previewKeyFor(sourceKey);
-      try {
-        const existingPreview = await r2.head(previewKey);
-        if (!existingPreview) await createWatermarkedPreview({ r2, sourceKey, previewKey, origin: url.origin });
-        records[index] = { ...record, previewKey, previewReady: true, previewHeight: 750 };
-        return { name: record.name, status: existingPreview ? 'already-ready' : 'created', changed: true };
-      } catch (error) {
-        return { name: record.name, status: 'failed', error: error.message || String(error), changed: false };
-      }
-    })());
-  }
-  const jobOutcomes = await Promise.all(jobs);
-  for (const outcome of jobOutcomes) {
-    changed = changed || outcome.changed;
-    delete outcome.changed;
-    outcomes.push(outcome);
+  const outcomes = await Promise.all(sourceKeys.map(async sourceKey => {
+    const previewKey = previewKeyFor(sourceKey);
+    try {
+      const existingPreview = await r2.head(previewKey);
+      if (!existingPreview) await createWatermarkedPreview({ r2, sourceKey, previewKey, origin: url.origin });
+      return { sourceKey, status: existingPreview ? 'already-ready' : 'created' };
+    } catch (error) {
+      return { sourceKey, status: 'failed', error: error.message || String(error) };
+    }
+  }));
+
+  const complete = !listed.truncated;
+  if (complete && !outcomes.some(item => item.status === 'failed')) {
+    await kv.put(COMPLETE_KEY, 'true');
   }
 
-  if (changed) {
-    const updatedRaw = JSON.stringify(records);
-    await Promise.all([
-      kv.put('all_vectors', updatedRaw),
-      r2.put('all_vectors.json', updatedRaw, { httpMetadata: { contentType: 'application/json' } })
-    ]);
-  }
-
-  const complete = end >= total;
-  return new Response(JSON.stringify({ success: true, cursor, nextCursor: end, complete, total, processed: end - cursor, outcomes }), { status: 200, headers });
+  return new Response(JSON.stringify({
+    success: true,
+    cursor: cursor || null,
+    nextCursor: listed.cursor || null,
+    complete,
+    scannedObjects: listed.objects.length,
+    processedSourceJpegs: sourceKeys.length,
+    outcomes
+  }), { status: 200, headers });
 }

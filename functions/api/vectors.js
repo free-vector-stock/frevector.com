@@ -38,11 +38,12 @@ export async function onRequestGet(context) {
 
         let allVectors = JSON.parse(allVectorsRaw);
         const watermarkEnabled = (await kv.get('preview_watermark_enabled')) !== 'false';
+        const previewCopiesComplete = (await kv.get('preview_copy_migration_complete')) === 'true';
 
         if (slug) {
             const vector = allVectors.find(v => v.name === slug);
             if (!vector) return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers: CORS_HEADERS });
-            const response = new Response(JSON.stringify(enrichVector(vector, watermarkEnabled)), { status: 200, headers: CORS_HEADERS });
+            const response = new Response(JSON.stringify(enrichVector(vector, watermarkEnabled, previewCopiesComplete)), { status: 200, headers: CORS_HEADERS });
             context.waitUntil(cache.put(context.request, response.clone()));
             return response;
         }
@@ -75,7 +76,7 @@ export async function onRequestGet(context) {
             if (slugMatch && !pageVectors.find(v => v.name === fetchAllForSlug)) pageVectors.unshift(slugMatch);
         }
 
-        const response = new Response(JSON.stringify({ vectors: pageVectors.map(vector => enrichVector(vector, watermarkEnabled)), total, page: validPage, totalPages, category: category || "all" }), { status: 200, headers: CORS_HEADERS });
+        const response = new Response(JSON.stringify({ vectors: pageVectors.map(vector => enrichVector(vector, watermarkEnabled, previewCopiesComplete)), total, page: validPage, totalPages, category: category || "all" }), { status: 200, headers: CORS_HEADERS });
         context.waitUntil(cache.put(context.request, response.clone()));
         return response;
     } catch (e) {
@@ -83,7 +84,7 @@ export async function onRequestGet(context) {
     }
 }
 
-function enrichVector(v, watermarkEnabled) {
+function enrichVector(v, watermarkEnabled, previewCopiesComplete) {
     const id = v.name;
     const category = v.category || "Miscellaneous";
     const sourceKey = `${category}/${id}/${id}.jpg`;
@@ -94,7 +95,7 @@ function enrichVector(v, watermarkEnabled) {
         // Watermark enabled: use a separate, 750px-high preview copy when it exists.
         // During the one-time migration, the existing safe endpoint covers not-yet-copied items.
         thumbnail: watermarkEnabled
-            ? (v.previewReady ? `https://assets.frevector.com/${previewKey}` : `https://frevector.com/api/preview?key=${encodeURIComponent(sourceKey)}`)
+            ? ((v.previewReady || previewCopiesComplete) ? `https://assets.frevector.com/${previewKey}` : `https://frevector.com/api/preview?key=${encodeURIComponent(sourceKey)}`)
             : `https://assets.frevector.com/${sourceKey}`,
         isJpegOnly: v.contentType === 'jpeg'
     };
