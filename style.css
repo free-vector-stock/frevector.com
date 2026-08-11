@@ -52,11 +52,11 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 .search-icon-btn:hover { background: #333; }
 .sort-filter { border: 1px solid var(--border); padding: 7px 10px; border-radius: 3px; font-size: 12px; cursor: pointer; background: var(--white); color: #1a1a1a; white-space: nowrap; flex-shrink: 0; }
 
-/* COOKIE BANNER — fixed top bars are 104px on desktop */
+/* COOKIE BANNER — offset is measured from the live fixed top bars */
 #cookie-banner {
     position: relative;
     z-index: 1200;
-    margin-top: 104px;
+    margin-top: var(--cookie-banner-top-offset, 0px);
     width: 100%;
     box-sizing: border-box;
 }

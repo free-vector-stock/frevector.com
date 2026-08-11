@@ -8,7 +8,7 @@
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
  <title>Frevector Free Vector, SVG & JPEG Downloads</title>
- <link rel="stylesheet" href="/style.css?v=6">
+ <link rel="stylesheet" href="/style.css?v=7">
  <link rel="icon" href="/favicon.ico" type="image/x-icon">
  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -53,15 +53,27 @@ window.addEventListener("scroll", () => {
  <p style="margin:0;font-size:14px;line-height:1.5">This website uses cookies to improve your experience and to serve Google AdSense advertisements. By continuing to use this site, you accept our use of cookies. <a href="/privacy" style="color:#aed6f1;text-decoration:underline">Privacy Policy</a></p>
  <button onclick="acceptCookies()" style="background:#27ae60;color:#fff;border:none;padding:10px 24px;cursor:pointer;border-radius:4px;font-size:14px;white-space:nowrap;font-family:Arial,sans-serif">Accept</button>
  </div>
- <script>
+<script>
+ function updateCookieBannerOffset(){
+ const topBanner = document.querySelector('.top-banner');
+ const header = document.querySelector('.header');
+ const topOffset = (topBanner ? topBanner.getBoundingClientRect().height : 0) + (header ? header.getBoundingClientRect().height : 0);
+ document.documentElement.style.setProperty('--cookie-banner-top-offset', `${topOffset}px`);
+}
  function acceptCookies(){
  localStorage.setItem('cookieConsent','accepted');
  document.getElementById('cookie-banner').style.display='none';
+}
+ if(document.readyState === 'loading'){
+ document.addEventListener('DOMContentLoaded', updateCookieBannerOffset);
+ } else {
+ updateCookieBannerOffset();
  }
+ window.addEventListener('resize', updateCookieBannerOffset);
  if(localStorage.getItem('cookieConsent')==='accepted'){
  document.getElementById('cookie-banner').style.display='none';
- }
- </script>
+}
+</script>
  <div class="top-banner">
  <a href="/" class="banner-logo-link">
  <img src="/logo.svg" alt="Frevector" class="banner-logo" width="220" height="60">
