@@ -1,12 +1,12 @@
 /**
- * POST /api/watermark-previews?cursor=0&limit=10
+ * POST /api/watermark-previews?cursor=0&limit=25
  * Creates separate 750px watermarked preview JPEG copies from ZIP-external source JPEGs.
  * The endpoint is admin-authenticated, bounded, resumable, and never overwrites source JPEG/ZIP/JSON.
  */
 import { createWatermarkedPreview, previewKeyFor } from '../watermark-preview.js';
 
 const ADMIN_PASSWORD = 'vector2026';
-const MAX_LIMIT = 10;
+const MAX_LIMIT = 25;
 
 function authenticate(request) {
   const authHeader = request.headers.get('X-Admin-Key') || request.headers.get('Authorization') || '';
@@ -29,20 +29,28 @@ export async function onRequestPost(context) {
   const outcomes = [];
   let changed = false;
 
+  const jobs = [];
   for (let index = cursor; index < end; index++) {
-    const record = records[index];
-    const category = record.category || 'Miscellaneous';
-    const sourceKey = `${category}/${record.name}/${record.name}.jpg`;
-    const previewKey = record.previewKey || previewKeyFor(sourceKey);
-    try {
-      const existingPreview = await r2.head(previewKey);
-      if (!existingPreview) await createWatermarkedPreview({ r2, sourceKey, previewKey, origin: url.origin });
-      records[index] = { ...record, previewKey, previewReady: true, previewHeight: 750 };
-      changed = true;
-      outcomes.push({ name: record.name, status: existingPreview ? 'already-ready' : 'created' });
-    } catch (error) {
-      outcomes.push({ name: record.name, status: 'failed', error: error.message || String(error) });
-    }
+    jobs.push((async () => {
+      const record = records[index];
+      const category = record.category || 'Miscellaneous';
+      const sourceKey = `${category}/${record.name}/${record.name}.jpg`;
+      const previewKey = record.previewKey || previewKeyFor(sourceKey);
+      try {
+        const existingPreview = await r2.head(previewKey);
+        if (!existingPreview) await createWatermarkedPreview({ r2, sourceKey, previewKey, origin: url.origin });
+        records[index] = { ...record, previewKey, previewReady: true, previewHeight: 750 };
+        return { name: record.name, status: existingPreview ? 'already-ready' : 'created', changed: true };
+      } catch (error) {
+        return { name: record.name, status: 'failed', error: error.message || String(error), changed: false };
+      }
+    })());
+  }
+  const jobOutcomes = await Promise.all(jobs);
+  for (const outcome of jobOutcomes) {
+    changed = changed || outcome.changed;
+    delete outcome.changed;
+    outcomes.push(outcome);
   }
 
   if (changed) {
