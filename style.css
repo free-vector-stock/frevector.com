@@ -371,6 +371,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
         border-right: none; 
         border-bottom: 1px solid var(--border);
         padding: 8px 0;
+        min-height: 214px; /* Geç oluşturulan kategori etiketleri için başlangıç alanı */
         overflow: visible;
         order: 4; /* Kategoriler 4. sırada */
     }
