@@ -133,7 +133,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 
 .category-title { font-size: 24px; font-weight: 800; margin-bottom: 20px; text-transform: capitalize; }
 
-.vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); gap: 10px; margin-bottom: 40px; min-height: 0; }
+.vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(410px, 1fr)); gap: 10px; margin-bottom: 40px; min-height: 0; }
 /* Yalnızca ilk API yanıtı gelene kadar alan ayırır; kartlar render edilince satır arası boşluk oluşmaz. */
 #vectorsGrid:empty { min-height: 1816px; }
 .home-seo-content { min-height: 456px; }
@@ -518,16 +518,16 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 8px;
+    padding: 6px 10px;
     background: var(--white);
     border-top: 1px solid var(--border);
-    gap: 2px;
+    gap: 4px;
 }
 .vc-stat-item {
     display: flex;
     align-items: center;
-    gap: 3px;
-    font-size: 11px;
+    gap: 4px;
+    font-size: 14px;
     color: var(--gray-text);
     white-space: nowrap;
     cursor: default;
@@ -540,7 +540,7 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
 .vc-stat-item.vc-stat-like.liked { color: #e74c3c; }
 .vc-stat-item.vc-stat-share { cursor: pointer; transition: color 0.15s; }
 .vc-stat-item.vc-stat-share:hover { color: #2980b9; }
-.vc-stat-icon { font-size: 13px; line-height: 1; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
+.vc-stat-icon { font-size: 16px; line-height: 1; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif; }
 .detail-stats-bar {
     display: flex;
     align-items: center;
@@ -579,9 +579,9 @@ GÖREV 1: Etkileşim İkon Çubuğu (Views, Downloads, Likes, Share)
 .share-popup .share-copy-btn:hover { background: #f5f5f5; }
 .our-picks-track .vc-stats-bar { display: none; }
 @media (max-width: 768px) {
-    .vc-stats-bar { padding: 3px 5px; gap: 1px; }
-    .vc-stat-item { font-size: 10px; gap: 2px; }
-    .vc-stat-icon { font-size: 11px; }
+    .vc-stats-bar { padding: 6px 10px; gap: 4px; }
+    .vc-stat-item { font-size: 14px; gap: 4px; }
+    .vc-stat-icon { font-size: 16px; }
     .detail-stats-bar { gap: 12px; padding: 10px 0; }
     .detail-stat-item { font-size: 14px; }
     .detail-stat-icon { font-size: 18px; }
