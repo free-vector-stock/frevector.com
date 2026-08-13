@@ -581,7 +581,7 @@ async function fetchVectors() {
         }
 
         url.searchParams.set('page', state.currentPage);
-        url.searchParams.set('limit', '24');
+        url.searchParams.set('limit', '20');
         if (state.selectedCategory !== 'all') url.searchParams.set('category', state.selectedCategory);
         // JPEG visibility: JPEG files are stored in Cloudflare bucket but hidden from site display.
         // To re-enable JPEG listings, set HIDE_JPEG = false (or remove the filter).

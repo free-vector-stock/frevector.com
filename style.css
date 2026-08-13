@@ -133,7 +133,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 
 .category-title { font-size: 24px; font-weight: 800; margin-bottom: 20px; text-transform: capitalize; }
 
-.vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(410px, 1fr)); gap: 6px; margin-bottom: 40px; min-height: 0; }
+.vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); gap: 10px; margin-bottom: 40px; min-height: 0; }
 /* Yalnızca ilk API yanıtı gelene kadar alan ayırır; kartlar render edilince satır arası boşluk oluşmaz. */
 #vectorsGrid:empty { min-height: 1816px; }
 .home-seo-content { min-height: 456px; }
@@ -421,7 +421,7 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     
     .category-title { font-size: 18px; margin-bottom: 16px; }
     
-    .vectors-grid { grid-template-columns: 1fr; gap: 6px; margin-bottom: 24px; min-height: 0; }
+    .vectors-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 24px; min-height: 0; }
     #vectorsGrid:empty { min-height: 6352px; }
     .home-seo-content { min-height: 943px; }
     .vector-card { border-radius: 6px; }
