@@ -133,8 +133,9 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
 
 .category-title { font-size: 24px; font-weight: 800; margin-bottom: 20px; text-transform: capitalize; }
 
-.vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 6px; margin-bottom: 40px; min-height: 1816px; }
-/* İlk API yanıtı gelmeden önce 24 kartlık başlangıç alanını ayırarak alt içeriklerin kaymasını önler. */
+.vectors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(410px, 1fr)); gap: 6px; margin-bottom: 40px; min-height: 0; }
+/* Yalnızca ilk API yanıtı gelene kadar alan ayırır; kartlar render edilince satır arası boşluk oluşmaz. */
+#vectorsGrid:empty { min-height: 1816px; }
 .home-seo-content { min-height: 456px; }
 .vector-card { cursor: pointer; border-radius: 3px; overflow: hidden; background: var(--white); transition: box-shadow 0.15s; position: relative; }
 .vector-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
@@ -420,7 +421,8 @@ body { font-family: var(--font); background: var(--white); color: #1a1a1a; line-
     
     .category-title { font-size: 18px; margin-bottom: 16px; }
     
-    .vectors-grid { grid-template-columns: 1fr; gap: 6px; margin-bottom: 24px; min-height: 6352px; }
+    .vectors-grid { grid-template-columns: 1fr; gap: 6px; margin-bottom: 24px; min-height: 0; }
+    #vectorsGrid:empty { min-height: 6352px; }
     .home-seo-content { min-height: 943px; }
     .vector-card { border-radius: 6px; }
     .vc-img-wrap { aspect-ratio: 16/9; }
