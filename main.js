@@ -1037,12 +1037,20 @@ function buildVectorSeoText(v) {
     const category = escHtml(v.category || 'vector graphics');
     const style = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 3).join(', ')) : 'clean and editable';
     const useCases = (v.keywords && v.keywords.length) ? escHtml(v.keywords.slice(0, 8).join(', ')) : 'websites, social media posts, presentations, print advertisements, packaging, flyers, app icons, and infographics';
+    const aboutExtended = (typeof v.about_extended === 'string' && v.about_extended.trim())
+        ? `<p class="detail-about-extended">${escHtml(v.about_extended)}</p>`
+        : '';
+    const usageAreas = (typeof v.usage_areas === 'string' && v.usage_areas.trim())
+        ? `<h3>Usage Areas</h3><p class="detail-usage-areas">${escHtml(v.usage_areas)}</p>`
+        : '';
     return `<section class="detail-seo-text" style="margin-top:24px;font-size:14px;line-height:1.75;color:#333">
  <h3>${title} Free SVG & JPEG Download</h3>
  <p>${title} is a high-quality free vector graphic available for download in SVG and JPEG formats. This file is part of our ${category} collection and is suitable for a wide range of design projects, from digital media to print materials.</p>
  <h3>About This File</h3>
+ ${aboutExtended}
  <p>This vector has been prepared in a ${style} style, making it versatile and easy to customize in vector editing applications such as vector design software, free vector editor, vector graphics software, or professional vector tool. The scalable format ensures that the graphic looks sharp and professional at any size, whether you need a small icon for a mobile app or a large illustration for a poster or banner.</p>
  <p>The file is fully editable. You can change colors, resize elements, add text, or combine it with other graphics to create a unique composition. No quality loss occurs at any resolution because the artwork is delivered in a true vector format.</p>
+ ${usageAreas}
  <h3>How to Use This Vector</h3>
  <p>This graphic is ideal for ${useCases}. Simply click the download button to get the file in your preferred format. SVG files can be opened directly in web browsers and most design tools. JPEG preview files are provided for quick viewing and reference.</p>
  <h3>License Information</h3>

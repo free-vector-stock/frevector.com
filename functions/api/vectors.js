@@ -40,10 +40,18 @@ export async function onRequestGet(context) {
         const watermarkEnabled = (await kv.get('preview_watermark_enabled')) !== 'false';
         const previewCopiesComplete = (await kv.get('preview_copy_migration_complete')) === 'true';
 
+        // Detail-only enrichment: preserve the existing list payload and read optional fields from the matching R2 JSON.
+        const detailSlug = slug || fetchAllForSlug;
+        let detailMetadata = null;
+        if (detailSlug && r2) {
+            const detailVector = allVectors.find(v => v.name === detailSlug);
+            if (detailVector) detailMetadata = await loadDetailMetadata(r2, detailVector);
+        }
+
         if (slug) {
             const vector = allVectors.find(v => v.name === slug);
             if (!vector) return new Response(JSON.stringify({ error: "Vector not found" }), { status: 404, headers: CORS_HEADERS });
-            const response = new Response(JSON.stringify(enrichVector(vector, watermarkEnabled, previewCopiesComplete)), { status: 200, headers: CORS_HEADERS });
+            const response = new Response(JSON.stringify(enrichVector(vector, watermarkEnabled, previewCopiesComplete, detailMetadata)), { status: 200, headers: CORS_HEADERS });
             context.waitUntil(cache.put(context.request, response.clone()));
             return response;
         }
@@ -76,7 +84,7 @@ export async function onRequestGet(context) {
             if (slugMatch && !pageVectors.find(v => v.name === fetchAllForSlug)) pageVectors.unshift(slugMatch);
         }
 
-        const response = new Response(JSON.stringify({ vectors: pageVectors.map(vector => enrichVector(vector, watermarkEnabled, previewCopiesComplete)), total, page: validPage, totalPages, category: category || "all" }), { status: 200, headers: CORS_HEADERS });
+        const response = new Response(JSON.stringify({ vectors: pageVectors.map(vector => enrichVector(vector, watermarkEnabled, previewCopiesComplete, vector.name === detailSlug ? detailMetadata : null)), total, page: validPage, totalPages, category: category || "all" }), { status: 200, headers: CORS_HEADERS });
         context.waitUntil(cache.put(context.request, response.clone()));
         return response;
     } catch (e) {
@@ -84,7 +92,22 @@ export async function onRequestGet(context) {
     }
 }
 
-function enrichVector(v, watermarkEnabled, previewCopiesComplete) {
+async function loadDetailMetadata(r2, vector) {
+    try {
+        const key = `${vector.category || "Miscellaneous"}/${vector.name}/${vector.name}.json`;
+        const object = await r2.get(key);
+        if (!object) return null;
+        const data = await object.json();
+        const metadata = {};
+        if (typeof data.about_extended === "string" && data.about_extended.trim()) metadata.about_extended = data.about_extended;
+        if (typeof data.usage_areas === "string" && data.usage_areas.trim()) metadata.usage_areas = data.usage_areas;
+        return Object.keys(metadata).length ? metadata : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function enrichVector(v, watermarkEnabled, previewCopiesComplete, detailMetadata = null) {
     const id = v.name;
     const category = v.category || "Miscellaneous";
     const sourceKey = `${category}/${id}/${id}.jpg`;
@@ -97,6 +120,7 @@ function enrichVector(v, watermarkEnabled, previewCopiesComplete) {
         thumbnail: watermarkEnabled
             ? ((v.previewReady || previewCopiesComplete) ? `https://assets.frevector.com/${previewKey}` : `https://frevector.com/api/preview?key=${encodeURIComponent(sourceKey)}`)
             : `https://assets.frevector.com/${sourceKey}`,
-        isJpegOnly: v.contentType === 'jpeg'
+        isJpegOnly: v.contentType === 'jpeg',
+        ...(detailMetadata || {})
     };
 }

@@ -68,6 +68,29 @@ export async function onRequest(context) {
   const keywords = Array.isArray(vector.keywords) ? vector.keywords.slice(0, 20).join(", ") : (vector.keywords || "");
   const category = vector.category    || "";
   const fileSize = vector.fileSize    || "N/A";
+
+  // Optional product-detail metadata from the existing R2 JSON. Missing fields remain absent.
+  let detailMetadata = {};
+  try {
+    const detailObject = context.env.VECTOR_ASSETS && await context.env.VECTOR_ASSETS.get(`${category}/${slug}/${slug}.json`);
+    if (detailObject) {
+      const detailJson = await detailObject.json();
+      if (typeof detailJson.about_extended === "string" && detailJson.about_extended.trim()) {
+        detailMetadata.about_extended = detailJson.about_extended;
+      }
+      if (typeof detailJson.usage_areas === "string" && detailJson.usage_areas.trim()) {
+        detailMetadata.usage_areas = detailJson.usage_areas;
+      }
+    }
+  } catch (e) {
+    detailMetadata = {};
+  }
+  const aboutExtendedHTML = detailMetadata.about_extended
+    ? `<div class="detail-extended-copy"><h3>About This File</h3><p>${escapeHtml(detailMetadata.about_extended)}</p></div>`
+    : "";
+  const usageAreasHTML = detailMetadata.usage_areas
+    ? `<div class="detail-usage-areas"><h3>Usage Areas</h3><p>${escapeHtml(detailMetadata.usage_areas)}</p></div>`
+    : "";
   const thumbKey = `${category}/${slug}/${slug}.jpg`;
   const thumbUrl = `https://assets.frevector.com/${thumbKey}`;
   const canonical = `https://frevector.com/details/${slug}`;
@@ -175,6 +198,8 @@ export async function onRequest(context) {
  <section class="product-unique-content" style="padding:24px 0 32px;max-width:100%;margin:24px 0 0;font-family:Arial,sans-serif;color:#2c3e50;border-top:1px solid #eee">
  <h2 style="font-size:20px;font-weight:700;margin-bottom:12px;color:#1a5276">${escapeHtml(title)} - Vector Details</h2>
  <p style="font-size:14px;line-height:1.7;margin-bottom:20px">${escapeHtml(desc)}</p>
+ ${aboutExtendedHTML}
+ ${usageAreasHTML}
  <div style="background:#f9f9f9; padding:20px; border-radius:8px; border:1px solid #eee;">
  <table style="width:100%; border-collapse:collapse; font-size:13px;">
  <tr style="border-bottom:1px solid #eee;"><td style="padding:10px 0; font-weight:bold; color:#555; width:150px;">FILE FORMAT</td><td style="color:#2c3e50;">SVG & JPEG</td></tr>
